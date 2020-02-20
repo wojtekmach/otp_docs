@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>gen_event — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+gen_event <small>behaviour</small>      </h1>
+
+
+        <section id="moduledoc">
+<p>This behavior module provides event handling functionality. It consists of a generic event manager process with any number of event handlers that are added and deleted dynamically.</p>
+<p>An event manager implemented using this module has a standard set of interface functions and includes functionality for tracing and error reporting. It also fits into an OTP supervision tree. For more information, see OTP Design Principles.</p>
+<p>Each event handler is implemented as a callback module exporting a predefined set of functions. The relationship between the behavior functions and the callback functions is as follows:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">gen_event</span><span class="w"> </span><span class="n">module</span><span class="w">                   </span><span class="nc">Callback</span><span class="w"> </span><span class="n">module</span><span class="w">
+</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="w">                   </span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">-</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:start</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:start_link</span><span class="w">       </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="o">-</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:add_handler</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:add_sup_handler</span><span class="w">  </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:init</span><span class="o">/</span><span class="mi">1</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:notify</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:sync_notify</span><span class="w">      </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:handle_event</span><span class="o">/</span><span class="mi">2</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:send_request</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:call</span><span class="w">             </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:handle_call</span><span class="o">/</span><span class="mi">2</span><span class="w">
+
+</span><span class="o">-</span><span class="w">                          </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:handle_info</span><span class="o">/</span><span class="mi">2</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:delete_handler</span><span class="w">   </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:terminate</span><span class="o">/</span><span class="mi">2</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:swap_handler</span><span class="w">
+</span><span class="n">gen_event</span><span class="ss">:swap_sup_handler</span><span class="w"> </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module1</span><span class="ss">:terminate</span><span class="o">/</span><span class="mi">2</span><span class="w">
+                                   </span><span class="nc">Module2</span><span class="ss">:init</span><span class="o">/</span><span class="mi">1</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:which_handlers</span><span class="w">   </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="o">-</span><span class="w">
+
+</span><span class="n">gen_event</span><span class="ss">:stop</span><span class="w">             </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:terminate</span><span class="o">/</span><span class="mi">2</span><span class="w">
+
+</span><span class="o">-</span><span class="w">                          </span><span class="o">--</span><span class="o">--</span><span class="o">-&gt;</span><span class="w">  </span><span class="nc">Module</span><span class="ss">:code_change</span><span class="o">/</span><span class="mi">3</span></code></pre>
+<p>As each event handler is one callback module, an event manager has many callback modules that are added and deleted dynamically. <code class="inline">gen_event</code> is therefore more tolerant of callback module errors than the other behaviors. If a callback function for an installed event handler fails with <code class="inline">Reason</code>, or returns a bad value <code class="inline">Term</code>, the event manager does not fail. It deletes the event handler by calling callback function <code class="inline">Module:terminate/2</code>, giving as argument <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively. No other event handler is affected.</p>
+<p>A <code class="inline">gen_event</code> process handles system messages as described in <code class="inline">sys(3)</code>. The <code class="inline">sys</code> module can be used for debugging an event manager.</p>
+<p>Notice that an event manager <em >does</em> trap exit signals automatically.</p>
+<p>The <code class="inline">gen_event</code> process can go into hibernation (see <code class="inline">erlang:hibernate/3</code>) if a callback function in a handler module specifies <code class="inline">hibernate</code> in its return value. This can be useful if the server is expected to be idle for a long time. However, use this feature with care, as hibernation implies at least two garbage collections (when hibernating and shortly after waking up) and is not something you want to do between each event handled by a busy event manager.</p>
+<p>Notice that when multiple event handlers are invoked, it is sufficient that one single event handler returns a <code class="inline">hibernate</code> request for the whole event manager to go into hibernation.</p>
+<p>Unless otherwise stated, all functions in this module fail if the specified event manager does not exist or if bad arguments are specified.</p>
+<h2 id="module-callback-functions" class="section-heading">
+  <a href="#module-callback-functions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Callback Functions
+</h2>
+<p>The following functions are to be exported from a <code class="inline">gen_event</code> callback module.</p>
+<h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><code class="inline">supervisor(3)</code>, <code class="inline">sys(3)</code></p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:add_handler_ret/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:del_handler_ret/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handler/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handler_args/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:request_id/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A request handle, see <a href="#send_request/3"><code class="inline">send_request/3</code></a> for details.</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_handler/3">add_handler(EventMgrRef, Handler, Args) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = ok | {'EXIT',Reason} | term()</li><li class="type"> Reason = term()</li></ul><p>Adds a new event handler to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:init/1</code> to initiate the event handler and its internal state.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_sup_handler/3">add_sup_handler(EventMgrRef, Handler, Args) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = ok | {'EXIT',Reason} | term()</li><li class="type"> Reason = term()</li></ul><p>Adds a new event handler in the same way as <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>, but also supervises the connection between the event handler and the calling process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/3">call(EventMgrRef, Handler, Request) -&gt; Result call(EventMgrRef, Handler, Request, Timeout) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">Timeout = int()>0 | infinity</li><li class="type">Result = Reply | {error,Error}</li><li class="type"> Reply = term()</li><li class="type"> Error = bad_module | {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Makes a synchronous call to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> by sending a request and waiting until a reply arrives or a time-out occurs. The event manager calls <code class="inline">Module:handle_call/2</code> to handle the request.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/4">call(EventMgrRef, Handler, Request) -&gt; Result call(EventMgrRef, Handler, Request, Timeout) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">Timeout = int()>0 | infinity</li><li class="type">Result = Reply | {error,Error}</li><li class="type"> Reply = term()</li><li class="type"> Error = bad_module | {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Makes a synchronous call to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> by sending a request and waiting until a reply arrives or a time-out occurs. The event manager calls <code class="inline">Module:handle_call/2</code> to handle the request.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_response/2">check_response(Msg, RequestId) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">Msg = term()</li><li class="type">RequestId = request_id()</li><li class="type">Result = {reply, Reply} | no_reply | {error, Error}</li><li class="type">Reply = Error = term()</li></ul><p>This function is used to check if a previously received message, for example by <code class="inline">receive</code> or <code class="inline">handle_info/2</code>, is a result of a request made with <a href="#send_request/3"><code class="inline">send_request/3</code></a>. If <code class="inline">Msg</code> is a reply to the handle <code class="inline">RequestId</code> the result of the request is returned in <code class="inline">Reply</code>. Otherwise returns <code class="inline">no_reply</code> and no cleanup is done, and thus the function shall be invoked repeatedly until a reply is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_handler/3">delete_handler(EventMgrRef, Handler, Args) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = term() | {error,module_not_found} | {'EXIT',Reason}</li><li class="type"> Reason = term()</li></ul><p>Deletes an event handler from event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:terminate/2</code> to terminate the event handler.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#notify/2">notify(EventMgrRef, Event) -&gt; ok sync_notify(EventMgrRef, Event) -&gt; ok</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Event = term()</li></ul><p>Sends an event notification to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:handle_event/2</code> for each installed event handler to handle the event.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_request/3">send_request(EventMgrRef, Handler, Request) -&gt; RequestId</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName}</li><li class="type">  | {via,Module,ViaName} | pid()</li><li class="type"> Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">RequestId = request_id()</li></ul><p>Sends a request to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> and returns a handle <code class="inline">RequestId</code>. The return value <code class="inline">RequestId</code> shall later be used with <a href="#wait_response/2"><code class="inline">wait_response/2</code></a> or <a href="#check_response/2"><code class="inline">check_response/2</code></a> in the same process to fetch the actual result of the request.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/1">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/2">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/0">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/1">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/2">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop(EventMgrRef) -&gt; ok stop(EventMgrRef, Reason, Timeout) -&gt; ok</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type">Name = Node = atom()</li><li class="type">GlobalName = ViaName = term()</li><li class="type">Reason = term()</li><li class="type">Timeout = int()>0 | infinity</li></ul><p>Orders event manager <code class="inline">EventMgrRef</code> to exit with the specifies <code class="inline">Reason</code> and waits for it to terminate. Before terminating, <code class="inline">gen_event</code> calls <code class="inline">Module:terminate(stop,...)</code> for each installed event handler.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/3">stop(EventMgrRef) -&gt; ok stop(EventMgrRef, Reason, Timeout) -&gt; ok</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type">Name = Node = atom()</li><li class="type">GlobalName = ViaName = term()</li><li class="type">Reason = term()</li><li class="type">Timeout = int()>0 | infinity</li></ul><p>Orders event manager <code class="inline">EventMgrRef</code> to exit with the specifies <code class="inline">Reason</code> and waits for it to terminate. Before terminating, <code class="inline">gen_event</code> calls <code class="inline">Module:terminate(stop,...)</code> for each installed event handler.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#swap_handler/3">swap_handler(EventMgrRef, {Handler1,Args1}, {Handler2,Args2}) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler1 = Handler2 = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args1 = Args2 = term()</li><li class="type">Result = ok | {error,Error}</li><li class="type"> Error = {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Replaces an old event handler with a new event handler in event manager <code class="inline">EventMgrRef</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#swap_sup_handler/3">swap_sup_handler(EventMgrRef, {Handler1,Args1}, {Handler2,Args2}) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler1 = Handler 2 = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args1 = Args2 = term()</li><li class="type">Result = ok | {error,Error}</li><li class="type"> Error = {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Replaces an event handler in event manager <code class="inline">EventMgrRef</code> in the same way as <a href="#swap_handler/3"><code class="inline">swap_handler/3</code></a>, but also supervises the connection between <code class="inline">Handler2</code> and the calling process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sync_notify/2">notify(EventMgrRef, Event) -&gt; ok sync_notify(EventMgrRef, Event) -&gt; ok</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Event = term()</li></ul><p>Sends an event notification to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:handle_event/2</code> for each installed event handler to handle the event.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#wait_response/2">wait_response(RequestId, Timeout) -&gt; Result</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">RequestId = request_id()</li><li class="type">Reply = term()</li><li class="type">Timeout = timeout()</li><li class="type">Result = {reply, Reply} | timeout | {error, Error}</li><li class="type">Reply = Error = term()</li></ul><p>This function is used to wait for a reply of a request made with <a href="#send_request/3"><code class="inline">send_request/3</code></a> from the event manager. This function must be called from the same process from which <a href="#send_request/3"><code class="inline">send_request/3</code></a> was made.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_handlers/1">which_handlers(EventMgrRef) -&gt; [Handler]</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li></ul><p>Returns a list of all event handlers installed in event manager <code class="inline">EventMgrRef</code>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:add_handler_ret/0">
+  <div class="detail-header">
+    <a href="#t:add_handler_ret/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>add_handler_ret() :: ok | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>() | {'EXIT', <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:del_handler_ret/0">
+  <div class="detail-header">
+    <a href="#t:del_handler_ret/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>del_handler_ret() :: ok | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>() | {'EXIT', <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:handler/0">
+  <div class="detail-header">
+    <a href="#t:handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>handler() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:handler_args/0">
+  <div class="detail-header">
+    <a href="#t:handler_args/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>handler_args() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:request_id/0">
+  <div class="detail-header">
+    <a href="#t:request_id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>request_id() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A request handle, see <a href="#send_request/3"><code class="inline">send_request/3</code></a> for details.</p>
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="add_handler/3">
+  <div class="detail-header">
+    <a href="#add_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_handler(EventMgrRef, Handler, Args) -&gt; Result</h1>
+      <div class="specs">
+          <pre>add_handler(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = ok | {'EXIT',Reason} | term()</li><li class="type"> Reason = term()</li></ul><p>Adds a new event handler to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:init/1</code> to initiate the event handler and its internal state.</p>
+<p><code class="inline">EventMgrRef</code> can be any of the following:</p>
+<ul ><li >The pid</li><li >`Name`, if the event manager is locally registered</li><li >`{Name,Node}`, if the event manager is locally registered at another node</li><li >`{global,GlobalName}`, if the event manager is globally registered</li><li >`{via,Module,ViaName}`, if the event manager is registered through an alternative process registry</li></ul><p><code class="inline">Handler</code> is the name of the callback module <a href="https://hexdocs.pm/elixir/Module.html"><code class="inline">Module</code></a> or a tuple <code class="inline">{Module,Id}</code>, where <code class="inline">Id</code> is any term. The <code class="inline">{Module,Id}</code> representation makes it possible to identify a specific event handler when many event handlers use the same callback module.</p>
+<p><code class="inline">Args</code> is any term that is passed as the argument to <code class="inline">Module:init/1</code>.</p>
+<p>If <code class="inline">Module:init/1</code> returns a correct value indicating successful completion, the event manager adds the event handler and this function returns <code class="inline">ok</code>. If <code class="inline">Module:init/1</code> fails with <code class="inline">Reason</code> or returns <code class="inline">{error,Reason}</code>, the event handler is ignored and this function returns <code class="inline">{&#39;EXIT&#39;,Reason}</code> or <code class="inline">{error,Reason}</code>, respectively.</p>
+  </section>
+</section>
+<section class="detail" id="add_sup_handler/3">
+  <div class="detail-header">
+    <a href="#add_sup_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_sup_handler(EventMgrRef, Handler, Args) -&gt; Result</h1>
+      <div class="specs">
+          <pre>add_sup_handler(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = ok | {'EXIT',Reason} | term()</li><li class="type"> Reason = term()</li></ul><p>Adds a new event handler in the same way as <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>, but also supervises the connection between the event handler and the calling process.</p>
+<ul ><li >If the calling process later terminates with `Reason`, the event manager deletes the event handler by calling `Module:terminate/2` with `{stop,Reason}` as argument.</li><li >
+If the event handler is deleted later, the event manager sends a message `{gen_event_EXIT,Handler,Reason}` to the calling process. `Reason` is one of the following:
+<ul ><li >
+`normal`, if the event handler has been removed because of a call to [`delete_handler/3`](#delete_handler/3), or `remove_handler` has been returned by a callback function (see below).
+</li><li >
+`shutdown`, if the event handler has been removed because the event manager is terminating.
+</li><li >
+`{swapped,NewHandler,Pid}`, if the process `Pid` has replaced the event handler with another event handler `NewHandler` using a call to [`swap_handler/3`](#swap_handler/3) or [`swap_sup_handler/3`](#swap_sup_handler/3).
+</li><li >
+A term, if the event handler is removed because of an error. Which term depends on the error.
+</li></ul></li></ul>
+For a description of the arguments and return values, see [`add_handler/3`](#add_handler/3).  </section>
+</section>
+<section class="detail" id="call/3">
+  <div class="detail-header">
+    <a href="#call/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call(EventMgrRef, Handler, Request) -&gt; Result call(EventMgrRef, Handler, Request, Timeout) -&gt; Result</h1>
+      <div class="specs">
+          <pre>call(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">Timeout = int()>0 | infinity</li><li class="type">Result = Reply | {error,Error}</li><li class="type"> Reply = term()</li><li class="type"> Error = bad_module | {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Makes a synchronous call to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> by sending a request and waiting until a reply arrives or a time-out occurs. The event manager calls <code class="inline">Module:handle_call/2</code> to handle the request.</p>
+<p>For a description of <code class="inline">EventMgrRef</code> and <code class="inline">Handler</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p><code class="inline">Request</code> is any term that is passed as one of the arguments to <code class="inline">Module:handle_call/2</code>.</p>
+<p><code class="inline">Timeout</code> is an integer greater than zero that specifies how many milliseconds to wait for a reply, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to 5000. If no reply is received within the specified time, the function call fails.</p>
+<p>The return value <code class="inline">Reply</code> is defined in the return value of <code class="inline">Module:handle_call/2</code>. If the specified event handler is not installed, the function returns <code class="inline">{error,bad_module}</code>. If the callback function fails with <code class="inline">Reason</code> or returns an unexpected value <code class="inline">Term</code>, this function returns <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively.</p>
+  </section>
+</section>
+<section class="detail" id="call/4">
+  <div class="detail-header">
+    <a href="#call/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call(EventMgrRef, Handler, Request) -&gt; Result call(EventMgrRef, Handler, Request, Timeout) -&gt; Result</h1>
+      <div class="specs">
+          <pre>call(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">Timeout = int()>0 | infinity</li><li class="type">Result = Reply | {error,Error}</li><li class="type"> Reply = term()</li><li class="type"> Error = bad_module | {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Makes a synchronous call to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> by sending a request and waiting until a reply arrives or a time-out occurs. The event manager calls <code class="inline">Module:handle_call/2</code> to handle the request.</p>
+<p>For a description of <code class="inline">EventMgrRef</code> and <code class="inline">Handler</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p><code class="inline">Request</code> is any term that is passed as one of the arguments to <code class="inline">Module:handle_call/2</code>.</p>
+<p><code class="inline">Timeout</code> is an integer greater than zero that specifies how many milliseconds to wait for a reply, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to 5000. If no reply is received within the specified time, the function call fails.</p>
+<p>The return value <code class="inline">Reply</code> is defined in the return value of <code class="inline">Module:handle_call/2</code>. If the specified event handler is not installed, the function returns <code class="inline">{error,bad_module}</code>. If the callback function fails with <code class="inline">Reason</code> or returns an unexpected value <code class="inline">Term</code>, this function returns <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively.</p>
+  </section>
+</section>
+<section class="detail" id="check_response/2">
+  <div class="detail-header">
+    <a href="#check_response/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_response(Msg, RequestId) -&gt; Result</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>check_response(Msg :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), RequestId :: <a href="#t:request_id/0">request_id</a>()) ->
+                  {reply, Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                  no_reply |
+                  {error, {Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), emgr_ref()}}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">Msg = term()</li><li class="type">RequestId = request_id()</li><li class="type">Result = {reply, Reply} | no_reply | {error, Error}</li><li class="type">Reply = Error = term()</li></ul><p>This function is used to check if a previously received message, for example by <code class="inline">receive</code> or <code class="inline">handle_info/2</code>, is a result of a request made with <a href="#send_request/3"><code class="inline">send_request/3</code></a>. If <code class="inline">Msg</code> is a reply to the handle <code class="inline">RequestId</code> the result of the request is returned in <code class="inline">Reply</code>. Otherwise returns <code class="inline">no_reply</code> and no cleanup is done, and thus the function shall be invoked repeatedly until a reply is returned.</p>
+<p>If the specified event handler is not installed, the function returns <code class="inline">{error,bad_module}</code>. If the callback function fails with <code class="inline">Reason</code> or returns an unexpected value <code class="inline">Term</code>, this function returns <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively. If the event manager dies before or during the request this function returns <code class="inline">{error,{Reason, EventMgrRef}}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="delete_handler/3">
+  <div class="detail-header">
+    <a href="#delete_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_handler(EventMgrRef, Handler, Args) -&gt; Result</h1>
+      <div class="specs">
+          <pre>delete_handler(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args = term()</li><li class="type">Result = term() | {error,module_not_found} | {'EXIT',Reason}</li><li class="type"> Reason = term()</li></ul><p>Deletes an event handler from event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:terminate/2</code> to terminate the event handler.</p>
+<p>For a description of <code class="inline">EventMgrRef</code> and <code class="inline">Handler</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p><code class="inline">Args</code> is any term that is passed as one of the arguments to <code class="inline">Module:terminate/2</code>.</p>
+<p>The return value is the return value of <code class="inline">Module:terminate/2</code>. If the specified event handler is not installed, the function returns <code class="inline">{error,module_not_found}</code>. If the callback function fails with <code class="inline">Reason</code>, the function returns <code class="inline">{&#39;EXIT&#39;,Reason}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="notify/2">
+  <div class="detail-header">
+    <a href="#notify/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notify(EventMgrRef, Event) -&gt; ok sync_notify(EventMgrRef, Event) -&gt; ok</h1>
+      <div class="specs">
+          <pre>notify(emgr_ref(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Event = term()</li></ul><p>Sends an event notification to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:handle_event/2</code> for each installed event handler to handle the event.</p>
+<p><a href="#notify/2"><code class="inline">notify/2</code></a> is asynchronous and returns immediately after the event notification has been sent. <a href="#sync_notify/2"><code class="inline">sync_notify/2</code></a> is synchronous in the sense that it returns <code class="inline">ok</code> after the event has been handled by all event handlers.</p>
+<p>For a description of <code class="inline">EventMgrRef</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p><code class="inline">Event</code> is any term that is passed as one of the arguments to <code class="inline">Module:handle_event/2</code>.</p>
+<p><code class="inline">notify/1</code> does not fail even if the specified event manager does not exist, unless it is specified as <code class="inline">Name</code>.</p>
+  </section>
+</section>
+<section class="detail" id="send_request/3">
+  <div class="detail-header">
+    <a href="#send_request/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_request(EventMgrRef, Handler, Request) -&gt; RequestId</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>send_request(emgr_ref(), <a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="#t:request_id/0">request_id</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName}</li><li class="type">  | {via,Module,ViaName} | pid()</li><li class="type"> Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Request = term()</li><li class="type">RequestId = request_id()</li></ul><p>Sends a request to event handler <code class="inline">Handler</code> installed in event manager <code class="inline">EventMgrRef</code> and returns a handle <code class="inline">RequestId</code>. The return value <code class="inline">RequestId</code> shall later be used with <a href="#wait_response/2"><code class="inline">wait_response/2</code></a> or <a href="#check_response/2"><code class="inline">check_response/2</code></a> in the same process to fetch the actual result of the request.</p>
+<p>The call <code class="inline">gen_event:wait_response(gen_event:send_request(EventMgrRef,Handler,Request), Timeout)</code> can be seen as equivalent to <code class="inline">gen_event:call(EventMgrRef,Handler,Request,Timeout)</code>, ignoring the error handling.</p>
+<p>The event manager calls <code class="inline">Module:handle_call/2</code> to handle the request.</p>
+<p><code class="inline">Request</code> is any term that is passed as one of the arguments to <code class="inline">Module:handle_call/3</code>.</p>
+  </section>
+</section>
+<section class="detail" id="start/0">
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start() -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p>
+<p>For a description of the arguments and return values, see <a href="#start_link/0"><code class="inline">start_link/0,1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start/1">
+  <div class="detail-header">
+    <a href="#start/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start(emgr_name() | [option()]) -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p>
+<p>For a description of the arguments and return values, see <a href="#start_link/0"><code class="inline">start_link/0,1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start/2">
+  <div class="detail-header">
+    <a href="#start/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start() -&gt; Result start(EventMgrName | Options) -&gt; Result start(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start(emgr_name(), [option()]) -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates a stand-alone event manager process, that is, an event manager that is not part of a supervision tree and thus has no supervisor.</p>
+<p>For a description of the arguments and return values, see <a href="#start_link/0"><code class="inline">start_link/0,1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start_link/0">
+  <div class="detail-header">
+    <a href="#start_link/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start_link() -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p>
+<ul ><li >
+If `EventMgrName={local,Name}`, the event manager is registered locally as `Name` using `register/2`.
+</li><li >
+If `EventMgrName={global,GlobalName}`, the event manager is registered globally as `GlobalName` using `global:register_name/2`. If no name is provided, the event manager is not registered.
+</li><li >
+If `EventMgrName={via,Module,ViaName}`, the event manager registers with the registry represented by [`Module`](https://hexdocs.pm/elixir/Module.html). The [`Module`](https://hexdocs.pm/elixir/Module.html) callback is to export the functions `register_name/2`, `unregister_name/1`, `whereis_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which are to behave as the corresponding functions in `global`. Thus, `{via,global,GlobalName}` is a valid reference.
+</li><li >
+If option `{hibernate_after,HibernateAfterTimeout}` is present, the `gen_event` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</li></ul>
+If the event manager is successfully created, the function returns `{ok,Pid}`, where `Pid` is the pid of the event manager. If a process with the specified `EventMgrName` exists already, the function returns `{error,{already_started,Pid}}`, where `Pid` is the pid of that process.  </section>
+</section>
+<section class="detail" id="start_link/1">
+  <div class="detail-header">
+    <a href="#start_link/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start_link(emgr_name() | [option()]) -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p>
+<ul ><li >
+If `EventMgrName={local,Name}`, the event manager is registered locally as `Name` using `register/2`.
+</li><li >
+If `EventMgrName={global,GlobalName}`, the event manager is registered globally as `GlobalName` using `global:register_name/2`. If no name is provided, the event manager is not registered.
+</li><li >
+If `EventMgrName={via,Module,ViaName}`, the event manager registers with the registry represented by [`Module`](https://hexdocs.pm/elixir/Module.html). The [`Module`](https://hexdocs.pm/elixir/Module.html) callback is to export the functions `register_name/2`, `unregister_name/1`, `whereis_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which are to behave as the corresponding functions in `global`. Thus, `{via,global,GlobalName}` is a valid reference.
+</li><li >
+If option `{hibernate_after,HibernateAfterTimeout}` is present, the `gen_event` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</li></ul>
+If the event manager is successfully created, the function returns `{ok,Pid}`, where `Pid` is the pid of the event manager. If a process with the specified `EventMgrName` exists already, the function returns `{error,{already_started,Pid}}`, where `Pid` is the pid of that process.  </section>
+</section>
+<section class="detail" id="start_link/2">
+  <div class="detail-header">
+    <a href="#start_link/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link() -&gt; Result start_link(EventMgrName | Options) -&gt; Result start_link(EventMgrName, Options) -&gt; Result</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>start_link(emgr_name(), [option()]) -> start_ret().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrName = {local,Name} | {global,GlobalName} | {via,Module,ViaName}</li><li class="type"> Name = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Options = [Option]</li><li class="type"> Option = {debug,Dbgs} | {timeout,Time} | {hibernate_after,HibernateAfterTimeout} | {spawn_opt,SOpts}</li><li class="type">  Dbgs = [Dbg]</li><li class="type">   Dbg = trace | log | statistics | {log_to_file,FileName} | {install,{Func,FuncState}}</li><li class="type">  SOpts = [term()]</li><li class="type">Result = {ok,Pid} | {error,{already_started,Pid}}</li><li class="type"> Pid = pid()</li></ul><p>Creates an event manager process as part of a supervision tree. The function is to be called, directly or indirectly, by the supervisor. For example, it ensures that the event manager is linked to the supervisor.</p>
+<ul ><li >
+If `EventMgrName={local,Name}`, the event manager is registered locally as `Name` using `register/2`.
+</li><li >
+If `EventMgrName={global,GlobalName}`, the event manager is registered globally as `GlobalName` using `global:register_name/2`. If no name is provided, the event manager is not registered.
+</li><li >
+If `EventMgrName={via,Module,ViaName}`, the event manager registers with the registry represented by [`Module`](https://hexdocs.pm/elixir/Module.html). The [`Module`](https://hexdocs.pm/elixir/Module.html) callback is to export the functions `register_name/2`, `unregister_name/1`, `whereis_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which are to behave as the corresponding functions in `global`. Thus, `{via,global,GlobalName}` is a valid reference.
+</li><li >
+If option `{hibernate_after,HibernateAfterTimeout}` is present, the `gen_event` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</li></ul>
+If the event manager is successfully created, the function returns `{ok,Pid}`, where `Pid` is the pid of the event manager. If a process with the specified `EventMgrName` exists already, the function returns `{error,{already_started,Pid}}`, where `Pid` is the pid of that process.  </section>
+</section>
+<section class="detail" id="stop/1">
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop(EventMgrRef) -&gt; ok stop(EventMgrRef, Reason, Timeout) -&gt; ok</h1>
+      <span class="note">(since OTP 18.0)</span>
+      <div class="specs">
+          <pre>stop(emgr_ref()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type">Name = Node = atom()</li><li class="type">GlobalName = ViaName = term()</li><li class="type">Reason = term()</li><li class="type">Timeout = int()>0 | infinity</li></ul><p>Orders event manager <code class="inline">EventMgrRef</code> to exit with the specifies <code class="inline">Reason</code> and waits for it to terminate. Before terminating, <code class="inline">gen_event</code> calls <code class="inline">Module:terminate(stop,...)</code> for each installed event handler.</p>
+<p>The function returns <code class="inline">ok</code> if the event manager terminates with the expected reason. Any other reason than <code class="inline">normal</code>, <code class="inline">shutdown</code>, or <code class="inline">{shutdown,Term}</code> causes an error report to be issued using <code class="inline">logger(3)</code>. The default <code class="inline">Reason</code> is <code class="inline">normal</code>.</p>
+<p><code class="inline">Timeout</code> is an integer greater than zero that specifies how many milliseconds to wait for the event manager to terminate, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to <code class="inline">infinity</code>. If the event manager has not terminated within the specified time, a <code class="inline">timeout</code> exception is raised.</p>
+<p>If the process does not exist, a <code class="inline">noproc</code> exception is raised.</p>
+<p>For a description of <code class="inline">EventMgrRef</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/3">
+  <div class="detail-header">
+    <a href="#stop/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop(EventMgrRef) -&gt; ok stop(EventMgrRef, Reason, Timeout) -&gt; ok</h1>
+      <span class="note">(since OTP 18.0)</span>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type">Name = Node = atom()</li><li class="type">GlobalName = ViaName = term()</li><li class="type">Reason = term()</li><li class="type">Timeout = int()>0 | infinity</li></ul><p>Orders event manager <code class="inline">EventMgrRef</code> to exit with the specifies <code class="inline">Reason</code> and waits for it to terminate. Before terminating, <code class="inline">gen_event</code> calls <code class="inline">Module:terminate(stop,...)</code> for each installed event handler.</p>
+<p>The function returns <code class="inline">ok</code> if the event manager terminates with the expected reason. Any other reason than <code class="inline">normal</code>, <code class="inline">shutdown</code>, or <code class="inline">{shutdown,Term}</code> causes an error report to be issued using <code class="inline">logger(3)</code>. The default <code class="inline">Reason</code> is <code class="inline">normal</code>.</p>
+<p><code class="inline">Timeout</code> is an integer greater than zero that specifies how many milliseconds to wait for the event manager to terminate, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to <code class="inline">infinity</code>. If the event manager has not terminated within the specified time, a <code class="inline">timeout</code> exception is raised.</p>
+<p>If the process does not exist, a <code class="inline">noproc</code> exception is raised.</p>
+<p>For a description of <code class="inline">EventMgrRef</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="swap_handler/3">
+  <div class="detail-header">
+    <a href="#swap_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">swap_handler(EventMgrRef, {Handler1,Args1}, {Handler2,Args2}) -&gt; Result</h1>
+      <div class="specs">
+          <pre>swap_handler(emgr_ref(), {<a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}, {<a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}) ->
+                ok | {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler1 = Handler2 = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args1 = Args2 = term()</li><li class="type">Result = ok | {error,Error}</li><li class="type"> Error = {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Replaces an old event handler with a new event handler in event manager <code class="inline">EventMgrRef</code>.</p>
+<p>For a description of the arguments, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p>First the old event handler <code class="inline">Handler1</code> is deleted. The event manager calls <code class="inline">Module1:terminate(Args1, ...)</code>, where <code class="inline">Module1</code> is the callback module of <code class="inline">Handler1</code>, and collects the return value.</p>
+<p>Then the new event handler <code class="inline">Handler2</code> is added and initiated by calling <code class="inline">Module2:init({Args2,Term})</code>, where <code class="inline">Module2</code> is the callback module of <code class="inline">Handler2</code> and <code class="inline">Term</code> is the return value of <code class="inline">Module1:terminate/2</code>. This makes it possible to transfer information from <code class="inline">Handler1</code> to <code class="inline">Handler2</code>.</p>
+<p>The new handler is added even if the the specified old event handler is not installed, in which case <code class="inline">Term=error</code>, or if <code class="inline">Module1:terminate/2</code> fails with <code class="inline">Reason</code>, in which case <code class="inline">Term={&#39;EXIT&#39;,Reason}</code>. The old handler is deleted even if <code class="inline">Module2:init/1</code> fails.</p>
+<p>If there was a supervised connection between <code class="inline">Handler1</code> and a process <code class="inline">Pid</code>, there is a supervised connection between <code class="inline">Handler2</code> and <code class="inline">Pid</code> instead.</p>
+<p>If <code class="inline">Module2:init/1</code> returns a correct value, this function returns <code class="inline">ok</code>. If <code class="inline">Module2:init/1</code> fails with <code class="inline">Reason</code> or returns an unexpected value <code class="inline">Term</code>, this function returns <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively.</p>
+  </section>
+</section>
+<section class="detail" id="swap_sup_handler/3">
+  <div class="detail-header">
+    <a href="#swap_sup_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">swap_sup_handler(EventMgrRef, {Handler1,Args1}, {Handler2,Args2}) -&gt; Result</h1>
+      <div class="specs">
+          <pre>swap_sup_handler(emgr_ref(),
+                 {<a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+                 {<a href="#t:handler/0">handler</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}) ->
+                    ok | {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler1 = Handler 2 = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li><li class="type">Args1 = Args2 = term()</li><li class="type">Result = ok | {error,Error}</li><li class="type"> Error = {'EXIT',Reason} | term()</li><li class="type">  Reason = term()</li></ul><p>Replaces an event handler in event manager <code class="inline">EventMgrRef</code> in the same way as <a href="#swap_handler/3"><code class="inline">swap_handler/3</code></a>, but also supervises the connection between <code class="inline">Handler2</code> and the calling process.</p>
+<p>For a description of the arguments and return values, see <a href="#swap_handler/3"><code class="inline">swap_handler/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="sync_notify/2">
+  <div class="detail-header">
+    <a href="#sync_notify/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notify(EventMgrRef, Event) -&gt; ok sync_notify(EventMgrRef, Event) -&gt; ok</h1>
+      <div class="specs">
+          <pre>sync_notify(emgr_ref(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Event = term()</li></ul><p>Sends an event notification to event manager <code class="inline">EventMgrRef</code>. The event manager calls <code class="inline">Module:handle_event/2</code> for each installed event handler to handle the event.</p>
+<p><a href="#notify/2"><code class="inline">notify/2</code></a> is asynchronous and returns immediately after the event notification has been sent. <a href="#sync_notify/2"><code class="inline">sync_notify/2</code></a> is synchronous in the sense that it returns <code class="inline">ok</code> after the event has been handled by all event handlers.</p>
+<p>For a description of <code class="inline">EventMgrRef</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+<p><code class="inline">Event</code> is any term that is passed as one of the arguments to <code class="inline">Module:handle_event/2</code>.</p>
+<p><code class="inline">notify/1</code> does not fail even if the specified event manager does not exist, unless it is specified as <code class="inline">Name</code>.</p>
+  </section>
+</section>
+<section class="detail" id="wait_response/2">
+  <div class="detail-header">
+    <a href="#wait_response/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">wait_response(RequestId, Timeout) -&gt; Result</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>wait_response(RequestId :: <a href="#t:request_id/0">request_id</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()) ->
+                 {reply, Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                 timeout |
+                 {error, {Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), emgr_ref()}}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">RequestId = request_id()</li><li class="type">Reply = term()</li><li class="type">Timeout = timeout()</li><li class="type">Result = {reply, Reply} | timeout | {error, Error}</li><li class="type">Reply = Error = term()</li></ul><p>This function is used to wait for a reply of a request made with <a href="#send_request/3"><code class="inline">send_request/3</code></a> from the event manager. This function must be called from the same process from which <a href="#send_request/3"><code class="inline">send_request/3</code></a> was made.</p>
+<p><code class="inline">Timeout</code> is an integer greater then or equal to zero that specifies how many milliseconds to wait for an reply, or the atom <code class="inline">infinity</code> to wait indefinitely. If no reply is received within the specified time, the function returns <code class="inline">timeout</code> and no cleanup is done, and thus the function must be invoked repeatedly until a reply is returned.</p>
+<p>The return value <code class="inline">Reply</code> is defined in the return value of <code class="inline">Module:handle_call/3</code>.</p>
+<p>If the specified event handler is not installed, the function returns <code class="inline">{error,bad_module}</code>. If the callback function fails with <code class="inline">Reason</code> or returns an unexpected value <code class="inline">Term</code>, this function returns <code class="inline">{error,{&#39;EXIT&#39;,Reason}}</code> or <code class="inline">{error,Term}</code>, respectively. If the event manager dies before or during the request this function returns <code class="inline">{error,{Reason, EventMgrRef}}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="which_handlers/1">
+  <div class="detail-header">
+    <a href="#which_handlers/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_handlers(EventMgrRef) -&gt; [Handler]</h1>
+      <div class="specs">
+          <pre>which_handlers(emgr_ref()) -> [<a href="#t:handler/0">handler</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li class="type">EventMgrRef = Name | {Name,Node} | {global,GlobalName} | {via,Module,ViaName} | pid()</li><li class="type"> Name = Node = atom()</li><li class="type"> GlobalName = ViaName = term()</li><li class="type">Handler = Module | {Module,Id}</li><li class="type"> Module = atom()</li><li class="type"> Id = term()</li></ul><p>Returns a list of all event handlers installed in event manager <code class="inline">EventMgrRef</code>.</p>
+<p>For a description of <code class="inline">EventMgrRef</code> and <code class="inline">Handler</code>, see <a href="#add_handler/3"><code class="inline">add_handler/3</code></a>.</p>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

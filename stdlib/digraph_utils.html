@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>digraph_utils — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+digraph_utils      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides algorithms based on depth-first traversal of directed graphs. For basic functions on directed graphs, see the <code class="inline">digraph(3)</code> module.</p>
+<ul ><li >
+A <a id="digraph"></a><em >directed graph</em> (or just "digraph") is a pair (V, E) of a finite set V of <a id="vertex"></a><em >vertices</em> and a finite set E of <a id="edge"></a><em >directed edges</em> (or just "edges"). The set of edges E is a subset of V × V (the Cartesian product of V with itself).
+</li><li >
+Digraphs can be annotated with more information. Such information can be attached to the vertices and to the edges of the digraph. An annotated digraph is called a <em >labeled digraph</em>, and the information attached to a vertex or an edge is called a <a id="label"></a><em >label</em>.
+</li><li >
+An edge e = (v, w) is said to <a id="emanate"></a><em >emanate</em> from vertex v and to be <a id="incident"></a><em >incident</em> on vertex w.
+</li><li >
+If an edge is emanating from v and incident on w, then w is said to be an <a id="out_neighbour"></a><em >out-neighbor</em> of v, and v is said to be an <a id="in_neighbour"></a><em >in-neighbor</em> of w.
+</li><li >
+A <a id="path"></a><em >path</em> P from v[1] to v[k] in a digraph (V, E) is a non-empty sequence v[1], v[2], ..., v[k] of vertices in V such that there is an edge (v[i],v[i+1]) in E for 1 <= i < k.
+</li><li >
+The <a id="length"></a><em >length</em> of path P is k-1.
+</li><li >
+Path P is a <a id="cycle"></a><em >cycle</em> if the length of P is not zero and v[1] = v[k].
+</li><li >
+A <a id="loop"></a><em >loop</em> is a cycle of length one.
+</li><li >
+An <a id="acyclic_digraph"></a><em >acyclic digraph</em> is a digraph without cycles.
+</li><li >
+A <a id="depth_first_traversal"></a><em >depth-first traversal</em> of a directed digraph can be viewed as a process that visits all vertices of the digraph. Initially, all vertices are marked as unvisited. The traversal starts with an arbitrarily chosen vertex, which is marked as visited, and follows an edge to an unmarked vertex, marking that vertex. The search then proceeds from that vertex in the same fashion, until there is no edge leading to an unvisited vertex. At that point the process backtracks, and the traversal continues as long as there are unexamined edges. If unvisited vertices remain when all edges from the first vertex have been examined, some so far unvisited vertex is chosen, and the process is repeated.
+</li><li >
+A <a id="partial_ordering"></a><em >partial ordering</em> of a set S is a transitive, antisymmetric, and reflexive relation between the objects of S.
+</li><li >
+The problem of <a id="topsort"></a><em >topological sorting</em> is to find a total ordering of S that is a superset of the partial ordering. A digraph G = (V, E) is equivalent to a relation E on V (we neglect that the version of directed graphs provided by the `digraph` module allows multiple edges between vertices). If the digraph has no cycles of length two or more, the reflexive and transitive closure of E is a partial ordering.
+</li><li >
+A <a id="subgraph"></a><em >subgraph</em> G' of G is a digraph whose vertices and edges form subsets of the vertices and edges of G.
+</li><li >
+G' is <em >maximal</em> with respect to a property P if all other subgraphs that include the vertices of G' do not have property P.
+</li><li >
+A <a id="strong_components"></a><em >strongly connected component</em> is a maximal subgraph such that there is a path between each pair of vertices.
+</li><li >
+A <a id="components"></a><em >connected component</em> is a maximal subgraph such that there is a path between each pair of vertices, considering all edges undirected.
+</li><li >
+An <a id="arborescence"></a><em >arborescence</em> is an acyclic digraph with a vertex V, the <a id="root"></a><em >root</em>, such that there is a unique path from V to every other vertex of G.
+</li><li >
+A <a id="tree"></a><em >tree</em> is an acyclic non-empty digraph such that there is a unique path between every pair of vertices, considering all edges undirected.
+</li></ul><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+
+`digraph(3)`        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#arborescence_root/1">arborescence_root/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">{yes, Root}</code> if <a type="anno">Root</a> is the root of the arborescence <a type="anno">Digraph</a>, otherwise <code class="inline">no</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#components/1">components/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of connected components.. Each component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Each vertex of digraph <a type="anno">Digraph</a> occurs in exactly one component.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#condensation/1">condensation/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a digraph where the vertices are the strongly connected components of <a type="anno">Digraph</a> as returned by <a href="#strong_components/1"><code class="inline">strong_components/1</code></a>. If X and Y are two different strongly connected components, and vertices x and y exist in X and Y, respectively, such that there is an edge emanating from x and incident on y, then an edge emanating from X and incident on Y is created.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cyclic_strong_components/1">cyclic_strong_components/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of strongly connected components. Each strongly component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Only vertices that are included in some cycle in <a type="anno">Digraph</a> are returned, otherwise the returned list is equal to that returned by <a href="#strong_components/1"><code class="inline">strong_components/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_acyclic/1">is_acyclic/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is acyclic.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_arborescence/1">is_arborescence/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is an arborescence.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_tree/1">is_tree/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is a tree.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#loop_vertices/1">loop_vertices/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of all vertices of <a type="anno">Digraph</a> that are included in some loop.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#postorder/1">postorder/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all vertices of digraph <a type="anno">Digraph</a>. The order is given by a depth-first traversal of the digraph, collecting visited vertices in postorder. More precisely, the vertices visited while searching from an arbitrarily chosen vertex are collected in postorder, and all those collected vertices are placed before the subsequently visited vertices.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#preorder/1">preorder/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all vertices of digraph <a type="anno">Digraph</a>. The order is given by a depth-first traversal of the digraph, collecting visited vertices in preorder.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reachable/2">reachable/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path in <a type="anno">Digraph</a> from some vertex of <a type="anno">Vertices</a> to the vertex. In particular, as paths can have length zero, the vertices of <a type="anno">Vertices</a> are included in the returned list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reachable_neighbours/2">reachable_neighbours/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path in <a type="anno">Digraph</a> of length one or more from some vertex of <a type="anno">Vertices</a> to the vertex. As a consequence, only those vertices of <a type="anno">Vertices</a> that are included in some cycle are returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reaching/2">reaching/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path from the vertex to some vertex of <a type="anno">Vertices</a>. In particular, as paths can have length zero, the vertices of <a type="anno">Vertices</a> are included in the returned list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reaching_neighbours/2">reaching_neighbours/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path of length one or more from the vertex to some vertex of <a type="anno">Vertices</a>. Therefore only those vertices of <a type="anno">Vertices</a> that are included in some cycle are returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strong_components/1">strong_components/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of strongly connected components. Each strongly component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Each vertex of digraph <a type="anno">Digraph</a> occurs in exactly one strong component.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#subgraph/2">subgraph/2 subgraph/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a maximal subgraph of <code class="inline">Digraph</code> having as vertices those vertices of <a type="anno">Digraph</a> that are mentioned in <a type="anno">Vertices</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#subgraph/3">subgraph/2 subgraph/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a maximal subgraph of <code class="inline">Digraph</code> having as vertices those vertices of <a type="anno">Digraph</a> that are mentioned in <a type="anno">Vertices</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#topsort/1">topsort/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a topological ordering of the vertices of digraph <a type="anno">Digraph</a> if such an ordering exists, otherwise <code class="inline">false</code>. For each vertex in the returned list, no out-neighbors occur earlier in the list.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="arborescence_root/1">
+  <div class="detail-header">
+    <a href="#arborescence_root/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">arborescence_root/1</h1>
+      <div class="specs">
+          <pre>arborescence_root(Digraph) -> no | {yes, Root}
+                     when
+                         Digraph :: digraph:graph(),
+                         Root :: digraph:vertex().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">{yes, Root}</code> if <a type="anno">Root</a> is the root of the arborescence <a type="anno">Digraph</a>, otherwise <code class="inline">no</code>.</p>
+  </section>
+</section>
+<section class="detail" id="components/1">
+  <div class="detail-header">
+    <a href="#components/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">components/1</h1>
+      <div class="specs">
+          <pre>components(Digraph) -> [Component]
+              when
+                  Digraph :: digraph:graph(),
+                  Component :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of connected components.. Each component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Each vertex of digraph <a type="anno">Digraph</a> occurs in exactly one component.</p>
+  </section>
+</section>
+<section class="detail" id="condensation/1">
+  <div class="detail-header">
+    <a href="#condensation/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">condensation/1</h1>
+      <div class="specs">
+          <pre>condensation(Digraph) -> CondensedDigraph
+                when
+                    Digraph :: digraph:graph(),
+                    CondensedDigraph :: digraph:graph().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a digraph where the vertices are the strongly connected components of <a type="anno">Digraph</a> as returned by <a href="#strong_components/1"><code class="inline">strong_components/1</code></a>. If X and Y are two different strongly connected components, and vertices x and y exist in X and Y, respectively, such that there is an edge emanating from x and incident on y, then an edge emanating from X and incident on Y is created.</p>
+<p>The created digraph has the same type as <a type="anno">Digraph</a>. All vertices and edges have the default label <code class="inline">[]</code>.</p>
+<p>Each cycle is included in some strongly connected component, which implies that a topological ordering of the created digraph always exists.</p>
+  </section>
+</section>
+<section class="detail" id="cyclic_strong_components/1">
+  <div class="detail-header">
+    <a href="#cyclic_strong_components/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cyclic_strong_components/1</h1>
+      <div class="specs">
+          <pre>cyclic_strong_components(Digraph) -> [StrongComponent]
+                            when
+                                Digraph :: digraph:graph(),
+                                StrongComponent ::
+                                    [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of strongly connected components. Each strongly component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Only vertices that are included in some cycle in <a type="anno">Digraph</a> are returned, otherwise the returned list is equal to that returned by <a href="#strong_components/1"><code class="inline">strong_components/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="is_acyclic/1">
+  <div class="detail-header">
+    <a href="#is_acyclic/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_acyclic/1</h1>
+      <div class="specs">
+          <pre>is_acyclic(Digraph) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() when Digraph :: digraph:graph().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is acyclic.</p>
+  </section>
+</section>
+<section class="detail" id="is_arborescence/1">
+  <div class="detail-header">
+    <a href="#is_arborescence/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_arborescence/1</h1>
+      <div class="specs">
+          <pre>is_arborescence(Digraph) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+                   when Digraph :: digraph:graph().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is an arborescence.</p>
+  </section>
+</section>
+<section class="detail" id="is_tree/1">
+  <div class="detail-header">
+    <a href="#is_tree/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_tree/1</h1>
+      <div class="specs">
+          <pre>is_tree(Digraph) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() when Digraph :: digraph:graph().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if and only if digraph <a type="anno">Digraph</a> is a tree.</p>
+  </section>
+</section>
+<section class="detail" id="loop_vertices/1">
+  <div class="detail-header">
+    <a href="#loop_vertices/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">loop_vertices/1</h1>
+      <div class="specs">
+          <pre>loop_vertices(Digraph) -> Vertices
+                 when
+                     Digraph :: digraph:graph(),
+                     Vertices :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of all vertices of <a type="anno">Digraph</a> that are included in some loop.</p>
+  </section>
+</section>
+<section class="detail" id="postorder/1">
+  <div class="detail-header">
+    <a href="#postorder/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">postorder/1</h1>
+      <div class="specs">
+          <pre>postorder(Digraph) -> Vertices
+             when
+                 Digraph :: digraph:graph(),
+                 Vertices :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns all vertices of digraph <a type="anno">Digraph</a>. The order is given by a depth-first traversal of the digraph, collecting visited vertices in postorder. More precisely, the vertices visited while searching from an arbitrarily chosen vertex are collected in postorder, and all those collected vertices are placed before the subsequently visited vertices.</p>
+  </section>
+</section>
+<section class="detail" id="preorder/1">
+  <div class="detail-header">
+    <a href="#preorder/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">preorder/1</h1>
+      <div class="specs">
+          <pre>preorder(Digraph) -> Vertices
+            when
+                Digraph :: digraph:graph(),
+                Vertices :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns all vertices of digraph <a type="anno">Digraph</a>. The order is given by a depth-first traversal of the digraph, collecting visited vertices in preorder.</p>
+  </section>
+</section>
+<section class="detail" id="reachable/2">
+  <div class="detail-header">
+    <a href="#reachable/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reachable/2</h1>
+      <div class="specs">
+          <pre>reachable(Vertices, Digraph) -> Reachable
+             when
+                 Digraph :: digraph:graph(),
+                 Vertices :: [digraph:vertex()],
+                 Reachable :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path in <a type="anno">Digraph</a> from some vertex of <a type="anno">Vertices</a> to the vertex. In particular, as paths can have length zero, the vertices of <a type="anno">Vertices</a> are included in the returned list.</p>
+  </section>
+</section>
+<section class="detail" id="reachable_neighbours/2">
+  <div class="detail-header">
+    <a href="#reachable_neighbours/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reachable_neighbours/2</h1>
+      <div class="specs">
+          <pre>reachable_neighbours(Vertices, Digraph) -> Reachable
+                        when
+                            Digraph :: digraph:graph(),
+                            Vertices :: [digraph:vertex()],
+                            Reachable :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path in <a type="anno">Digraph</a> of length one or more from some vertex of <a type="anno">Vertices</a> to the vertex. As a consequence, only those vertices of <a type="anno">Vertices</a> that are included in some cycle are returned.</p>
+  </section>
+</section>
+<section class="detail" id="reaching/2">
+  <div class="detail-header">
+    <a href="#reaching/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reaching/2</h1>
+      <div class="specs">
+          <pre>reaching(Vertices, Digraph) -> Reaching
+            when
+                Digraph :: digraph:graph(),
+                Vertices :: [digraph:vertex()],
+                Reaching :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path from the vertex to some vertex of <a type="anno">Vertices</a>. In particular, as paths can have length zero, the vertices of <a type="anno">Vertices</a> are included in the returned list.</p>
+  </section>
+</section>
+<section class="detail" id="reaching_neighbours/2">
+  <div class="detail-header">
+    <a href="#reaching_neighbours/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reaching_neighbours/2</h1>
+      <div class="specs">
+          <pre>reaching_neighbours(Vertices, Digraph) -> Reaching
+                       when
+                           Digraph :: digraph:graph(),
+                           Vertices :: [digraph:vertex()],
+                           Reaching :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns an unsorted list of digraph vertices such that for each vertex in the list, there is a path of length one or more from the vertex to some vertex of <a type="anno">Vertices</a>. Therefore only those vertices of <a type="anno">Vertices</a> that are included in some cycle are returned.</p>
+  </section>
+</section>
+<section class="detail" id="strong_components/1">
+  <div class="detail-header">
+    <a href="#strong_components/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strong_components/1</h1>
+      <div class="specs">
+          <pre>strong_components(Digraph) -> [StrongComponent]
+                     when
+                         Digraph :: digraph:graph(),
+                         StrongComponent :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of strongly connected components. Each strongly component is represented by its vertices. The order of the vertices and the order of the components are arbitrary. Each vertex of digraph <a type="anno">Digraph</a> occurs in exactly one strong component.</p>
+  </section>
+</section>
+<section class="detail" id="subgraph/2">
+  <div class="detail-header">
+    <a href="#subgraph/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">subgraph/2 subgraph/3</h1>
+      <div class="specs">
+          <pre>subgraph(Digraph, Vertices) -> SubGraph
+            when
+                Digraph :: digraph:graph(),
+                Vertices :: [digraph:vertex()],
+                SubGraph :: digraph:graph().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a maximal subgraph of <code class="inline">Digraph</code> having as vertices those vertices of <a type="anno">Digraph</a> that are mentioned in <a type="anno">Vertices</a>.</p>
+<p>If the value of option <code class="inline">type</code> is <code class="inline">inherit</code>, which is the default, the type of <a type="anno">Digraph</a> is used for the subgraph as well. Otherwise the option value of <code class="inline">type</code> is used as argument to <code class="inline">digraph:new/1</code>.</p>
+<p>If the value of option <code class="inline">keep_labels</code> is <code class="inline">true</code>, which is the default, the labels of vertices and edges of <a type="anno">Digraph</a> are used for the subgraph as well. If the value is <code class="inline">false</code>, default label <code class="inline">[]</code> is used for the vertices and edges of the subgroup.</p>
+<p><code class="inline">subgraph(Digraph, Vertices)</code> is equivalent to <code class="inline">subgraph(Digraph, Vertices, [])</code>.</p>
+<p>If any of the arguments are invalid, a <code class="inline">badarg</code> exception is raised.</p>
+  </section>
+</section>
+<section class="detail" id="subgraph/3">
+  <div class="detail-header">
+    <a href="#subgraph/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">subgraph/2 subgraph/3</h1>
+      <div class="specs">
+          <pre>subgraph(Digraph, Vertices, Options) -> SubGraph
+            when
+                Digraph :: digraph:graph(),
+                SubGraph :: digraph:graph(),
+                Vertices :: [digraph:vertex()],
+                Options ::
+                    [{type, SubgraphType} |
+                     {keep_labels, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()}],
+                SubgraphType :: inherit | [digraph:d_type()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a maximal subgraph of <code class="inline">Digraph</code> having as vertices those vertices of <a type="anno">Digraph</a> that are mentioned in <a type="anno">Vertices</a>.</p>
+<p>If the value of option <code class="inline">type</code> is <code class="inline">inherit</code>, which is the default, the type of <a type="anno">Digraph</a> is used for the subgraph as well. Otherwise the option value of <code class="inline">type</code> is used as argument to <code class="inline">digraph:new/1</code>.</p>
+<p>If the value of option <code class="inline">keep_labels</code> is <code class="inline">true</code>, which is the default, the labels of vertices and edges of <a type="anno">Digraph</a> are used for the subgraph as well. If the value is <code class="inline">false</code>, default label <code class="inline">[]</code> is used for the vertices and edges of the subgroup.</p>
+<p><code class="inline">subgraph(Digraph, Vertices)</code> is equivalent to <code class="inline">subgraph(Digraph, Vertices, [])</code>.</p>
+<p>If any of the arguments are invalid, a <code class="inline">badarg</code> exception is raised.</p>
+  </section>
+</section>
+<section class="detail" id="topsort/1">
+  <div class="detail-header">
+    <a href="#topsort/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">topsort/1</h1>
+      <div class="specs">
+          <pre>topsort(Digraph) -> Vertices | false
+           when
+               Digraph :: digraph:graph(),
+               Vertices :: [digraph:vertex()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a topological ordering of the vertices of digraph <a type="anno">Digraph</a> if such an ordering exists, otherwise <code class="inline">false</code>. For each vertex in the returned list, no out-neighbors occur earlier in the list.</p>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>string — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+string      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for string processing.</p>
+<p>A string in this module is represented by <code class="inline">unicode:chardata()</code>, that is, a list of codepoints, binaries with UTF-8-encoded codepoints (<em >UTF-8 binaries</em>), or a mix of the two.</p>
+<code >"abcd"               is a valid string
+<<"abcd">>           is a valid string
+["abcd"]             is a valid string
+<<"abc..åäö"/utf8>>  is a valid string
+<<"abc..åäö">>       is NOT a valid string,
+                     but a binary with Latin-1-encoded codepoints
+[<<"abc">>, "..åäö"] is a valid string
+[atom]               is NOT a valid string</code>
+This module operates on grapheme clusters. A <em >grapheme cluster</em> is a user-perceived character, which can be represented by several codepoints.
+<code >"å"  [229] or [97, 778]
+"e̊"  [101, 778]</code>
+The string length of "ß↑e̊" is 3, even though it is represented by the codepoints `[223,8593,101,778]` or the UTF-8 binary `<<195,159,226,134,145,101,204,138>>`.
+
+Grapheme clusters for codepoints of class `prepend` and non-modern (or decomposed) Hangul is not handled for performance reasons in [`find/3`](#find/3), [`replace/3`](#replace/3), [`split/2`](#split/2), [`split/2`](#split/2) and [`trim/3`](#trim/3).
+
+Splitting and appending strings is to be done on grapheme clusters borders. There is no verification that the results of appending strings are valid or normalized.
+
+Most of the functions expect all input to be normalized to one form, see for example `unicode:characters_to_nfc_list/1`.
+
+Language or locale specific handling of input is not considered in any function.
+
+The functions can crash for non-valid input strings. For example, the functions expect UTF-8 binaries but not all functions verify that all binaries are encoded correctly.
+
+Unless otherwise specified the return value type is the same as the input type. That is, binary input returns binary output, list input returns a list output, and mixed input can return a mixed output.
+<code >1> string:trim("  sarah  ").
+"sarah"
+2> string:trim(<<"  sarah  ">>).
+<<"sarah">>
+3> string:lexemes("foo bar", " ").
+["foo","bar"]
+4> string:lexemes(<<"foo bar">>, " ").
+[<<"foo">>,<<"bar">>]</code>
+This module has been reworked in Erlang/OTP 20 to handle `unicode:chardata()` and operate on grapheme clusters. The `old functions` that only work on Latin-1 lists as input are still available but should not be used, they will be deprecated in a future release.
+<a id="oldapi"></a><h2 id="module-obsolete-api-functions" class="section-heading">
+  <a href="#module-obsolete-api-functions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Obsolete API functions
+</h2>
+
+Here follows the function of the old API. These functions only work on a list of Latin-1 characters.
+
+
+The functions are kept for backward compatibility, but are not recommended. They will be deprecated in a future release.
+
+Any undocumented functions in `string` are not to be used.
+
+<h2 id="module-notes" class="section-heading">
+  <a href="#module-notes" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Notes
+</h2>
+
+Some of the general string functions can seem to overlap each other. The reason is that this string package is the combination of two earlier packages and all functions of both packages have been retained.        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:direction/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A user-perceived character, consisting of one or more codepoints.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:grapheme_cluster/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A user-perceived character, consisting of one or more codepoints.</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#casefold/1">casefold/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">String</a> to a case-agnostic comparable string. Function <a href="#casefold/1"><code class="inline">casefold/1</code></a> is preferred over <a href="#lowercase/1"><code class="inline">lowercase/1</code></a> when two strings are to be compared for equality. See also <a href="#equal/4"><code class="inline">equal/4</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#centre/2">centre/2 centre/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where <a type="anno">String</a> is centered in the string and surrounded by blanks or <a type="anno">Character</a>. The resulting string has length <a type="anno">Number</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#centre/3">centre/2 centre/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where <a type="anno">String</a> is centered in the string and surrounded by blanks or <a type="anno">Character</a>. The resulting string has length <a type="anno">Number</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chars/2">chars/2 chars/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string consisting of <a type="anno">Number</a> characters <a type="anno">Character</a>. Optionally, the string can end with string <a type="anno">Tail</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chars/3">chars/2 chars/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string consisting of <a type="anno">Number</a> characters <a type="anno">Character</a>. Optionally, the string can end with string <a type="anno">Tail</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chomp/1">chomp/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string where any trailing <code class="inline">\n</code> or <code class="inline">\r\n</code> have been removed from <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chr/2">chr/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the index of the first occurrence of <a type="anno">Character</a> in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">Character</a> does not occur.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#concat/2">concat/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Concatenates <a type="anno">String1</a> and <a type="anno">String2</a> to form a new string <a type="anno">String3</a>, which is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#copies/2">copies/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string containing <a type="anno">String</a> repeated <a type="anno">Number</a> times.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cspan/2">cspan/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the length of the maximum initial segment of <a type="anno">String</a>, which consists entirely of characters not from <a type="anno">Chars</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/2">equal/2 equal/3 equal/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/3">equal/2 equal/3 equal/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/4">equal/2 equal/3 equal/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find/2">find/2 find/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes anything before <a type="anno">SearchPattern</a> in <a type="anno">String</a> and returns the remainder of the string or <code class="inline">nomatch</code> if <a type="anno">SearchPattern</a> is not found. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be searched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find/3">find/2 find/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes anything before <a type="anno">SearchPattern</a> in <a type="anno">String</a> and returns the remainder of the string or <code class="inline">nomatch</code> if <a type="anno">SearchPattern</a> is not found. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be searched.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_empty/1">is_empty/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if <a type="anno">String</a> is the empty string, otherwise <code class="inline">false</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/2">join/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string with the elements of <a type="anno">StringList</a> separated by the string in <a type="anno">Separator</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#left/2">left/2 left/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The left margin is fixed. If <code class="inline">length(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#left/3">left/2 left/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The left margin is fixed. If <code class="inline">length(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#len/1">len/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of characters in <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#length/1">length/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of grapheme clusters in <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lexemes/2">lexemes/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of lexemes in <a type="anno">String</a>, separated by the grapheme clusters in <a type="anno">SeparatorList</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lowercase/1">lowercase/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">String</a> to lowercase.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_codepoint/1">next_codepoint/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the first codepoint in <a type="anno">String</a> and the rest of <a type="anno">String</a> in the tail. Returns an empty list if <a type="anno">String</a> is empty or an <code class="inline">{error, String}</code> tuple if the next byte is invalid.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_grapheme/1">next_grapheme/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the first grapheme cluster in <a type="anno">String</a> and the rest of <a type="anno">String</a> in the tail. Returns an empty list if <a type="anno">String</a> is empty or an <code class="inline">{error, String}</code> tuple if the next byte is invalid.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nth_lexeme/3">nth_lexeme/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns lexeme number <a type="anno">N</a> in <a type="anno">String</a>, where lexemes are separated by the grapheme clusters in <a type="anno">SeparatorList</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/2">pad/2 pad/3 pad/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/3">pad/2 pad/3 pad/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/4">pad/2 pad/3 pad/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prefix/2">prefix/2</a>
+  </div>
+    <div class="summary-synopsis"><p>If <a type="anno">Prefix</a> is the prefix of <a type="anno">String</a>, removes it and returns the remainder of <a type="anno">String</a>, otherwise returns <code class="inline">nomatch</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rchr/2">rchr/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the index of the last occurrence of <a type="anno">Character</a> in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">Character</a> does not occur.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/3">replace/3 replace/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Replaces <a type="anno">SearchPattern</a> in <a type="anno">String</a> with <a type="anno">Replacement</a>. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> are to be replaced.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/4">replace/3 replace/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Replaces <a type="anno">SearchPattern</a> in <a type="anno">String</a> with <a type="anno">Replacement</a>. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> are to be replaced.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reverse/1">reverse/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the reverse list of the grapheme clusters in <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#right/2">right/2 right/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The right margin is fixed. If the length of <code class="inline">(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#right/3">right/2 right/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The right margin is fixed. If the length of <code class="inline">(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rstr/2">rstr/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the position where the last occurrence of <a type="anno">SubString</a> begins in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">SubString</a> does not exist in <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#slice/2">slice/2 slice/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a> of at most <a type="anno">Length</a> grapheme clusters, starting at position <a type="anno">Start</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#slice/3">slice/2 slice/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a> of at most <a type="anno">Length</a> grapheme clusters, starting at position <a type="anno">Start</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#span/2">span/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the length of the maximum initial segment of <a type="anno">String</a>, which consists entirely of characters from <a type="anno">Chars</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/2">split/2 split/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Splits <a type="anno">String</a> where <a type="anno">SearchPattern</a> is encountered and return the remaining parts. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> will split <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/3">split/2 split/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Splits <a type="anno">String</a> where <a type="anno">SearchPattern</a> is encountered and return the remaining parts. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> will split <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#str/2">str/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the position where the first occurrence of <a type="anno">SubString</a> begins in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">SubString</a> does not exist in <a type="anno">String</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/1">strip/1 strip/2 strip/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/2">strip/1 strip/2 strip/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/3">strip/1 strip/2 strip/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_string/2">sub_string/2 sub_string/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a> to the end of the string, or to and including position <a type="anno">Stop</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_string/3">sub_string/2 sub_string/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a> to the end of the string, or to and including position <a type="anno">Stop</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_word/2">sub_word/2 sub_word/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the word in position <a type="anno">Number</a> of <a type="anno">String</a>. Words are separated by blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_word/3">sub_word/2 sub_word/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the word in position <a type="anno">Number</a> of <a type="anno">String</a>. Words are separated by blanks or <a type="anno">Character</a>s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#substr/2">substr/2 substr/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a>, and ending at the end of the string or at length <a type="anno">Length</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#substr/3">substr/2 substr/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a>, and ending at the end of the string or at length <a type="anno">Length</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/2">take/2 take/3 take/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/3">take/2 take/3 take/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/4">take/2 take/3 take/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#titlecase/1">titlecase/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">String</a> to titlecase.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_float/1">to_float/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Argument <a type="anno">String</a> is expected to start with a valid text represented float (the digits are ASCII values). Remaining characters in the string after the float are returned in <a type="anno">Rest</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_graphemes/1">to_graphemes/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">String</a> to a list of grapheme clusters.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_integer/1">to_integer/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Argument <a type="anno">String</a> is expected to start with a valid text represented integer (the digits are ASCII values). Remaining characters in the string after the integer are returned in <a type="anno">Rest</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_lower/1">to_lower/1 to_lower/1 to_upper/1 to_upper/1</a>
+  </div>
+    <div class="summary-synopsis"><p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_upper/1">to_lower/1 to_lower/1 to_upper/1 to_upper/1</a>
+  </div>
+    <div class="summary-synopsis"><p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tokens/2">tokens/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of tokens in <a type="anno">String</a>, separated by the characters in <a type="anno">SeparatorList</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/1">trim/1 trim/2 trim/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/2">trim/1 trim/2 trim/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/3">trim/1 trim/2 trim/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uppercase/1">uppercase/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">String</a> to uppercase.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#words/1">words/1 words/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of words in <a type="anno">String</a>, separated by blanks or <a type="anno">Character</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#words/2">words/1 words/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of words in <a type="anno">String</a>, separated by blanks or <a type="anno">Character</a>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:direction/0">
+  <div class="detail-header">
+    <a href="#t:direction/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>direction() :: leading | trailing.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A user-perceived character, consisting of one or more codepoints.</p>
+  </section>
+</section>
+<section class="detail" id="t:grapheme_cluster/0">
+  <div class="detail-header">
+    <a href="#t:grapheme_cluster/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>grapheme_cluster() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>() | [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A user-perceived character, consisting of one or more codepoints.</p>
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="casefold/1">
+  <div class="detail-header">
+    <a href="#casefold/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">casefold/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>casefold(String :: unicode:chardata()) -> unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">String</a> to a case-agnostic comparable string. Function <a href="#casefold/1"><code class="inline">casefold/1</code></a> is preferred over <a href="#lowercase/1"><code class="inline">lowercase/1</code></a> when two strings are to be compared for equality. See also <a href="#equal/4"><code class="inline">equal/4</code></a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:casefold</span><span class="p" data-group-id="4412788003-1">(</span><span class="s">&quot;Ω and ẞ SHARP S&quot;</span><span class="p" data-group-id="4412788003-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ω and ss sharp s&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="centre/2">
+  <div class="detail-header">
+    <a href="#centre/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">centre/2 centre/3</h1>
+      <div class="specs">
+          <pre>centre(String, Number) -> Centered
+          when
+              String :: string(),
+              Centered :: string(),
+              Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where <a type="anno">String</a> is centered in the string and surrounded by blanks or <a type="anno">Character</a>. The resulting string has length <a type="anno">Number</a>.</p>
+<p>This function is obsolete. Use <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="centre/3">
+  <div class="detail-header">
+    <a href="#centre/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">centre/2 centre/3</h1>
+      <div class="specs">
+          <pre>centre(String, Number, Character) -> Centered
+          when
+              String :: string(),
+              Centered :: string(),
+              Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+              Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where <a type="anno">String</a> is centered in the string and surrounded by blanks or <a type="anno">Character</a>. The resulting string has length <a type="anno">Number</a>.</p>
+<p>This function is obsolete. Use <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="chars/2">
+  <div class="detail-header">
+    <a href="#chars/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chars/2 chars/3</h1>
+      <div class="specs">
+          <pre>chars(Character, Number) -> String
+         when
+             Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(),
+             Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             String :: string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string consisting of <a type="anno">Number</a> characters <a type="anno">Character</a>. Optionally, the string can end with string <a type="anno">Tail</a>.</p>
+<p>This function is obsolete. Use <code class="inline">lists:duplicate/2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="chars/3">
+  <div class="detail-header">
+    <a href="#chars/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chars/2 chars/3</h1>
+      <div class="specs">
+          <pre>chars(Character, Number, Tail) -> String
+         when
+             Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(),
+             Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             Tail :: string(),
+             String :: string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string consisting of <a type="anno">Number</a> characters <a type="anno">Character</a>. Optionally, the string can end with string <a type="anno">Tail</a>.</p>
+<p>This function is obsolete. Use <code class="inline">lists:duplicate/2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="chomp/1">
+  <div class="detail-header">
+    <a href="#chomp/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chomp/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>chomp(String :: unicode:chardata()) -> unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string where any trailing <code class="inline">\n</code> or <code class="inline">\r\n</code> have been removed from <a type="anno">String</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">182</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:chomp</span><span class="p" data-group-id="8471167091-1">(</span><span class="p" data-group-id="8471167091-2">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Hello</span><span class="se">\n</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="8471167091-2">&gt;&gt;</span><span class="p" data-group-id="8471167091-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8471167091-3">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Hello&quot;</span><span class="p" data-group-id="8471167091-3">&gt;&gt;</span><span class="w">
+</span><span class="mi">183</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:chomp</span><span class="p" data-group-id="8471167091-4">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Hello</span><span class="se">\r</span><span class="se">\r</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="8471167091-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Hello</span><span class="se">\r</span><span class="s">&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="chr/2">
+  <div class="detail-header">
+    <a href="#chr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chr/2</h1>
+      <div class="specs">
+          <pre>chr(String, Character) -> Index
+       when
+           String :: string(),
+           Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(),
+           Index :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the index of the first occurrence of <a type="anno">Character</a> in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">Character</a> does not occur.</p>
+<p>This function is obsolete. Use <a href="#find/2"><code class="inline">find/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="concat/2">
+  <div class="detail-header">
+    <a href="#concat/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">concat/2</h1>
+      <div class="specs">
+          <pre>concat(String1, String2) -> String3
+          when
+              String1 :: string(),
+              String2 :: string(),
+              String3 :: string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Concatenates <a type="anno">String1</a> and <a type="anno">String2</a> to form a new string <a type="anno">String3</a>, which is returned.</p>
+<p>This function is obsolete. Use <code class="inline">[String1, String2]</code> as <code class="inline">Data</code> argument, and call <code class="inline">unicode:characters_to_list/2</code> or <code class="inline">unicode:characters_to_binary/2</code> to flatten the output.</p>
+  </section>
+</section>
+<section class="detail" id="copies/2">
+  <div class="detail-header">
+    <a href="#copies/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">copies/2</h1>
+      <div class="specs">
+          <pre>copies(String, Number) -> Copies
+          when
+              String :: string(),
+              Copies :: string(),
+              Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string containing <a type="anno">String</a> repeated <a type="anno">Number</a> times.</p>
+<p>This function is obsolete. Use <code class="inline">lists:duplicate/2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cspan/2">
+  <div class="detail-header">
+    <a href="#cspan/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cspan/2</h1>
+      <div class="specs">
+          <pre>cspan(String, Chars) -> Length
+         when
+             String :: string(),
+             Chars :: string(),
+             Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the length of the maximum initial segment of <a type="anno">String</a>, which consists entirely of characters not from <a type="anno">Chars</a>.</p>
+<p>This function is obsolete. Use <a href="#take/3"><code class="inline">take/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:cspan("\t    abcdef", " \t").
+0</code>  </section>
+</section>
+<section class="detail" id="equal/2">
+  <div class="detail-header">
+    <a href="#equal/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/2 equal/3 equal/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>equal(A, B) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+         when A :: unicode:chardata(), B :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p>
+<p>If <a type="anno">IgnoreCase</a> is <code class="inline">true</code> the function does <code class="inline">casefold</code>ing on the fly before the equality test.</p>
+<p>If <a type="anno">Norm</a> is not <code class="inline">none</code> the function applies normalization on the fly before the equality test. There are four available normalization forms: <code class="inline">nfc</code>, <code class="inline">nfd</code>, <code class="inline">nfkc</code>, and <code class="inline">nfkd</code>.</p>
+<p>By default, <a type="anno">IgnoreCase</a> is <code class="inline">false</code> and <a type="anno">Norm</a> is <code class="inline">none</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="6257746139-1">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6257746139-2">&lt;&lt;</span><span class="s">&quot;åäö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="6257746139-2">&gt;&gt;</span><span class="p" data-group-id="6257746139-1">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="6257746139-3">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="6257746139-4">(</span><span class="s">&quot;åäö&quot;</span><span class="p" data-group-id="6257746139-4">)</span><span class="p" data-group-id="6257746139-3">)</span><span class="o">.</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="6257746139-5">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="6257746139-6">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="6257746139-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">nfc</span><span class="p" data-group-id="6257746139-5">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="equal/3">
+  <div class="detail-header">
+    <a href="#equal/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/2 equal/3 equal/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>equal(A, B, IgnoreCase) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+         when
+             A :: unicode:chardata(),
+             B :: unicode:chardata(),
+             IgnoreCase :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p>
+<p>If <a type="anno">IgnoreCase</a> is <code class="inline">true</code> the function does <code class="inline">casefold</code>ing on the fly before the equality test.</p>
+<p>If <a type="anno">Norm</a> is not <code class="inline">none</code> the function applies normalization on the fly before the equality test. There are four available normalization forms: <code class="inline">nfc</code>, <code class="inline">nfd</code>, <code class="inline">nfkc</code>, and <code class="inline">nfkd</code>.</p>
+<p>By default, <a type="anno">IgnoreCase</a> is <code class="inline">false</code> and <a type="anno">Norm</a> is <code class="inline">none</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="5942454750-1">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5942454750-2">&lt;&lt;</span><span class="s">&quot;åäö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="5942454750-2">&gt;&gt;</span><span class="p" data-group-id="5942454750-1">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="5942454750-3">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="5942454750-4">(</span><span class="s">&quot;åäö&quot;</span><span class="p" data-group-id="5942454750-4">)</span><span class="p" data-group-id="5942454750-3">)</span><span class="o">.</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="5942454750-5">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="5942454750-6">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="5942454750-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">nfc</span><span class="p" data-group-id="5942454750-5">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="equal/4">
+  <div class="detail-header">
+    <a href="#equal/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/2 equal/3 equal/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>equal(A, B, IgnoreCase, Norm) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+         when
+             A :: unicode:chardata(),
+             B :: unicode:chardata(),
+             IgnoreCase :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+             Norm :: none | nfc | nfd | nfkc | nfkd.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if <a type="anno">A</a> and <a type="anno">B</a> are equal, otherwise <code class="inline">false</code>.</p>
+<p>If <a type="anno">IgnoreCase</a> is <code class="inline">true</code> the function does <code class="inline">casefold</code>ing on the fly before the equality test.</p>
+<p>If <a type="anno">Norm</a> is not <code class="inline">none</code> the function applies normalization on the fly before the equality test. There are four available normalization forms: <code class="inline">nfc</code>, <code class="inline">nfd</code>, <code class="inline">nfkc</code>, and <code class="inline">nfkd</code>.</p>
+<p>By default, <a type="anno">IgnoreCase</a> is <code class="inline">false</code> and <a type="anno">Norm</a> is <code class="inline">none</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="1345493189-1">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1345493189-2">&lt;&lt;</span><span class="s">&quot;åäö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="1345493189-2">&gt;&gt;</span><span class="p" data-group-id="1345493189-1">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="1345493189-3">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="1345493189-4">(</span><span class="s">&quot;åäö&quot;</span><span class="p" data-group-id="1345493189-4">)</span><span class="p" data-group-id="1345493189-3">)</span><span class="o">.</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:equal</span><span class="p" data-group-id="1345493189-5">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="1345493189-6">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="1345493189-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">nfc</span><span class="p" data-group-id="1345493189-5">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="find/2">
+  <div class="detail-header">
+    <a href="#find/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find/2 find/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>find(String, SearchPattern) -> unicode:chardata() | nomatch
+        when
+            String :: unicode:chardata(),
+            SearchPattern :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes anything before <a type="anno">SearchPattern</a> in <a type="anno">String</a> and returns the remainder of the string or <code class="inline">nomatch</code> if <a type="anno">SearchPattern</a> is not found. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be searched.</p>
+<p>By default, <a type="anno">Dir</a> is <code class="inline">leading</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="2570737126-1">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="2570737126-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;..cd..ef&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="2570737126-2">(</span><span class="p" data-group-id="2570737126-3">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="2570737126-3">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="2570737126-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2570737126-4">&lt;&lt;</span><span class="s">&quot;..ef&quot;</span><span class="p" data-group-id="2570737126-4">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="2570737126-5">(</span><span class="p" data-group-id="2570737126-6">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="2570737126-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="2570737126-5">)</span><span class="o">.</span><span class="w">
+</span><span class="n">nomatch</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="2570737126-7">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="2570737126-7">)</span><span class="o">.</span><span class="w">
+</span><span class="n">nomatch</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="find/3">
+  <div class="detail-header">
+    <a href="#find/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find/2 find/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>find(String, SearchPattern, Dir) -> unicode:chardata() | nomatch
+        when
+            String :: unicode:chardata(),
+            SearchPattern :: unicode:chardata(),
+            Dir :: <a href="#t:direction/0">direction</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes anything before <a type="anno">SearchPattern</a> in <a type="anno">String</a> and returns the remainder of the string or <code class="inline">nomatch</code> if <a type="anno">SearchPattern</a> is not found. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be searched.</p>
+<p>By default, <a type="anno">Dir</a> is <code class="inline">leading</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="3971440510-1">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="3971440510-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;..cd..ef&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="3971440510-2">(</span><span class="p" data-group-id="3971440510-3">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="3971440510-3">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="3971440510-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3971440510-4">&lt;&lt;</span><span class="s">&quot;..ef&quot;</span><span class="p" data-group-id="3971440510-4">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="3971440510-5">(</span><span class="p" data-group-id="3971440510-6">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="3971440510-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="3971440510-5">)</span><span class="o">.</span><span class="w">
+</span><span class="n">nomatch</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:find</span><span class="p" data-group-id="3971440510-7">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="3971440510-7">)</span><span class="o">.</span><span class="w">
+</span><span class="n">nomatch</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="is_empty/1">
+  <div class="detail-header">
+    <a href="#is_empty/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_empty/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>is_empty(String :: unicode:chardata()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <code class="inline">true</code> if <a type="anno">String</a> is the empty string, otherwise <code class="inline">false</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:is_empty</span><span class="p" data-group-id="2132046267-1">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="2132046267-1">)</span><span class="o">.</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:is_empty</span><span class="p" data-group-id="2132046267-2">(</span><span class="p" data-group-id="2132046267-3">[</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="p" data-group-id="2132046267-4">&lt;&lt;</span><span class="p" data-group-id="2132046267-4">&gt;&gt;</span><span class="p" data-group-id="2132046267-3">]</span><span class="p" data-group-id="2132046267-2">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="join/2">
+  <div class="detail-header">
+    <a href="#join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/2</h1>
+      <div class="specs">
+          <pre>join(StringList, Separator) -> String
+        when
+            StringList :: [string()],
+            Separator :: string(),
+            String :: string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string with the elements of <a type="anno">StringList</a> separated by the string in <a type="anno">Separator</a>.</p>
+<p>This function is obsolete. Use <code class="inline">lists:join/2</code>.</p>
+<p><em >Example:</em></p>
+<code type="none">> join(["one", "two", "three"], ", ").
+"one, two, three"</code>  </section>
+</section>
+<section class="detail" id="left/2">
+  <div class="detail-header">
+    <a href="#left/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">left/2 left/3</h1>
+      <div class="specs">
+          <pre>left(String, Number) -> Left
+        when
+            String :: string(),
+            Left :: string(),
+            Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The left margin is fixed. If <code class="inline">length(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#pad/2"><code class="inline">pad/2</code></a> or <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:left("Hello",10,$.).
+"Hello....."</code>  </section>
+</section>
+<section class="detail" id="left/3">
+  <div class="detail-header">
+    <a href="#left/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">left/2 left/3</h1>
+      <div class="specs">
+          <pre>left(String, Number, Character) -> Left
+        when
+            String :: string(),
+            Left :: string(),
+            Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+            Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The left margin is fixed. If <code class="inline">length(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#pad/2"><code class="inline">pad/2</code></a> or <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:left("Hello",10,$.).
+"Hello....."</code>  </section>
+</section>
+<section class="detail" id="len/1">
+  <div class="detail-header">
+    <a href="#len/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">len/1</h1>
+      <div class="specs">
+          <pre>len(String) -> Length
+       when String :: string(), Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of characters in <a type="anno">String</a>.</p>
+<p>This function is obsolete. Use <a href="#length/1"><code class="inline">length/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="length/1">
+  <div class="detail-header">
+    <a href="#length/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">length/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>length(String :: unicode:chardata()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of grapheme clusters in <a type="anno">String</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:length</span><span class="p" data-group-id="1099428170-1">(</span><span class="s">&quot;ß↑e̊&quot;</span><span class="p" data-group-id="1099428170-1">)</span><span class="o">.</span><span class="w">
+</span><span class="mi">3</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:length</span><span class="p" data-group-id="1099428170-2">(</span><span class="p" data-group-id="1099428170-3">&lt;&lt;</span><span class="mi">195</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">134</span><span class="p">,</span><span class="mi">145</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p" data-group-id="1099428170-3">&gt;&gt;</span><span class="p" data-group-id="1099428170-2">)</span><span class="o">.</span><span class="w">
+</span><span class="mi">3</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="lexemes/2">
+  <div class="detail-header">
+    <a href="#lexemes/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lexemes/2</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>lexemes(String :: unicode:chardata(),
+        SeparatorList :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()]) ->
+           [unicode:chardata()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of lexemes in <a type="anno">String</a>, separated by the grapheme clusters in <a type="anno">SeparatorList</a>.</p>
+<p>Notice that, as shown in this example, two or more adjacent separator graphemes clusters in <a type="anno">String</a> are treated as one. That is, there are no empty strings in the resulting list of lexemes. See also <a href="#split/3"><code class="inline">split/3</code></a> which returns empty strings.</p>
+<p>Notice that <code class="inline">[$\r,$\n]</code> is one grapheme cluster.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:lexemes</span><span class="p" data-group-id="8805639327-1">(</span><span class="s">&quot;abc de̊fxxghix jkl</span><span class="se">\r</span><span class="se">\n</span><span class="s">foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x e&quot;</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p" data-group-id="8805639327-2">[</span><span class="p" data-group-id="8805639327-3">[</span><span class="err">$</span><span class="err">\</span><span class="n">r</span><span class="p">,</span><span class="err">$</span><span class="err">\</span><span class="n">n</span><span class="p" data-group-id="8805639327-3">]</span><span class="p" data-group-id="8805639327-2">]</span><span class="p" data-group-id="8805639327-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8805639327-4">[</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;de̊f&quot;</span><span class="p">,</span><span class="s">&quot;ghi&quot;</span><span class="p">,</span><span class="s">&quot;jkl&quot;</span><span class="p">,</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="8805639327-4">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:lexemes</span><span class="p" data-group-id="8805639327-5">(</span><span class="p" data-group-id="8805639327-6">&lt;&lt;</span><span class="s">&quot;abc de̊fxxghix jkl</span><span class="se">\r</span><span class="se">\n</span><span class="s">foo&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="8805639327-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x e&quot;</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p" data-group-id="8805639327-7">[</span><span class="err">$</span><span class="err">\</span><span class="n">r</span><span class="p">,</span><span class="err">$</span><span class="err">\</span><span class="n">n</span><span class="p" data-group-id="8805639327-7">]</span><span class="p" data-group-id="8805639327-5">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8805639327-8">[</span><span class="p" data-group-id="8805639327-9">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p" data-group-id="8805639327-9">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8805639327-10">&lt;&lt;</span><span class="s">&quot;de̊f&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="8805639327-10">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8805639327-11">&lt;&lt;</span><span class="s">&quot;ghi&quot;</span><span class="p" data-group-id="8805639327-11">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8805639327-12">&lt;&lt;</span><span class="s">&quot;jkl</span><span class="se">\r</span><span class="se">\n</span><span class="s">foo&quot;</span><span class="p" data-group-id="8805639327-12">&gt;&gt;</span><span class="p" data-group-id="8805639327-8">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="lowercase/1">
+  <div class="detail-header">
+    <a href="#lowercase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lowercase/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>lowercase(String :: unicode:chardata()) -> unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">String</a> to lowercase.</p>
+<p>Notice that function <a href="#casefold/1"><code class="inline">casefold/1</code></a> should be used when converting a string to be tested for equality.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:lowercase</span><span class="p" data-group-id="6870130049-1">(</span><span class="n">string</span><span class="ss">:uppercase</span><span class="p" data-group-id="6870130049-2">(</span><span class="s">&quot;Michał&quot;</span><span class="p" data-group-id="6870130049-2">)</span><span class="p" data-group-id="6870130049-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;michał&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="next_codepoint/1">
+  <div class="detail-header">
+    <a href="#next_codepoint/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_codepoint/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>next_codepoint(String :: unicode:chardata()) ->
+                  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">maybe_improper_list</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(), unicode:chardata()) |
+                  {error, unicode:chardata()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the first codepoint in <a type="anno">String</a> and the rest of <a type="anno">String</a> in the tail. Returns an empty list if <a type="anno">String</a> is empty or an <code class="inline">{error, String}</code> tuple if the next byte is invalid.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:next_codepoint</span><span class="p" data-group-id="3310665353-1">(</span><span class="n">unicode</span><span class="ss">:characters_to_binary</span><span class="p" data-group-id="3310665353-2">(</span><span class="s">&quot;e̊fg&quot;</span><span class="p" data-group-id="3310665353-2">)</span><span class="p" data-group-id="3310665353-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3310665353-3">[</span><span class="mi">101</span><span class="o">|</span><span class="p" data-group-id="3310665353-4">&lt;&lt;</span><span class="s">&quot;̊fg&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="3310665353-4">&gt;&gt;</span><span class="p" data-group-id="3310665353-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="next_grapheme/1">
+  <div class="detail-header">
+    <a href="#next_grapheme/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_grapheme/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>next_grapheme(String :: unicode:chardata()) ->
+                 <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">maybe_improper_list</a>(<a href="#t:grapheme_cluster/0">grapheme_cluster</a>(),
+                                     unicode:chardata()) |
+                 {error, unicode:chardata()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the first grapheme cluster in <a type="anno">String</a> and the rest of <a type="anno">String</a> in the tail. Returns an empty list if <a type="anno">String</a> is empty or an <code class="inline">{error, String}</code> tuple if the next byte is invalid.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:next_grapheme</span><span class="p" data-group-id="8453240240-1">(</span><span class="n">unicode</span><span class="ss">:characters_to_binary</span><span class="p" data-group-id="8453240240-2">(</span><span class="s">&quot;e̊fg&quot;</span><span class="p" data-group-id="8453240240-2">)</span><span class="p" data-group-id="8453240240-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8453240240-3">[</span><span class="s">&quot;e̊&quot;</span><span class="o">|</span><span class="p" data-group-id="8453240240-4">&lt;&lt;</span><span class="s">&quot;fg&quot;</span><span class="p" data-group-id="8453240240-4">&gt;&gt;</span><span class="p" data-group-id="8453240240-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="nth_lexeme/3">
+  <div class="detail-header">
+    <a href="#nth_lexeme/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nth_lexeme/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>nth_lexeme(String, N, SeparatorList) -> unicode:chardata()
+              when
+                  String :: unicode:chardata(),
+                  N :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+                  SeparatorList :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns lexeme number <a type="anno">N</a> in <a type="anno">String</a>, where lexemes are separated by the grapheme clusters in <a type="anno">SeparatorList</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:nth_lexeme</span><span class="p" data-group-id="7690360726-1">(</span><span class="s">&quot;abc.de̊f.ghiejkl&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.e&quot;</span><span class="p" data-group-id="7690360726-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ghi&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pad/2">
+  <div class="detail-header">
+    <a href="#pad/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/2 pad/3 pad/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>pad(String, Length) -> unicode:<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">charlist</a>()
+       when String :: unicode:chardata(), Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p>
+<p>By default, <a type="anno">Char</a> is <code class="inline">$\s</code> and <a type="anno">Dir</a> is <code class="inline">trailing</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="8066960969-1">(</span><span class="p" data-group-id="8066960969-2">&lt;&lt;</span><span class="s">&quot;He̊llö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="8066960969-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p" data-group-id="8066960969-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8066960969-3">[</span><span class="p" data-group-id="8066960969-4">&lt;&lt;</span><span class="mi">72</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">195</span><span class="p">,</span><span class="mi">182</span><span class="p" data-group-id="8066960969-4">&gt;&gt;</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p" data-group-id="8066960969-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="8066960969-5">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="8066960969-6">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="8066960969-7">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="8066960969-7">)</span><span class="p" data-group-id="8066960969-6">]</span><span class="p" data-group-id="8066960969-5">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39;   He̊llö&#39;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="8066960969-8">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="8066960969-9">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="8066960969-10">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">both</span><span class="p" data-group-id="8066960969-10">)</span><span class="p" data-group-id="8066960969-9">]</span><span class="p" data-group-id="8066960969-8">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39; He̊llö  &#39;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pad/3">
+  <div class="detail-header">
+    <a href="#pad/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/2 pad/3 pad/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>pad(String, Length, Dir) -> unicode:<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">charlist</a>()
+       when
+           String :: unicode:chardata(),
+           Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+           Dir :: <a href="#t:direction/0">direction</a>() | both.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p>
+<p>By default, <a type="anno">Char</a> is <code class="inline">$\s</code> and <a type="anno">Dir</a> is <code class="inline">trailing</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5999630102-1">(</span><span class="p" data-group-id="5999630102-2">&lt;&lt;</span><span class="s">&quot;He̊llö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="5999630102-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p" data-group-id="5999630102-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5999630102-3">[</span><span class="p" data-group-id="5999630102-4">&lt;&lt;</span><span class="mi">72</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">195</span><span class="p">,</span><span class="mi">182</span><span class="p" data-group-id="5999630102-4">&gt;&gt;</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p" data-group-id="5999630102-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="5999630102-5">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="5999630102-6">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5999630102-7">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="5999630102-7">)</span><span class="p" data-group-id="5999630102-6">]</span><span class="p" data-group-id="5999630102-5">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39;   He̊llö&#39;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="5999630102-8">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="5999630102-9">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5999630102-10">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">both</span><span class="p" data-group-id="5999630102-10">)</span><span class="p" data-group-id="5999630102-9">]</span><span class="p" data-group-id="5999630102-8">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39; He̊llö  &#39;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pad/4">
+  <div class="detail-header">
+    <a href="#pad/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/2 pad/3 pad/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>pad(String, Length, Dir, Char) -> unicode:<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">charlist</a>()
+       when
+           String :: unicode:chardata(),
+           Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+           Dir :: <a href="#t:direction/0">direction</a>() | both,
+           Char :: <a href="#t:grapheme_cluster/0">grapheme_cluster</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Pads <a type="anno">String</a> to <a type="anno">Length</a> with grapheme cluster <a type="anno">Char</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates where the padding should be added.</p>
+<p>By default, <a type="anno">Char</a> is <code class="inline">$\s</code> and <a type="anno">Dir</a> is <code class="inline">trailing</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5247782114-1">(</span><span class="p" data-group-id="5247782114-2">&lt;&lt;</span><span class="s">&quot;He̊llö&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="5247782114-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p" data-group-id="5247782114-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5247782114-3">[</span><span class="p" data-group-id="5247782114-4">&lt;&lt;</span><span class="mi">72</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">195</span><span class="p">,</span><span class="mi">182</span><span class="p" data-group-id="5247782114-4">&gt;&gt;</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p" data-group-id="5247782114-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="5247782114-5">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="5247782114-6">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5247782114-7">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="5247782114-7">)</span><span class="p" data-group-id="5247782114-6">]</span><span class="p" data-group-id="5247782114-5">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39;   He̊llö&#39;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="5247782114-8">(</span><span class="s">&quot;&#39;~ts&#39;~n&quot;</span><span class="p">,</span><span class="p" data-group-id="5247782114-9">[</span><span class="n">string</span><span class="ss">:pad</span><span class="p" data-group-id="5247782114-10">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">both</span><span class="p" data-group-id="5247782114-10">)</span><span class="p" data-group-id="5247782114-9">]</span><span class="p" data-group-id="5247782114-8">)</span><span class="o">.</span><span class="w">
+</span><span class="sc">&#39; He̊llö  &#39;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="prefix/2">
+  <div class="detail-header">
+    <a href="#prefix/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prefix/2</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>prefix(String :: unicode:chardata(), Prefix :: unicode:chardata()) ->
+          nomatch | unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If <a type="anno">Prefix</a> is the prefix of <a type="anno">String</a>, removes it and returns the remainder of <a type="anno">String</a>, otherwise returns <code class="inline">nomatch</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:prefix</span><span class="p" data-group-id="3162131958-1">(</span><span class="p" data-group-id="3162131958-2">&lt;&lt;</span><span class="s">&quot;prefix of string&quot;</span><span class="p" data-group-id="3162131958-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pre&quot;</span><span class="p" data-group-id="3162131958-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3162131958-3">&lt;&lt;</span><span class="s">&quot;fix of string&quot;</span><span class="p" data-group-id="3162131958-3">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:prefix</span><span class="p" data-group-id="3162131958-4">(</span><span class="s">&quot;pre&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;prefix&quot;</span><span class="p" data-group-id="3162131958-4">)</span><span class="o">.</span><span class="w">
+</span><span class="n">nomatch</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="rchr/2">
+  <div class="detail-header">
+    <a href="#rchr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rchr/2</h1>
+      <div class="specs">
+          <pre>rchr(String, Character) -> Index
+        when
+            String :: string(),
+            Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(),
+            Index :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the index of the last occurrence of <a type="anno">Character</a> in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">Character</a> does not occur.</p>
+<p>This function is obsolete. Use <a href="#find/3"><code class="inline">find/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="replace/3">
+  <div class="detail-header">
+    <a href="#replace/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace/3 replace/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>replace(String, SearchPattern, Replacement) ->
+           [unicode:chardata()]
+           when
+               String :: unicode:chardata(),
+               SearchPattern :: unicode:chardata(),
+               Replacement :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Replaces <a type="anno">SearchPattern</a> in <a type="anno">String</a> with <a type="anno">Replacement</a>. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> are to be replaced.</p>
+<p>Can be implemented as:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">lists</span><span class="ss">:join</span><span class="p" data-group-id="1732830797-1">(</span><span class="nc">Replacement</span><span class="p">,</span><span class="w"> </span><span class="n">split</span><span class="p" data-group-id="1732830797-2">(</span><span class="nc">String</span><span class="p">,</span><span class="w"> </span><span class="nc">SearchPattern</span><span class="p">,</span><span class="w"> </span><span class="nc">Where</span><span class="p" data-group-id="1732830797-2">)</span><span class="p" data-group-id="1732830797-1">)</span><span class="o">.</span></code></pre>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:replace</span><span class="p" data-group-id="9001617110-1">(</span><span class="p" data-group-id="9001617110-2">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="9001617110-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p" data-group-id="9001617110-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="9001617110-3">[</span><span class="p" data-group-id="9001617110-4">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="9001617110-4">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="9001617110-5">&lt;&lt;</span><span class="s">&quot;cd..ef&quot;</span><span class="p" data-group-id="9001617110-5">&gt;&gt;</span><span class="p" data-group-id="9001617110-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:replace</span><span class="p" data-group-id="9001617110-6">(</span><span class="p" data-group-id="9001617110-7">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="9001617110-7">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">all</span><span class="p" data-group-id="9001617110-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="9001617110-8">[</span><span class="p" data-group-id="9001617110-9">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="9001617110-9">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="9001617110-10">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="9001617110-10">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="9001617110-11">&lt;&lt;</span><span class="s">&quot;ef&quot;</span><span class="p" data-group-id="9001617110-11">&gt;&gt;</span><span class="p" data-group-id="9001617110-8">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="replace/4">
+  <div class="detail-header">
+    <a href="#replace/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace/3 replace/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>replace(String, SearchPattern, Replacement, Where) ->
+           [unicode:chardata()]
+           when
+               String :: unicode:chardata(),
+               SearchPattern :: unicode:chardata(),
+               Replacement :: unicode:chardata(),
+               Where :: <a href="#t:direction/0">direction</a>() | all.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Replaces <a type="anno">SearchPattern</a> in <a type="anno">String</a> with <a type="anno">Replacement</a>. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> are to be replaced.</p>
+<p>Can be implemented as:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">lists</span><span class="ss">:join</span><span class="p" data-group-id="9499028074-1">(</span><span class="nc">Replacement</span><span class="p">,</span><span class="w"> </span><span class="n">split</span><span class="p" data-group-id="9499028074-2">(</span><span class="nc">String</span><span class="p">,</span><span class="w"> </span><span class="nc">SearchPattern</span><span class="p">,</span><span class="w"> </span><span class="nc">Where</span><span class="p" data-group-id="9499028074-2">)</span><span class="p" data-group-id="9499028074-1">)</span><span class="o">.</span></code></pre>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:replace</span><span class="p" data-group-id="0395349397-1">(</span><span class="p" data-group-id="0395349397-2">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="0395349397-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p" data-group-id="0395349397-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="0395349397-3">[</span><span class="p" data-group-id="0395349397-4">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="0395349397-4">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="0395349397-5">&lt;&lt;</span><span class="s">&quot;cd..ef&quot;</span><span class="p" data-group-id="0395349397-5">&gt;&gt;</span><span class="p" data-group-id="0395349397-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:replace</span><span class="p" data-group-id="0395349397-6">(</span><span class="p" data-group-id="0395349397-7">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p" data-group-id="0395349397-7">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">all</span><span class="p" data-group-id="0395349397-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="0395349397-8">[</span><span class="p" data-group-id="0395349397-9">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="0395349397-9">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="0395349397-10">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="0395349397-10">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p" data-group-id="0395349397-11">&lt;&lt;</span><span class="s">&quot;ef&quot;</span><span class="p" data-group-id="0395349397-11">&gt;&gt;</span><span class="p" data-group-id="0395349397-8">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="reverse/1">
+  <div class="detail-header">
+    <a href="#reverse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reverse/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>reverse(String :: unicode:chardata()) -> [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the reverse list of the grapheme clusters in <a type="anno">String</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">Reverse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">string</span><span class="ss">:reverse</span><span class="p" data-group-id="4419433405-1">(</span><span class="n">unicode</span><span class="ss">:characters_to_nfd_binary</span><span class="p" data-group-id="4419433405-2">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="4419433405-2">)</span><span class="p" data-group-id="4419433405-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4419433405-3">[</span><span class="p" data-group-id="4419433405-4">[</span><span class="mi">79</span><span class="p">,</span><span class="mi">776</span><span class="p" data-group-id="4419433405-4">]</span><span class="p">,</span><span class="p" data-group-id="4419433405-5">[</span><span class="mi">65</span><span class="p">,</span><span class="mi">776</span><span class="p" data-group-id="4419433405-5">]</span><span class="p">,</span><span class="p" data-group-id="4419433405-6">[</span><span class="mi">65</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="4419433405-6">]</span><span class="p" data-group-id="4419433405-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">io</span><span class="ss">:format</span><span class="p" data-group-id="4419433405-7">(</span><span class="s">&quot;~ts~n&quot;</span><span class="p">,</span><span class="p" data-group-id="4419433405-8">[</span><span class="nc">Reverse</span><span class="p" data-group-id="4419433405-8">]</span><span class="p" data-group-id="4419433405-7">)</span><span class="o">.</span><span class="w">
+</span><span class="nc">O</span><span class="err">̈</span><span class="nc">A</span><span class="err">̈</span><span class="nc">A</span><span class="err">̊</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="right/2">
+  <div class="detail-header">
+    <a href="#right/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">right/2 right/3</h1>
+      <div class="specs">
+          <pre>right(String, Number) -> Right
+         when
+             String :: string(),
+             Right :: string(),
+             Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The right margin is fixed. If the length of <code class="inline">(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:right("Hello", 10, $.).
+".....Hello"</code>  </section>
+</section>
+<section class="detail" id="right/3">
+  <div class="detail-header">
+    <a href="#right/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">right/2 right/3</h1>
+      <div class="specs">
+          <pre>right(String, Number, Character) -> Right
+         when
+             String :: string(),
+             Right :: string(),
+             Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns <a type="anno">String</a> with the length adjusted in accordance with <a type="anno">Number</a>. The right margin is fixed. If the length of <code class="inline">(String)</code> &lt; <a type="anno">Number</a>, then <a type="anno">String</a> is padded with blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#pad/3"><code class="inline">pad/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:right("Hello", 10, $.).
+".....Hello"</code>  </section>
+</section>
+<section class="detail" id="rstr/2">
+  <div class="detail-header">
+    <a href="#rstr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rstr/2</h1>
+      <div class="specs">
+          <pre>rstr(String, SubString) -> Index
+        when
+            String :: string(),
+            SubString :: string(),
+            Index :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the position where the last occurrence of <a type="anno">SubString</a> begins in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">SubString</a> does not exist in <a type="anno">String</a>.</p>
+<p>This function is obsolete. Use <a href="#find/3"><code class="inline">find/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:rstr(" Hello Hello World World ", "Hello World").
+8</code>  </section>
+</section>
+<section class="detail" id="slice/2">
+  <div class="detail-header">
+    <a href="#slice/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">slice/2 slice/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>slice(String, Start) -> Slice
+         when
+             String :: unicode:chardata(),
+             Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             Slice :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a> of at most <a type="anno">Length</a> grapheme clusters, starting at position <a type="anno">Start</a>.</p>
+<p>By default, <a type="anno">Length</a> is <code class="inline">infinity</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4577390081-1">(</span><span class="p" data-group-id="4577390081-2">&lt;&lt;</span><span class="s">&quot;He̊llö Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4577390081-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="4577390081-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4577390081-3">&lt;&lt;</span><span class="s">&quot;ö Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4577390081-3">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4577390081-4">(</span><span class="p" data-group-id="4577390081-5">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4577390081-6">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4577390081-6">&gt;&gt;</span><span class="p" data-group-id="4577390081-5">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="4577390081-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ö Wö&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4577390081-7">(</span><span class="p" data-group-id="4577390081-8">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4577390081-9">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4577390081-9">&gt;&gt;</span><span class="p" data-group-id="4577390081-8">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">50</span><span class="p" data-group-id="4577390081-7">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ö Wörld&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="slice/3">
+  <div class="detail-header">
+    <a href="#slice/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">slice/2 slice/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>slice(String, Start, Length) -> Slice
+         when
+             String :: unicode:chardata(),
+             Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             Length :: infinity | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             Slice :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a> of at most <a type="anno">Length</a> grapheme clusters, starting at position <a type="anno">Start</a>.</p>
+<p>By default, <a type="anno">Length</a> is <code class="inline">infinity</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4507887550-1">(</span><span class="p" data-group-id="4507887550-2">&lt;&lt;</span><span class="s">&quot;He̊llö Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4507887550-2">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="4507887550-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4507887550-3">&lt;&lt;</span><span class="s">&quot;ö Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4507887550-3">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4507887550-4">(</span><span class="p" data-group-id="4507887550-5">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4507887550-6">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4507887550-6">&gt;&gt;</span><span class="p" data-group-id="4507887550-5">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="4507887550-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ö Wö&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:slice</span><span class="p" data-group-id="4507887550-7">(</span><span class="p" data-group-id="4507887550-8">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4507887550-9">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="4507887550-9">&gt;&gt;</span><span class="p" data-group-id="4507887550-8">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">50</span><span class="p" data-group-id="4507887550-7">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;ö Wörld&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="span/2">
+  <div class="detail-header">
+    <a href="#span/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">span/2</h1>
+      <div class="specs">
+          <pre>span(String, Chars) -> Length
+        when
+            String :: string(),
+            Chars :: string(),
+            Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the length of the maximum initial segment of <a type="anno">String</a>, which consists entirely of characters from <a type="anno">Chars</a>.</p>
+<p>This function is obsolete. Use <a href="#take/2"><code class="inline">take/2</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:span("\t    abcdef", " \t").
+5</code>  </section>
+</section>
+<section class="detail" id="split/2">
+  <div class="detail-header">
+    <a href="#split/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/2 split/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>split(String, SearchPattern) -> [unicode:chardata()]
+         when
+             String :: unicode:chardata(),
+             SearchPattern :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Splits <a type="anno">String</a> where <a type="anno">SearchPattern</a> is encountered and return the remaining parts. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> will split <a type="anno">String</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="8297271562-1">(</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p" data-group-id="8297271562-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8297271562-2">[</span><span class="s">&quot;ab&quot;</span><span class="p">,</span><span class="s">&quot;bc..cd&quot;</span><span class="p" data-group-id="8297271562-2">]</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="8297271562-3">(</span><span class="p" data-group-id="8297271562-4">&lt;&lt;</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p" data-group-id="8297271562-4">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="8297271562-3">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8297271562-5">[</span><span class="p" data-group-id="8297271562-6">&lt;&lt;</span><span class="s">&quot;ab..bc&quot;</span><span class="p" data-group-id="8297271562-6">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8297271562-7">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="8297271562-7">&gt;&gt;</span><span class="p" data-group-id="8297271562-5">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="8297271562-8">(</span><span class="p" data-group-id="8297271562-9">&lt;&lt;</span><span class="s">&quot;ab..bc....cd&quot;</span><span class="p" data-group-id="8297271562-9">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">all</span><span class="p" data-group-id="8297271562-8">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8297271562-10">[</span><span class="p" data-group-id="8297271562-11">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="8297271562-11">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8297271562-12">&lt;&lt;</span><span class="s">&quot;bc&quot;</span><span class="p" data-group-id="8297271562-12">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8297271562-13">&lt;&lt;</span><span class="p" data-group-id="8297271562-13">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="8297271562-14">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="8297271562-14">&gt;&gt;</span><span class="p" data-group-id="8297271562-10">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="split/3">
+  <div class="detail-header">
+    <a href="#split/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/2 split/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>split(String, SearchPattern, Where) -> [unicode:chardata()]
+         when
+             String :: unicode:chardata(),
+             SearchPattern :: unicode:chardata(),
+             Where :: <a href="#t:direction/0">direction</a>() | all.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Splits <a type="anno">String</a> where <a type="anno">SearchPattern</a> is encountered and return the remaining parts. <a type="anno">Where</a>, default <code class="inline">leading</code>, indicates whether the <code class="inline">leading</code>, the <code class="inline">trailing</code> or <code class="inline">all</code> encounters of <a type="anno">SearchPattern</a> will split <a type="anno">String</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="1952169779-1">(</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p" data-group-id="1952169779-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1952169779-2">[</span><span class="s">&quot;ab&quot;</span><span class="p">,</span><span class="s">&quot;bc..cd&quot;</span><span class="p" data-group-id="1952169779-2">]</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="1952169779-3">(</span><span class="p" data-group-id="1952169779-4">&lt;&lt;</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p" data-group-id="1952169779-4">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="1952169779-3">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1952169779-5">[</span><span class="p" data-group-id="1952169779-6">&lt;&lt;</span><span class="s">&quot;ab..bc&quot;</span><span class="p" data-group-id="1952169779-6">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="1952169779-7">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="1952169779-7">&gt;&gt;</span><span class="p" data-group-id="1952169779-5">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:split</span><span class="p" data-group-id="1952169779-8">(</span><span class="p" data-group-id="1952169779-9">&lt;&lt;</span><span class="s">&quot;ab..bc....cd&quot;</span><span class="p" data-group-id="1952169779-9">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">all</span><span class="p" data-group-id="1952169779-8">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1952169779-10">[</span><span class="p" data-group-id="1952169779-11">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p" data-group-id="1952169779-11">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="1952169779-12">&lt;&lt;</span><span class="s">&quot;bc&quot;</span><span class="p" data-group-id="1952169779-12">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="1952169779-13">&lt;&lt;</span><span class="p" data-group-id="1952169779-13">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="1952169779-14">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p" data-group-id="1952169779-14">&gt;&gt;</span><span class="p" data-group-id="1952169779-10">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="str/2">
+  <div class="detail-header">
+    <a href="#str/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">str/2</h1>
+      <div class="specs">
+          <pre>str(String, SubString) -> Index
+       when
+           String :: string(),
+           SubString :: string(),
+           Index :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the position where the first occurrence of <a type="anno">SubString</a> begins in <a type="anno">String</a>. Returns <code class="inline">0</code> if <a type="anno">SubString</a> does not exist in <a type="anno">String</a>.</p>
+<p>This function is obsolete. Use <a href="#find/2"><code class="inline">find/2</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:str(" Hello Hello World World ", "Hello World").
+8</code>  </section>
+</section>
+<section class="detail" id="strip/1">
+  <div class="detail-header">
+    <a href="#strip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1 strip/2 strip/3</h1>
+      <div class="specs">
+          <pre>strip(string()) -> string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p>
+<p>This function is obsolete. Use <a href="#trim/3"><code class="inline">trim/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:strip("...Hello.....", both, $.).
+"Hello"</code>  </section>
+</section>
+<section class="detail" id="strip/2">
+  <div class="detail-header">
+    <a href="#strip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1 strip/2 strip/3</h1>
+      <div class="specs">
+          <pre>strip(String, Direction) -> Stripped
+         when
+             String :: string(),
+             Stripped :: string(),
+             Direction :: left | right | both.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p>
+<p>This function is obsolete. Use <a href="#trim/3"><code class="inline">trim/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:strip("...Hello.....", both, $.).
+"Hello"</code>  </section>
+</section>
+<section class="detail" id="strip/3">
+  <div class="detail-header">
+    <a href="#strip/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1 strip/2 strip/3</h1>
+      <div class="specs">
+          <pre>strip(String, Direction, Character) -> Stripped
+         when
+             String :: string(),
+             Stripped :: string(),
+             Direction :: left | right | both,
+             Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, blanks or a number of <a type="anno">Character</a> have been removed. <a type="anno">Direction</a>, which can be <code class="inline">left</code>, <code class="inline">right</code>, or <code class="inline">both</code>, indicates from which direction blanks are to be removed. <a href="#strip/1"><code class="inline">strip/1</code></a> is equivalent to <code class="inline">strip(String, both)</code>.</p>
+<p>This function is obsolete. Use <a href="#trim/3"><code class="inline">trim/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:strip("...Hello.....", both, $.).
+"Hello"</code>  </section>
+</section>
+<section class="detail" id="sub_string/2">
+  <div class="detail-header">
+    <a href="#sub_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_string/2 sub_string/3</h1>
+      <div class="specs">
+          <pre>sub_string(String, Start) -> SubString
+              when
+                  String :: string(),
+                  SubString :: string(),
+                  Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a> to the end of the string, or to and including position <a type="anno">Stop</a>.</p>
+<p>This function is obsolete. Use <a href="#slice/3"><code class="inline">slice/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">sub_string("Hello World", 4, 8).
+"lo Wo"</code>  </section>
+</section>
+<section class="detail" id="sub_string/3">
+  <div class="detail-header">
+    <a href="#sub_string/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_string/2 sub_string/3</h1>
+      <div class="specs">
+          <pre>sub_string(String, Start, Stop) -> SubString
+              when
+                  String :: string(),
+                  SubString :: string(),
+                  Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                  Stop :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a> to the end of the string, or to and including position <a type="anno">Stop</a>.</p>
+<p>This function is obsolete. Use <a href="#slice/3"><code class="inline">slice/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">sub_string("Hello World", 4, 8).
+"lo Wo"</code>  </section>
+</section>
+<section class="detail" id="sub_word/2">
+  <div class="detail-header">
+    <a href="#sub_word/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_word/2 sub_word/3</h1>
+      <div class="specs">
+          <pre>sub_word(String, Number) -> Word
+            when
+                String :: string(),
+                Word :: string(),
+                Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the word in position <a type="anno">Number</a> of <a type="anno">String</a>. Words are separated by blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#nth_lexeme/3"><code class="inline">nth_lexeme/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:sub_word(" Hello old boy !",3,$o).
+"ld b"</code>  </section>
+</section>
+<section class="detail" id="sub_word/3">
+  <div class="detail-header">
+    <a href="#sub_word/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_word/2 sub_word/3</h1>
+      <div class="specs">
+          <pre>sub_word(String, Number, Character) -> Word
+            when
+                String :: string(),
+                Word :: string(),
+                Number :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the word in position <a type="anno">Number</a> of <a type="anno">String</a>. Words are separated by blanks or <a type="anno">Character</a>s.</p>
+<p>This function is obsolete. Use <a href="#nth_lexeme/3"><code class="inline">nth_lexeme/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> string:sub_word(" Hello old boy !",3,$o).
+"ld b"</code>  </section>
+</section>
+<section class="detail" id="substr/2">
+  <div class="detail-header">
+    <a href="#substr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">substr/2 substr/3</h1>
+      <div class="specs">
+          <pre>substr(String, Start) -> SubString
+          when
+              String :: string(),
+              SubString :: string(),
+              Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a>, and ending at the end of the string or at length <a type="anno">Length</a>.</p>
+<p>This function is obsolete. Use <a href="#slice/3"><code class="inline">slice/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> substr("Hello World", 4, 5).
+"lo Wo"</code>  </section>
+</section>
+<section class="detail" id="substr/3">
+  <div class="detail-header">
+    <a href="#substr/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">substr/2 substr/3</h1>
+      <div class="specs">
+          <pre>substr(String, Start, Length) -> SubString
+          when
+              String :: string(),
+              SubString :: string(),
+              Start :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+              Length :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a substring of <a type="anno">String</a>, starting at position <a type="anno">Start</a>, and ending at the end of the string or at length <a type="anno">Length</a>.</p>
+<p>This function is obsolete. Use <a href="#slice/3"><code class="inline">slice/3</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> substr("Hello World", 4, 5).
+"lo Wo"</code>  </section>
+</section>
+<section class="detail" id="take/2">
+  <div class="detail-header">
+    <a href="#take/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2 take/3 take/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>take(String, Characters) -> {Leading, Trailing}
+        when
+            String :: unicode:chardata(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Leading :: unicode:chardata(),
+            Trailing :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="5786165131-1">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="5786165131-2">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="5786165131-2">)</span><span class="p" data-group-id="5786165131-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5786165131-3">{</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="5786165131-3">}</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="5786165131-4">(</span><span class="p" data-group-id="5786165131-5">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="5786165131-5">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="5786165131-6">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="5786165131-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="5786165131-4">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5786165131-7">{</span><span class="p" data-group-id="5786165131-8">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p" data-group-id="5786165131-8">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="5786165131-9">&lt;&lt;</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="5786165131-9">&gt;&gt;</span><span class="p" data-group-id="5786165131-7">}</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="5786165131-10">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="5786165131-11">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="5786165131-11">)</span><span class="p">,</span><span class="w"> </span><span class="no">false</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="5786165131-10">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5786165131-12">{</span><span class="s">&quot;abc0z&quot;</span><span class="p">,</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="5786165131-12">}</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="5786165131-13">(</span><span class="p" data-group-id="5786165131-14">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="5786165131-14">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="5786165131-15">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="5786165131-15">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="5786165131-13">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5786165131-16">{</span><span class="p" data-group-id="5786165131-17">&lt;&lt;</span><span class="s">&quot;abc0z&quot;</span><span class="p" data-group-id="5786165131-17">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="5786165131-18">&lt;&lt;</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="5786165131-18">&gt;&gt;</span><span class="p" data-group-id="5786165131-16">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="take/3">
+  <div class="detail-header">
+    <a href="#take/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2 take/3 take/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>take(String, Characters, Complement) -> {Leading, Trailing}
+        when
+            String :: unicode:chardata(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Complement :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+            Leading :: unicode:chardata(),
+            Trailing :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="2938150510-1">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="2938150510-2">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="2938150510-2">)</span><span class="p" data-group-id="2938150510-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2938150510-3">{</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="2938150510-3">}</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="2938150510-4">(</span><span class="p" data-group-id="2938150510-5">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="2938150510-5">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="2938150510-6">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="2938150510-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="2938150510-4">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2938150510-7">{</span><span class="p" data-group-id="2938150510-8">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p" data-group-id="2938150510-8">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="2938150510-9">&lt;&lt;</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="2938150510-9">&gt;&gt;</span><span class="p" data-group-id="2938150510-7">}</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="2938150510-10">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="2938150510-11">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="2938150510-11">)</span><span class="p">,</span><span class="w"> </span><span class="no">false</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="2938150510-10">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2938150510-12">{</span><span class="s">&quot;abc0z&quot;</span><span class="p">,</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="2938150510-12">}</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="2938150510-13">(</span><span class="p" data-group-id="2938150510-14">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="2938150510-14">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="2938150510-15">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="2938150510-15">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="2938150510-13">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2938150510-16">{</span><span class="p" data-group-id="2938150510-17">&lt;&lt;</span><span class="s">&quot;abc0z&quot;</span><span class="p" data-group-id="2938150510-17">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="2938150510-18">&lt;&lt;</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="2938150510-18">&gt;&gt;</span><span class="p" data-group-id="2938150510-16">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="take/4">
+  <div class="detail-header">
+    <a href="#take/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2 take/3 take/4</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>take(String, Characters, Complement, Dir) -> {Leading, Trailing}
+        when
+            String :: unicode:chardata(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Complement :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+            Dir :: <a href="#t:direction/0">direction</a>(),
+            Leading :: unicode:chardata(),
+            Trailing :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Takes characters from <a type="anno">String</a> as long as the characters are members of set <a type="anno">Characters</a> or the complement of set <a type="anno">Characters</a>. <a type="anno">Dir</a>, which can be <code class="inline">leading</code> or <code class="inline">trailing</code>, indicates from which direction characters are to be taken.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="6883254356-1">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="6883254356-2">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="6883254356-2">)</span><span class="p" data-group-id="6883254356-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6883254356-3">{</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="6883254356-3">}</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="6883254356-4">(</span><span class="p" data-group-id="6883254356-5">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="6883254356-5">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="6883254356-6">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="6883254356-6">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="6883254356-4">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6883254356-7">{</span><span class="p" data-group-id="6883254356-8">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p" data-group-id="6883254356-8">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="6883254356-9">&lt;&lt;</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="6883254356-9">&gt;&gt;</span><span class="p" data-group-id="6883254356-7">}</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="6883254356-10">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="6883254356-11">(</span><span class="err">$</span><span class="mi">0</span><span class="p">,</span><span class="err">$</span><span class="mi">9</span><span class="p" data-group-id="6883254356-11">)</span><span class="p">,</span><span class="w"> </span><span class="no">false</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="6883254356-10">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6883254356-12">{</span><span class="s">&quot;abc0z&quot;</span><span class="p">,</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="6883254356-12">}</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:take</span><span class="p" data-group-id="6883254356-13">(</span><span class="p" data-group-id="6883254356-14">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p" data-group-id="6883254356-14">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">lists</span><span class="ss">:seq</span><span class="p" data-group-id="6883254356-15">(</span><span class="err">$</span><span class="n">a</span><span class="p">,</span><span class="err">$</span><span class="n">z</span><span class="p" data-group-id="6883254356-15">)</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p" data-group-id="6883254356-13">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6883254356-16">{</span><span class="p" data-group-id="6883254356-17">&lt;&lt;</span><span class="s">&quot;abc0z&quot;</span><span class="p" data-group-id="6883254356-17">&gt;&gt;</span><span class="p">,</span><span class="p" data-group-id="6883254356-18">&lt;&lt;</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="6883254356-18">&gt;&gt;</span><span class="p" data-group-id="6883254356-16">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="titlecase/1">
+  <div class="detail-header">
+    <a href="#titlecase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">titlecase/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>titlecase(String :: unicode:chardata()) -> unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">String</a> to titlecase.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:titlecase</span><span class="p" data-group-id="3368521859-1">(</span><span class="s">&quot;ß is a SHARP s&quot;</span><span class="p" data-group-id="3368521859-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;Ss is a SHARP s&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_float/1">
+  <div class="detail-header">
+    <a href="#to_float/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_float/1</h1>
+      <div class="specs">
+          <pre>to_float(String) -> {Float, Rest} | {error, Reason}
+            when
+                String :: unicode:chardata(),
+                Float :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">float</a>(),
+                Rest :: unicode:chardata(),
+                Reason :: no_float | badarg.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Argument <a type="anno">String</a> is expected to start with a valid text represented float (the digits are ASCII values). Remaining characters in the string after the float are returned in <a type="anno">Rest</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="6526938937-1">{</span><span class="nc">F1</span><span class="p">,</span><span class="nc">Fs</span><span class="p" data-group-id="6526938937-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_float</span><span class="p" data-group-id="6526938937-2">(</span><span class="s">&quot;1.0-1.0e-1&quot;</span><span class="p" data-group-id="6526938937-2">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="6526938937-3">{</span><span class="nc">F2</span><span class="p">,</span><span class="p" data-group-id="6526938937-4">[</span><span class="p" data-group-id="6526938937-4">]</span><span class="p" data-group-id="6526938937-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_float</span><span class="p" data-group-id="6526938937-5">(</span><span class="nc">Fs</span><span class="p" data-group-id="6526938937-5">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">F1</span><span class="o">+</span><span class="nc">F2</span><span class="o">.</span><span class="w">
+</span><span class="mf">0.9</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_float</span><span class="p" data-group-id="6526938937-6">(</span><span class="s">&quot;3/2=1.5&quot;</span><span class="p" data-group-id="6526938937-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6526938937-7">{</span><span class="n">error</span><span class="p">,</span><span class="n">no_float</span><span class="p" data-group-id="6526938937-7">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_float</span><span class="p" data-group-id="6526938937-8">(</span><span class="s">&quot;-1.5eX&quot;</span><span class="p" data-group-id="6526938937-8">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6526938937-9">{</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span><span class="s">&quot;eX&quot;</span><span class="p" data-group-id="6526938937-9">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_graphemes/1">
+  <div class="detail-header">
+    <a href="#to_graphemes/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_graphemes/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>to_graphemes(String :: unicode:chardata()) -> [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">String</a> to a list of grapheme clusters.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_graphemes</span><span class="p" data-group-id="9549758539-1">(</span><span class="s">&quot;ß↑e̊&quot;</span><span class="p" data-group-id="9549758539-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="9549758539-2">[</span><span class="mi">223</span><span class="p">,</span><span class="mi">8593</span><span class="p">,</span><span class="p" data-group-id="9549758539-3">[</span><span class="mi">101</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="9549758539-3">]</span><span class="p" data-group-id="9549758539-2">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_graphemes</span><span class="p" data-group-id="9549758539-4">(</span><span class="p" data-group-id="9549758539-5">&lt;&lt;</span><span class="s">&quot;ß↑e̊&quot;</span><span class="o">/</span><span class="n">utf8</span><span class="p" data-group-id="9549758539-5">&gt;&gt;</span><span class="p" data-group-id="9549758539-4">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="9549758539-6">[</span><span class="mi">223</span><span class="p">,</span><span class="mi">8593</span><span class="p">,</span><span class="p" data-group-id="9549758539-7">[</span><span class="mi">101</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="9549758539-7">]</span><span class="p" data-group-id="9549758539-6">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_integer/1">
+  <div class="detail-header">
+    <a href="#to_integer/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_integer/1</h1>
+      <div class="specs">
+          <pre>to_integer(String) -> {Int, Rest} | {error, Reason}
+              when
+                  String :: unicode:chardata(),
+                  Int :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                  Rest :: unicode:chardata(),
+                  Reason :: no_integer | badarg.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Argument <a type="anno">String</a> is expected to start with a valid text represented integer (the digits are ASCII values). Remaining characters in the string after the integer are returned in <a type="anno">Rest</a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4988268059-1">{</span><span class="nc">I1</span><span class="p">,</span><span class="nc">Is</span><span class="p" data-group-id="4988268059-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_integer</span><span class="p" data-group-id="4988268059-2">(</span><span class="s">&quot;33+22&quot;</span><span class="p" data-group-id="4988268059-2">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4988268059-3">{</span><span class="nc">I2</span><span class="p">,</span><span class="p" data-group-id="4988268059-4">[</span><span class="p" data-group-id="4988268059-4">]</span><span class="p" data-group-id="4988268059-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_integer</span><span class="p" data-group-id="4988268059-5">(</span><span class="nc">Is</span><span class="p" data-group-id="4988268059-5">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">I1</span><span class="o">-</span><span class="nc">I2</span><span class="o">.</span><span class="w">
+</span><span class="mi">11</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_integer</span><span class="p" data-group-id="4988268059-6">(</span><span class="s">&quot;0.5&quot;</span><span class="p" data-group-id="4988268059-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4988268059-7">{</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;.5&quot;</span><span class="p" data-group-id="4988268059-7">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:to_integer</span><span class="p" data-group-id="4988268059-8">(</span><span class="s">&quot;x=2&quot;</span><span class="p" data-group-id="4988268059-8">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4988268059-9">{</span><span class="n">error</span><span class="p">,</span><span class="n">no_integer</span><span class="p" data-group-id="4988268059-9">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_lower/1">
+  <div class="detail-header">
+    <a href="#to_lower/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_lower/1 to_lower/1 to_upper/1 to_upper/1</h1>
+      <div class="specs">
+          <pre>to_lower(String) -> Result
+            when
+                String :: io_lib:latin1_string(),
+                Result :: io_lib:latin1_string().
+</pre>
+          <pre>to_lower(Char) -> CharResult
+            when Char :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(), CharResult :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p>
+<p>This function is obsolete use <a href="#lowercase/1"><code class="inline">lowercase/1</code></a>, <a href="#uppercase/1"><code class="inline">uppercase/1</code></a>, <a href="#titlecase/1"><code class="inline">titlecase/1</code></a> or <a href="#casefold/1"><code class="inline">casefold/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="to_upper/1">
+  <div class="detail-header">
+    <a href="#to_upper/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_lower/1 to_lower/1 to_upper/1 to_upper/1</h1>
+      <div class="specs">
+          <pre>to_upper(String) -> Result
+            when
+                String :: io_lib:latin1_string(),
+                Result :: io_lib:latin1_string().
+</pre>
+          <pre>to_upper(Char) -> CharResult
+            when Char :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(), CharResult :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p>
+<p>This function is obsolete use <a href="#lowercase/1"><code class="inline">lowercase/1</code></a>, <a href="#uppercase/1"><code class="inline">uppercase/1</code></a>, <a href="#titlecase/1"><code class="inline">titlecase/1</code></a> or <a href="#casefold/1"><code class="inline">casefold/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="tokens/2">
+  <div class="detail-header">
+    <a href="#tokens/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tokens/2</h1>
+      <div class="specs">
+          <pre>tokens(String, SeparatorList) -> Tokens
+          when
+              String :: string(),
+              SeparatorList :: string(),
+              Tokens :: [Token :: nonempty_string()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of tokens in <a type="anno">String</a>, separated by the characters in <a type="anno">SeparatorList</a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> tokens("abc defxxghix jkl", "x ").
+["abc", "def", "ghi", "jkl"]</code>
+Notice that, as shown in this example, two or more adjacent separator characters in <a type="anno">String</a> are treated as one. That is, there are no empty strings in the resulting list of tokens.
+
+This function is obsolete. Use [`lexemes/2`](#lexemes/2).  </section>
+</section>
+<section class="detail" id="trim/1">
+  <div class="detail-header">
+    <a href="#trim/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/1 trim/2 trim/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>trim(String) -> unicode:chardata()
+        when String :: unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p>
+<p>Default <a type="anno">Characters</a> is the set of nonbreakable whitespace codepoints, defined as Pattern_White_Space in <a href="http://unicode.org/reports/tr31/">Unicode Standard Annex #31</a>. <code class="inline">By default, Dir</code> is <code class="inline">both</code>.</p>
+<p>Notice that <code class="inline">[$\r,$\n]</code> is one grapheme cluster according to the Unicode Standard.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="5643177170-1">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="5643177170-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;Hello&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="5643177170-2">(</span><span class="p" data-group-id="5643177170-3">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="5643177170-3">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="5643177170-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5643177170-4">&lt;&lt;</span><span class="s">&quot;Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="5643177170-4">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="5643177170-5">(</span><span class="p" data-group-id="5643177170-6">&lt;&lt;</span><span class="s">&quot;.Hello.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="5643177170-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">.&quot;</span><span class="p" data-group-id="5643177170-5">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="5643177170-7">&lt;&lt;</span><span class="s">&quot;.Hello&quot;</span><span class="p" data-group-id="5643177170-7">&gt;&gt;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="trim/2">
+  <div class="detail-header">
+    <a href="#trim/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/1 trim/2 trim/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>trim(String, Dir) -> unicode:chardata()
+        when
+            String :: unicode:chardata(),
+            Dir :: <a href="#t:direction/0">direction</a>() | both.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p>
+<p>Default <a type="anno">Characters</a> is the set of nonbreakable whitespace codepoints, defined as Pattern_White_Space in <a href="http://unicode.org/reports/tr31/">Unicode Standard Annex #31</a>. <code class="inline">By default, Dir</code> is <code class="inline">both</code>.</p>
+<p>Notice that <code class="inline">[$\r,$\n]</code> is one grapheme cluster according to the Unicode Standard.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="1207211934-1">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="1207211934-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;Hello&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="1207211934-2">(</span><span class="p" data-group-id="1207211934-3">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="1207211934-3">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="1207211934-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1207211934-4">&lt;&lt;</span><span class="s">&quot;Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="1207211934-4">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="1207211934-5">(</span><span class="p" data-group-id="1207211934-6">&lt;&lt;</span><span class="s">&quot;.Hello.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="1207211934-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">.&quot;</span><span class="p" data-group-id="1207211934-5">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1207211934-7">&lt;&lt;</span><span class="s">&quot;.Hello&quot;</span><span class="p" data-group-id="1207211934-7">&gt;&gt;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="trim/3">
+  <div class="detail-header">
+    <a href="#trim/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/1 trim/2 trim/3</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>trim(String, Dir, Characters) -> unicode:chardata()
+        when
+            String :: unicode:chardata(),
+            Dir :: <a href="#t:direction/0">direction</a>() | both,
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a string, where leading or trailing, or both, <a type="anno">Characters</a> have been removed. <a type="anno">Dir</a> which can be <code class="inline">leading</code>, <code class="inline">trailing</code>, or <code class="inline">both</code>, indicates from which direction characters are to be removed.</p>
+<p>Default <a type="anno">Characters</a> is the set of nonbreakable whitespace codepoints, defined as Pattern_White_Space in <a href="http://unicode.org/reports/tr31/">Unicode Standard Annex #31</a>. <code class="inline">By default, Dir</code> is <code class="inline">both</code>.</p>
+<p>Notice that <code class="inline">[$\r,$\n]</code> is one grapheme cluster according to the Unicode Standard.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="4207384926-1">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="4207384926-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;Hello&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="4207384926-2">(</span><span class="p" data-group-id="4207384926-3">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">  Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="4207384926-3">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">leading</span><span class="p" data-group-id="4207384926-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4207384926-4">&lt;&lt;</span><span class="s">&quot;Hello  </span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="4207384926-4">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:trim</span><span class="p" data-group-id="4207384926-5">(</span><span class="p" data-group-id="4207384926-6">&lt;&lt;</span><span class="s">&quot;.Hello.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="4207384926-6">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">trailing</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">.&quot;</span><span class="p" data-group-id="4207384926-5">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4207384926-7">&lt;&lt;</span><span class="s">&quot;.Hello&quot;</span><span class="p" data-group-id="4207384926-7">&gt;&gt;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="uppercase/1">
+  <div class="detail-header">
+    <a href="#uppercase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uppercase/1</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>uppercase(String :: unicode:chardata()) -> unicode:chardata().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">String</a> to uppercase.</p>
+<p>See also <a href="#titlecase/1"><code class="inline">titlecase/1</code></a>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">string</span><span class="ss">:uppercase</span><span class="p" data-group-id="5332734010-1">(</span><span class="s">&quot;Michał&quot;</span><span class="p" data-group-id="5332734010-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;MICHAŁ&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="words/1">
+  <div class="detail-header">
+    <a href="#words/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">words/1 words/2</h1>
+      <div class="specs">
+          <pre>words(String) -> Count
+         when String :: string(), Count :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of words in <a type="anno">String</a>, separated by blanks or <a type="anno">Character</a>.</p>
+<p>This function is obsolete. Use <a href="#lexemes/2"><code class="inline">lexemes/2</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> words(" Hello old boy!", $o).
+4</code>  </section>
+</section>
+<section class="detail" id="words/2">
+  <div class="detail-header">
+    <a href="#words/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">words/1 words/2</h1>
+      <div class="specs">
+          <pre>words(String, Character) -> Count
+         when
+             String :: string(),
+             Character :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">char</a>(),
+             Count :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of words in <a type="anno">String</a>, separated by blanks or <a type="anno">Character</a>.</p>
+<p>This function is obsolete. Use <a href="#lexemes/2"><code class="inline">lexemes/2</code></a>.</p>
+<p><em >Example:</em></p>
+<code type="none">> words(" Hello old boy!", $o).
+4</code>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

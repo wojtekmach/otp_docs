@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>timer — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+timer      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides useful functions related to time. Unless otherwise stated, time is always measured in <em >milliseconds</em>. All timer functions return immediately, regardless of work done by another process.</p>
+<p>Successful evaluations of the timer functions give return values containing a timer reference, denoted <code class="inline">TRef</code>. By using <a href="#cancel/1"><code class="inline">cancel/1</code></a>, the returned reference can be used to cancel any requested action. A <code class="inline">TRef</code> is an Erlang term, which contents must not be changed.</p>
+<p>The time-outs are not exact, but are <em >at least</em> as long as requested.</p>
+<h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p><em >Example 1</em></p>
+<p>The following example shows how to print &quot;Hello World!&quot; in 5 seconds:</p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">timer</span><span class="ss">:apply_after</span><span class="p" data-group-id="3395533899-1">(</span><span class="mi">5000</span><span class="p">,</span><span class="w"> </span><span class="n">io</span><span class="p">,</span><span class="w"> </span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3395533899-2">[</span><span class="s">&quot;~nHello World!~n&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3395533899-3">[</span><span class="p" data-group-id="3395533899-3">]</span><span class="p" data-group-id="3395533899-2">]</span><span class="p" data-group-id="3395533899-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3395533899-4">{</span><span class="n">ok</span><span class="p">,</span><span class="nc">TRef</span><span class="p" data-group-id="3395533899-4">}</span><span class="w">
+</span><span class="nc">Hello</span><span class="w"> </span><span class="nc">World</span><span class="o">!</span></code></pre>
+<p><em >Example 2</em></p>
+<p>The following example shows a process performing a certain action, and if this action is not completed within a certain limit, the process is killed:</p>
+<code type="none">Pid = spawn(mod, fun, [foo, bar]),
+%% If pid is not finished in 10 seconds, kill him
+{ok, R} = timer:kill_after(timer:seconds(10), Pid),
+...
+%% We change our mind...
+timer:cancel(R),
+...</code><h2 id="module-notes" class="section-heading">
+  <a href="#module-notes" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Notes
+</h2>
+
+A timer can always be removed by calling [`cancel/1`](#cancel/1).
+
+An interval timer, that is, a timer created by evaluating any of the functions [`apply_interval/4`](#apply_interval/4), [`send_interval/3`](#send_interval/3), and [`send_interval/2`](#send_interval/2) is linked to the process to which the timer performs its task.
+
+A one-shot timer, that is, a timer created by evaluating any of the functions [`apply_after/4`](#apply_after/4), [`send_after/3`](#send_after/3), [`send_after/2`](#send_after/2), [`exit_after/3`](#exit_after/3), [`exit_after/2`](#exit_after/2), [`kill_after/2`](#kill_after/2), and [`kill_after/1`](#kill_after/1) is not linked to any process. Hence, such a timer is removed only when it reaches its time-out, or if it is explicitly removed by a call to [`cancel/1`](#cancel/1).        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:time/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Time in milliseconds.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tref/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A timer reference.</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply_after/4">apply_after/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates <code class="inline">apply(Module, Function, Arguments)</code> after <a type="anno">Time</a> milliseconds.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply_interval/4">apply_interval/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates <code class="inline">apply(Module, Function, Arguments)</code> repeatedly at intervals of <a type="anno">Time</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cancel/1">cancel/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Cancels a previously requested time-out. <a type="anno">TRef</a> is a unique timer reference returned by the related timer function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exit_after/2">exit_after/2 exit_after/3</a>
+  </div>
+    <div class="summary-synopsis"><p><a href="#exit_after/2"><code class="inline">exit_after/2</code></a> is the same as <code class="inline">exit_after(Time, self(), Reason1)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exit_after/3">exit_after/2 exit_after/3</a>
+  </div>
+    <div class="summary-synopsis"><p><a href="#exit_after/2"><code class="inline">exit_after/2</code></a> is the same as <code class="inline">exit_after(Time, self(), Reason1)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hms/3">hms/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of milliseconds in <code class="inline">Hours + Minutes + Seconds</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hours/1">hours/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of milliseconds in <a type="anno">Hours</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#kill_after/1">kill_after/1 kill_after/2</a>
+  </div>
+    <div class="summary-synopsis"><p><a href="#kill_after/1"><code class="inline">kill_after/1</code></a> is the same as <code class="inline">exit_after(Time, self(), kill)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#kill_after/2">kill_after/1 kill_after/2</a>
+  </div>
+    <div class="summary-synopsis"><p><a href="#kill_after/1"><code class="inline">kill_after/1</code></a> is the same as <code class="inline">exit_after(Time, self(), kill)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#minutes/1">minutes/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of milliseconds in <a type="anno">Minutes</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#now_diff/2">now_diff/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Calculates the time difference <code class="inline">Tdiff = T2 - T1</code> in <em >microseconds</em>, where <a type="anno">T1</a> and <a type="anno">T2</a> are time-stamp tuples on the same format as returned from <code class="inline">erlang:timestamp/0</code> or <code class="inline">os:timestamp/0</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#seconds/1">seconds/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of milliseconds in <a type="anno">Seconds</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_after/2">send_after/2 send_after/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`send_after/3`](#send_after/3)</dt><dd >
+Evaluates `Pid ! Message` after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_after/2`](#send_after/2)</dt><dd >
+Same as `send_after(Time, self(), Message)`.
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_after/3">send_after/2 send_after/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`send_after/3`](#send_after/3)</dt><dd >
+Evaluates `Pid ! Message` after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_after/2`](#send_after/2)</dt><dd >
+Same as `send_after(Time, self(), Message)`.
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_interval/2">send_interval/2 send_interval/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`send_interval/3`](#send_interval/3)</dt><dd >
+Evaluates `Pid ! Message` repeatedly after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_interval/2`](#send_interval/2)</dt><dd >
+Same as `send_interval(Time, self(), Message)`.
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_interval/3">send_interval/2 send_interval/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`send_interval/3`](#send_interval/3)</dt><dd >
+Evaluates `Pid ! Message` repeatedly after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_interval/2`](#send_interval/2)</dt><dd >
+Same as `send_interval(Time, self(), Message)`.
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sleep/1">sleep/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Suspends the process calling this function for <a type="anno">Time</a> milliseconds and then returns <code class="inline">ok</code>, or suspends the process forever if <a type="anno">Time</a> is the atom <code class="inline">infinity</code>. Naturally, this function does <em >not</em> return immediately.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start/0</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts the timer server. Normally, the server does not need to be started explicitly. It is started dynamically if it is needed. This is useful during development, but in a target system the server is to be started explicitly. Use configuration parameters for Kernel for this.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tc/1">tc/1 tc/2 tc/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tc/2">tc/1 tc/2 tc/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tc/3">tc/1 tc/2 tc/3</a>
+  </div>
+    <div class="summary-synopsis"><dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:time/0">
+  <div class="detail-header">
+    <a href="#t:time/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>time() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Time in milliseconds.</p>
+  </section>
+</section>
+<section class="detail" id="t:tref/0">
+  <div class="detail-header">
+    <a href="#t:tref/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <span class="note">(opaque)</span>
+      <div class="specs">
+          <pre>tref() :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">reference</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A timer reference.</p>
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="apply_after/4">
+  <div class="detail-header">
+    <a href="#apply_after/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply_after/4</h1>
+      <div class="specs">
+          <pre>apply_after(Time, Module, Function, Arguments) ->
+               {ok, TRef} | {error, Reason}
+               when
+                   Time :: <a href="#t:time/0">time</a>(),
+                   Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+                   Function :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+                   Arguments :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+                   TRef :: <a href="#t:tref/0">tref</a>(),
+                   Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates <code class="inline">apply(Module, Function, Arguments)</code> after <a type="anno">Time</a> milliseconds.</p>
+<p>Returns <code class="inline">{ok, TRef}</code> or <code class="inline">{error, Reason}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="apply_interval/4">
+  <div class="detail-header">
+    <a href="#apply_interval/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply_interval/4</h1>
+      <div class="specs">
+          <pre>apply_interval(Time, Module, Function, Arguments) ->
+                  {ok, TRef} | {error, Reason}
+                  when
+                      Time :: <a href="#t:time/0">time</a>(),
+                      Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+                      Function :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+                      Arguments :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+                      TRef :: <a href="#t:tref/0">tref</a>(),
+                      Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates <code class="inline">apply(Module, Function, Arguments)</code> repeatedly at intervals of <a type="anno">Time</a>.</p>
+<p>Returns <code class="inline">{ok, TRef}</code> or <code class="inline">{error, Reason}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cancel/1">
+  <div class="detail-header">
+    <a href="#cancel/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cancel/1</h1>
+      <div class="specs">
+          <pre>cancel(TRef) -> {ok, cancel} | {error, Reason}
+          when TRef :: <a href="#t:tref/0">tref</a>(), Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Cancels a previously requested time-out. <a type="anno">TRef</a> is a unique timer reference returned by the related timer function.</p>
+<p>Returns <code class="inline">{ok, cancel}</code>, or <code class="inline">{error, Reason}</code> when <a type="anno">TRef</a> is not a timer reference.</p>
+  </section>
+</section>
+<section class="detail" id="exit_after/2">
+  <div class="detail-header">
+    <a href="#exit_after/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exit_after/2 exit_after/3</h1>
+      <div class="specs">
+          <pre>exit_after(Time, Reason1) -> {ok, TRef} | {error, Reason2}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                  Reason2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a href="#exit_after/2"><code class="inline">exit_after/2</code></a> is the same as <code class="inline">exit_after(Time, self(), Reason1)</code>.</p>
+<p><a href="#exit_after/3"><code class="inline">exit_after/3</code></a> sends an exit signal with reason <a type="anno">Reason1</a> to pid <a type="anno">Pid</a>. Returns <code class="inline">{ok, TRef}</code> or <code class="inline">{error, Reason2}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="exit_after/3">
+  <div class="detail-header">
+    <a href="#exit_after/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exit_after/2 exit_after/3</h1>
+      <div class="specs">
+          <pre>exit_after(Time, Pid, Reason1) -> {ok, TRef} | {error, Reason2}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | (RegName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                  Reason2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a href="#exit_after/2"><code class="inline">exit_after/2</code></a> is the same as <code class="inline">exit_after(Time, self(), Reason1)</code>.</p>
+<p><a href="#exit_after/3"><code class="inline">exit_after/3</code></a> sends an exit signal with reason <a type="anno">Reason1</a> to pid <a type="anno">Pid</a>. Returns <code class="inline">{ok, TRef}</code> or <code class="inline">{error, Reason2}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="hms/3">
+  <div class="detail-header">
+    <a href="#hms/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hms/3</h1>
+      <div class="specs">
+          <pre>hms(Hours, Minutes, Seconds) -> MilliSeconds
+       when
+           Hours :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+           Minutes :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+           Seconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+           MilliSeconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of milliseconds in <code class="inline">Hours + Minutes + Seconds</code>.</p>
+  </section>
+</section>
+<section class="detail" id="hours/1">
+  <div class="detail-header">
+    <a href="#hours/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hours/1</h1>
+      <div class="specs">
+          <pre>hours(Hours) -> MilliSeconds
+         when
+             Hours :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+             MilliSeconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of milliseconds in <a type="anno">Hours</a>.</p>
+  </section>
+</section>
+<section class="detail" id="kill_after/1">
+  <div class="detail-header">
+    <a href="#kill_after/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">kill_after/1 kill_after/2</h1>
+      <div class="specs">
+          <pre>kill_after(Time) -> {ok, TRef} | {error, Reason2}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a href="#kill_after/1"><code class="inline">kill_after/1</code></a> is the same as <code class="inline">exit_after(Time, self(), kill)</code>.</p>
+<p><a href="#kill_after/2"><code class="inline">kill_after/2</code></a> is the same as <code class="inline">exit_after(Time, Pid, kill)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="kill_after/2">
+  <div class="detail-header">
+    <a href="#kill_after/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">kill_after/1 kill_after/2</h1>
+      <div class="specs">
+          <pre>kill_after(Time, Pid) -> {ok, TRef} | {error, Reason2}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | (RegName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a href="#kill_after/1"><code class="inline">kill_after/1</code></a> is the same as <code class="inline">exit_after(Time, self(), kill)</code>.</p>
+<p><a href="#kill_after/2"><code class="inline">kill_after/2</code></a> is the same as <code class="inline">exit_after(Time, Pid, kill)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="minutes/1">
+  <div class="detail-header">
+    <a href="#minutes/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">minutes/1</h1>
+      <div class="specs">
+          <pre>minutes(Minutes) -> MilliSeconds
+           when
+               Minutes :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+               MilliSeconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of milliseconds in <a type="anno">Minutes</a>.</p>
+  </section>
+</section>
+<section class="detail" id="now_diff/2">
+  <div class="detail-header">
+    <a href="#now_diff/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">now_diff/2</h1>
+      <div class="specs">
+          <pre>now_diff(T2, T1) -> Tdiff
+            when
+                T1 :: erlang:timestamp(),
+                T2 :: erlang:timestamp(),
+                Tdiff :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Calculates the time difference <code class="inline">Tdiff = T2 - T1</code> in <em >microseconds</em>, where <a type="anno">T1</a> and <a type="anno">T2</a> are time-stamp tuples on the same format as returned from <code class="inline">erlang:timestamp/0</code> or <code class="inline">os:timestamp/0</code>.</p>
+  </section>
+</section>
+<section class="detail" id="seconds/1">
+  <div class="detail-header">
+    <a href="#seconds/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">seconds/1</h1>
+      <div class="specs">
+          <pre>seconds(Seconds) -> MilliSeconds
+           when
+               Seconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+               MilliSeconds :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the number of milliseconds in <a type="anno">Seconds</a>.</p>
+  </section>
+</section>
+<section class="detail" id="send_after/2">
+  <div class="detail-header">
+    <a href="#send_after/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_after/2 send_after/3</h1>
+      <div class="specs">
+          <pre>send_after(Time, Message) -> {ok, TRef} | {error, Reason}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  Message :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`send_after/3`](#send_after/3)</dt><dd >
+Evaluates `Pid ! Message` after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_after/2`](#send_after/2)</dt><dd >
+Same as `send_after(Time, self(), Message)`.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="send_after/3">
+  <div class="detail-header">
+    <a href="#send_after/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_after/2 send_after/3</h1>
+      <div class="specs">
+          <pre>send_after(Time, Pid, Message) -> {ok, TRef} | {error, Reason}
+              when
+                  Time :: <a href="#t:time/0">time</a>(),
+                  Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | (RegName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()),
+                  Message :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                  TRef :: <a href="#t:tref/0">tref</a>(),
+                  Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`send_after/3`](#send_after/3)</dt><dd >
+Evaluates `Pid ! Message` after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_after/2`](#send_after/2)</dt><dd >
+Same as `send_after(Time, self(), Message)`.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="send_interval/2">
+  <div class="detail-header">
+    <a href="#send_interval/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_interval/2 send_interval/3</h1>
+      <div class="specs">
+          <pre>send_interval(Time, Message) -> {ok, TRef} | {error, Reason}
+                 when
+                     Time :: <a href="#t:time/0">time</a>(),
+                     Message :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                     TRef :: <a href="#t:tref/0">tref</a>(),
+                     Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`send_interval/3`](#send_interval/3)</dt><dd >
+Evaluates `Pid ! Message` repeatedly after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_interval/2`](#send_interval/2)</dt><dd >
+Same as `send_interval(Time, self(), Message)`.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="send_interval/3">
+  <div class="detail-header">
+    <a href="#send_interval/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_interval/2 send_interval/3</h1>
+      <div class="specs">
+          <pre>send_interval(Time, Pid, Message) -> {ok, TRef} | {error, Reason}
+                 when
+                     Time :: <a href="#t:time/0">time</a>(),
+                     Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | (RegName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()),
+                     Message :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                     TRef :: <a href="#t:tref/0">tref</a>(),
+                     Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`send_interval/3`](#send_interval/3)</dt><dd >
+Evaluates `Pid ! Message` repeatedly after <a type="anno">Time</a> milliseconds. (<a type="anno">Pid</a> can also be an atom of a registered name.)
+
+Returns `{ok, TRef}` or `{error, Reason}`.
+</dd><dt >[`send_interval/2`](#send_interval/2)</dt><dd >
+Same as `send_interval(Time, self(), Message)`.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="sleep/1">
+  <div class="detail-header">
+    <a href="#sleep/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sleep/1</h1>
+      <div class="specs">
+          <pre>sleep(Time) -> ok when Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Suspends the process calling this function for <a type="anno">Time</a> milliseconds and then returns <code class="inline">ok</code>, or suspends the process forever if <a type="anno">Time</a> is the atom <code class="inline">infinity</code>. Naturally, this function does <em >not</em> return immediately.</p>
+  </section>
+</section>
+<section class="detail" id="start/0">
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/0</h1>
+      <div class="specs">
+          <pre>start() -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Starts the timer server. Normally, the server does not need to be started explicitly. It is started dynamically if it is needed. This is useful during development, but in a target system the server is to be started explicitly. Use configuration parameters for Kernel for this.</p>
+  </section>
+</section>
+<section class="detail" id="tc/1">
+  <div class="detail-header">
+    <a href="#tc/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tc/1 tc/2 tc/3</h1>
+      <span class="note">(since OTP R14B,OTP R14B03)</span>
+      <div class="specs">
+          <pre>tc(Fun) -> {Time, Value}
+      when Fun :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">function</a>(), Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl>  </section>
+</section>
+<section class="detail" id="tc/2">
+  <div class="detail-header">
+    <a href="#tc/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tc/1 tc/2 tc/3</h1>
+      <span class="note">(since OTP R14B,OTP R14B03)</span>
+      <div class="specs">
+          <pre>tc(Fun, Arguments) -> {Time, Value}
+      when
+          Fun :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">function</a>(),
+          Arguments :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+          Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+          Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl>  </section>
+</section>
+<section class="detail" id="tc/3">
+  <div class="detail-header">
+    <a href="#tc/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tc/1 tc/2 tc/3</h1>
+      <span class="note">(since OTP R14B,OTP R14B03)</span>
+      <div class="specs">
+          <pre>tc(Module, Function, Arguments) -> {Time, Value}
+      when
+          Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+          Function :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+          Arguments :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+          Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+          Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<dl ><dt >[`tc/3`](#tc/3)</dt><dd >
+Evaluates `apply(Module, Function, Arguments)` and measures the elapsed real time as reported by `erlang:monotonic_time/0`.
+
+Returns `{Time, Value}`, where <a type="anno">Time</a> is the elapsed real time in <em >microseconds</em>, and <a type="anno">Value</a> is what is returned from the apply.
+</dd><dt >[`tc/2`](#tc/2)</dt><dd >
+Evaluates `apply(Fun, Arguments)`. Otherwise the same as [`tc/3`](#tc/3).
+</dd><dt >[`tc/1`](#tc/1)</dt><dd >
+Evaluates `Fun()`. Otherwise the same as [`tc/2`](#tc/2).
+</dd></dl>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

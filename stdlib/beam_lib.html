@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>beam_lib — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+beam_lib      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides an interface to files created by the BEAM Compiler (&quot;BEAM files&quot;). The format used, a variant of &quot;EA IFF 1985&quot; Standard for Interchange Format Files, divides data into chunks.</p>
+<p>Chunk data can be returned as binaries or as compound terms. Compound terms are returned when chunks are referenced by names (atoms) rather than identifiers (strings). The recognized names and the corresponding identifiers are as follows:</p>
+<ul ><li >`atoms ("Atom")`</li><li >`attributes ("Attr")`</li><li >`compile_info ("CInf")`</li><li >`debug_info ("Dbgi")`</li><li >`exports ("ExpT")`</li><li >`imports ("ImpT")`</li><li >`indexed_imports ("ImpT")`</li><li >`labeled_exports ("ExpT")`</li><li >`labeled_locals ("LocT")`</li><li >`locals ("LocT")`</li></ul><a id="debug_info"></a><h2 id="module-debug-information-abstract-code" class="section-heading">
+  <a href="#module-debug-information-abstract-code" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Debug Information/Abstract Code
+</h2>
+<p>Option <code class="inline">debug_info</code> can be specified to the Compiler (see <code class="inline">compile(3)</code>) to have debug information, such as Erlang Abstract Format, stored in the <code class="inline">debug_info</code> chunk. Tools such as Debugger and Xref require the debug information to be included.</p>
+<p>Source code can be reconstructed from the debug information. To prevent this, use encrypted debug information (see below).</p>
+<p>The debug information can also be removed from BEAM files using <a href="#strip/1"><code class="inline">strip/1</code></a>, <a href="#strip_files/1"><code class="inline">strip_files/1</code></a>, and/or <a href="#strip_release/1"><code class="inline">strip_release/1</code></a>.</p>
+<h2 id="module-reconstruct-source-code" class="section-heading">
+  <a href="#module-reconstruct-source-code" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Reconstruct Source Code
+</h2>
+<p>The following example shows how to reconstruct Erlang source code from the debug information in a BEAM file <code class="inline">Beam</code>:</p>
+<code type="none">{ok,{_,[{abstract_code,{_,AC}}]}} = beam_lib:chunks(Beam,[abstract_code]).
+io:fwrite("~s~n", [erl_prettypr:format(erl_syntax:form_list(AC))]).</code><h2 id="module-encrypted-debug-information" class="section-heading">
+  <a href="#module-encrypted-debug-information" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Encrypted Debug Information
+</h2>
+
+The debug information can be encrypted to keep the source code secret, but still be able to use tools such as Debugger or Xref.
+
+To use encrypted debug information, a key must be provided to the compiler and `beam_lib`. The key is specified as a string. It is recommended that the string contains at least 32 characters and that both upper and lower case letters as well as digits and special characters are used.
+
+The default type (and currently the only type) of crypto algorithm is `des3_cbc`, three rounds of DES. The key string is scrambled using `erlang:md5/1` to generate the keys used for `des3_cbc`.
+
+
+As far as we know by the time of writing, it is infeasible to break `des3_cbc` encryption without any knowledge of the key. Therefore, as long as the key is kept safe and is unguessable, the encrypted debug information <em >should</em> be safe from intruders.
+
+
+The key can be provided in the following two ways:
+<ol ><li >
+Use Compiler option `{debug_info_key,Key}`, see `compile(3)` and function [`crypto_key_fun/1`](#crypto_key_fun/1) to register a fun that returns the key whenever `beam_lib` must decrypt the debug information.
+
+If no such fun is registered, `beam_lib` instead searches for an `.erlang.crypt` file, see the next section.
+</li><li >
+Store the key in a text file named `.erlang.crypt`.
+
+In this case, Compiler option `encrypt_debug_info` can be used, see `compile(3)`.
+</li></ol><h2 id="module-erlang-crypt" class="section-heading">
+  <a href="#module-erlang-crypt" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  .erlang.crypt
+</h2>
+
+`beam_lib` searches for `.erlang.crypt` in the current directory and then the home directory for the current user. If the file is found and contains a key, `beam_lib` implicitly creates a crypto key fun and registers it.
+
+File `.erlang.crypt` is to contain a single list of tuples:
+<code type="none">{debug_info, Mode, Module, Key}</code>
+`Mode` is the type of crypto algorithm; currently, the only allowed value is `des3_cbc`. [`Module`](https://hexdocs.pm/elixir/Module.html) is either an atom, in which case `Key` is only used for the module [`Module`](https://hexdocs.pm/elixir/Module.html), or `[]`, in which case `Key` is used for all modules. `Key` is the non-empty key string.
+
+`Key` in the first tuple where both `Mode` and [`Module`](https://hexdocs.pm/elixir/Module.html) match is used.
+
+The following is an example of an `.erlang.crypt` file that returns the same key for all modules:
+<code type="none">[{debug_info, des3_cbc, [], "%>7}|pc/DM6Cga*68$Mw]L#&_Gejr]G^"}].</code>
+The following is a slightly more complicated example of an `.erlang.crypt` providing one key for module `t` and another key for all other modules:
+<code type="none">[{debug_info, des3_cbc, t, "My KEY"},
+ {debug_info, des3_cbc, [], "%>7}|pc/DM6Cga*68$Mw]L#&_Gejr]G^"}].</code>
+
+Do not use any of the keys in these examples. Use your own keys.        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:abst_code/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>It is not checked that the forms conform to the abstract format indicated by <a type="anno">AbstVersion</a>. <code class="inline">no_abstract_code</code> means that chunk <code class="inline">&quot;Abst&quot;</code> is present, but empty.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:attrib_entry/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:beam/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Each of the functions described below accept either the filename (as a string) or a binary containing the BEAM module.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chnk_rsn/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkdata/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>The list of attributes is sorted on <code class="inline">Attribute</code> (in <code class="inline">attrib_entry()</code>) and each attribute name occurs once in the list. The attribute values occur in the same order as in the file. The lists of functions are also sorted.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkid/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>&quot;Attr&quot; | &quot;CInf&quot; | &quot;Dbgi&quot; | &quot;ExpT&quot; | &quot;ImpT&quot; | &quot;LocT&quot; | &quot;AtU8&quot;</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkname/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkref/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:compinfo_entry/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dataB/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:debug_info/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>The format stored in the <code class="inline">debug_info</code> chunk. To retrieve particular code representation from the backend, <code class="inline">Backend:debug_info(Format, Module, Data, Opts)</code> must be invoked. <code class="inline">Format</code> is an atom, such as <code class="inline">erlang_v1</code> for the Erlang Abstract Format or <code class="inline">core_v1</code> for Core Erlang. <a href="https://hexdocs.pm/elixir/Module.html"><code class="inline">Module</code></a> is the module represented by the beam file and <code class="inline">Data</code> is the value stored in the debug info chunk. <code class="inline">Opts</code> is any list of values supported by the <code class="inline">Backend</code>. <code class="inline">Backend:debug_info/4</code> must return <code class="inline">{ok, Code}</code> or <code class="inline">{error, Term}</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:forms/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:index/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:info_rsn/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:label/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:labeled_entry/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all_chunks/1">all_chunks/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads chunk data for all chunks.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#build_module/1">build_module/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Builds a BEAM module (as a binary) from a list of chunks.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunks/2">chunks/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunks/3">chunks/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear_crypto_key_fun/0">clear_crypto_key_fun/0</a>
+  </div>
+    <div class="summary-synopsis"><p>Unregisters the crypto key fun and terminates the process holding it, started by <a href="#crypto_key_fun/1"><code class="inline">crypto_key_fun/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmp/2">cmp/2</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="cmp_rsn"></li></ul><p>Compares the contents of two BEAM files. If the module names are the same, and all chunks except for chunk <code class="inline">&quot;CInf&quot;</code> (the chunk containing the compilation information that is returned by <code class="inline">Module:module_info(compile)</code>) have the same contents in both files, <code class="inline">ok</code> is returned. Otherwise an error message is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmp_dirs/2">cmp_dirs/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Compares the BEAM files in two directories. Only files with extension <code class="inline">&quot;.beam&quot;</code> are compared. BEAM files that exist only in directory <a type="anno">Dir1</a> (<a type="anno">Dir2</a>) are returned in <a type="anno">Only1</a> (<a type="anno">Only2</a>). BEAM files that exist in both directories but are considered different by <a href="#cmp/2"><code class="inline">cmp/2</code></a> are returned as pairs {<a type="anno">Filename1</a>, <a type="anno">Filename2</a>}, where <a type="anno">Filename1</a> (<a type="anno">Filename2</a>) exists in directory <a type="anno">Dir1</a> (<a type="anno">Dir2</a>).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crypto_key_fun/1">crypto_key_fun/1</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="crypto_fun"></li><li name="crypto_fun_arg"></li><li name="mode"></li></ul><p>Registers an unary fun that is called if <code class="inline">beam_lib</code> must read an <code class="inline">debug_info</code> chunk that has been encrypted. The fun is held in a process that is started by the function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#diff_dirs/2">diff_dirs/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Compares the BEAM files in two directories as <a href="#cmp_dirs/2"><code class="inline">cmp_dirs/2</code></a>, but the names of files that exist in only one directory or are different are presented on standard output.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_error/1">format_error/1</a>
+  </div>
+    <div class="summary-synopsis"><p>For a specified error returned by any function in this module, this function returns a descriptive string of the error in English. For file errors, function <code class="inline">file:format_error(Posix)</code> is to be called.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list containing some information about a BEAM file as tuples <code class="inline">{Item, Info}</code></p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#md5/1">md5/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Calculates an MD5 redundancy check for the code of the module (compilation date and other attributes are not included).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/1">strip/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks from a BEAM file except those needed by the loader. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/2">strip/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks from a BEAM file except those needed by the loader or passed in. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_files/1">strip_files/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader from BEAM files. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code class="inline">Files</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_files/2">strip_files/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader or passed in from BEAM files. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code class="inline">Files</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_release/1">strip_release/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader from the BEAM files of a release. <a type="anno">Dir</a> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code class="inline">beam_lib:strip_release(code:root_dir())</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_release/2">strip_release/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader or passed in from the BEAM files of a release. <a type="anno">Dir</a> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code class="inline">beam_lib:strip_release(code:root_dir())</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#version/1">version/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the module version or versions. A version is defined by module attribute <code class="inline">-vsn(Vsn)</code>. If this attribute is not specified, the version defaults to the checksum of the module. Notice that if version <code class="inline">Vsn</code> is not a list, it is made into one, that is <code class="inline">{ok,{Module,[Vsn]}}</code> is returned. If there are many <code class="inline">-vsn</code> module attributes, the result is the concatenated list of versions.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:abst_code/0">
+  <div class="detail-header">
+    <a href="#t:abst_code/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>abst_code() :: {AbstVersion :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="#t:forms/0">forms</a>()} | no_abstract_code.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>It is not checked that the forms conform to the abstract format indicated by <a type="anno">AbstVersion</a>. <code class="inline">no_abstract_code</code> means that chunk <code class="inline">&quot;Abst&quot;</code> is present, but empty.</p>
+<p>For modules compiled with OTP 20 onwards, the <code class="inline">abst_code</code> chunk is automatically computed from the <code class="inline">debug_info</code> chunk.</p>
+  </section>
+</section>
+<section class="detail" id="t:attrib_entry/0">
+  <div class="detail-header">
+    <a href="#t:attrib_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>attrib_entry() ::
+    {Attribute :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), [AttributeValue :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()]}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:beam/0">
+  <div class="detail-header">
+    <a href="#t:beam/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>beam() :: file:filename() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Each of the functions described below accept either the filename (as a string) or a binary containing the BEAM module.</p>
+  </section>
+</section>
+<section class="detail" id="t:chnk_rsn/0">
+  <div class="detail-header">
+    <a href="#t:chnk_rsn/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>chnk_rsn() ::
+    {unknown_chunk, file:filename(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()} |
+    {key_missing_or_invalid,
+     file:filename(),
+     abstract_code | debug_info} |
+    <a href="#t:info_rsn/0">info_rsn</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:chunkdata/0">
+  <div class="detail-header">
+    <a href="#t:chunkdata/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>chunkdata() ::
+    {<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()} |
+    {abstract_code, <a href="#t:abst_code/0">abst_code</a>()} |
+    {debug_info, <a href="#t:debug_info/0">debug_info</a>()} |
+    {attributes, [<a href="#t:attrib_entry/0">attrib_entry</a>()]} |
+    {compile_info, [<a href="#t:compinfo_entry/0">compinfo_entry</a>()]} |
+    {exports, [{<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">arity</a>()}]} |
+    {labeled_exports, [<a href="#t:labeled_entry/0">labeled_entry</a>()]} |
+    {imports, [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">mfa</a>()]} |
+    {indexed_imports,
+     [{<a href="#t:index/0">index</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Function :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">arity</a>()}]} |
+    {locals, [{<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">arity</a>()}]} |
+    {labeled_locals, [<a href="#t:labeled_entry/0">labeled_entry</a>()]} |
+    {atoms, [{<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()}]}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The list of attributes is sorted on <code class="inline">Attribute</code> (in <code class="inline">attrib_entry()</code>) and each attribute name occurs once in the list. The attribute values occur in the same order as in the file. The lists of functions are also sorted.</p>
+  </section>
+</section>
+<section class="detail" id="t:chunkid/0">
+  <div class="detail-header">
+    <a href="#t:chunkid/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>chunkid() :: nonempty_string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>&quot;Attr&quot; | &quot;CInf&quot; | &quot;Dbgi&quot; | &quot;ExpT&quot; | &quot;ImpT&quot; | &quot;LocT&quot; | &quot;AtU8&quot;</p>
+  </section>
+</section>
+<section class="detail" id="t:chunkname/0">
+  <div class="detail-header">
+    <a href="#t:chunkname/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>chunkname() ::
+    abstract_code | debug_info | attributes | compile_info |
+    exports | labeled_exports | imports | indexed_imports |
+    locals | labeled_locals | atoms.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:chunkref/0">
+  <div class="detail-header">
+    <a href="#t:chunkref/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>chunkref() :: <a href="#t:chunkname/0">chunkname</a>() | <a href="#t:chunkid/0">chunkid</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:compinfo_entry/0">
+  <div class="detail-header">
+    <a href="#t:compinfo_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>compinfo_entry() :: {InfoKey :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:dataB/0">
+  <div class="detail-header">
+    <a href="#t:dataB/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>dataB() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:debug_info/0">
+  <div class="detail-header">
+    <a href="#t:debug_info/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>debug_info() ::
+    {DbgiVersion :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), Backend :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Data :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    no_debug_info.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The format stored in the <code class="inline">debug_info</code> chunk. To retrieve particular code representation from the backend, <code class="inline">Backend:debug_info(Format, Module, Data, Opts)</code> must be invoked. <code class="inline">Format</code> is an atom, such as <code class="inline">erlang_v1</code> for the Erlang Abstract Format or <code class="inline">core_v1</code> for Core Erlang. <a href="https://hexdocs.pm/elixir/Module.html"><code class="inline">Module</code></a> is the module represented by the beam file and <code class="inline">Data</code> is the value stored in the debug info chunk. <code class="inline">Opts</code> is any list of values supported by the <code class="inline">Backend</code>. <code class="inline">Backend:debug_info/4</code> must return <code class="inline">{ok, Code}</code> or <code class="inline">{error, Term}</code>.</p>
+<p>Developers must always invoke the <code class="inline">debug_info/4</code> function and never rely on the <code class="inline">Data</code> stored in the <code class="inline">debug_info</code> chunk, as it is opaque and may change at any moment. <code class="inline">no_debug_info</code> means that chunk <code class="inline">&quot;Dbgi&quot;</code> is present, but empty.</p>
+  </section>
+</section>
+<section class="detail" id="t:forms/0">
+  <div class="detail-header">
+    <a href="#t:forms/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>forms() :: [erl_parse:abstract_form() | erl_parse:form_info()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:index/0">
+  <div class="detail-header">
+    <a href="#t:index/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>index() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:info_rsn/0">
+  <div class="detail-header">
+    <a href="#t:info_rsn/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>info_rsn() ::
+    {chunk_too_big,
+     file:filename(),
+     <a href="#t:chunkid/0">chunkid</a>(),
+     ChunkSize :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+     FileSize :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+    {invalid_beam_file,
+     file:filename(),
+     Position :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+    {invalid_chunk, file:filename(), <a href="#t:chunkid/0">chunkid</a>()} |
+    {missing_chunk, file:filename(), <a href="#t:chunkid/0">chunkid</a>()} |
+    {not_a_beam_file, file:filename()} |
+    {file_error, file:filename(), file:posix()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:label/0">
+  <div class="detail-header">
+    <a href="#t:label/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>label() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:labeled_entry/0">
+  <div class="detail-header">
+    <a href="#t:labeled_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>labeled_entry() :: {Function :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">arity</a>(), <a href="#t:label/0">label</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="all_chunks/1">
+  <div class="detail-header">
+    <a href="#all_chunks/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all_chunks/1</h1>
+      <span class="note">(since OTP 18.2)</span>
+      <div class="specs">
+          <pre>all_chunks(<a href="#t:beam/0">beam</a>()) ->
+              {ok, beam_lib, [{<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()}]} |
+              {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Reads chunk data for all chunks.</p>
+  </section>
+</section>
+<section class="detail" id="build_module/1">
+  <div class="detail-header">
+    <a href="#build_module/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">build_module/1</h1>
+      <span class="note">(since OTP 18.2)</span>
+      <div class="specs">
+          <pre>build_module(Chunks) -> {ok, Binary}
+                when
+                    Chunks :: [{<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()}],
+                    Binary :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Builds a BEAM module (as a binary) from a list of chunks.</p>
+  </section>
+</section>
+<section class="detail" id="chunks/2">
+  <div class="detail-header">
+    <a href="#chunks/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunks/2</h1>
+      <div class="specs">
+          <pre>chunks(Beam, ChunkRefs) ->
+          {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), [<a href="#t:chunkdata/0">chunkdata</a>()]}} |
+          {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+          when Beam :: <a href="#t:beam/0">beam</a>(), ChunkRefs :: [<a href="#t:chunkref/0">chunkref</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p>
+  </section>
+</section>
+<section class="detail" id="chunks/3">
+  <div class="detail-header">
+    <a href="#chunks/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunks/3</h1>
+      <div class="specs">
+          <pre>chunks(Beam, ChunkRefs, Options) ->
+          {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), [ChunkResult]}} |
+          {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+          when
+              Beam :: <a href="#t:beam/0">beam</a>(),
+              ChunkRefs :: [<a href="#t:chunkref/0">chunkref</a>()],
+              Options :: [allow_missing_chunks],
+              ChunkResult ::
+                  <a href="#t:chunkdata/0">chunkdata</a>() |
+                  {ChunkRef :: <a href="#t:chunkref/0">chunkref</a>(), missing_chunk}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p>
+<p>By default, if any requested chunk is missing in <a type="anno">Beam</a>, an <code class="inline">error</code> tuple is returned. However, if option <code class="inline">allow_missing_chunks</code> is specified, a result is returned even if chunks are missing. In the result list, any missing chunks are represented as <code class="inline">{ChunkRef,missing_chunk}</code>. Notice however that if chunk <code class="inline">&quot;Atom&quot;</code> is missing, that is considered a fatal error and the return value is an <code class="inline">error</code> tuple.</p>
+  </section>
+</section>
+<section class="detail" id="clear_crypto_key_fun/0">
+  <div class="detail-header">
+    <a href="#clear_crypto_key_fun/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear_crypto_key_fun/0</h1>
+      <div class="specs">
+          <pre>clear_crypto_key_fun() -> undefined | {ok, Result}
+                        when Result :: undefined | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Unregisters the crypto key fun and terminates the process holding it, started by <a href="#crypto_key_fun/1"><code class="inline">crypto_key_fun/1</code></a>.</p>
+<p>Returns either <code class="inline">{ok, undefined}</code> if no crypto key fun is registered, or <code class="inline">{ok, Term}</code>, where <code class="inline">Term</code> is the return value from <code class="inline">CryptoKeyFun(clear)</code>, see <a href="#crypto_key_fun/1"><code class="inline">crypto_key_fun/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="cmp/2">
+  <div class="detail-header">
+    <a href="#cmp/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmp/2</h1>
+      <div class="specs">
+          <pre>cmp(Beam1, Beam2) -> ok | {error, beam_lib, cmp_rsn()}
+       when Beam1 :: <a href="#t:beam/0">beam</a>(), Beam2 :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="cmp_rsn"></li></ul><p>Compares the contents of two BEAM files. If the module names are the same, and all chunks except for chunk <code class="inline">&quot;CInf&quot;</code> (the chunk containing the compilation information that is returned by <code class="inline">Module:module_info(compile)</code>) have the same contents in both files, <code class="inline">ok</code> is returned. Otherwise an error message is returned.</p>
+  </section>
+</section>
+<section class="detail" id="cmp_dirs/2">
+  <div class="detail-header">
+    <a href="#cmp_dirs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmp_dirs/2</h1>
+      <div class="specs">
+          <pre>cmp_dirs(Dir1, Dir2) ->
+            {Only1, Only2, Different} | {error, beam_lib, Reason}
+            when
+                Dir1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                Dir2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                Only1 :: [file:filename()],
+                Only2 :: [file:filename()],
+                Different ::
+                    [{Filename1 :: file:filename(),
+                      Filename2 :: file:filename()}],
+                Reason :: {not_a_directory, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | <a href="#t:info_rsn/0">info_rsn</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Compares the BEAM files in two directories. Only files with extension <code class="inline">&quot;.beam&quot;</code> are compared. BEAM files that exist only in directory <a type="anno">Dir1</a> (<a type="anno">Dir2</a>) are returned in <a type="anno">Only1</a> (<a type="anno">Only2</a>). BEAM files that exist in both directories but are considered different by <a href="#cmp/2"><code class="inline">cmp/2</code></a> are returned as pairs {<a type="anno">Filename1</a>, <a type="anno">Filename2</a>}, where <a type="anno">Filename1</a> (<a type="anno">Filename2</a>) exists in directory <a type="anno">Dir1</a> (<a type="anno">Dir2</a>).</p>
+  </section>
+</section>
+<section class="detail" id="crypto_key_fun/1">
+  <div class="detail-header">
+    <a href="#crypto_key_fun/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crypto_key_fun/1</h1>
+      <div class="specs">
+          <pre>crypto_key_fun(CryptoKeyFun) -> ok | {error, Reason}
+                  when
+                      CryptoKeyFun :: crypto_fun(),
+                      Reason :: badfun | exists | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="crypto_fun"></li><li name="crypto_fun_arg"></li><li name="mode"></li></ul><p>Registers an unary fun that is called if <code class="inline">beam_lib</code> must read an <code class="inline">debug_info</code> chunk that has been encrypted. The fun is held in a process that is started by the function.</p>
+<p>If a fun is already registered when attempting to register a fun, <code class="inline">{error, exists}</code> is returned.</p>
+<p>The fun must handle the following arguments:
+<code type="none">CryptoKeyFun(init) -&gt; ok | {ok, NewCryptoKeyFun} | {error, Term}</code>
+Called when the fun is registered, in the process that holds the fun. Here the crypto key fun can do any necessary initializations. If <code class="inline">{ok, NewCryptoKeyFun}</code> is returned, <code class="inline">NewCryptoKeyFun</code> is registered instead of <code class="inline">CryptoKeyFun</code>. If <code class="inline">{error, Term}</code> is returned, the registration is aborted and <a href="#crypto_key_fun/1"><code class="inline">crypto_key_fun/1</code></a> also returns <code class="inline">{error, Term}</code>.
+<code type="none">CryptoKeyFun({debug_info, Mode, Module, Filename}) -&gt; Key</code>
+Called when the key is needed for module <a href="https://hexdocs.pm/elixir/Module.html"><code class="inline">Module</code></a> in the file named <code class="inline">Filename</code>. <code class="inline">Mode</code> is the type of crypto algorithm; currently, the only possible value is <code class="inline">des3_cbc</code>. The call is to fail (raise an exception) if no key is available.
+<code type="none">CryptoKeyFun(clear) -&gt; term()</code>
+Called before the fun is unregistered. Here any cleaning up can be done. The return value is not important, but is passed back to the caller of <a href="#clear_crypto_key_fun/0"><code class="inline">clear_crypto_key_fun/0</code></a> as part of its return value.</p>
+  </section>
+</section>
+<section class="detail" id="diff_dirs/2">
+  <div class="detail-header">
+    <a href="#diff_dirs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">diff_dirs/2</h1>
+      <div class="specs">
+          <pre>diff_dirs(Dir1, Dir2) -> ok | {error, beam_lib, Reason}
+             when
+                 Dir1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                 Dir2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                 Reason :: {not_a_directory, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | <a href="#t:info_rsn/0">info_rsn</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Compares the BEAM files in two directories as <a href="#cmp_dirs/2"><code class="inline">cmp_dirs/2</code></a>, but the names of files that exist in only one directory or are different are presented on standard output.</p>
+  </section>
+</section>
+<section class="detail" id="format_error/1">
+  <div class="detail-header">
+    <a href="#format_error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_error/1</h1>
+      <div class="specs">
+          <pre>format_error(Reason) -> io_lib:chars() when Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>For a specified error returned by any function in this module, this function returns a descriptive string of the error in English. For file errors, function <code class="inline">file:format_error(Posix)</code> is to be called.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1</h1>
+      <div class="specs">
+          <pre>info(Beam) -> [InfoPair] | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+        when
+            Beam :: <a href="#t:beam/0">beam</a>(),
+            InfoPair ::
+                {file, Filename :: file:filename()} |
+                {binary, Binary :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()} |
+                {module, Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()} |
+                {chunks,
+                 [{ChunkId :: <a href="#t:chunkid/0">chunkid</a>(),
+                   Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+                   Size :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}]}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list containing some information about a BEAM file as tuples <code class="inline">{Item, Info}</code>:</p>
+<dl ><dt >`{file, Filename} | {binary, Binary}`</dt><dd >
+The name (string) of the BEAM file, or the binary from which the information was extracted.
+</dd><dt >`{module, Module}`</dt><dd >
+The name (atom) of the module.
+</dd><dt >`{chunks, [{ChunkId, Pos, Size}]}`</dt><dd >
+For each chunk, the identifier (string) and the position and size of the chunk data, in bytes.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="md5/1">
+  <div class="detail-header">
+    <a href="#md5/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">md5/1</h1>
+      <div class="specs">
+          <pre>md5(Beam) -> {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), MD5}} | {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+       when Beam :: <a href="#t:beam/0">beam</a>(), MD5 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Calculates an MD5 redundancy check for the code of the module (compilation date and other attributes are not included).</p>
+  </section>
+</section>
+<section class="detail" id="strip/1">
+  <div class="detail-header">
+    <a href="#strip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1</h1>
+      <div class="specs">
+          <pre>strip(Beam1) ->
+         {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Beam2}} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+         when Beam1 :: <a href="#t:beam/0">beam</a>(), Beam2 :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks from a BEAM file except those needed by the loader. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed.</p>
+  </section>
+</section>
+<section class="detail" id="strip/2">
+  <div class="detail-header">
+    <a href="#strip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/2</h1>
+      <div class="specs">
+          <pre>strip(Beam1, AdditionalChunks) ->
+         {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Beam2}} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+         when
+             Beam1 :: <a href="#t:beam/0">beam</a>(),
+             AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()],
+             Beam2 :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks from a BEAM file except those needed by the loader or passed in. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed.</p>
+  </section>
+</section>
+<section class="detail" id="strip_files/1">
+  <div class="detail-header">
+    <a href="#strip_files/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_files/1</h1>
+      <div class="specs">
+          <pre>strip_files(Files) ->
+               {ok, [{<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Beam}]} |
+               {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+               when Files :: [<a href="#t:beam/0">beam</a>()], Beam :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks except those needed by the loader from BEAM files. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code class="inline">Files</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_files/2">
+  <div class="detail-header">
+    <a href="#strip_files/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_files/2</h1>
+      <div class="specs">
+          <pre>strip_files(Files, AdditionalChunks) ->
+               {ok, [{<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Beam}]} |
+               {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+               when
+                   Files :: [<a href="#t:beam/0">beam</a>()],
+                   AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()],
+                   Beam :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks except those needed by the loader or passed in from BEAM files. In particular, the debug information (chunk <code class="inline">debug_info</code> and <code class="inline">abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code class="inline">Files</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_release/1">
+  <div class="detail-header">
+    <a href="#strip_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_release/1</h1>
+      <div class="specs">
+          <pre>strip_release(Dir) ->
+                 {ok, [{<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), file:filename()}]} |
+                 {error, beam_lib, Reason}
+                 when
+                     Dir :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                     Reason ::
+                         {not_a_directory, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | <a href="#t:info_rsn/0">info_rsn</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks except those needed by the loader from the BEAM files of a release. <a type="anno">Dir</a> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code class="inline">beam_lib:strip_release(code:root_dir())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_release/2">
+  <div class="detail-header">
+    <a href="#strip_release/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_release/2</h1>
+      <div class="specs">
+          <pre>strip_release(Dir, AdditionalChunks) ->
+                 {ok, [{<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), file:filename()}]} |
+                 {error, beam_lib, Reason}
+                 when
+                     Dir :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | file:filename(),
+                     AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()],
+                     Reason ::
+                         {not_a_directory, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | <a href="#t:info_rsn/0">info_rsn</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes all chunks except those needed by the loader or passed in from the BEAM files of a release. <a type="anno">Dir</a> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code class="inline">beam_lib:strip_release(code:root_dir())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="version/1">
+  <div class="detail-header">
+    <a href="#version/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">version/1</h1>
+      <div class="specs">
+          <pre>version(Beam) ->
+           {ok, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), [Version :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()]}} |
+           {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+           when Beam :: <a href="#t:beam/0">beam</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the module version or versions. A version is defined by module attribute <code class="inline">-vsn(Vsn)</code>. If this attribute is not specified, the version defaults to the checksum of the module. Notice that if version <code class="inline">Vsn</code> is not a list, it is made into one, that is <code class="inline">{ok,{Module,[Vsn]}}</code> is returned. If there are many <code class="inline">-vsn</code> module attributes, the result is the concatenated list of versions.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">beam_lib</span><span class="ss">:version</span><span class="p" data-group-id="4822279949-1">(</span><span class="n">a</span><span class="p" data-group-id="4822279949-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="o">-</span><span class="n">vsn</span><span class="p" data-group-id="4822279949-2">(</span><span class="mi">1</span><span class="p" data-group-id="4822279949-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4822279949-3">{</span><span class="n">ok</span><span class="p">,</span><span class="p" data-group-id="4822279949-4">{</span><span class="n">a</span><span class="p">,</span><span class="p" data-group-id="4822279949-5">[</span><span class="mi">1</span><span class="p" data-group-id="4822279949-5">]</span><span class="p" data-group-id="4822279949-4">}</span><span class="p" data-group-id="4822279949-3">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">beam_lib</span><span class="ss">:version</span><span class="p" data-group-id="4822279949-6">(</span><span class="n">b</span><span class="p" data-group-id="4822279949-6">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="o">-</span><span class="n">vsn</span><span class="p" data-group-id="4822279949-7">(</span><span class="p" data-group-id="4822279949-8">[</span><span class="mi">1</span><span class="p" data-group-id="4822279949-8">]</span><span class="p" data-group-id="4822279949-7">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4822279949-9">{</span><span class="n">ok</span><span class="p">,</span><span class="p" data-group-id="4822279949-10">{</span><span class="n">b</span><span class="p">,</span><span class="p" data-group-id="4822279949-11">[</span><span class="mi">1</span><span class="p" data-group-id="4822279949-11">]</span><span class="p" data-group-id="4822279949-10">}</span><span class="p" data-group-id="4822279949-9">}</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">beam_lib</span><span class="ss">:version</span><span class="p" data-group-id="4822279949-12">(</span><span class="n">c</span><span class="p" data-group-id="4822279949-12">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="o">-</span><span class="n">vsn</span><span class="p" data-group-id="4822279949-13">(</span><span class="p" data-group-id="4822279949-14">[</span><span class="mi">1</span><span class="p" data-group-id="4822279949-14">]</span><span class="p" data-group-id="4822279949-13">)</span><span class="o">.</span><span class="w"> </span><span class="o">-</span><span class="n">vsn</span><span class="p" data-group-id="4822279949-15">(</span><span class="mi">2</span><span class="p" data-group-id="4822279949-15">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4822279949-16">{</span><span class="n">ok</span><span class="p">,</span><span class="p" data-group-id="4822279949-17">{</span><span class="n">c</span><span class="p">,</span><span class="p" data-group-id="4822279949-18">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4822279949-18">]</span><span class="p" data-group-id="4822279949-17">}</span><span class="p" data-group-id="4822279949-16">}</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">beam_lib</span><span class="ss">:version</span><span class="p" data-group-id="4822279949-19">(</span><span class="n">d</span><span class="p" data-group-id="4822279949-19">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="o">-</span><span class="n">vsn</span><span class="w"> </span><span class="n">attribute</span><span class="w">
+</span><span class="p" data-group-id="4822279949-20">{</span><span class="n">ok</span><span class="p">,</span><span class="p" data-group-id="4822279949-21">{</span><span class="n">d</span><span class="p">,</span><span class="p" data-group-id="4822279949-22">[</span><span class="mi">275613208176997377698094100858909383631</span><span class="p" data-group-id="4822279949-22">]</span><span class="p" data-group-id="4822279949-21">}</span><span class="p" data-group-id="4822279949-20">}</span></code></pre>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

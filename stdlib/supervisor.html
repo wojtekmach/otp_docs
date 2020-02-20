@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>supervisor — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+supervisor <small>behaviour</small>      </h1>
+
+
+        <section id="moduledoc">
+<p>This behavior module provides a supervisor, a process that supervises other processes called child processes. A child process can either be another supervisor or a worker process. Worker processes are normally implemented using one of the <code class="inline">gen_event</code>, <code class="inline">gen_server</code>, or <code class="inline">gen_statem</code> behaviors. A supervisor implemented using this module has a standard set of interface functions and include functionality for tracing and error reporting. Supervisors are used to build a hierarchical process structure called a supervision tree, a nice way to structure a fault-tolerant application. For more information, see Supervisor Behaviour in OTP Design Principles.</p>
+<p>A supervisor expects the definition of which child processes to supervise to be specified in a callback module exporting a predefined set of functions.</p>
+<p>Unless otherwise stated, all functions in this module fail if the specified supervisor does not exist or if bad arguments are specified.
+<a id="supervision_princ"></a><h2 id="module-supervision-principles" class="section-heading">
+  <a href="#module-supervision-principles" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Supervision Principles
+</h2>
+
+The supervisor is responsible for starting, stopping, and monitoring its child processes. The basic idea of a supervisor is that it must keep its child processes alive by restarting them when necessary.</p>
+<p>The children of a supervisor are defined as a list of <em >child specifications</em>. When the supervisor is started, the child processes are started in order from left to right according to this list. When the supervisor terminates, it first terminates its child processes in reversed start order, from right to left.
+<a id="sup_flags"></a>
+The supervisor properties are defined by the supervisor flags. The type definition for the supervisor flags is as follows:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">sup_flags</span><span class="p" data-group-id="6909154991-1">(</span><span class="p" data-group-id="6909154991-1">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">#{strategy =&gt; strategy(),         % optional</span><span class="w">
+                </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="n">non_neg_integer</span><span class="p" data-group-id="6909154991-2">(</span><span class="p" data-group-id="6909154991-2">)</span><span class="p">,</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">optional</span><span class="w">
+                </span><span class="n">period</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pos_integer</span><span class="p" data-group-id="6909154991-3">(</span><span class="p" data-group-id="6909154991-3">)</span><span class="err">}</span><span class="w">        </span><span class="p">%</span><span class="w"> </span><span class="n">optional</span></code></pre>
+<p>A supervisor can have one of the following <em >restart strategies</em> specified with the <code class="inline">strategy</code> key in the above map:</p>
+<ul ><li >
+`one_for_one` - If one child process terminates and is to be restarted, only that child process is affected. This is the default restart strategy.
+</li><li >
+`one_for_all` - If one child process terminates and is to be restarted, all other child processes are terminated and then all child processes are restarted.
+</li><li >
+`rest_for_one` - If one child process terminates and is to be restarted, the 'rest' of the child processes (that is, the child processes after the terminated child process in the start order) are terminated. Then the terminated child process and all child processes after it are restarted.
+</li><li >
+`simple_one_for_one` - A simplified `one_for_one` supervisor, where all child processes are dynamically added instances of the same process type, that is, running the same code.
+
+Functions [`delete_child/2`](#delete_child/2) and [`restart_child/2`](#restart_child/2) are invalid for `simple_one_for_one` supervisors and return `{error,simple_one_for_one}` if the specified supervisor uses this restart strategy.
+
+Function [`terminate_child/2`](#terminate_child/2) can be used for children under `simple_one_for_one` supervisors by specifying the child's `pid()` as the second argument. If instead the child specification identifier is used, [`terminate_child/2`](#terminate_child/2) return `{error,simple_one_for_one}`.
+
+As a `simple_one_for_one` supervisor can have many children, it shuts them all down asynchronously. This means that the children do their cleanup in parallel, and therefore the order in which they are stopped is not defined.
+</li></ul>
+To prevent a supervisor from getting into an infinite loop of child process terminations and restarts, a <em >maximum restart intensity</em> is defined using two integer values specified with keys `intensity` and `period` in the above map. Assuming the values `MaxR` for `intensity` and `MaxT` for `period`, then, if more than `MaxR` restarts occur within `MaxT` seconds, the supervisor terminates all child processes and then itself. The termination reason for the supervisor itself in that case will be `shutdown`. `intensity` defaults to `1` and `period` defaults to `5`.
+<a id="child_spec"></a>
+The type definition of a child specification is as follows:
+
+```
+child_spec() = #{id => child_id(),       % mandatory
+                 start => mfargs(),      % mandatory
+                 restart => restart(),   % optional
+                 shutdown => shutdown(), % optional
+                 type => worker(),       % optional
+                 modules => modules()}   % optional
+```
+
+The old tuple format is kept for backwards compatibility, see child_spec(), but the map is preferred.
+<ul ><li >
+`id` is used to identify the child specification internally by the supervisor.
+
+The `id` key is mandatory.
+
+Notice that this identifier on occations has been called "name". As far as possible, the terms "identifier" or "id" are now used but to keep backward compatibility, some occurences of "name" can still be found, for example in error messages.
+</li><li >
+`start` defines the function call used to start the child process. It must be a module-function-arguments tuple `{M,F,A}` used as `apply(M,F,A)`.
+
+The start function <em >must create and link to</em> the child process, and must return `{ok,Child}` or `{ok,Child,Info}`, where `Child` is the pid of the child process and `Info` any term that is ignored by the supervisor.
+
+The start function can also return `ignore` if the child process for some reason cannot be started, in which case the child specification is kept by the supervisor (unless it is a temporary child) but the non-existing child process is ignored.
+
+If something goes wrong, the function can also return an error tuple `{error,Error}`.
+
+Notice that the `start_link` functions of the different behavior modules fulfill the above requirements.
+
+The `start` key is mandatory.
+</li><li >
+`restart` defines when a terminated child process must be restarted. A `permanent` child process is always restarted. A `temporary` child process is never restarted (even when the supervisor's restart strategy is `rest_for_one` or `one_for_all` and a sibling's death causes the temporary process to be terminated). A `transient` child process is restarted only if it terminates abnormally, that is, with another exit reason than `normal`, `shutdown`, or `{shutdown,Term}`.
+
+The `restart` key is optional. If it is not specified, it defaults to `permanent`.
+</li><li >
+`shutdown` defines how a child process must be terminated. `brutal_kill` means that the child process is unconditionally terminated using `exit(Child,kill)`. An integer time-out value means that the supervisor tells the child process to terminate by calling `exit(Child,shutdown)` and then wait for an exit signal with reason `shutdown` back from the child process. If no exit signal is received within the specified number of milliseconds, the child process is unconditionally terminated using `exit(Child,kill)`.
+
+If the child process is another supervisor, the shutdown time must be set to `infinity` to give the subtree ample time to shut down.
+
+
+Setting the shutdown time to anything other than `infinity` for a child of type `supervisor` can cause a race condition where the child in question unlinks its own children, but fails to terminate them before it is killed.
+
+
+It is also allowed to set it to `infinity`, if the child process is a worker.
+
+
+Be careful when setting the shutdown time to `infinity` when the child process is a worker. Because, in this situation, the termination of the supervision tree depends on the child process, it must be implemented in a safe way and its cleanup procedure must always return.
+
+
+Notice that all child processes implemented using the standard OTP behavior modules automatically adhere to the shutdown protocol.
+
+The `shutdown` key is optional. If it is not specified, it defaults to `5000` if the child is of type `worker` and it defaults to `infinity` if the child is of type `supervisor`.
+</li><li >
+`type` specifies if the child process is a supervisor or a worker.
+
+The `type` key is optional. If it is not specified, it defaults to `worker`.
+</li><li >
+`modules` is used by the release handler during code replacement to determine which processes are using a certain module. As a rule of thumb, if the child process is a `supervisor`, `gen_server` or, `gen_statem`, this is to be a list with one element `[Module]`, where [`Module`](https://hexdocs.pm/elixir/Module.html) is the callback module. If the child process is an event manager (`gen_event`) with a dynamic set of callback modules, value `dynamic` must be used. For more information about release handling, see Release Handling in OTP Design Principles.
+
+The `modules` key is optional. If it is not specified, it defaults to `[M]`, where `M` comes from the child's start `{M,F,A}`.
+</li><li >
+Internally, the supervisor also keeps track of the pid `Child` of the child process, or `undefined` if no pid exists.
+</li></ul><h2 id="module-callback-functions" class="section-heading">
+  <a href="#module-callback-functions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Callback Functions
+</h2>
+
+The following function must be exported from a `supervisor` callback module.
+<h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+
+`gen_event(3)`, `gen_statem(3)`, `gen_server(3)`, `sys(3)`        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:child/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:child_id/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Not a <code class="inline">pid()</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:child_spec/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>The tuple format is kept for backward compatibility only. A map is preferred; see more details above.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:mfargs/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Value <code class="inline">undefined</code> for <a type="anno">A</a> (the argument list) is only to be used internally in <code class="inline">supervisor</code>. If the restart type of the child is <code class="inline">temporary</code>, the process is never to be restarted and therefore there is no need to store the real argument list. Value <code class="inline">undefined</code> is then stored instead.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:modules/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:restart/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:shutdown/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:startchild_err/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:startchild_ret/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:startlink_err/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:startlink_ret/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:strategy/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:sup_flags/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>The tuple format is kept for backward compatibility only. A map is preferred; see more details above.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:sup_ref/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:worker/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_childspecs/1">check_childspecs/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Takes a list of child specification as argument and returns <code class="inline">ok</code> if all of them are syntactically correct, otherwise <code class="inline">{error,Error}</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#count_children/1">count_children/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a property list (see <code class="inline">proplists</code>) containing the counts for each of the following elements of the supervisor&#39;s child specifications and managed processes</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_child/2">delete_child/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Tells supervisor <a type="anno">SupRef</a> to delete the child specification identified by <a type="anno">Id</a>. The corresponding child process must not be running. Use <a href="#terminate_child/2"><code class="inline">terminate_child/2</code></a> to terminate it.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_childspec/2">get_childspec/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the child specification map for the child identified by <code class="inline">Id</code> under supervisor <code class="inline">SupRef</code>. The returned map contains all keys, both mandatory and optional.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart_child/2">restart_child/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Tells supervisor <a type="anno">SupRef</a> to restart a child process corresponding to the child specification identified by <a type="anno">Id</a>. The child specification must exist, and the corresponding child process must not be running.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_child/2">start_child/2</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="startchild_err"></li><li name="startchild_ret"></li></ul><p>Dynamically adds a child specification to supervisor <a type="anno">SupRef</a>, which starts the corresponding child process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/2">start_link/2 start_link/3</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="startlink_err"></li><li name="startlink_ret"></li><li name="sup_name"></li></ul><p>Creates a supervisor process as part of a supervision tree. For example, the function ensures that the supervisor is linked to the calling process (its supervisor).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/3">start_link/2 start_link/3</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="startlink_err"></li><li name="startlink_ret"></li><li name="sup_name"></li></ul><p>Creates a supervisor process as part of a supervision tree. For example, the function ensures that the supervisor is linked to the calling process (its supervisor).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#terminate_child/2">terminate_child/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Tells supervisor <a type="anno">SupRef</a> to terminate the specified child.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_children/1">which_children/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a newly created list with information about all child specifications and child processes belonging to supervisor <a type="anno">SupRef</a>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:child/0">
+  <div class="detail-header">
+    <a href="#t:child/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>child() :: undefined | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:child_id/0">
+  <div class="detail-header">
+    <a href="#t:child_id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>child_id() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Not a <code class="inline">pid()</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:child_spec/0">
+  <div class="detail-header">
+    <a href="#t:child_spec/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>child_spec() ::
+    #{id := <a href="#t:child_id/0">child_id</a>(),
+      start := <a href="#t:mfargs/0">mfargs</a>(),
+      restart => <a href="#t:restart/0">restart</a>(),
+      shutdown => <a href="#t:shutdown/0">shutdown</a>(),
+      type => <a href="#t:worker/0">worker</a>(),
+      modules => <a href="#t:modules/0">modules</a>()} |
+    {Id :: <a href="#t:child_id/0">child_id</a>(),
+     StartFunc :: <a href="#t:mfargs/0">mfargs</a>(),
+     Restart :: <a href="#t:restart/0">restart</a>(),
+     Shutdown :: <a href="#t:shutdown/0">shutdown</a>(),
+     Type :: <a href="#t:worker/0">worker</a>(),
+     Modules :: <a href="#t:modules/0">modules</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The tuple format is kept for backward compatibility only. A map is preferred; see more details above.</p>
+  </section>
+</section>
+<section class="detail" id="t:mfargs/0">
+  <div class="detail-header">
+    <a href="#t:mfargs/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>mfargs() ::
+    {M :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), F :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), A :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()] | undefined}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Value <code class="inline">undefined</code> for <a type="anno">A</a> (the argument list) is only to be used internally in <code class="inline">supervisor</code>. If the restart type of the child is <code class="inline">temporary</code>, the process is never to be restarted and therefore there is no need to store the real argument list. Value <code class="inline">undefined</code> is then stored instead.</p>
+  </section>
+</section>
+<section class="detail" id="t:modules/0">
+  <div class="detail-header">
+    <a href="#t:modules/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>modules() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()] | dynamic.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:restart/0">
+  <div class="detail-header">
+    <a href="#t:restart/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>restart() :: permanent | transient | temporary.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:shutdown/0">
+  <div class="detail-header">
+    <a href="#t:shutdown/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>shutdown() :: brutal_kill | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:startchild_err/0">
+  <div class="detail-header">
+    <a href="#t:startchild_err/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>startchild_err() ::
+    already_present | {already_started, Child :: <a href="#t:child/0">child</a>()} | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:startchild_ret/0">
+  <div class="detail-header">
+    <a href="#t:startchild_ret/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>startchild_ret() ::
+    {ok, Child :: <a href="#t:child/0">child</a>()} |
+    {ok, Child :: <a href="#t:child/0">child</a>(), Info :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {error, <a href="#t:startchild_err/0">startchild_err</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:startlink_err/0">
+  <div class="detail-header">
+    <a href="#t:startlink_err/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>startlink_err() ::
+    {already_started, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()} | {shutdown, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:startlink_ret/0">
+  <div class="detail-header">
+    <a href="#t:startlink_ret/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>startlink_ret() :: {ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()} | ignore | {error, <a href="#t:startlink_err/0">startlink_err</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:strategy/0">
+  <div class="detail-header">
+    <a href="#t:strategy/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>strategy() ::
+    one_for_all | one_for_one | rest_for_one | simple_one_for_one.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:sup_flags/0">
+  <div class="detail-header">
+    <a href="#t:sup_flags/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>sup_flags() ::
+    #{strategy => <a href="#t:strategy/0">strategy</a>(),
+      intensity => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+      period => <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()} |
+    {RestartStrategy :: <a href="#t:strategy/0">strategy</a>(),
+     Intensity :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+     Period :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The tuple format is kept for backward compatibility only. A map is preferred; see more details above.</p>
+  </section>
+</section>
+<section class="detail" id="t:sup_ref/0">
+  <div class="detail-header">
+    <a href="#t:sup_ref/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>sup_ref() ::
+    (Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) |
+    {Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), Node :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">node</a>()} |
+    {global, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()} |
+    {via, Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()} |
+    <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:worker/0">
+  <div class="detail-header">
+    <a href="#t:worker/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>worker() :: worker | supervisor.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="check_childspecs/1">
+  <div class="detail-header">
+    <a href="#check_childspecs/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_childspecs/1</h1>
+      <div class="specs">
+          <pre>check_childspecs(ChildSpecs) -> Result
+                    when
+                        ChildSpecs :: [<a href="#t:child_spec/0">child_spec</a>()],
+                        Result :: ok | {error, Error :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Takes a list of child specification as argument and returns <code class="inline">ok</code> if all of them are syntactically correct, otherwise <code class="inline">{error,Error}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="count_children/1">
+  <div class="detail-header">
+    <a href="#count_children/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">count_children/1</h1>
+      <span class="note">(since OTP R13B04)</span>
+      <div class="specs">
+          <pre>count_children(SupRef) -> PropListOfCounts
+                  when
+                      SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                      PropListOfCounts :: [Count],
+                      Count ::
+                          {specs,
+                           ChildSpecCount :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                          {active,
+                           ActiveProcessCount :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                          {supervisors,
+                           ChildSupervisorCount ::
+                               <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                          {workers,
+                           ChildWorkerCount :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a property list (see <code class="inline">proplists</code>) containing the counts for each of the following elements of the supervisor&#39;s child specifications and managed processes:</p>
+<ul ><li >
+`specs` - The total count of children, dead or alive.
+</li><li >
+`active` - The count of all actively running child processes managed by this supervisor. For a `simple_one_for_one` supervisors, no check is done to ensure that each child process is still alive, although the result provided here is likely to be very accurate unless the supervisor is heavily overloaded.
+</li><li >
+`supervisors` - The count of all children marked as `child_type = supervisor` in the specification list, regardless if the child process is still alive.
+</li><li >
+`workers` - The count of all children marked as `child_type = worker` in the specification list, regardless if the child process is still alive.
+</li></ul>
+For a description of <a type="anno">SupRef</a>, see [`start_child/2`](#start_child/2).  </section>
+</section>
+<section class="detail" id="delete_child/2">
+  <div class="detail-header">
+    <a href="#delete_child/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_child/2</h1>
+      <div class="specs">
+          <pre>delete_child(SupRef, Id) -> Result
+                when
+                    SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                    Id :: <a href="#t:child_id/0">child_id</a>(),
+                    Result :: ok | {error, Error},
+                    Error ::
+                        running | restarting | not_found |
+                        simple_one_for_one.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Tells supervisor <a type="anno">SupRef</a> to delete the child specification identified by <a type="anno">Id</a>. The corresponding child process must not be running. Use <a href="#terminate_child/2"><code class="inline">terminate_child/2</code></a> to terminate it.</p>
+<p>For a description of <a type="anno">SupRef</a>, see <a href="#start_child/2"><code class="inline">start_child/2</code></a>.</p>
+<p>If successful, the function returns <code class="inline">ok</code>. If the child specification identified by <a type="anno">Id</a> exists but the corresponding child process is running or is about to be restarted, the function returns <code class="inline">{error,running}</code> or <code class="inline">{error,restarting}</code>, respectively. If the child specification identified by <a type="anno">Id</a> does not exist, the function returns <code class="inline">{error,not_found}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="get_childspec/2">
+  <div class="detail-header">
+    <a href="#get_childspec/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_childspec/2</h1>
+      <span class="note">(since OTP 18.0)</span>
+      <div class="specs">
+          <pre>get_childspec(SupRef, Id) -> Result
+                 when
+                     SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                     Id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | <a href="#t:child_id/0">child_id</a>(),
+                     Result :: {ok, <a href="#t:child_spec/0">child_spec</a>()} | {error, Error},
+                     Error :: not_found.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the child specification map for the child identified by <code class="inline">Id</code> under supervisor <code class="inline">SupRef</code>. The returned map contains all keys, both mandatory and optional.</p>
+<p>For a description of <a type="anno">SupRef</a>, see <a href="#start_child/2"><code class="inline">start_child/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="restart_child/2">
+  <div class="detail-header">
+    <a href="#restart_child/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart_child/2</h1>
+      <div class="specs">
+          <pre>restart_child(SupRef, Id) -> Result
+                 when
+                     SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                     Id :: <a href="#t:child_id/0">child_id</a>(),
+                     Result ::
+                         {ok, Child :: <a href="#t:child/0">child</a>()} |
+                         {ok, Child :: <a href="#t:child/0">child</a>(), Info :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                         {error, Error},
+                     Error ::
+                         running | restarting | not_found |
+                         simple_one_for_one |
+                         <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Tells supervisor <a type="anno">SupRef</a> to restart a child process corresponding to the child specification identified by <a type="anno">Id</a>. The child specification must exist, and the corresponding child process must not be running.</p>
+<p>Notice that for temporary children, the child specification is automatically deleted when the child terminates; thus, it is not possible to restart such children.</p>
+<p>For a description of <a type="anno">SupRef</a>, see <a href="#start_child/2"><code class="inline">start_child/2</code></a>.</p>
+<p>If the child specification identified by <a type="anno">Id</a> does not exist, the function returns <code class="inline">{error,not_found}</code>. If the child specification exists but the corresponding process is already running, the function returns <code class="inline">{error,running}</code>.</p>
+<p>If the child process start function returns <code class="inline">{ok,Child}</code> or <code class="inline">{ok,Child,Info}</code>, the pid is added to the supervisor and the function returns the same value.</p>
+<p>If the child process start function returns <code class="inline">ignore</code>, the pid remains set to <code class="inline">undefined</code> and the function returns <code class="inline">{ok,undefined}</code>.</p>
+<p>If the child process start function returns an error tuple or an erroneous value, or if it fails, the function returns <code class="inline">{error,Error}</code>, where <a type="anno">Error</a> is a term containing information about the error.</p>
+  </section>
+</section>
+<section class="detail" id="start_child/2">
+  <div class="detail-header">
+    <a href="#start_child/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_child/2</h1>
+      <div class="specs">
+          <pre>start_child(SupRef, ChildSpec) -> <a href="#t:startchild_ret/0">startchild_ret</a>()
+               when
+                   SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                   ChildSpec :: <a href="#t:child_spec/0">child_spec</a>() | (List :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()]).
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="startchild_err"></li><li name="startchild_ret"></li></ul><p>Dynamically adds a child specification to supervisor <a type="anno">SupRef</a>, which starts the corresponding child process.</p>
+<p><a id="SupRef"></a><a type="anno">SupRef</a> can be any of the following:</p>
+<ul ><li >The pid</li><li >`Name`, if the supervisor is locally registered</li><li >`{Name,Node}`, if the supervisor is locally registered at another node</li><li >`{global,Name}`, if the supervisor is globally registered</li><li >`{via,Module,Name}`, if the supervisor is registered through an alternative process registry</li></ul><p><a type="anno">ChildSpec</a> must be a valid child specification (unless the supervisor is a <code class="inline">simple_one_for_one</code> supervisor; see below). The child process is started by using the start function as defined in the child specification.</p>
+<p>For a <code class="inline">simple_one_for_one</code> supervisor, the child specification defined in <code class="inline">Module:init/1</code> is used, and <a type="anno">ChildSpec</a> must instead be an arbitrary list of terms <a type="anno">List</a>. The child process is then started by appending <a type="anno">List</a> to the existing start function arguments, that is, by calling <code class="inline">apply(M, F, A++List)</code>, where <code class="inline">{M,F,A}</code> is the start function defined in the child specification.</p>
+<ul ><li >
+If there already exists a child specification with the specified identifier, <a type="anno">ChildSpec</a> is discarded, and the function returns `{error,already_present}` or `{error,{already_started,Child}}`, depending on if the corresponding child process is running or not.
+</li><li >
+If the child process start function returns `{ok,Child}` or `{ok,Child,Info}`, the child specification and pid are added to the supervisor and the function returns the same value.
+</li><li >
+If the child process start function returns `ignore`, the child specification is added to the supervisor (unless the supervisor is a `simple_one_for_one` supervisor, see below), the pid is set to `undefined`, and the function returns `{ok,undefined}`.
+</li></ul>
+For a `simple_one_for_one` supervisor, when a child process start function returns `ignore`, the functions returns `{ok,undefined}` and no child is added to the supervisor.
+
+If the child process start function returns an error tuple or an erroneous value, or if it fails, the child specification is discarded, and the function returns `{error,Error}`, where `Error` is a term containing information about the error and child specification.  </section>
+</section>
+<section class="detail" id="start_link/2">
+  <div class="detail-header">
+    <a href="#start_link/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/2 start_link/3</h1>
+      <div class="specs">
+          <pre>start_link(Module, Args) -> <a href="#t:startlink_ret/0">startlink_ret</a>()
+              when Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="startlink_err"></li><li name="startlink_ret"></li><li name="sup_name"></li></ul><p>Creates a supervisor process as part of a supervision tree. For example, the function ensures that the supervisor is linked to the calling process (its supervisor).</p>
+<p>The created supervisor process calls <code class="inline">Module:init/1</code> to find out about restart strategy, maximum restart intensity, and child processes. To ensure a synchronized startup procedure, <a href="#start_link/2"><code class="inline">start_link/2,3</code></a> does not return until <code class="inline">Module:init/1</code> has returned and all child processes have been started.</p>
+<ul ><li >
+If `SupName={local,Name}`, the supervisor is registered locally as `Name` using `register/2`.
+</li><li >
+If `SupName={global,Name}`, the supervisor is registered globally as `Name` using `global:register_name/2`.
+</li><li >
+If `SupName={via,Module,Name}`, the supervisor is registered as `Name` using the registry represented by [`Module`](https://hexdocs.pm/elixir/Module.html). The [`Module`](https://hexdocs.pm/elixir/Module.html) callback must export the functions `register_name/2`, `unregister_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which must behave like the corresponding functions in `global`. Thus, `{via,global,Name}` is a valid reference.
+</li></ul>
+If no name is provided, the supervisor is not registered.
+
+<a type="anno">Module</a> is the name of the callback module.
+
+<a type="anno">Args</a> is any term that is passed as the argument to `Module:init/1`.
+<ul ><li >
+If the supervisor and its child processes are successfully created (that is, if all child process start functions return `{ok,Child}`, `{ok,Child,Info}`, or `ignore`), the function returns `{ok,Pid}`, where `Pid` is the pid of the supervisor.
+</li><li >
+If there already exists a process with the specified <a type="anno">SupName</a>, the function returns `{error,{already_started,Pid}}`, where `Pid` is the pid of that process.
+</li><li >
+If `Module:init/1` returns `ignore`, this function returns `ignore` as well, and the supervisor terminates with reason `normal`.
+</li><li >
+If `Module:init/1` fails or returns an incorrect value, this function returns `{error,Term}`, where `Term` is a term with information about the error, and the supervisor terminates with reason `Term`.
+</li><li >
+If any child process start function fails or returns an error tuple or an erroneous value, the supervisor first terminates all already started child processes with reason `shutdown` and then terminate itself and returns `{error, {shutdown, Reason}}`.
+</li></ul>  </section>
+</section>
+<section class="detail" id="start_link/3">
+  <div class="detail-header">
+    <a href="#start_link/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/2 start_link/3</h1>
+      <div class="specs">
+          <pre>start_link(SupName, Module, Args) -> <a href="#t:startlink_ret/0">startlink_ret</a>()
+              when
+                  SupName :: sup_name(),
+                  Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+                  Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="startlink_err"></li><li name="startlink_ret"></li><li name="sup_name"></li></ul><p>Creates a supervisor process as part of a supervision tree. For example, the function ensures that the supervisor is linked to the calling process (its supervisor).</p>
+<p>The created supervisor process calls <code class="inline">Module:init/1</code> to find out about restart strategy, maximum restart intensity, and child processes. To ensure a synchronized startup procedure, <a href="#start_link/2"><code class="inline">start_link/2,3</code></a> does not return until <code class="inline">Module:init/1</code> has returned and all child processes have been started.</p>
+<ul ><li >
+If `SupName={local,Name}`, the supervisor is registered locally as `Name` using `register/2`.
+</li><li >
+If `SupName={global,Name}`, the supervisor is registered globally as `Name` using `global:register_name/2`.
+</li><li >
+If `SupName={via,Module,Name}`, the supervisor is registered as `Name` using the registry represented by [`Module`](https://hexdocs.pm/elixir/Module.html). The [`Module`](https://hexdocs.pm/elixir/Module.html) callback must export the functions `register_name/2`, `unregister_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which must behave like the corresponding functions in `global`. Thus, `{via,global,Name}` is a valid reference.
+</li></ul>
+If no name is provided, the supervisor is not registered.
+
+<a type="anno">Module</a> is the name of the callback module.
+
+<a type="anno">Args</a> is any term that is passed as the argument to `Module:init/1`.
+<ul ><li >
+If the supervisor and its child processes are successfully created (that is, if all child process start functions return `{ok,Child}`, `{ok,Child,Info}`, or `ignore`), the function returns `{ok,Pid}`, where `Pid` is the pid of the supervisor.
+</li><li >
+If there already exists a process with the specified <a type="anno">SupName</a>, the function returns `{error,{already_started,Pid}}`, where `Pid` is the pid of that process.
+</li><li >
+If `Module:init/1` returns `ignore`, this function returns `ignore` as well, and the supervisor terminates with reason `normal`.
+</li><li >
+If `Module:init/1` fails or returns an incorrect value, this function returns `{error,Term}`, where `Term` is a term with information about the error, and the supervisor terminates with reason `Term`.
+</li><li >
+If any child process start function fails or returns an error tuple or an erroneous value, the supervisor first terminates all already started child processes with reason `shutdown` and then terminate itself and returns `{error, {shutdown, Reason}}`.
+</li></ul>  </section>
+</section>
+<section class="detail" id="terminate_child/2">
+  <div class="detail-header">
+    <a href="#terminate_child/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">terminate_child/2</h1>
+      <div class="specs">
+          <pre>terminate_child(SupRef, Id) -> Result
+                   when
+                       SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                       Id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | <a href="#t:child_id/0">child_id</a>(),
+                       Result :: ok | {error, Error},
+                       Error :: not_found | simple_one_for_one.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Tells supervisor <a type="anno">SupRef</a> to terminate the specified child.</p>
+<p>If the supervisor is not <code class="inline">simple_one_for_one</code>, <a type="anno">Id</a> must be the child specification identifier. The process, if any, is terminated and, unless it is a temporary child, the child specification is kept by the supervisor. The child process can later be restarted by the supervisor. The child process can also be restarted explicitly by calling <a href="#restart_child/2"><code class="inline">restart_child/2</code></a>. Use <a href="#delete_child/2"><code class="inline">delete_child/2</code></a> to remove the child specification.</p>
+<p>If the child is temporary, the child specification is deleted as soon as the process terminates. This means that <a href="#delete_child/2"><code class="inline">delete_child/2</code></a> has no meaning and <a href="#restart_child/2"><code class="inline">restart_child/2</code></a> cannot be used for these children.</p>
+<p>If the supervisor is <code class="inline">simple_one_for_one</code>, <a type="anno">Id</a> must be the <code class="inline">pid()</code> of the child process. If the specified process is alive, but is not a child of the specified supervisor, the function returns <code class="inline">{error,not_found}</code>. If the child specification identifier is specified instead of a <code class="inline">pid()</code>, the function returns <code class="inline">{error,simple_one_for_one}</code>.</p>
+<p>If successful, the function returns <code class="inline">ok</code>. If there is no child specification with the specified <a type="anno">Id</a>, the function returns <code class="inline">{error,not_found}</code>.</p>
+<p>For a description of <a type="anno">SupRef</a>, see <a href="#start_child/2"><code class="inline">start_child/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="which_children/1">
+  <div class="detail-header">
+    <a href="#which_children/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_children/1</h1>
+      <div class="specs">
+          <pre>which_children(SupRef) -> [{Id, Child, Type, Modules}]
+                  when
+                      SupRef :: <a href="#t:sup_ref/0">sup_ref</a>(),
+                      Id :: <a href="#t:child_id/0">child_id</a>() | undefined,
+                      Child :: <a href="#t:child/0">child</a>() | restarting,
+                      Type :: <a href="#t:worker/0">worker</a>(),
+                      Modules :: <a href="#t:modules/0">modules</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a newly created list with information about all child specifications and child processes belonging to supervisor <a type="anno">SupRef</a>.</p>
+<p>Notice that calling this function when supervising many childrens under low memory conditions can cause an out of memory exception.</p>
+<p>For a description of <a type="anno">SupRef</a>, see <a href="#start_child/2"><code class="inline">start_child/2</code></a>.</p>
+<p>The following information is given for each child specification/process:</p>
+<ul ><li >
+<a type="anno">Id</a> - As defined in the child specification or `undefined` for a `simple_one_for_one` supervisor.
+</li><li >
+<a type="anno">Child</a> - The pid of the corresponding child process, the atom `restarting` if the process is about to be restarted, or `undefined` if there is no such process.
+</li><li >
+<a type="anno">Type</a> - As defined in the child specification.
+</li><li >
+<a type="anno">Modules</a> - As defined in the child specification.
+</li></ul>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

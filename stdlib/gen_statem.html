@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>gen_statem — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+gen_statem      </h1>
+
+
+        <section id="moduledoc">
+<p><code class="inline">gen_statem</code> provides a generic state machine behaviour that for new code replaces its predecessor <code class="inline">gen_fsm</code> since Erlang/OTP 20.0. The <code class="inline">gen_fsm</code> behaviour remains in OTP &quot;as is&quot;.</p>
+<p>If you are new to <code class="inline">gen_statem</code> and want an overview of concepts and operation the section <code class="inline">gen_statem</code> Behaviour located in the User&#39;s Guide OTP Design Principles is recommended to read before this reference manual, possibly after the Description section you are reading here.</p>
+<p>This reference manual contains type descriptions generated from types in the <code class="inline">gen_statem</code> source code, so they are correct. However, the generated descriptions also reflect the type hierarchy, which sometimes makes it hard to get a good overview. If so, see the section <code class="inline">gen_statem</code> Behaviour in the OTP Design Principles User&#39;s Guide.</p>
+<ul ><li >This behavior appeared in Erlang/OTP 19.0.</li><li >In OTP 19.1 a backwards incompatible change of the return tuple from `Module:init/1` was made and the mandatory callback function `Module:callback_mode/0` was introduced.</li><li >In OTP 20.0 generic time-outs were added.</li><li >In OTP 22.1 time-out content `update` and explicit time-out `cancel` were added.</li><li >In OTP 22.3 the possibility to change the callback module with action `change_callback_module` was added.</li></ul><p><code class="inline">gen_statem</code> has got the same features that <code class="inline">gen_fsm</code> had and adds some really useful:</p>
+<ul ><li >Co-located state code</li><li >Arbitrary term state</li><li >Event postponing</li><li >Self-generated events</li><li >State time-out</li><li >Multiple generic named time-outs</li><li >Absolute time-out time</li><li >Automatic state enter calls</li><li >Reply from other state than the request, `sys` traceable</li><li >Multiple `sys` traceable replies</li><li >Changing the callback module</li></ul><p>Two <em >callback modes</em> are supported:</p>
+<ul ><li >
+One for finite-state machines (`gen_fsm` like), which requires the state to be an atom and uses that state as the name of the current callback function.
+</li><li >
+One that allows the state to be any term and that uses one callback function for all states.
+</li></ul>
+The callback model(s) for `gen_statem` differs from the one for `gen_fsm`, but it is still fairly easy to rewrite from `gen_fsm` to `gen_statem`.
+
+A generic state machine server process (`gen_statem`) implemented using this module has a standard set of interface functions and includes functionality for tracing and error reporting. It also fits into an OTP supervision tree. For more information, see OTP Design Principles.
+
+A `gen_statem` assumes all specific parts to be located in a callback module exporting a predefined set of functions. The relationship between the behavior functions and the callback functions is as follows:
+
+```
+gen_statem module            Callback module
+-----------------            ---------------
+gen_statem:start
+gen_statem:start_link -----> Module:init/1
+
+Server start or code change
+                      -----> Module:callback_mode/0
+
+gen_statem:stop       -----> Module:terminate/3
+
+gen_statem:call
+gen_statem:cast
+gen_statem:send_request
+erlang:send
+erlang:'!'            -----> Module:StateName/3
+                             Module:handle_event/4
+
+-                     -----> Module:terminate/3
+
+-                     -----> Module:code_change/4
+```
+
+Events are of different types, so the callback functions can know the origin of an event and how to respond.
+
+If a callback function fails or returns a bad value, the `gen_statem` terminates, unless otherwise stated. However, an exception of class `throw` is not regarded as an error but as a valid return from all callback functions.
+<a id="state callback"></a>
+The <em >state callback</em> for a specific state in a `gen_statem` is the callback function that is called for all events in this state. It is selected depending on which <em >callback mode</em> that the callback module defines with the callback function `Module:callback_mode/0`.
+
+When the <em >callback mode</em> is `state_functions`, the state must be an atom and is used as the <em >state callback</em> name; see `Module:StateName/3`. This co-locates all code for a specific state in one function as the `gen_statem` engine branches depending on state name. Note the fact that the callback function `Module:terminate/3` makes the state name `terminate` unusable in this mode.
+
+When the <em >callback mode</em> is `handle_event_function`, the state can be any term and the <em >state callback</em> name is `Module:handle_event/4`. This makes it easy to branch depending on state or event as you desire. Be careful about which events you handle in which states so that you do not accidentally postpone an event forever creating an infinite busy loop.
+
+When `gen_statem` receives a process message it is converted into an event and the <em >state callback</em> is called with the event as two arguments: type and content. When the <em >state callback</em> has processed the event it returns to `gen_statem` which does a <em >state transition</em>. If this <em >state transition</em> is to a different state, that is: `NextState =/= State`, it is a <em >state change</em>.
+
+The <em >state callback</em> may return <em >transition actions</em> for `gen_statem` to execute during the <em >state transition</em>, for example to reply to a `gen_statem:call/2,3`.
+
+One of the possible <em >transition actions</em> is to postpone the current event. Then it is not retried in the current state. The `gen_statem` engine keeps a queue of events divided into the postponed events and the events still to process. After a <em >state change</em> the queue restarts with the postponed events.
+
+The `gen_statem` event queue model is sufficient to emulate the normal process message queue with selective receive. Postponing an event corresponds to not matching it in a receive statement, and changing states corresponds to entering a new receive statement.
+
+The <em >state callback</em> can insert events using the <em >transition actions</em> `next_event` and such an event is inserted in the event queue as the next to call the <em >state callback</em> with. That is, as if it is the oldest incoming event. A dedicated `event_type()` `internal` can be used for such events making them impossible to mistake for external events.
+
+Inserting an event replaces the trick of calling your own state handling functions that you often would have to resort to in, for example, `gen_fsm` to force processing an inserted event before others.
+
+The `gen_statem` engine can automatically make a specialized call to the <em >state callback</em> whenever a new state is entered; see `state_enter()`. This is for writing code common to all state entries. Another way to do it is to explicitly insert an event at the <em >state transition</em>, and/or to use a dedicated <em >state transition</em> function, but that is something you will have to remember at every <em >state transition</em> to the state(s) that need it.
+
+
+If you in `gen_statem`, for example, postpone an event in one state and then call another <em >state callback</em> of yours, you have not done a <em >state change</em> and hence the postponed event is not retried, which is logical but can be confusing.
+
+
+For the details of a <em >state transition</em>, see type `transition_option()`.
+
+A `gen_statem` handles system messages as described in `sys`. The `sys` module can be used for debugging a `gen_statem`.
+
+Notice that a `gen_statem` does not trap exit signals automatically, this must be explicitly initiated in the callback module (by calling `process_flag(trap_exit, true)`.
+
+Unless otherwise stated, all functions in this module fail if the specified `gen_statem` does not exist or if bad arguments are specified.
+
+The `gen_statem` process can go into hibernation; see `proc_lib:hibernate/3`. It is done when a <em >state callback</em> or `Module:init/1` specifies `hibernate` in the returned `Actions` list. This feature can be useful to reclaim process heap memory while the server is expected to be idle for a long time. However, use this feature with care, as hibernation can be too costly to use after every event; see `erlang:hibernate/3`.
+
+There is also a server start option `{hibernate_after, Timeout}` for [`start/3,4`](#start/3), [`start_link/3,4`](#start_link/3) or [`enter_loop/4,5,6`](#enter_loop/4), that may be used to automatically hibernate the server.
+<h2 id="module-example" class="section-heading">
+  <a href="#module-example" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Example
+</h2>
+
+The following example shows a simple pushbutton model for a toggling pushbutton implemented with <em >callback mode</em> `state_functions`. You can push the button and it replies if it went on or off, and you can ask for a count of how many times it has been pushed to switch on.
+
+The following is the complete callback module file `pushbutton.erl`:
+<code type="erl">-module(pushbutton).
+-behaviour(gen_statem).
+
+-export([start/0,push/0,get_count/0,stop/0]).
+-export([terminate/3,code_change/4,init/1,callback_mode/0]).
+-export([on/3,off/3]).
+
+name() -> pushbutton_statem. % The registered server name
+
+%% API.  This example uses a registered name name()
+%% and does not link to the caller.
+start() ->
+    gen_statem:start({local,name()}, ?MODULE, [], []).
+push() ->
+    gen_statem:call(name(), push).
+get_count() ->
+    gen_statem:call(name(), get_count).
+stop() ->
+    gen_statem:stop(name()).
+
+%% Mandatory callback functions
+terminate(_Reason, _State, _Data) ->
+    void.
+code_change(_Vsn, State, Data, _Extra) ->
+    {ok,State,Data}.
+init([]) ->
+    %% Set the initial state + data.  Data is used only as a counter.
+    State = off, Data = 0,
+    {ok,State,Data}.
+callback_mode() -> state_functions.
+
+%%% state callback(s)
+
+off({call,From}, push, Data) ->
+    %% Go to 'on', increment count and reply
+    %% that the resulting status is 'on'
+    {next_state,on,Data+1,[{reply,From,on}]};
+off(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+
+on({call,From}, push, Data) ->
+    %% Go to 'off' and reply that the resulting status is 'off'
+    {next_state,off,Data,[{reply,From,off}]};
+on(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+
+%% Handle events common to all states
+handle_event({call,From}, get_count, Data) ->
+    %% Reply with the current count
+    {keep_state,Data,[{reply,From,Data}]};
+handle_event(_, _, Data) ->
+    %% Ignore all other events
+    {keep_state,Data}.
+    </code>
+The following is a shell session when running it:
+
+```
+1> pushbutton:start().
+{ok,<0.36.0>}
+2> pushbutton:get_count().
+0
+3> pushbutton:push().
+on
+4> pushbutton:get_count().
+1
+5> pushbutton:push().
+off
+6> pushbutton:get_count().
+1
+7> pushbutton:stop().
+ok
+8> pushbutton:push().
+** exception exit: {noproc,{gen_statem,call,[pushbutton_statem,push,infinity]}}
+     in function  gen:do_for_proc/2 (gen.erl, line 261)
+     in call from gen_statem:call/3 (gen_statem.erl, line 386)
+    
+```
+
+To compare styles, here follows the same example using <em >callback mode</em> `handle_event_function`, or rather the code to replace after function `init/1` of the `pushbutton.erl` example file above:
+<code type="erl">callback_mode() -> handle_event_function.
+
+%%% state callback(s)
+
+handle_event({call,From}, push, off, Data) ->
+    %% Go to 'on', increment count and reply
+    %% that the resulting status is 'on'
+    {next_state,on,Data+1,[{reply,From,on}]};
+handle_event({call,From}, push, on, Data) ->
+    %% Go to 'off' and reply that the resulting status is 'off'
+    {next_state,off,Data,[{reply,From,off}]};
+%%
+%% Event handling common to all states
+handle_event({call,From}, get_count, State, Data) ->
+    %% Reply with the current count
+    {next_state,State,Data,[{reply,From,Data}]};
+handle_event(_, _, State, Data) ->
+    %% Ignore all other events
+    {next_state,State,Data}.
+    </code><h2 id="module-callback-functions" class="section-heading">
+  <a href="#module-callback-functions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Callback Functions
+</h2>
+
+The following functions are to be exported from a `gen_statem` callback module.
+<h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+
+`gen_event(3)`, `gen_fsm(3)`, `gen_server(3)`, `proc_lib(3)`, `supervisor(3)`, `sys(3)`.        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em> when it is called with an event, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:callback_mode/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>The <em >callback mode</em> is selected with the return value from <code class="inline">Module:callback_mode/0</code></p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:callback_mode_result/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>This is the return type from <code class="inline">Module:callback_mode/0</code> and selects <em >callback mode</em> and whether to do <em >state enter calls</em>, or not.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:data/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A term in which the state machine implementation is to store any server data it needs. The difference between this and the <code class="inline">state()</code> itself is that a change in this data does not cause postponed events to be retried. Hence, if a change in this data would change the set of events that are handled, then that data item is to be made a part of the state.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:enter_action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:enter_loop_opt/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Options that can be used when starting a <code class="inline">gen_statem</code> server through, <code class="inline">enter_loop/4-6</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:event_handler_result/1">event_handler_result(var)</a>
+  </div>
+    <div class="summary-synopsis"><p><a type="anno">StateType</a> is <code class="inline">state_name()</code> if <em >callback mode</em> is <code class="inline">state_functions</code>, or <code class="inline">state()</code> if <em >callback mode</em> is <code class="inline">handle_event_function</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:event_timeout/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">timeout</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">timeout</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:event_type/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>There are 3 categories of events: external, timeout, and <code class="inline">internal</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:external_event_type/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>External events are of 3 types: <code class="inline">{call,From}</code>, <code class="inline">cast</code>, or <code class="inline">info</code>. Type <code class="inline">call</code> originates from the API functions <a href="#call/2"><code class="inline">call/2</code></a> and <a href="#send_request/2"><code class="inline">send_request/2</code></a>. For calls, the event contains whom to reply to. Type <code class="inline">cast</code> originates from the API function <a href="#cast/2"><code class="inline">cast/2</code></a>. Type <code class="inline">info</code> originates from regular process messages sent to the <code class="inline">gen_statem</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:from/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Destination to use when replying through, for example, the <code class="inline">action()</code> <code class="inline">{reply,From,Reply}</code> to a process that has called the <code class="inline">gen_statem</code> server using <a href="#call/2"><code class="inline">call/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:generic_timeout/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">{timeout,Name}</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">{timeout,Name}</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:hibernate/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>If <code class="inline">true</code>, hibernates the <code class="inline">gen_statem</code> by calling <code class="inline">proc_lib:hibernate/3</code> before going into <code class="inline">receive</code> to wait for a new external event.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:init_result/1">init_result(var)</a>
+  </div>
+    <div class="summary-synopsis"><p>For a succesful initialization, <a type="anno">State</a> is the initial <code class="inline">state()</code> and <a type="anno">Data</a> the initial server <code class="inline">data()</code> of the <code class="inline">gen_statem</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:postpone/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>If <code class="inline">true</code>, postpones the current event and retries it after a <em >state change</em> (<code class="inline">NextState =/= State</code>).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:reply_action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>This <em >transition action</em> can be invoked by returning it from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving it to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:request_id/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A request handle, see <a href="#send_request/2"><code class="inline">send_request/2</code></a> for details.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:server_name/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Name specification to use when starting a <code class="inline">gen_statem</code> server. See <a href="#start_link/3"><code class="inline">start_link/3</code></a> and <code class="inline">server_ref()</code> below.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:server_ref/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Server specification to use when addressing a <code class="inline">gen_statem</code> server. See <a href="#call/2"><code class="inline">call/2</code></a> and <code class="inline">server_name()</code> above.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:start_opt/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Options that can be used when starting a <code class="inline">gen_statem</code> server through, for example, <a href="#start_link/3"><code class="inline">start_link/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:start_ret/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Return value from the start functions, for example, <a href="#start_link/3"><code class="inline">start_link/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>If the <em >callback mode</em> is <code class="inline">handle_event_function</code>, the state can be any term. After a <em >state change</em> (<code class="inline">NextState =/= State</code>), all postponed events are retried.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state_callback_result/1">state_callback_result(var)</a>
+  </div>
+    <div class="summary-synopsis"><p><a type="anno">ActionType</a> is <code class="inline">enter_action()</code> if the state callback was called with a <em >state enter call</em> and <code class="inline">action()</code> if the state callback was called with an event.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state_enter/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Whether the state machine should use <em >state enter calls</em> or not is selected when starting the <code class="inline">gen_statem</code> and after code change using the return value from <code class="inline">Module:callback_mode/0</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state_enter_result/1">state_enter_result(var)</a>
+  </div>
+    <div class="summary-synopsis"><p><a type="anno">State</a> is the current state and it cannot be changed since the state callback was called with a <em >state enter call</em>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state_name/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>If the <em >callback mode</em> is <code class="inline">state_functions</code>, the state must be an atom. After a <em >state change</em> (<code class="inline">NextState =/= State</code>), all postponed events are retried. Note that the state <code class="inline">terminate</code> is not possible to use since it would collide with the optional callback function <code class="inline">Module:terminate/3</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:state_timeout/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">state_timeout</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">state_timeout</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timeout_action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timeout_cancel_action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>This is a shorter and clearer form of timeout_action() with <code class="inline">Time = infinity</code> which cancels a time-out.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timeout_event_type/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>There are 3 types of time-out events that the state machine can generate for itself with the corresponding timeout_action()s.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timeout_option/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>If <code class="inline">Abs</code> is <code class="inline">true</code> an absolute timer is started, and if it is <code class="inline">false</code> a relative, which is the default. See <code class="inline">erlang:start_timer/4</code> for details.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timeout_update_action/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Updates a time-out with a new <code class="inline">EventContent</code>. See timeout_action() for how to start a time-out.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:transition_option/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Transition options can be set by actions and modify the <em >state transition</em>. The <em >state transition</em> takes place when the <em >state callback</em> has processed an event and returns. Here are the sequence of steps for a <em >state transition</em></p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/2">call/2 call/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Makes a synchronous call to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> by sending a request and waiting until its reply arrives. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">{call,From}</code> and event content <a type="anno">Request</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/3">call/2 call/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Makes a synchronous call to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> by sending a request and waiting until its reply arrives. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">{call,From}</code> and event content <a type="anno">Request</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cast/2">cast/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Sends an asynchronous event to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> and returns <code class="inline">ok</code> immediately, ignoring if the destination node or <code class="inline">gen_statem</code> does not exist. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">cast</code> and event content <a type="anno">Msg</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_response/2">check_response/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function is used to check if a previously received message, for example by <code class="inline">receive</code> or <code class="inline">handle_info/2</code>, is a result of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a>. If <code class="inline">Msg</code> is a reply to the handle <code class="inline">RequestId</code> the result of the request is returned in <code class="inline">Reply</code>. Otherwise returns <code class="inline">no_reply</code> and no cleanup is done, and thus the function shall be invoked repeatedly until a reply is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enter_loop/4">enter_loop/4</a>
+  </div>
+    <div class="summary-synopsis"><p>The same as <a href="#enter_loop/6"><code class="inline">enter_loop/6</code></a> with <code class="inline">Actions = []</code> except that no <code class="inline">server_name()</code> must have been registered. This creates an anonymous server.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enter_loop/5">enter_loop/5</a>
+  </div>
+    <div class="summary-synopsis"><p>If <a type="anno">Server_or_Actions</a> is a <code class="inline">list()</code>, the same as <a href="#enter_loop/6"><code class="inline">enter_loop/6</code></a> except that no <code class="inline">server_name()</code> must have been registered and <code class="inline">Actions = Server_or_Actions</code>. This creates an anonymous server.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enter_loop/6">enter_loop/6</a>
+  </div>
+    <div class="summary-synopsis"><p>Makes the calling process become a <code class="inline">gen_statem</code>. Does not return, instead the calling process enters the <code class="inline">gen_statem</code> receive loop and becomes a <code class="inline">gen_statem</code> server. The process <em >must</em> have been started using one of the start functions in <code class="inline">proc_lib</code>. The user is responsible for any initialization of the process, including registering a name for it.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reply/1">reply/1 reply/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function can be used by a <code class="inline">gen_statem</code> to explicitly send a reply to a process that waits in <a href="#call/2"><code class="inline">call/2</code></a> when the reply cannot be defined in the return value of a <em >state callback</em>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reply/2">reply/1 reply/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function can be used by a <code class="inline">gen_statem</code> to explicitly send a reply to a process that waits in <a href="#call/2"><code class="inline">call/2</code></a> when the reply cannot be defined in the return value of a <em >state callback</em>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_request/2">send_request/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Sends a request to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> and returns a handle <a type="anno">RequestId</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/3">start/3 start/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a standalone <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives). As it does not get linked to the calling process, this start function cannot be used by a supervisor to start a child.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/4">start/3 start/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a standalone <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives). As it does not get linked to the calling process, this start function cannot be used by a supervisor to start a child.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/3">start_link/3 start_link/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives) that is linked to the calling process. This is essential when the <code class="inline">gen_statem</code> must be part of a supervision tree so it gets linked to its supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/4">start_link/3 start_link/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives) that is linked to the calling process. This is essential when the <code class="inline">gen_statem</code> must be part of a supervision tree so it gets linked to its supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+  </div>
+    <div class="summary-synopsis"><p>The same as <code class="inline">stop(ServerRef, normal, infinity)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/3">stop/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Orders the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> to exit with the specified <a type="anno">Reason</a> and waits for it to terminate. The <code class="inline">gen_statem</code> calls <code class="inline">Module:terminate/3</code> before exiting.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#wait_response/1">wait_response/1 wait_response/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function is used to wait for a reply of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a> from the <code class="inline">gen_statem</code> process. This function must be called from the same process from which <a href="#send_request/2"><code class="inline">send_request/2</code></a> was made.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#wait_response/2">wait_response/1 wait_response/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function is used to wait for a reply of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a> from the <code class="inline">gen_statem</code> process. This function must be called from the same process from which <a href="#send_request/2"><code class="inline">send_request/2</code></a> was made.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:action/0">
+  <div class="detail-header">
+    <a href="#t:action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>action() ::
+    postpone |
+    {postpone, Postpone :: <a href="#t:postpone/0">postpone</a>()} |
+    {next_event,
+     EventType :: <a href="#t:event_type/0">event_type</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {change_callback_module, NewModule :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()} |
+    <a href="#t:enter_action/0">enter_action</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em> when it is called with an event, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p>
+<p>Actions are executed in the containing list order.</p>
+<p>Actions that set transition options override any previous of the same type, so the last in the containing list wins. For example, the last <code class="inline">postpone()</code> overrides any previous <code class="inline">postpone()</code> in the list.</p>
+<dl ><dt >`postpone`</dt><dd >
+Sets the `transition_option()` `postpone()` for this <em >state transition</em>. This action is ignored when returned from `Module:init/1` or given to [`enter_loop/5,6`](#enter_loop/5), as there is no event to postpone in those cases.
+</dd><dt >`next_event`</dt><dd >
+This action does not set any `transition_option()` but instead stores the specified <a type="anno">EventType</a> and <a type="anno">EventContent</a> for insertion after all actions have been executed.
+
+The stored events are inserted in the queue as the next to process before any already queued events. The order of these stored events is preserved, so the first `next_event` in the containing list becomes the first to process.
+
+An event of type `internal` is to be used when you want to reliably distinguish an event inserted this way from any external event.
+</dd><dt >`change_callback_module`</dt><dd >
+Changes the callback module to <a type="anno">NewModule</a> which will be used when calling all subsequent state callbacks.
+
+The `gen_statem` engine will find out the <em >callback mode</em> of <a type="anno">NewModule</a> by calling `NewModule:callback_mode/0` before the next state callback.
+
+Changing the callback module does not affect the <em >state transition</em> in any way, it only changes which module that handles the events. Be aware that all relevant callback functions in <a type="anno">NewModule</a> such as the state callback, `NewModule:code_change/4`, `NewModule:format_status/2` and `NewModule:terminate/3` must be able to handle the state and data from the old module.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:callback_mode/0">
+  <div class="detail-header">
+    <a href="#t:callback_mode/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>callback_mode() :: state_functions | handle_event_function.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The <em >callback mode</em> is selected with the return value from <code class="inline">Module:callback_mode/0</code>:</p>
+<dl ><dt >`state_functions`</dt><dd >
+The state must be of type `state_name()` and one callback function per state, that is, `Module:StateName/3`, is used.
+</dd><dt >`handle_event_function`</dt><dd >
+The state can be any term and the callback function `Module:handle_event/4` is used for all states.
+</dd></dl>
+The function `Module:callback_mode/0` is called when starting the `gen_statem`, after code change and after changing the callback module with action `change_callback_module`. The result is cached for subsequent calls to state callbacks.  </section>
+</section>
+<section class="detail" id="t:callback_mode_result/0">
+  <div class="detail-header">
+    <a href="#t:callback_mode_result/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>callback_mode_result() ::
+    <a href="#t:callback_mode/0">callback_mode</a>() | [<a href="#t:callback_mode/0">callback_mode</a>() | <a href="#t:state_enter/0">state_enter</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This is the return type from <code class="inline">Module:callback_mode/0</code> and selects <em >callback mode</em> and whether to do <em >state enter calls</em>, or not.</p>
+  </section>
+</section>
+<section class="detail" id="t:data/0">
+  <div class="detail-header">
+    <a href="#t:data/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>data() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A term in which the state machine implementation is to store any server data it needs. The difference between this and the <code class="inline">state()</code> itself is that a change in this data does not cause postponed events to be retried. Hence, if a change in this data would change the set of events that are handled, then that data item is to be made a part of the state.</p>
+  </section>
+</section>
+<section class="detail" id="t:enter_action/0">
+  <div class="detail-header">
+    <a href="#t:enter_action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>enter_action() ::
+    hibernate |
+    {hibernate, Hibernate :: <a href="#t:hibernate/0">hibernate</a>()} |
+    <a href="#t:timeout_action/0">timeout_action</a>() |
+    <a href="#t:reply_action/0">reply_action</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p>
+<p>Actions are executed in the containing list order.</p>
+<p>Actions that set transition options override any previous of the same type, so the last in the containing list wins. For example, the last <code class="inline">event_timeout()</code> overrides any previous <code class="inline">event_timeout()</code> in the list.</p>
+<dl ><dt >`hibernate`</dt><dd >
+Sets the `transition_option()` `hibernate()` for this <em >state transition</em>.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:enter_loop_opt/0">
+  <div class="detail-header">
+    <a href="#t:enter_loop_opt/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>enter_loop_opt() ::
+    {hibernate_after, HibernateAfterTimeout :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()} |
+    {debug, Dbgs :: [sys:debug_option()]}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Options that can be used when starting a <code class="inline">gen_statem</code> server through, <code class="inline">enter_loop/4-6</code>.</p>
+<dl ><dt >`hibernate_after`</dt><dd >
+`HibernateAfterTimeout` specifies that the `gen_statem` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</dd><dt >`debug`</dt><dd >
+For every entry in <a type="anno">Dbgs</a>, the corresponding function in `sys` is called.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:event_handler_result/1">
+  <div class="detail-header">
+    <a href="#t:event_handler_result/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">event_handler_result(var)</h1>
+      <div class="specs">
+          <pre>event_handler_result(StateType) ::
+    {next_state, NextState :: StateType, NewData :: <a href="#t:data/0">data</a>()} |
+    {next_state,
+     NextState :: StateType,
+     NewData :: <a href="#t:data/0">data</a>(),
+     Actions :: [<a href="#t:action/0">action</a>()] | <a href="#t:action/0">action</a>()} |
+    <a href="#t:state_callback_result/1">state_callback_result</a>(<a href="#t:action/0">action</a>()).
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a type="anno">StateType</a> is <code class="inline">state_name()</code> if <em >callback mode</em> is <code class="inline">state_functions</code>, or <code class="inline">state()</code> if <em >callback mode</em> is <code class="inline">handle_event_function</code>.</p>
+<dl ><dt >`next_state`</dt><dd >
+The `gen_statem` does a <em >state transition</em> to <a type="anno">NextState</a> (which can be the same as the current state), sets <a type="anno">NewData</a>, and executes all <a type="anno">Actions</a>. If `NextState =/= CurrentState` the <em >state transition</em> is a <em >state change</em>.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:event_timeout/0">
+  <div class="detail-header">
+    <a href="#t:event_timeout/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>event_timeout() :: Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">timeout</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">timeout</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p>
+<p>Any event that arrives cancels this time-out. Note that a retried or inserted event counts as arrived. So does a state time-out zero event, if it was generated before this time-out is requested.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is <code class="inline">infinity</code>, no timer is started, as it never would expire anyway.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is relative and <code class="inline">0</code> no timer is actually started, instead the the time-out event is enqueued to ensure that it gets processed before any not yet received external event, but after already queued events.</p>
+<p>Note that it is not possible nor needed to cancel this time-out, as it is cancelled automatically by any other event.</p>
+  </section>
+</section>
+<section class="detail" id="t:event_type/0">
+  <div class="detail-header">
+    <a href="#t:event_type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>event_type() ::
+    <a href="#t:external_event_type/0">external_event_type</a>() | <a href="#t:timeout_event_type/0">timeout_event_type</a>() | internal.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>There are 3 categories of events: external, timeout, and <code class="inline">internal</code>.</p>
+<p><code class="inline">internal</code> events can only be generated by the state machine itself through the <em >transition action</em> <code class="inline">next_event</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:external_event_type/0">
+  <div class="detail-header">
+    <a href="#t:external_event_type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>external_event_type() :: {call, From :: <a href="#t:from/0">from</a>()} | cast | info.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>External events are of 3 types: <code class="inline">{call,From}</code>, <code class="inline">cast</code>, or <code class="inline">info</code>. Type <code class="inline">call</code> originates from the API functions <a href="#call/2"><code class="inline">call/2</code></a> and <a href="#send_request/2"><code class="inline">send_request/2</code></a>. For calls, the event contains whom to reply to. Type <code class="inline">cast</code> originates from the API function <a href="#cast/2"><code class="inline">cast/2</code></a>. Type <code class="inline">info</code> originates from regular process messages sent to the <code class="inline">gen_statem</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:from/0">
+  <div class="detail-header">
+    <a href="#t:from/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>from() :: {To :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(), Tag :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Destination to use when replying through, for example, the <code class="inline">action()</code> <code class="inline">{reply,From,Reply}</code> to a process that has called the <code class="inline">gen_statem</code> server using <a href="#call/2"><code class="inline">call/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:generic_timeout/0">
+  <div class="detail-header">
+    <a href="#t:generic_timeout/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>generic_timeout() :: Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">{timeout,Name}</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">{timeout,Name}</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is <code class="inline">infinity</code>, no timer is started, as it never would expire anyway.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is relative and <code class="inline">0</code> no timer is actually started, instead the the time-out event is enqueued to ensure that it gets processed before any not yet received external event.</p>
+<p>Setting a timer with the same <code class="inline">Name</code> while it is running will restart it with the new time-out value. Therefore it is possible to cancel a specific time-out by setting it to <code class="inline">infinity</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:hibernate/0">
+  <div class="detail-header">
+    <a href="#t:hibernate/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>hibernate() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If <code class="inline">true</code>, hibernates the <code class="inline">gen_statem</code> by calling <code class="inline">proc_lib:hibernate/3</code> before going into <code class="inline">receive</code> to wait for a new external event.</p>
+<p>If there are enqueued events to process when hibrnation is requested, this is optimized by not hibernating but instead calling <code class="inline">erlang:garbage_collect/0</code> to simulate that the <code class="inline">gen_statem</code> entered hibernation and immediately got awakened by an enqueued event.</p>
+  </section>
+</section>
+<section class="detail" id="t:init_result/1">
+  <div class="detail-header">
+    <a href="#t:init_result/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">init_result(var)</h1>
+      <div class="specs">
+          <pre>init_result(StateType) ::
+    {ok, State :: StateType, Data :: <a href="#t:data/0">data</a>()} |
+    {ok,
+     State :: StateType,
+     Data :: <a href="#t:data/0">data</a>(),
+     Actions :: [<a href="#t:action/0">action</a>()] | <a href="#t:action/0">action</a>()} |
+    ignore |
+    {stop, Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>For a succesful initialization, <a type="anno">State</a> is the initial <code class="inline">state()</code> and <a type="anno">Data</a> the initial server <code class="inline">data()</code> of the <code class="inline">gen_statem</code>.</p>
+<p>The <code class="inline">Actions</code> are executed when entering the first state just as for a <em >state callback</em>, except that the action <code class="inline">postpone</code> is forced to <code class="inline">false</code> since there is no event to postpone.</p>
+<p>For an unsuccesful initialization, <code class="inline">{stop,Reason}</code> or <code class="inline">ignore</code> should be used; see <a href="#start_link/3"><code class="inline">start_link/3,4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:postpone/0">
+  <div class="detail-header">
+    <a href="#t:postpone/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>postpone() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If <code class="inline">true</code>, postpones the current event and retries it after a <em >state change</em> (<code class="inline">NextState =/= State</code>).</p>
+  </section>
+</section>
+<section class="detail" id="t:reply_action/0">
+  <div class="detail-header">
+    <a href="#t:reply_action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>reply_action() :: {reply, From :: <a href="#t:from/0">from</a>(), Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This <em >transition action</em> can be invoked by returning it from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving it to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p>
+<p>It does not set any <code class="inline">transition_option()</code> but instead replies to a caller waiting for a reply in <a href="#call/2"><code class="inline">call/2</code></a>. <a type="anno">From</a> must be the term from argument <code class="inline">{call,From}</code> in a call to a <em >state callback</em>.</p>
+<p>Note that using this action from <code class="inline">Module:init/1</code> or <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a> would be weird on the border of witchcraft since there has been no earlier call to a <em >state callback</em> in this server.</p>
+  </section>
+</section>
+<section class="detail" id="t:request_id/0">
+  <div class="detail-header">
+    <a href="#t:request_id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>request_id() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A request handle, see <a href="#send_request/2"><code class="inline">send_request/2</code></a> for details.</p>
+  </section>
+</section>
+<section class="detail" id="t:server_name/0">
+  <div class="detail-header">
+    <a href="#t:server_name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>server_name() ::
+    {global, GlobalName :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {via, RegMod :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {local, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Name specification to use when starting a <code class="inline">gen_statem</code> server. See <a href="#start_link/3"><code class="inline">start_link/3</code></a> and <code class="inline">server_ref()</code> below.</p>
+  </section>
+</section>
+<section class="detail" id="t:server_ref/0">
+  <div class="detail-header">
+    <a href="#t:server_ref/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>server_ref() ::
+    <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() |
+    (LocalName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) |
+    {Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), Node :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()} |
+    {global, GlobalName :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {via, RegMod :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), ViaName :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Server specification to use when addressing a <code class="inline">gen_statem</code> server. See <a href="#call/2"><code class="inline">call/2</code></a> and <code class="inline">server_name()</code> above.</p>
+<p>It can be:</p>
+<dl ><dt >`pid() | LocalName`</dt><dd >
+The `gen_statem` is locally registered.
+</dd><dt >`{Name,Node}`</dt><dd >
+The `gen_statem` is locally registered on another node.
+</dd><dt >`{global,GlobalName}`</dt><dd >
+The `gen_statem` is globally registered in `global`.
+</dd><dt >`{via,RegMod,ViaName}`</dt><dd >
+The `gen_statem` is registered in an alternative process registry. The registry callback module `RegMod` is to export functions `register_name/2`, `unregister_name/1`, `whereis_name/1`, and [`send/2`](https://hexdocs.pm/elixir/Kernel.html#send/2), which are to behave like the corresponding functions in `global`. Thus, `{via,global,GlobalName}` is the same as `{global,GlobalName}`.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:start_opt/0">
+  <div class="detail-header">
+    <a href="#t:start_opt/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>start_opt() ::
+    {timeout, Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()} |
+    {spawn_opt, [proc_lib:spawn_option()]} |
+    <a href="#t:enter_loop_opt/0">enter_loop_opt</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Options that can be used when starting a <code class="inline">gen_statem</code> server through, for example, <a href="#start_link/3"><code class="inline">start_link/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:start_ret/0">
+  <div class="detail-header">
+    <a href="#t:start_ret/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>start_ret() :: {ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()} | ignore | {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Return value from the start functions, for example, <a href="#start_link/3"><code class="inline">start_link/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:state/0">
+  <div class="detail-header">
+    <a href="#t:state/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>state() :: <a href="#t:state_name/0">state_name</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If the <em >callback mode</em> is <code class="inline">handle_event_function</code>, the state can be any term. After a <em >state change</em> (<code class="inline">NextState =/= State</code>), all postponed events are retried.</p>
+  </section>
+</section>
+<section class="detail" id="t:state_callback_result/1">
+  <div class="detail-header">
+    <a href="#t:state_callback_result/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">state_callback_result(var)</h1>
+      <div class="specs">
+          <pre>state_callback_result(ActionType) ::
+    {keep_state, NewData :: <a href="#t:data/0">data</a>()} |
+    {keep_state,
+     NewData :: <a href="#t:data/0">data</a>(),
+     Actions :: [ActionType] | ActionType} |
+    keep_state_and_data |
+    {keep_state_and_data, Actions :: [ActionType] | ActionType} |
+    {repeat_state, NewData :: <a href="#t:data/0">data</a>()} |
+    {repeat_state,
+     NewData :: <a href="#t:data/0">data</a>(),
+     Actions :: [ActionType] | ActionType} |
+    repeat_state_and_data |
+    {repeat_state_and_data, Actions :: [ActionType] | ActionType} |
+    stop |
+    {stop, Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {stop, Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), NewData :: <a href="#t:data/0">data</a>()} |
+    {stop_and_reply,
+     Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Replies :: [<a href="#t:reply_action/0">reply_action</a>()] | <a href="#t:reply_action/0">reply_action</a>()} |
+    {stop_and_reply,
+     Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Replies :: [<a href="#t:reply_action/0">reply_action</a>()] | <a href="#t:reply_action/0">reply_action</a>(),
+     NewData :: <a href="#t:data/0">data</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a type="anno">ActionType</a> is <code class="inline">enter_action()</code> if the state callback was called with a <em >state enter call</em> and <code class="inline">action()</code> if the state callback was called with an event.</p>
+<dl ><dt >`keep_state`</dt><dd >
+The same as `{next_state,CurrentState,NewData,Actions}`.
+</dd><dt >`keep_state_and_data`</dt><dd >
+The same as `{keep_state,CurrentData,Actions}`.
+</dd><dt >`repeat_state`</dt><dd >
+If the `gen_statem` runs with <em >state enter calls</em>, the <em >state enter call</em> is repeated, see type `transition_option()`, other than that `repeat_state` is the same as `keep_state`.
+</dd><dt >`repeat_state_and_data`</dt><dd >
+The same as `{repeat_state,CurrentData,Actions}`.
+</dd><dt >`stop`</dt><dd >
+Terminates the `gen_statem` by calling `Module:terminate/3` with `Reason` and <a type="anno">NewData</a>, if specified.
+</dd><dt >`stop_and_reply`</dt><dd >
+Sends all <a type="anno">Replies</a>, then terminates the `gen_statem` by calling `Module:terminate/3` with `Reason` and <a type="anno">NewData</a>, if specified.
+</dd></dl>
+All these terms are tuples or atoms and this property will hold in any future version of `gen_statem`.  </section>
+</section>
+<section class="detail" id="t:state_enter/0">
+  <div class="detail-header">
+    <a href="#t:state_enter/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>state_enter() :: state_enter.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Whether the state machine should use <em >state enter calls</em> or not is selected when starting the <code class="inline">gen_statem</code> and after code change using the return value from <code class="inline">Module:callback_mode/0</code>.</p>
+<p>If <code class="inline">Module:callback_mode/0</code> returns a list containing <code class="inline">state_enter</code>, the <code class="inline">gen_statem</code> engine will, at every <em >state change</em>, call the state callback with arguments <code class="inline">(enter, OldState, Data)</code> or <code class="inline">(enter, OldState, State, Data)</code>, depending on the <em >callback mode</em>. This may look like an event but is really a call performed after the previous <em >state callback</em> returned and before any event is delivered to the new <em >state callback</em>. See <code class="inline">Module:StateName/3</code> and <code class="inline">Module:handle_event/4</code>. Such a call can be repeated by returning a <code class="inline">repeat_state</code> or <code class="inline">repeat_state_and_data</code> tuple from the <em >state callback</em>.</p>
+<p>If <code class="inline">Module:callback_mode/0</code> does not return such a list, no <em >state enter calls</em> are done.</p>
+<p>If <code class="inline">Module:code_change/4</code> should transform the state, it is regarded as a state rename and not a <em >state change</em>, which will not cause a <em >state enter call</em>.</p>
+<p>Note that a <em >state enter call</em> <em >will</em> be done right before entering the initial state even though this actually is not a <em >state change</em>. In this case <code class="inline">OldState =:= State</code>, which cannot happen for a subsequent state change, but will happen when repeating the <em >state enter call</em>.</p>
+  </section>
+</section>
+<section class="detail" id="t:state_enter_result/1">
+  <div class="detail-header">
+    <a href="#t:state_enter_result/1" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">state_enter_result(var)</h1>
+      <div class="specs">
+          <pre>state_enter_result(State) ::
+    {next_state, State, NewData :: <a href="#t:data/0">data</a>()} |
+    {next_state, State,
+     NewData :: <a href="#t:data/0">data</a>(),
+     Actions :: [<a href="#t:enter_action/0">enter_action</a>()] | <a href="#t:enter_action/0">enter_action</a>()} |
+    <a href="#t:state_callback_result/1">state_callback_result</a>(<a href="#t:enter_action/0">enter_action</a>()).
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a type="anno">State</a> is the current state and it cannot be changed since the state callback was called with a <em >state enter call</em>.</p>
+<dl ><dt >`next_state`</dt><dd >
+The `gen_statem` does a state transition to <a type="anno">State</a>, which has to be the current state, sets <a type="anno">NewData</a>, and executes all <a type="anno">Actions</a>.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:state_name/0">
+  <div class="detail-header">
+    <a href="#t:state_name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>state_name() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If the <em >callback mode</em> is <code class="inline">state_functions</code>, the state must be an atom. After a <em >state change</em> (<code class="inline">NextState =/= State</code>), all postponed events are retried. Note that the state <code class="inline">terminate</code> is not possible to use since it would collide with the optional callback function <code class="inline">Module:terminate/3</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:state_timeout/0">
+  <div class="detail-header">
+    <a href="#t:state_timeout/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>state_timeout() :: Time :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Starts a timer set by <code class="inline">enter_action()</code> <code class="inline">state_timeout</code>. When the timer expires an event of <code class="inline">event_type()</code> <code class="inline">state_timeout</code> will be generated. See <code class="inline">erlang:start_timer/4</code> for how <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> and <code class="inline">Options</code> are interpreted. Future <code class="inline">erlang:start_timer/4</code> <code class="inline">Options</code> will not necessarily be supported.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is <code class="inline">infinity</code>, no timer is started, as it never would expire anyway.</p>
+<p>If <a href="https://hexdocs.pm/elixir/Time.html"><code class="inline">Time</code></a> is relative and <code class="inline">0</code> no timer is actually started, instead the the time-out event is enqueued to ensure that it gets processed before any not yet received external event.</p>
+<p>Setting this timer while it is running will restart it with the new time-out value. Therefore it is possible to cancel this time-out by setting it to <code class="inline">infinity</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:timeout_action/0">
+  <div class="detail-header">
+    <a href="#t:timeout_action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>timeout_action() ::
+    (Time :: <a href="#t:event_timeout/0">event_timeout</a>()) |
+    {timeout, Time :: <a href="#t:event_timeout/0">event_timeout</a>(), EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {timeout,
+     Time :: <a href="#t:event_timeout/0">event_timeout</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Options :: <a href="#t:timeout_option/0">timeout_option</a>() | [<a href="#t:timeout_option/0">timeout_option</a>()]} |
+    {{timeout, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+     Time :: <a href="#t:generic_timeout/0">generic_timeout</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {{timeout, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+     Time :: <a href="#t:generic_timeout/0">generic_timeout</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Options :: <a href="#t:timeout_option/0">timeout_option</a>() | [<a href="#t:timeout_option/0">timeout_option</a>()]} |
+    {state_timeout,
+     Time :: <a href="#t:state_timeout/0">state_timeout</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {state_timeout,
+     Time :: <a href="#t:state_timeout/0">state_timeout</a>(),
+     EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Options :: <a href="#t:timeout_option/0">timeout_option</a>() | [<a href="#t:timeout_option/0">timeout_option</a>()]} |
+    <a href="#t:timeout_cancel_action/0">timeout_cancel_action</a>() |
+    <a href="#t:timeout_update_action/0">timeout_update_action</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>These <em >transition actions</em> can be invoked by returning them from the <em >state callback</em>, from <code class="inline">Module:init/1</code> or by giving them to <a href="#enter_loop/5"><code class="inline">enter_loop/5,6</code></a>.</p>
+<p>These time-out actions sets time-out transition options.</p>
+<dl ><dt >[`Time`](https://hexdocs.pm/elixir/Time.html)</dt><dd >
+Short for `{timeout,Time,Time}`, that is, the time-out message is the time-out time. This form exists to make the <em >state callback</em> return value `{next_state,NextState,NewData,Time}` allowed like for `gen_fsm`.
+</dd><dt >`timeout`</dt><dd >
+Sets the `transition_option()` `event_timeout()` to <a type="anno">Time</a> with <a type="anno">EventContent</a> and time-out options <a type="anno">Options</a>.
+</dd><dt >`{timeout,Name}`</dt><dd >
+Sets the `transition_option()` `generic_timeout()` to <a type="anno">Time</a> for <a type="anno">Name</a> with <a type="anno">EventContent</a> and time-out options <a type="anno">Options</a>.
+</dd><dt >`state_timeout`</dt><dd >
+Sets the `transition_option()` `state_timeout()` to <a type="anno">Time</a> with <a type="anno">EventContent</a> and time-out options <a type="anno">Options</a>.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="t:timeout_cancel_action/0">
+  <div class="detail-header">
+    <a href="#t:timeout_cancel_action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>timeout_cancel_action() ::
+    {timeout, cancel} |
+    {{timeout, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}, cancel} |
+    {state_timeout, cancel}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This is a shorter and clearer form of timeout_action() with <code class="inline">Time = infinity</code> which cancels a time-out.</p>
+  </section>
+</section>
+<section class="detail" id="t:timeout_event_type/0">
+  <div class="detail-header">
+    <a href="#t:timeout_event_type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>timeout_event_type() ::
+    timeout | {timeout, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | state_timeout.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>There are 3 types of time-out events that the state machine can generate for itself with the corresponding timeout_action()s.</p>
+  </section>
+</section>
+<section class="detail" id="t:timeout_option/0">
+  <div class="detail-header">
+    <a href="#t:timeout_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>timeout_option() :: {abs, Abs :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If <code class="inline">Abs</code> is <code class="inline">true</code> an absolute timer is started, and if it is <code class="inline">false</code> a relative, which is the default. See <code class="inline">erlang:start_timer/4</code> for details.</p>
+  </section>
+</section>
+<section class="detail" id="t:timeout_update_action/0">
+  <div class="detail-header">
+    <a href="#t:timeout_update_action/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>timeout_update_action() ::
+    {timeout, update, EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {{timeout, Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}, update, EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+    {state_timeout, update, EventContent :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Updates a time-out with a new <code class="inline">EventContent</code>. See timeout_action() for how to start a time-out.</p>
+<p>If no time-out of the same type is active instead insert the time-out event just like when starting a time-out with relative <code class="inline">Time = 0</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:transition_option/0">
+  <div class="detail-header">
+    <a href="#t:transition_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>transition_option() ::
+    <a href="#t:postpone/0">postpone</a>() |
+    <a href="#t:hibernate/0">hibernate</a>() |
+    <a href="#t:event_timeout/0">event_timeout</a>() |
+    <a href="#t:generic_timeout/0">generic_timeout</a>() |
+    <a href="#t:state_timeout/0">state_timeout</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Transition options can be set by actions and modify the <em >state transition</em>. The <em >state transition</em> takes place when the <em >state callback</em> has processed an event and returns. Here are the sequence of steps for a <em >state transition</em>:</p>
+<ol ><li >
+All returned actions are processed in order of appearance. In this step all replies generated by any `reply_action()` are sent. Other actions set `transition_option()`s that come into play in subsequent steps.
+</li><li >
+If <em >state enter calls</em> are used, and either it is the initial state or one of the callback results `repeat_state_and_data` or `repeat_state_and_data` is used the `gen_statem` engine calls the current state callback with arguments `(enter, State, Data)` or `(enter, State, State, Data)` (depending on <em >callback mode</em>) and when it returns starts again from the top of this sequence.
+
+If <em >state enter calls</em> are used, and the state changes the `gen_statem` engine calls the new state callback with arguments `(enter, OldState, Data)` or `(enter, OldState, State, Data)` (depending on <em >callback mode</em>) and when it returns starts again from the top of this sequence.
+</li><li >
+If `postpone()` is `true`, the current event is postponed.
+</li><li >
+If this is a <em >state change</em>, the queue of incoming events is reset to start with the oldest postponed.
+</li><li >
+All events stored with `action()` `next_event` are inserted to be processed before previously queued events.
+</li><li >
+Time-out timers `event_timeout()`, `generic_timeout()` and `state_timeout()` are handled. Time-outs with zero time are guaranteed to be delivered to the state machine before any external not yet received event so if there is such a time-out requested, the corresponding time-out zero event is enqueued as the newest received event; that is after already queued events such as inserted and postponed events.
+
+Any event cancels an `event_timeout()` so a zero time event time-out is only generated if the event queue is empty.
+
+A <em >state change</em> cancels a `state_timeout()` and any new transition option of this type belongs to the new state, that is; a `state_timeout()` applies to the state the state machine enters.
+</li><li >
+If there are enqueued events the <em >state callback</em> for the possibly new state is called with the oldest enqueued event, and we start again from the top of this sequence.
+</li><li >
+Otherwise the `gen_statem` goes into `receive` or hibernation (if `hibernate()` is `true`) to wait for the next message. In hibernation the next non-system event awakens the `gen_statem`, or rather the next incoming message awakens the `gen_statem`, but if it is a system event it goes right back into hibernation. When a new message arrives the <em >state callback</em> is called with the corresponding event, and we start again from the top of this sequence.
+</li></ol>  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="call/2">
+  <div class="detail-header">
+    <a href="#call/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call/2 call/3</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>call(ServerRef :: <a href="#t:server_ref/0">server_ref</a>(), Request :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) ->
+        Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Makes a synchronous call to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> by sending a request and waiting until its reply arrives. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">{call,From}</code> and event content <a type="anno">Request</a>.</p>
+<p>A <a type="anno">Reply</a> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <a type="anno">Reply</a> becomes the return value of this function.</p>
+<p><a type="anno">Timeout</a> is an integer &gt; 0, which specifies how many milliseconds to wait for a reply, or the atom <code class="inline">infinity</code> to wait indefinitely, which is the default. If no reply is received within the specified time, the function call fails.</p>
+<p>For <code class="inline">Timeout &lt; infinity</code>, to avoid getting a late reply in the caller&#39;s inbox if the caller should catch exceptions, this function spawns a proxy process that does the call. A late reply gets delivered to the dead proxy process, hence gets discarded. This is less efficient than using <code class="inline">Timeout == infinity</code>.</p>
+<p><a type="anno">Timeout</a> can also be a tuple <code class="inline">{clean_timeout,T}</code> or <code class="inline">{dirty_timeout,T}</code>, where <a type="anno">T</a> is the time-out time. <code class="inline">{clean_timeout,T}</code> works like just <code class="inline">T</code> described in the note above and uses a proxy process while <code class="inline">{dirty_timeout,T}</code> bypasses the proxy process which is more lightweight.</p>
+<p>If you combine catching exceptions from this function with <code class="inline">{dirty_timeout,T}</code> to avoid that the calling process dies when the call times out, you will have to be prepared to handle a late reply. Note that there is an odd chance to get a late reply even with <code class="inline">{dirty_timeout,infinity}</code> or <code class="inline">infinity</code> for example in the event of network problems. So why not just let the calling process die by not catching the exception?</p>
+<p>The call can also fail, for example, if the <code class="inline">gen_statem</code> dies before or during this function call.</p>
+  </section>
+</section>
+<section class="detail" id="call/3">
+  <div class="detail-header">
+    <a href="#call/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call/2 call/3</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>call(ServerRef :: <a href="#t:server_ref/0">server_ref</a>(),
+     Request :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Timeout ::
+         <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>() |
+         {clean_timeout, T :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()} |
+         {dirty_timeout, T :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()}) ->
+        Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Makes a synchronous call to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> by sending a request and waiting until its reply arrives. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">{call,From}</code> and event content <a type="anno">Request</a>.</p>
+<p>A <a type="anno">Reply</a> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <a type="anno">Reply</a> becomes the return value of this function.</p>
+<p><a type="anno">Timeout</a> is an integer &gt; 0, which specifies how many milliseconds to wait for a reply, or the atom <code class="inline">infinity</code> to wait indefinitely, which is the default. If no reply is received within the specified time, the function call fails.</p>
+<p>For <code class="inline">Timeout &lt; infinity</code>, to avoid getting a late reply in the caller&#39;s inbox if the caller should catch exceptions, this function spawns a proxy process that does the call. A late reply gets delivered to the dead proxy process, hence gets discarded. This is less efficient than using <code class="inline">Timeout == infinity</code>.</p>
+<p><a type="anno">Timeout</a> can also be a tuple <code class="inline">{clean_timeout,T}</code> or <code class="inline">{dirty_timeout,T}</code>, where <a type="anno">T</a> is the time-out time. <code class="inline">{clean_timeout,T}</code> works like just <code class="inline">T</code> described in the note above and uses a proxy process while <code class="inline">{dirty_timeout,T}</code> bypasses the proxy process which is more lightweight.</p>
+<p>If you combine catching exceptions from this function with <code class="inline">{dirty_timeout,T}</code> to avoid that the calling process dies when the call times out, you will have to be prepared to handle a late reply. Note that there is an odd chance to get a late reply even with <code class="inline">{dirty_timeout,infinity}</code> or <code class="inline">infinity</code> for example in the event of network problems. So why not just let the calling process die by not catching the exception?</p>
+<p>The call can also fail, for example, if the <code class="inline">gen_statem</code> dies before or during this function call.</p>
+  </section>
+</section>
+<section class="detail" id="cast/2">
+  <div class="detail-header">
+    <a href="#cast/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cast/2</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>cast(ServerRef :: <a href="#t:server_ref/0">server_ref</a>(), Msg :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Sends an asynchronous event to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> and returns <code class="inline">ok</code> immediately, ignoring if the destination node or <code class="inline">gen_statem</code> does not exist. The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">cast</code> and event content <a type="anno">Msg</a>.</p>
+  </section>
+</section>
+<section class="detail" id="check_response/2">
+  <div class="detail-header">
+    <a href="#check_response/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_response/2</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>check_response(Msg :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), RequestId :: <a href="#t:request_id/0">request_id</a>()) ->
+                  {reply, Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                  no_reply |
+                  {error, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), <a href="#t:server_ref/0">server_ref</a>()}}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function is used to check if a previously received message, for example by <code class="inline">receive</code> or <code class="inline">handle_info/2</code>, is a result of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a>. If <code class="inline">Msg</code> is a reply to the handle <code class="inline">RequestId</code> the result of the request is returned in <code class="inline">Reply</code>. Otherwise returns <code class="inline">no_reply</code> and no cleanup is done, and thus the function shall be invoked repeatedly until a reply is returned.</p>
+<p>The return value <a type="anno">Reply</a> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <a type="anno">Reply</a> becomes the return value of this function.</p>
+<p>The function returns an error if the <code class="inline">gen_statem</code> dies before or during this request.</p>
+  </section>
+</section>
+<section class="detail" id="enter_loop/4">
+  <div class="detail-header">
+    <a href="#enter_loop/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enter_loop/4</h1>
+      <span class="note">(since OTP 19.1)</span>
+      <div class="specs">
+          <pre>enter_loop(Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+           Opts :: [<a href="#t:enter_loop_opt/0">enter_loop_opt</a>()],
+           State :: <a href="#t:state/0">state</a>(),
+           Data :: <a href="#t:data/0">data</a>()) ->
+              <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">no_return</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The same as <a href="#enter_loop/6"><code class="inline">enter_loop/6</code></a> with <code class="inline">Actions = []</code> except that no <code class="inline">server_name()</code> must have been registered. This creates an anonymous server.</p>
+  </section>
+</section>
+<section class="detail" id="enter_loop/5">
+  <div class="detail-header">
+    <a href="#enter_loop/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enter_loop/5</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>enter_loop(Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+           Opts :: [<a href="#t:enter_loop_opt/0">enter_loop_opt</a>()],
+           State :: <a href="#t:state/0">state</a>(),
+           Data :: <a href="#t:data/0">data</a>(),
+           Server_or_Actions :: <a href="#t:server_name/0">server_name</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | [<a href="#t:action/0">action</a>()]) ->
+              <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">no_return</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>If <a type="anno">Server_or_Actions</a> is a <code class="inline">list()</code>, the same as <a href="#enter_loop/6"><code class="inline">enter_loop/6</code></a> except that no <code class="inline">server_name()</code> must have been registered and <code class="inline">Actions = Server_or_Actions</code>. This creates an anonymous server.</p>
+<p>Otherwise the same as <a href="#enter_loop/6"><code class="inline">enter_loop/6</code></a> with <code class="inline">Server = Server_or_Actions</code> and <code class="inline">Actions = []</code>.</p>
+  </section>
+</section>
+<section class="detail" id="enter_loop/6">
+  <div class="detail-header">
+    <a href="#enter_loop/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enter_loop/6</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>enter_loop(Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+           Opts :: [<a href="#t:enter_loop_opt/0">enter_loop_opt</a>()],
+           State :: <a href="#t:state/0">state</a>(),
+           Data :: <a href="#t:data/0">data</a>(),
+           Server :: <a href="#t:server_name/0">server_name</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(),
+           Actions :: [<a href="#t:action/0">action</a>()] | <a href="#t:action/0">action</a>()) ->
+              <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">no_return</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Makes the calling process become a <code class="inline">gen_statem</code>. Does not return, instead the calling process enters the <code class="inline">gen_statem</code> receive loop and becomes a <code class="inline">gen_statem</code> server. The process <em >must</em> have been started using one of the start functions in <code class="inline">proc_lib</code>. The user is responsible for any initialization of the process, including registering a name for it.</p>
+<p>This function is useful when a more complex initialization procedure is needed than the <code class="inline">gen_statem</code> behavior provides.</p>
+<p><a type="anno">Module</a>, <a type="anno">Opts</a> have the same meaning as when calling <code class="inline">start[_link]/3,4</code>.</p>
+<p>If <a type="anno">Server</a> is <code class="inline">self()</code> an anonymous server is created just as when using <code class="inline">start[_link]/3</code>. If <a type="anno">Server</a> is a <code class="inline">server_name()</code> a named server is created just as when using <code class="inline">start[_link]/4</code>. However, the <code class="inline">server_name()</code> name must have been registered accordingly <em >before</em> this function is called.</p>
+<p><a type="anno">State</a>, <a type="anno">Data</a>, and <a type="anno">Actions</a> have the same meanings as in the return value of <code class="inline">Module:init/1</code>. Also, the callback module does not need to export a <code class="inline">Module:init/1</code> function.</p>
+<p>The function fails if the calling process was not started by a <code class="inline">proc_lib</code> start function, or if it is not registered according to <code class="inline">server_name()</code>.</p>
+  </section>
+</section>
+<section class="detail" id="reply/1">
+  <div class="detail-header">
+    <a href="#reply/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reply/1 reply/2</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>reply([<a href="#t:reply_action/0">reply_action</a>()] | <a href="#t:reply_action/0">reply_action</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function can be used by a <code class="inline">gen_statem</code> to explicitly send a reply to a process that waits in <a href="#call/2"><code class="inline">call/2</code></a> when the reply cannot be defined in the return value of a <em >state callback</em>.</p>
+<p><a type="anno">From</a> must be the term from argument <code class="inline">{call,From}</code> to the <em >state callback</em>. A reply or multiple replies canalso be sent using one or several <code class="inline">reply_action()</code>s from a <em >state callback</em>.</p>
+<p>A reply sent with this function is not visible in <code class="inline">sys</code> debug output.</p>
+  </section>
+</section>
+<section class="detail" id="reply/2">
+  <div class="detail-header">
+    <a href="#reply/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reply/1 reply/2</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>reply(From :: <a href="#t:from/0">from</a>(), Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function can be used by a <code class="inline">gen_statem</code> to explicitly send a reply to a process that waits in <a href="#call/2"><code class="inline">call/2</code></a> when the reply cannot be defined in the return value of a <em >state callback</em>.</p>
+<p><a type="anno">From</a> must be the term from argument <code class="inline">{call,From}</code> to the <em >state callback</em>. A reply or multiple replies canalso be sent using one or several <code class="inline">reply_action()</code>s from a <em >state callback</em>.</p>
+<p>A reply sent with this function is not visible in <code class="inline">sys</code> debug output.</p>
+  </section>
+</section>
+<section class="detail" id="send_request/2">
+  <div class="detail-header">
+    <a href="#send_request/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_request/2</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>send_request(ServerRef :: <a href="#t:server_ref/0">server_ref</a>(), Request :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) ->
+                RequestId :: <a href="#t:request_id/0">request_id</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Sends a request to the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> and returns a handle <a type="anno">RequestId</a>.</p>
+<p>The return value <a type="anno">RequestId</a> shall later be used with <a href="#wait_response/1"><code class="inline">wait_response/1,2</code></a> or <a href="#check_response/2"><code class="inline">check_response/2</code></a> to fetch the actual result of the request.</p>
+<p>The call <code class="inline">gen_statem:wait_response(gen_statem:send_request(ServerRef,Request), Timeout)</code> can be seen as equivalent to <code class="inline">gen_statem:call(Server,Request,Timeout)</code>, ignoring the error handling.</p>
+<p>The <code class="inline">gen_statem</code> calls the <em >state callback</em> with <code class="inline">event_type()</code> <code class="inline">{call,From}</code> and event content <a type="anno">Request</a>.</p>
+<p>A <code class="inline">Reply</code> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <code class="inline">Reply</code> becomes the return value of <a href="#wait_response/1"><code class="inline">wait_response/1,2</code></a> or <a href="#check_response/2"><code class="inline">check_response/2</code></a> function.</p>
+  </section>
+</section>
+<section class="detail" id="start/3">
+  <div class="detail-header">
+    <a href="#start/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/3 start/4</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>start(Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Opts :: [<a href="#t:start_opt/0">start_opt</a>()]) ->
+         <a href="#t:start_ret/0">start_ret</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a standalone <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives). As it does not get linked to the calling process, this start function cannot be used by a supervisor to start a child.</p>
+<p>For a description of arguments and return values, see <a href="#start_link/3"><code class="inline">start_link/3,4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start/4">
+  <div class="detail-header">
+    <a href="#start/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/3 start/4</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>start(ServerName :: <a href="#t:server_name/0">server_name</a>(),
+      Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+      Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+      Opts :: [<a href="#t:start_opt/0">start_opt</a>()]) ->
+         <a href="#t:start_ret/0">start_ret</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a standalone <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives). As it does not get linked to the calling process, this start function cannot be used by a supervisor to start a child.</p>
+<p>For a description of arguments and return values, see <a href="#start_link/3"><code class="inline">start_link/3,4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start_link/3">
+  <div class="detail-header">
+    <a href="#start_link/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/3 start_link/4</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>start_link(Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+           Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+           Opts :: [<a href="#t:start_opt/0">start_opt</a>()]) ->
+              <a href="#t:start_ret/0">start_ret</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives) that is linked to the calling process. This is essential when the <code class="inline">gen_statem</code> must be part of a supervision tree so it gets linked to its supervisor.</p>
+<p>The <code class="inline">gen_statem</code> process calls <code class="inline">Module:init/1</code> to initialize the server. To ensure a synchronized startup procedure, <a href="#start_link/3"><code class="inline">start_link/3,4</code></a> does not return until <code class="inline">Module:init/1</code> has returned.</p>
+<p><a type="anno">ServerName</a> specifies the <code class="inline">server_name()</code> to register for the <code class="inline">gen_statem</code>. If the <code class="inline">gen_statem</code> is started with <a href="#start_link/3"><code class="inline">start_link/3</code></a>, no <a type="anno">ServerName</a> is provided and the <code class="inline">gen_statem</code> is not registered.</p>
+<p><a type="anno">Module</a> is the name of the callback module.</p>
+<p><a type="anno">Args</a> is an arbitrary term that is passed as the argument to <code class="inline">Module:init/1</code>.</p>
+<ul ><li >
+If option `{timeout,Time}` is present in <a type="anno">Opts</a>, the `gen_statem` is allowed to spend [`Time`](https://hexdocs.pm/elixir/Time.html) milliseconds initializing or it terminates and the start function returns `{error,timeout}`.
+</li><li >
+If option `{hibernate_after,HibernateAfterTimeout}` is present, the `gen_statem` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</li><li >
+If option `{debug,Dbgs}` is present in <a type="anno">Opts</a>, debugging through `sys` is activated.
+</li><li >
+If option `{spawn_opt,SpawnOpts}` is present in <a type="anno">Opts</a>, `SpawnOpts` is passed as option list to `erlang:spawn_opt/2`, which is used to spawn the `gen_statem` process.
+</li></ul>
+
+Using spawn option `monitor` is not allowed, it causes this function to fail with reason `badarg`.
+
+
+If the `gen_statem` is successfully created and initialized, this function returns `{ok,Pid}`, where `Pid` is the `pid()` of the `gen_statem`. If a process with the specified <a type="anno">ServerName</a> exists already, this function returns `{error,{already_started,Pid}}`, where `Pid` is the `pid()` of that process.
+
+If `Module:init/1` fails with `Reason`, this function returns `{error,Reason}`. If `Module:init/1` returns `{stop,Reason}` or `ignore`, the process is terminated and this function returns `{error,Reason}` or `ignore`, respectively.  </section>
+</section>
+<section class="detail" id="start_link/4">
+  <div class="detail-header">
+    <a href="#start_link/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/3 start_link/4</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>start_link(ServerName :: <a href="#t:server_name/0">server_name</a>(),
+           Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+           Args :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+           Opts :: [<a href="#t:start_opt/0">start_opt</a>()]) ->
+              <a href="#t:start_ret/0">start_ret</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a <code class="inline">gen_statem</code> process according to OTP design principles (using <code class="inline">proc_lib</code> primitives) that is linked to the calling process. This is essential when the <code class="inline">gen_statem</code> must be part of a supervision tree so it gets linked to its supervisor.</p>
+<p>The <code class="inline">gen_statem</code> process calls <code class="inline">Module:init/1</code> to initialize the server. To ensure a synchronized startup procedure, <a href="#start_link/3"><code class="inline">start_link/3,4</code></a> does not return until <code class="inline">Module:init/1</code> has returned.</p>
+<p><a type="anno">ServerName</a> specifies the <code class="inline">server_name()</code> to register for the <code class="inline">gen_statem</code>. If the <code class="inline">gen_statem</code> is started with <a href="#start_link/3"><code class="inline">start_link/3</code></a>, no <a type="anno">ServerName</a> is provided and the <code class="inline">gen_statem</code> is not registered.</p>
+<p><a type="anno">Module</a> is the name of the callback module.</p>
+<p><a type="anno">Args</a> is an arbitrary term that is passed as the argument to <code class="inline">Module:init/1</code>.</p>
+<ul ><li >
+If option `{timeout,Time}` is present in <a type="anno">Opts</a>, the `gen_statem` is allowed to spend [`Time`](https://hexdocs.pm/elixir/Time.html) milliseconds initializing or it terminates and the start function returns `{error,timeout}`.
+</li><li >
+If option `{hibernate_after,HibernateAfterTimeout}` is present, the `gen_statem` process awaits any message for `HibernateAfterTimeout` milliseconds and if no message is received, the process goes into hibernation automatically (by calling `proc_lib:hibernate/3`).
+</li><li >
+If option `{debug,Dbgs}` is present in <a type="anno">Opts</a>, debugging through `sys` is activated.
+</li><li >
+If option `{spawn_opt,SpawnOpts}` is present in <a type="anno">Opts</a>, `SpawnOpts` is passed as option list to `erlang:spawn_opt/2`, which is used to spawn the `gen_statem` process.
+</li></ul>
+
+Using spawn option `monitor` is not allowed, it causes this function to fail with reason `badarg`.
+
+
+If the `gen_statem` is successfully created and initialized, this function returns `{ok,Pid}`, where `Pid` is the `pid()` of the `gen_statem`. If a process with the specified <a type="anno">ServerName</a> exists already, this function returns `{error,{already_started,Pid}}`, where `Pid` is the `pid()` of that process.
+
+If `Module:init/1` fails with `Reason`, this function returns `{error,Reason}`. If `Module:init/1` returns `{stop,Reason}` or `ignore`, the process is terminated and this function returns `{error,Reason}` or `ignore`, respectively.  </section>
+</section>
+<section class="detail" id="stop/1">
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>stop(ServerRef :: <a href="#t:server_ref/0">server_ref</a>()) -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>The same as <code class="inline">stop(ServerRef, normal, infinity)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/3">
+  <div class="detail-header">
+    <a href="#stop/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/3</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>stop(ServerRef :: <a href="#t:server_ref/0">server_ref</a>(),
+     Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+     Timeout :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()) ->
+        ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Orders the <code class="inline">gen_statem</code> <code class="inline">ServerRef</code> to exit with the specified <a type="anno">Reason</a> and waits for it to terminate. The <code class="inline">gen_statem</code> calls <code class="inline">Module:terminate/3</code> before exiting.</p>
+<p>This function returns <code class="inline">ok</code> if the server terminates with the expected reason. Any other reason than <code class="inline">normal</code>, <code class="inline">shutdown</code>, or <code class="inline">{shutdown,Term}</code> causes an error report to be issued through <code class="inline">logger(3)</code>. The default <a type="anno">Reason</a> is <code class="inline">normal</code>.</p>
+<p><a type="anno">Timeout</a> is an integer &gt; 0, which specifies how many milliseconds to wait for the server to terminate, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to <code class="inline">infinity</code>. If the server does not terminate within the specified time, a <code class="inline">timeout</code> exception is raised.</p>
+<p>If the process does not exist, a <code class="inline">noproc</code> exception is raised.</p>
+  </section>
+</section>
+<section class="detail" id="wait_response/1">
+  <div class="detail-header">
+    <a href="#wait_response/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">wait_response/1 wait_response/2</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>wait_response(RequestId :: <a href="#t:request_id/0">request_id</a>()) ->
+                 {reply, Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                 {error, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), <a href="#t:server_ref/0">server_ref</a>()}}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function is used to wait for a reply of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a> from the <code class="inline">gen_statem</code> process. This function must be called from the same process from which <a href="#send_request/2"><code class="inline">send_request/2</code></a> was made.</p>
+<p><code class="inline">Timeout</code> is an integer greater then or equal to zero that specifies how many milliseconds to wait for an reply, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to <code class="inline">infinity</code>. If no reply is received within the specified time, the function returns <code class="inline">timeout</code> and no cleanup is done, and thus the function can be invoked repeatedly until a reply is returned.</p>
+<p>The return value <a type="anno">Reply</a> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <a type="anno">Reply</a> becomes the return value of this function.</p>
+<p>The function returns an error if the <code class="inline">gen_statem</code> dies before or during this function call.</p>
+  </section>
+</section>
+<section class="detail" id="wait_response/2">
+  <div class="detail-header">
+    <a href="#wait_response/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">wait_response/1 wait_response/2</h1>
+      <span class="note">(since OTP-23)</span>
+      <div class="specs">
+          <pre>wait_response(RequestId :: <a href="#t:request_id/0">request_id</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()) ->
+                 {reply, Reply :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} |
+                 timeout |
+                 {error, {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), <a href="#t:server_ref/0">server_ref</a>()}}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function is used to wait for a reply of a request made with <a href="#send_request/2"><code class="inline">send_request/2</code></a> from the <code class="inline">gen_statem</code> process. This function must be called from the same process from which <a href="#send_request/2"><code class="inline">send_request/2</code></a> was made.</p>
+<p><code class="inline">Timeout</code> is an integer greater then or equal to zero that specifies how many milliseconds to wait for an reply, or the atom <code class="inline">infinity</code> to wait indefinitely. Defaults to <code class="inline">infinity</code>. If no reply is received within the specified time, the function returns <code class="inline">timeout</code> and no cleanup is done, and thus the function can be invoked repeatedly until a reply is returned.</p>
+<p>The return value <a type="anno">Reply</a> is generated when a <em >state callback</em> returns with <code class="inline">{reply,From,Reply}</code> as one <code class="inline">action()</code>, and that <a type="anno">Reply</a> becomes the return value of this function.</p>
+<p>The function returns an error if the <code class="inline">gen_statem</code> dies before or during this function call.</p>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

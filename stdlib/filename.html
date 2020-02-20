@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>filename — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+filename      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for analyzing and manipulating filenames. These functions are designed so that the Erlang code can work on many different platforms with different filename formats. With filename is meant all strings that can be used to denote a file. The filename can be a short relative name like <code class="inline">foo.erl</code>, a long absolute name including a drive designator, a directory name like <code class="inline">D:\usr/local\bin\erl/lib\tools\foo.erl</code>, or any variations in between.</p>
+<p>In Windows, all functions return filenames with forward slashes only, even if the arguments contain backslashes. To normalize a filename by removing redundant directory separators, use <a href="#join/1"><code class="inline">join/1</code></a>.</p>
+<p>The module supports raw filenames in the way that if a binary is present, or the filename cannot be interpreted according to the return value of <code class="inline">file:native_name_encoding/0</code>, a raw filename is also returned. For example, <a href="#join/1"><code class="inline">join/1</code></a> provided with a path component that is a binary (and cannot be interpreted under the current native filename encoding) results in a raw filename that is returned (the join operation is performed of course). For more information about raw filenames, see the <code class="inline">file</code> module.</p>
+<p>Functionality in this module generally assumes valid input and does not necessarily fail on input that does not use a valid encoding, but may instead very likely produce invalid output.</p>
+<p>File operations used to accept filenames containing null characters (integer value zero). This caused the name to be truncated and in some cases arguments to primitive operations to be mixed up. Filenames containing null characters inside the filename are now <em >rejected</em> and will cause primitive file operations to fail.</p>
+<p>Currently null characters at the end of the filename will be accepted by primitive file operations. Such filenames are however still documented as invalid. The implementation will also change in the future and reject such filenames.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname/1">absname/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts a relative <a type="anno">Filename</a> and returns an absolute name. No attempt is made to create the shortest absolute name, as this can give incorrect results on file systems that allow links.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname/2">absname/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Same as <a href="#absname/1"><code class="inline">absname/1</code></a>, except that the directory to which the filename is to be made relative is specified in argument <a type="anno">Dir</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname_join/2">absname_join/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Joins an absolute directory with a relative filename. Similar to <a href="#join/2"><code class="inline">join/2</code></a>, but on platforms with tight restrictions on raw filename length and no support for symbolic links (read: VxWorks), leading parent directory components in <a type="anno">Filename</a> are matched against trailing directory components in <a type="anno">Dir</a> so they can be removed from the result - minimizing its length.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basedir/2">basedir/2 basedir/2</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><p>Equivalent to basedir(PathType, Application, #{}) or basedir(PathsType, Application, #{}).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basedir/3">basedir/3 basedir/3</a>
+  </div>
+    <div class="summary-synopsis"><ul class="types"><li name="basedir_opts"></li><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><a id="basedir-3"></a><p>Returns a suitable path, or paths, for a given type. If <code class="inline">os</code> is not set in <a type="anno">Opts</a> the function will default to the native option, that is <code class="inline">&#39;linux&#39;</code>, <code class="inline">&#39;darwin&#39;</code> or <code class="inline">&#39;windows&#39;</code>, as understood by <code class="inline">os:type/0</code>. Anything not recognized as <code class="inline">&#39;darwin&#39;</code> or <code class="inline">&#39;windows&#39;</code> is interpreted as <code class="inline">&#39;linux&#39;</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basename/1">basename/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the last component of <a type="anno">Filename</a>, or <a type="anno">Filename</a> itself if it does not contain any directory separators.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basename/2">basename/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the last component of <a type="anno">Filename</a> with extension <a type="anno">Ext</a> stripped. This function is to be used to remove a (possible) specific extension. To remove an existing extension when you are unsure which one it is, use <code class="inline">rootname(basename(Filename))</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#dirname/1">dirname/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the directory part of <a type="anno">Filename</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#extension/1">extension/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the file extension of <a type="anno">Filename</a>, including the period. Returns an empty string if no extension exists.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_src/1">find_src/1 find_src/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Finds the source filename and compiler options for a module. The result can be fed to <code class="inline">compile:file/2</code> to compile the file again.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_src/2">find_src/1 find_src/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Finds the source filename and compiler options for a module. The result can be fed to <code class="inline">compile:file/2</code> to compile the file again.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flatten/1">flatten/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts a possibly deep list filename consisting of characters and atoms into the corresponding flat string filename.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/1">join/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Joins a list of filename <a type="anno">Components</a> with directory separators. If one of the elements of <a type="anno">Components</a> includes an absolute path, such as <code class="inline">&quot;/xxx&quot;</code>, the preceding elements, if any, are removed from the result.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/2">join/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Joins two filename components with directory separators. Equivalent to <code class="inline">join([Name1, Name2])</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nativename/1">nativename/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <a type="anno">Path</a> to a form accepted by the command shell and native applications on the current platform. On Windows, forward slashes are converted to backward slashes. On all platforms, the name is normalized as done by <a href="#join/1"><code class="inline">join/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pathtype/1">pathtype/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the path type, which is one of the following</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rootname/1">rootname/1 rootname/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes a filename extension. <a href="#rootname/2"><code class="inline">rootname/2</code></a> works as <a href="#rootname/1"><code class="inline">rootname/1</code></a>, except that the extension is removed only if it is <a type="anno">Ext</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rootname/2">rootname/1 rootname/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes a filename extension. <a href="#rootname/2"><code class="inline">rootname/2</code></a> works as <a href="#rootname/1"><code class="inline">rootname/1</code></a>, except that the extension is removed only if it is <a type="anno">Ext</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#safe_relative_path/1">safe_relative_path/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Sanitizes the relative path by eliminating &quot;..&quot; and &quot;.&quot; components to protect against directory traversal attacks. Either returns the sanitized path name, or the atom <code class="inline">unsafe</code> if the path is unsafe. The path is considered unsafe in the following circumstances</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/1">split/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list whose elements are the path components of <a type="anno">Filename</a>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="absname/1">
+  <div class="detail-header">
+    <a href="#absname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname/1</h1>
+      <div class="specs">
+          <pre>absname(Filename) -> file:filename_all()
+           when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts a relative <a type="anno">Filename</a> and returns an absolute name. No attempt is made to create the shortest absolute name, as this can give incorrect results on file systems that allow links.</p>
+<p><em >Unix examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pwd</span><span class="p" data-group-id="9606536554-1">(</span><span class="p" data-group-id="9606536554-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/usr/local&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="9606536554-2">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="9606536554-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/foo&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="9606536554-3">(</span><span class="s">&quot;../x&quot;</span><span class="p" data-group-id="9606536554-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/../x&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="9606536554-4">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="9606536554-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/&quot;</span></code></pre>
+<p><em >Windows examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pwd</span><span class="p" data-group-id="3925012369-1">(</span><span class="p" data-group-id="3925012369-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="3925012369-2">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="3925012369-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local/foo&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="3925012369-3">(</span><span class="s">&quot;../x&quot;</span><span class="p" data-group-id="3925012369-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local/../x&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:absname</span><span class="p" data-group-id="3925012369-4">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="3925012369-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;D:/&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="absname/2">
+  <div class="detail-header">
+    <a href="#absname/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname/2</h1>
+      <div class="specs">
+          <pre>absname(Filename, Dir) -> file:filename_all()
+           when
+               Filename :: file:name_all(), Dir :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Same as <a href="#absname/1"><code class="inline">absname/1</code></a>, except that the directory to which the filename is to be made relative is specified in argument <a type="anno">Dir</a>.</p>
+  </section>
+</section>
+<section class="detail" id="absname_join/2">
+  <div class="detail-header">
+    <a href="#absname_join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname_join/2</h1>
+      <div class="specs">
+          <pre>absname_join(Dir, Filename) -> file:filename_all()
+                when
+                    Dir :: file:name_all(),
+                    Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Joins an absolute directory with a relative filename. Similar to <a href="#join/2"><code class="inline">join/2</code></a>, but on platforms with tight restrictions on raw filename length and no support for symbolic links (read: VxWorks), leading parent directory components in <a type="anno">Filename</a> are matched against trailing directory components in <a type="anno">Dir</a> so they can be removed from the result - minimizing its length.</p>
+  </section>
+</section>
+<section class="detail" id="basedir/2">
+  <div class="detail-header">
+    <a href="#basedir/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basedir/2 basedir/2</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>basedir(PathType, Application) -> file:filename_all()
+           when
+               PathType :: basedir_path_type(),
+               Application :: string() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+          <pre>basedir(PathsType, Application) -> [file:filename_all()]
+           when
+               PathsType :: basedir_paths_type(),
+               Application :: string() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><p>Equivalent to basedir(PathType, Application, #{}) or basedir(PathsType, Application, #{}).</p>
+  </section>
+</section>
+<section class="detail" id="basedir/3">
+  <div class="detail-header">
+    <a href="#basedir/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basedir/3 basedir/3</h1>
+      <span class="note">(since OTP 19.0)</span>
+      <div class="specs">
+          <pre>basedir(PathType, Application, Opts) -> file:filename_all()
+           when
+               PathType :: basedir_path_type(),
+               Application :: string() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>(),
+               Opts :: basedir_opts().
+</pre>
+          <pre>basedir(PathsType, Application, Opts) -> [file:filename_all()]
+           when
+               PathsType :: basedir_paths_type(),
+               Application :: string() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>(),
+               Opts :: basedir_opts().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<ul class="types"><li name="basedir_opts"></li><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><a id="basedir-3"></a><p>Returns a suitable path, or paths, for a given type. If <code class="inline">os</code> is not set in <a type="anno">Opts</a> the function will default to the native option, that is <code class="inline">&#39;linux&#39;</code>, <code class="inline">&#39;darwin&#39;</code> or <code class="inline">&#39;windows&#39;</code>, as understood by <code class="inline">os:type/0</code>. Anything not recognized as <code class="inline">&#39;darwin&#39;</code> or <code class="inline">&#39;windows&#39;</code> is interpreted as <code class="inline">&#39;linux&#39;</code>.</p>
+<p>The options <code class="inline">&#39;author&#39;</code> and <code class="inline">&#39;version&#39;</code> are only used with <code class="inline">&#39;windows&#39;</code> option mode.</p>
+<ul ><li >`user_cache` 
+The path location is intended for transient data files on a local machine.
+
+On Linux: Respects the os environment variable `XDG_CACHE_HOME`.
+
+```
+1> filename:basedir(user_cache, "my_application", #{os=>linux}).
+"/home/otptest/.cache/my_application"
+```
+ On Darwin: 
+```
+1> filename:basedir(user_cache, "my_application", #{os=>darwin}).
+"/home/otptest/Library/Caches/my_application"
+```
+ On Windows: 
+```
+1> filename:basedir(user_cache, "My App").
+"c:/Users/otptest/AppData/Local/My App/Cache"
+2> filename:basedir(user_cache, "My App").
+"c:/Users/otptest/AppData/Local/My App/Cache"
+3> filename:basedir(user_cache, "My App", #{author=>"Erlang"}).
+"c:/Users/otptest/AppData/Local/Erlang/My App/Cache"
+4> filename:basedir(user_cache, "My App", #{version=>"1.2"}).
+"c:/Users/otptest/AppData/Local/My App/1.2/Cache"
+5> filename:basedir(user_cache, "My App", #{author=>"Erlang",version=>"1.2"}).
+"c:/Users/otptest/AppData/Local/Erlang/My App/1.2/Cache"
+```
+</li><li >`user_config` 
+The path location is intended for persistent configuration files.
+
+On Linux: Respects the os environment variable `XDG_CONFIG_HOME`.
+
+```
+2> filename:basedir(user_config, "my_application", #{os=>linux}).
+"/home/otptest/.config/my_application"
+```
+ On Darwin:
+```
+2> filename:basedir(user_config, "my_application", #{os=>darwin}).
+"/home/otptest/Library/Application Support/my_application"
+```
+ On Windows:
+```
+1> filename:basedir(user_config, "My App").
+"c:/Users/otptest/AppData/Roaming/My App"
+2> filename:basedir(user_config, "My App", #{author=>"Erlang", version=>"1.2"}).
+"c:/Users/otptest/AppData/Roaming/Erlang/My App/1.2"
+```
+</li><li >`user_data` 
+The path location is intended for persistent data files.
+
+On Linux: Respects the os environment variable `XDG_DATA_HOME`.
+
+```
+3> filename:basedir(user_data, "my_application", #{os=>linux}).
+"/home/otptest/.local/my_application"
+```
+ On Darwin:
+```
+3> filename:basedir(user_data, "my_application", #{os=>darwin}).
+"/home/otptest/Library/Application Support/my_application"
+```
+ On Windows:
+```
+8> filename:basedir(user_data, "My App").
+"c:/Users/otptest/AppData/Local/My App"
+9> filename:basedir(user_data, "My App",#{author=>"Erlang",version=>"1.2"}).
+"c:/Users/otptest/AppData/Local/Erlang/My App/1.2"
+```
+</li><li >`user_log` 
+The path location is intended for transient log files on a local machine.
+
+On Linux: Respects the os environment variable `XDG_CACHE_HOME`.
+
+```
+4> filename:basedir(user_log, "my_application", #{os=>linux}).
+"/home/otptest/.cache/my_application/log"
+```
+ On Darwin:
+```
+4> filename:basedir(user_log, "my_application", #{os=>darwin}).
+"/home/otptest/Library/Caches/my_application"
+```
+ On Windows:
+```
+12> filename:basedir(user_log, "My App").
+"c:/Users/otptest/AppData/Local/My App/Logs"
+13> filename:basedir(user_log, "My App",#{author=>"Erlang",version=>"1.2"}).
+"c:/Users/otptest/AppData/Local/Erlang/My App/1.2/Logs"
+```
+</li><li >`site_config`
+On Linux: Respects the os environment variable `XDG_CONFIG_DIRS`.
+
+```
+5> filename:basedir(site_data, "my_application", #{os=>linux}).
+["/usr/local/share/my_application",
+ "/usr/share/my_application"]
+6> os:getenv("XDG_CONFIG_DIRS").
+"/etc/xdg/xdg-ubuntu:/usr/share/upstart/xdg:/etc/xdg"
+7> filename:basedir(site_config, "my_application", #{os=>linux}).
+["/etc/xdg/xdg-ubuntu/my_application",
+ "/usr/share/upstart/xdg/my_application",
+ "/etc/xdg/my_application"]
+8> os:unsetenv("XDG_CONFIG_DIRS").
+true
+9> filename:basedir(site_config, "my_application", #{os=>linux}).
+["/etc/xdg/my_application"]
+```
+ On Darwin:
+```
+5> filename:basedir(site_config, "my_application", #{os=>darwin}).
+["/Library/Application Support/my_application"]
+```
+</li><li >`site_data`
+On Linux: Respects the os environment variable `XDG_DATA_DIRS`.
+
+```
+10> os:getenv("XDG_DATA_DIRS").
+"/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/"
+11> filename:basedir(site_data, "my_application", #{os=>linux}).
+["/usr/share/ubuntu/my_application",
+ "/usr/share/gnome/my_application",
+ "/usr/local/share/my_application",
+ "/usr/share/my_application"]
+12> os:unsetenv("XDG_DATA_DIRS").
+true
+13> filename:basedir(site_data, "my_application", #{os=>linux}).
+["/usr/local/share/my_application",
+ "/usr/share/my_application"]
+```
+ On Darwin:
+```
+5> filename:basedir(site_data, "my_application", #{os=>darwin}).
+["/Library/Application Support/my_application"]
+```
+</li></ul>  </section>
+</section>
+<section class="detail" id="basename/1">
+  <div class="detail-header">
+    <a href="#basename/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basename/1</h1>
+      <div class="specs">
+          <pre>basename(Filename) -> file:filename_all()
+            when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the last component of <a type="anno">Filename</a>, or <a type="anno">Filename</a> itself if it does not contain any directory separators.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="4874423865-1">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="4874423865-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;foo&quot;</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="4874423865-2">(</span><span class="s">&quot;/usr/foo&quot;</span><span class="p" data-group-id="4874423865-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;foo&quot;</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="4874423865-3">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="4874423865-3">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4874423865-4">[</span><span class="p" data-group-id="4874423865-4">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="basename/2">
+  <div class="detail-header">
+    <a href="#basename/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basename/2</h1>
+      <div class="specs">
+          <pre>basename(Filename, Ext) -> file:filename_all()
+            when
+                Filename :: file:name_all(),
+                Ext :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the last component of <a type="anno">Filename</a> with extension <a type="anno">Ext</a> stripped. This function is to be used to remove a (possible) specific extension. To remove an existing extension when you are unsure which one it is, use <code class="inline">rootname(basename(Filename))</code>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="5778545516-1">(</span><span class="s">&quot;~/src/kalle.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="5778545516-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span><span class="w">
+</span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="5778545516-2">(</span><span class="s">&quot;~/src/kalle.beam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="5778545516-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;kalle.beam&quot;</span><span class="w">
+</span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="5778545516-3">(</span><span class="s">&quot;~/src/kalle.old.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="5778545516-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;kalle.old&quot;</span><span class="w">
+</span><span class="mi">11</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="5778545516-4">(</span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="5778545516-5">(</span><span class="s">&quot;~/src/kalle.erl&quot;</span><span class="p" data-group-id="5778545516-5">)</span><span class="p" data-group-id="5778545516-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span><span class="w">
+</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="5778545516-6">(</span><span class="n">filename</span><span class="ss">:basename</span><span class="p" data-group-id="5778545516-7">(</span><span class="s">&quot;~/src/kalle.beam&quot;</span><span class="p" data-group-id="5778545516-7">)</span><span class="p" data-group-id="5778545516-6">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="dirname/1">
+  <div class="detail-header">
+    <a href="#dirname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">dirname/1</h1>
+      <div class="specs">
+          <pre>dirname(Filename) -> file:filename_all()
+           when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the directory part of <a type="anno">Filename</a>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">13</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:dirname</span><span class="p" data-group-id="6528326759-1">(</span><span class="s">&quot;/usr/src/kalle.erl&quot;</span><span class="p" data-group-id="6528326759-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/usr/src&quot;</span><span class="w">
+</span><span class="mi">14</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:dirname</span><span class="p" data-group-id="6528326759-2">(</span><span class="s">&quot;kalle.erl&quot;</span><span class="p" data-group-id="6528326759-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;.&quot;</span></code></pre>
+<pre><code class="nohighlight makeup elixir"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:dirname</span><span class="p" data-group-id="3830143216-1">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">usr</span><span class="se">\\</span><span class="s">src/kalle.erl&quot;</span><span class="p" data-group-id="3830143216-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="nc">Windows</span><span class="w">
+</span><span class="s">&quot;/usr/src&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="extension/1">
+  <div class="detail-header">
+    <a href="#extension/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">extension/1</h1>
+      <div class="specs">
+          <pre>extension(Filename) -> file:filename_all()
+             when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the file extension of <a type="anno">Filename</a>, including the period. Returns an empty string if no extension exists.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">15</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:extension</span><span class="p" data-group-id="1841360507-1">(</span><span class="s">&quot;foo.erl&quot;</span><span class="p" data-group-id="1841360507-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;.erl&quot;</span><span class="w">
+</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:extension</span><span class="p" data-group-id="1841360507-2">(</span><span class="s">&quot;beam.src/kalle&quot;</span><span class="p" data-group-id="1841360507-2">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1841360507-3">[</span><span class="p" data-group-id="1841360507-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="find_src/1">
+  <div class="detail-header">
+    <a href="#find_src/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_src/1 find_src/2</h1>
+      <div class="specs">
+          <pre>find_src(Beam) ->
+            {SourceFile, Options} | {error, {ErrorReason, Module}}
+            when
+                Beam :: Module | Filename,
+                Filename :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | string(),
+                Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+                SourceFile :: string(),
+                Options :: [Option],
+                Option ::
+                    {i, Path :: string()} |
+                    {outdir, Path :: string()} |
+                    {d, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()},
+                ErrorReason ::
+                    non_existing | preloaded | interpreted.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Finds the source filename and compiler options for a module. The result can be fed to <code class="inline">compile:file/2</code> to compile the file again.</p>
+<p>This function is deprecated. Use <code class="inline">filelib:find_source/1</code> instead for finding source files.</p>
+<p>If possible, use the <code class="inline">beam_lib(3)</code> module to extract the compiler options and the abstract code format from the Beam file and compile that instead.</p>
+<p>Argument <a type="anno">Beam</a>, which can be a string or an atom, specifies either the module name or the path to the source code, with or without extension <code class="inline">&quot;.erl&quot;</code>. In either case, the module must be known by the code server, that is, <code class="inline">code:which(Module)</code> must succeed.</p>
+<p><a type="anno">Rules</a> describes how the source directory can be found when the object code directory is known. It is a list of tuples <code class="inline">{BinSuffix, SourceSuffix}</code> and is interpreted as follows: if the end of the directory name where the object is located matches <a type="anno">BinSuffix</a>, then the name created by replacing <a type="anno">BinSuffix</a> with <a type="anno">SourceSuffix</a> is expanded by calling <code class="inline">filelib:wildcard/1</code>. If a regular file is found among the matches, the function returns that location together with <a type="anno">Options</a>. Otherwise the next rule is tried, and so on.</p>
+<p><a type="anno">Rules</a> defaults to:</p>
+<code type="none">[{"", ""}, {"ebin", "src"}, {"ebin", "esrc"},
+ {"ebin", "src/*"}, {"ebin", "esrc/*"}]</code>
+The function returns `{SourceFile, Options}` if it succeeds. <a type="anno">SourceFile</a> is the absolute path to the source file without extension `".erl"`. <a type="anno">Options</a> includes the options that are necessary to recompile the file with `compile:file/2`, but excludes options such as `report` and `verbose`, which do not change the way code is generated. The paths in options `{outdir, Path}` and `{i, Path}` are guaranteed to be absolute.  </section>
+</section>
+<section class="detail" id="find_src/2">
+  <div class="detail-header">
+    <a href="#find_src/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_src/1 find_src/2</h1>
+      <div class="specs">
+          <pre>find_src(Beam, Rules) ->
+            {SourceFile, Options} | {error, {ErrorReason, Module}}
+            when
+                Beam :: Module | Filename,
+                Filename :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | string(),
+                Rules ::
+                    [{BinSuffix :: string(),
+                      SourceSuffix :: string()}],
+                Module :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+                SourceFile :: string(),
+                Options :: [Option],
+                Option ::
+                    {i, Path :: string()} |
+                    {outdir, Path :: string()} |
+                    {d, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()},
+                ErrorReason ::
+                    non_existing | preloaded | interpreted.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Finds the source filename and compiler options for a module. The result can be fed to <code class="inline">compile:file/2</code> to compile the file again.</p>
+<p>This function is deprecated. Use <code class="inline">filelib:find_source/1</code> instead for finding source files.</p>
+<p>If possible, use the <code class="inline">beam_lib(3)</code> module to extract the compiler options and the abstract code format from the Beam file and compile that instead.</p>
+<p>Argument <a type="anno">Beam</a>, which can be a string or an atom, specifies either the module name or the path to the source code, with or without extension <code class="inline">&quot;.erl&quot;</code>. In either case, the module must be known by the code server, that is, <code class="inline">code:which(Module)</code> must succeed.</p>
+<p><a type="anno">Rules</a> describes how the source directory can be found when the object code directory is known. It is a list of tuples <code class="inline">{BinSuffix, SourceSuffix}</code> and is interpreted as follows: if the end of the directory name where the object is located matches <a type="anno">BinSuffix</a>, then the name created by replacing <a type="anno">BinSuffix</a> with <a type="anno">SourceSuffix</a> is expanded by calling <code class="inline">filelib:wildcard/1</code>. If a regular file is found among the matches, the function returns that location together with <a type="anno">Options</a>. Otherwise the next rule is tried, and so on.</p>
+<p><a type="anno">Rules</a> defaults to:</p>
+<code type="none">[{"", ""}, {"ebin", "src"}, {"ebin", "esrc"},
+ {"ebin", "src/*"}, {"ebin", "esrc/*"}]</code>
+The function returns `{SourceFile, Options}` if it succeeds. <a type="anno">SourceFile</a> is the absolute path to the source file without extension `".erl"`. <a type="anno">Options</a> includes the options that are necessary to recompile the file with `compile:file/2`, but excludes options such as `report` and `verbose`, which do not change the way code is generated. The paths in options `{outdir, Path}` and `{i, Path}` are guaranteed to be absolute.  </section>
+</section>
+<section class="detail" id="flatten/1">
+  <div class="detail-header">
+    <a href="#flatten/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flatten/1</h1>
+      <div class="specs">
+          <pre>flatten(Filename) -> file:filename_all()
+           when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts a possibly deep list filename consisting of characters and atoms into the corresponding flat string filename.</p>
+  </section>
+</section>
+<section class="detail" id="join/1">
+  <div class="detail-header">
+    <a href="#join/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/1</h1>
+      <div class="specs">
+          <pre>join(Components) -> file:filename_all()
+        when Components :: [file:name_all()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Joins a list of filename <a type="anno">Components</a> with directory separators. If one of the elements of <a type="anno">Components</a> includes an absolute path, such as <code class="inline">&quot;/xxx&quot;</code>, the preceding elements, if any, are removed from the result.</p>
+<p>The result is &quot;normalized&quot;:</p>
+<ul ><li >Redundant directory separators are removed.</li><li >In Windows, all directory separators are forward slashes and the drive letter is in lower case.</li></ul><p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">17</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:join</span><span class="p" data-group-id="8013467146-1">(</span><span class="p" data-group-id="8013467146-2">[</span><span class="s">&quot;/usr&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;local&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bin&quot;</span><span class="p" data-group-id="8013467146-2">]</span><span class="p" data-group-id="8013467146-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/bin&quot;</span><span class="w">
+</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:join</span><span class="p" data-group-id="8013467146-3">(</span><span class="p" data-group-id="8013467146-4">[</span><span class="s">&quot;a/b///c/&quot;</span><span class="p" data-group-id="8013467146-4">]</span><span class="p" data-group-id="8013467146-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;a/b/c&quot;</span></code></pre>
+<pre><code class="nohighlight makeup elixir"><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:join</span><span class="p" data-group-id="7523380484-1">(</span><span class="p" data-group-id="7523380484-2">[</span><span class="s">&quot;B:a</span><span class="se">\\</span><span class="s">b///c/&quot;</span><span class="p" data-group-id="7523380484-2">]</span><span class="p" data-group-id="7523380484-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="nc">Windows</span><span class="w">
+</span><span class="s">&quot;b:a/b/c&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="join/2">
+  <div class="detail-header">
+    <a href="#join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/2</h1>
+      <div class="specs">
+          <pre>join(Name1, Name2) -> file:filename_all()
+        when Name1 :: file:name_all(), Name2 :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Joins two filename components with directory separators. Equivalent to <code class="inline">join([Name1, Name2])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="nativename/1">
+  <div class="detail-header">
+    <a href="#nativename/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nativename/1</h1>
+      <div class="specs">
+          <pre>nativename(Path) -> file:filename_all()
+              when Path :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Converts <a type="anno">Path</a> to a form accepted by the command shell and native applications on the current platform. On Windows, forward slashes are converted to backward slashes. On all platforms, the name is normalized as done by <a href="#join/1"><code class="inline">join/1</code></a>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">19</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:nativename</span><span class="p" data-group-id="2229889272-1">(</span><span class="s">&quot;/usr/local/bin/&quot;</span><span class="p" data-group-id="2229889272-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="nc">Unix</span><span class="w">
+</span><span class="s">&quot;/usr/local/bin&quot;</span></code></pre>
+<pre><code class="nohighlight makeup elixir"><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:nativename</span><span class="p" data-group-id="1279033346-1">(</span><span class="s">&quot;/usr/local/bin/&quot;</span><span class="p" data-group-id="1279033346-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="nc">Windows</span><span class="w">
+</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">usr</span><span class="se">\\</span><span class="s">local</span><span class="se">\\</span><span class="s">bin&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pathtype/1">
+  <div class="detail-header">
+    <a href="#pathtype/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pathtype/1</h1>
+      <div class="specs">
+          <pre>pathtype(Path) -> absolute | relative | volumerelative
+            when Path :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the path type, which is one of the following:</p>
+<dl ><dt >`absolute`</dt><dd >
+The path name refers to a specific file on a specific volume.
+
+Unix example: `/usr/local/bin`
+
+Windows example: `D:/usr/local/bin`
+</dd><dt >`relative`</dt><dd >
+The path name is relative to the current working directory on the current volume.
+
+Example: `foo/bar, ../src`
+</dd><dt >`volumerelative`</dt><dd >
+The path name is relative to the current working directory on a specified volume, or it is a specific file on the current working volume.
+
+Windows example: `D:bar.erl, /bar/foo.erl`
+</dd></dl>  </section>
+</section>
+<section class="detail" id="rootname/1">
+  <div class="detail-header">
+    <a href="#rootname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rootname/1 rootname/2</h1>
+      <div class="specs">
+          <pre>rootname(Filename) -> file:filename_all()
+            when Filename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes a filename extension. <a href="#rootname/2"><code class="inline">rootname/2</code></a> works as <a href="#rootname/1"><code class="inline">rootname/1</code></a>, except that the extension is removed only if it is <a type="anno">Ext</a>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">20</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="7997345580-1">(</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="p" data-group-id="7997345580-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="w">
+</span><span class="mi">21</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="7997345580-2">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p" data-group-id="7997345580-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">22</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="7997345580-3">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="7997345580-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">23</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="7997345580-4">(</span><span class="s">&quot;/beam.src/foo.beam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="7997345580-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo.beam&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="rootname/2">
+  <div class="detail-header">
+    <a href="#rootname/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rootname/1 rootname/2</h1>
+      <div class="specs">
+          <pre>rootname(Filename, Ext) -> file:filename_all()
+            when
+                Filename :: file:name_all(),
+                Ext :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Removes a filename extension. <a href="#rootname/2"><code class="inline">rootname/2</code></a> works as <a href="#rootname/1"><code class="inline">rootname/1</code></a>, except that the extension is removed only if it is <a type="anno">Ext</a>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">20</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="6837419728-1">(</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="p" data-group-id="6837419728-1">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="w">
+</span><span class="mi">21</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="6837419728-2">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p" data-group-id="6837419728-2">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">22</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="6837419728-3">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="6837419728-3">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">23</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:rootname</span><span class="p" data-group-id="6837419728-4">(</span><span class="s">&quot;/beam.src/foo.beam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="6837419728-4">)</span><span class="o">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo.beam&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="safe_relative_path/1">
+  <div class="detail-header">
+    <a href="#safe_relative_path/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">safe_relative_path/1</h1>
+      <span class="note">(since OTP 19.3)</span>
+      <div class="specs">
+          <pre>safe_relative_path(Filename) -> unsafe | SafeFilename
+                      when
+                          Filename :: file:name_all(),
+                          SafeFilename :: file:name_all().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Sanitizes the relative path by eliminating &quot;..&quot; and &quot;.&quot; components to protect against directory traversal attacks. Either returns the sanitized path name, or the atom <code class="inline">unsafe</code> if the path is unsafe. The path is considered unsafe in the following circumstances:</p>
+<ul ><li >
+The path is not relative.
+</li><li >
+A ".." component would climb up above the root of the relative path.
+</li></ul>
+<em >Examples:</em>
+
+```
+1> filename:safe_relative_path("dir/sub_dir/..").
+"dir"
+2> filename:safe_relative_path("dir/..").
+[]
+3> filename:safe_relative_path("dir/../..").
+unsafe
+4> filename:safe_relative_path("/abs/path").
+unsafe
+```  </section>
+</section>
+<section class="detail" id="split/1">
+  <div class="detail-header">
+    <a href="#split/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/1</h1>
+      <div class="specs">
+          <pre>split(Filename) -> Components
+         when
+             Filename :: file:name_all(),
+             Components :: [file:name_all()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list whose elements are the path components of <a type="anno">Filename</a>.</p>
+<p><em >Examples:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">24</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:split</span><span class="p" data-group-id="3582672831-1">(</span><span class="s">&quot;/usr/local/bin&quot;</span><span class="p" data-group-id="3582672831-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3582672831-2">[</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="s">&quot;usr&quot;</span><span class="p">,</span><span class="s">&quot;local&quot;</span><span class="p">,</span><span class="s">&quot;bin&quot;</span><span class="p" data-group-id="3582672831-2">]</span><span class="w">
+</span><span class="mi">25</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:split</span><span class="p" data-group-id="3582672831-3">(</span><span class="s">&quot;foo/bar&quot;</span><span class="p" data-group-id="3582672831-3">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3582672831-4">[</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="s">&quot;bar&quot;</span><span class="p" data-group-id="3582672831-4">]</span><span class="w">
+</span><span class="mi">26</span><span class="o">&gt;</span><span class="w"> </span><span class="n">filename</span><span class="ss">:split</span><span class="p" data-group-id="3582672831-5">(</span><span class="s">&quot;a:</span><span class="se">\\</span><span class="s">msdev</span><span class="se">\\</span><span class="s">include&quot;</span><span class="p" data-group-id="3582672831-5">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="3582672831-6">[</span><span class="s">&quot;a:/&quot;</span><span class="p">,</span><span class="s">&quot;msdev&quot;</span><span class="p">,</span><span class="s">&quot;include&quot;</span><span class="p" data-group-id="3582672831-6">]</span></code></pre>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

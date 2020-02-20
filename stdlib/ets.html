@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>ets — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+ets      </h1>
+
+
+        <section id="moduledoc">
+<p>This module is an interface to the Erlang built-in term storage BIFs. These provide the ability to store very large quantities of data in an Erlang runtime system, and to have constant access time to the data. (In the case of <code class="inline">ordered_set</code>, see below, access time is proportional to the logarithm of the number of stored objects.)</p>
+<p>Data is organized as a set of dynamic tables, which can store tuples. Each table is created by a process. When the process terminates, the table is automatically destroyed. Every table has access rights set at creation.</p>
+<p>Tables are divided into four different types, <code class="inline">set</code>, <code class="inline">ordered_set</code>, <code class="inline">bag</code>, and <code class="inline">duplicate_bag</code>. A <code class="inline">set</code> or <code class="inline">ordered_set</code> table can only have one object associated with each key. A <code class="inline">bag</code> or <code class="inline">duplicate_bag</code> table can have many objects associated with each key.
+<a id="max_ets_tables"></a></p>
+<p>The number of tables stored at one Erlang node <em >used</em> to be limited. This is no longer the case (except by memory usage). The previous default limit was about 1400 tables and could be increased by setting the environment variable <code class="inline">ERL_MAX_ETS_TABLES</code> or the command line option <code class="inline">+e</code> before starting the Erlang runtime system. This hard limit has been removed, but it is currently useful to set the <code class="inline">ERL_MAX_ETS_TABLES</code> anyway. It should be set to an approximate of the maximum amount of tables used. This since an internal table for named tables is sized using this value. If large amounts of named tables are used and <code class="inline">ERL_MAX_ETS_TABLES</code> hasn&#39;t been increased, the performance of named table lookup will degrade.</p>
+<p>Notice that there is no automatic garbage collection for tables. Even if there are no references to a table from any process, it is not automatically destroyed unless the owner process terminates. To destroy a table explicitly, use function <a href="#delete/1"><code class="inline">delete/1</code></a>. The default owner is the process that created the table. To transfer table ownership at process termination, use option <code class="inline">heir</code> or call <a href="#give_away/3"><code class="inline">give_away/3</code></a>.</p>
+<p>Some implementation details:</p>
+<ul ><li >
+In the current implementation, every object insert and look-up operation results in a copy of the object.
+</li><li >
+`'$end_of_table'` is not to be used as a key, as this atom is used to mark the end of the table when using functions [`first/1`](#first/1) and [`next/2`](#next/2).
+</li></ul>
+Notice the subtle difference between <em >matching</em> and <em >comparing equal</em>, which is demonstrated by table types `set` and `ordered_set`:
+<ul ><li >
+Two Erlang terms `match` if they are of the same type and have the same value, so that `1` matches `1`, but not `1.0` (as `1.0` is a `float()` and not an `integer()`).
+</li><li >
+Two Erlang terms <em >compare equal</em> if they either are of the same type and value, or if both are numeric types and extend to the same value, so that `1` compares equal to both `1` and `1.0`.
+</li><li >
+The `ordered_set` works on the <em >Erlang term order</em> and no defined order exists between an `integer()` and a `float()` that extends to the same value. Hence the key `1` and the key `1.0` are regarded as equal in an `ordered_set` table.
+</li></ul><h2 id="module-failure" class="section-heading">
+  <a href="#module-failure" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Failure
+</h2>
+
+The functions in this module exits with reason `badarg` if any argument has the wrong format, if the table identifier is invalid, or if the operation is denied because of table access rights (protected or private).
+<a id="concurrency"></a><h2 id="module-concurrency" class="section-heading">
+  <a href="#module-concurrency" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Concurrency
+</h2>
+
+This module provides some limited support for concurrent access. All updates to single objects are guaranteed to be both <em >atomic</em> and <em >isolated</em>. This means that an updating operation to a single object either succeeds or fails completely without any effect (atomicity) and that no intermediate results of the update can be seen by other processes (isolation). Some functions that update many objects state that they even guarantee atomicity and isolation for the entire operation. In database terms the isolation level can be seen as "serializable", as if all isolated operations are carried out serially, one after the other in a strict order.
+<a id="traversal"></a><h2 id="module-table-traversal" class="section-heading">
+  <a href="#module-table-traversal" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Table traversal
+</h2>
+
+There are different ways to traverse through the objects of a table.
+<ul ><li >
+<em >Single-step</em> traversal one key at at time, using [`first/1`](#first/1), [`next/2`](#next/2), [`last/1`](#last/1) and [`prev/2`](#prev/2).
+</li><li >
+Search with simple <em >match patterns</em>, using `match/1/2/3`, [`match_delete/2`](#match_delete/2) and `match_object/1/2/3`.
+</li><li >
+Search with more powerful <em >match specifications</em>, using `select/1/2/3`, [`select_count/2`](#select_count/2), [`select_delete/2`](#select_delete/2), [`select_replace/2`](#select_replace/2) and `select_reverse/1/2/3`.
+</li><li >
+<em >Table conversions</em>, using `tab2file/2/3` and [`tab2list/1`](#tab2list/1).
+</li></ul>
+None of these ways of table traversal will guarantee a consistent table snapshot if the table is also updated during the traversal. Moreover, traversals not done in a <em >safe</em> way, on tables where keys are inserted or deleted during the traversal, may yield the following undesired effects:
+<ul ><li >
+Any key may be missed.
+</li><li >
+Any key may be found more than once.
+</li><li >
+The traversal may fail with `badarg` exception if keys are deleted.
+</li></ul>
+A table traversal is <em >safe</em> if either
+<ul ><li >
+the table is of type `ordered_set`.
+</li><li >
+the entire table traversal is done within one ETS function call.
+</li><li >
+function [`safe_fixtable/2`](#safe_fixtable/2) is used to keep the table fixated during the entire traversal.
+</li></ul>
+
+Even though the access of a single object is always guaranteed to be atomic and isolated, each traversal through a table to find the next key is not done with such guarantees. This is often not a problem, but may cause rare subtle "unexpected" effects if a concurrent process inserts objects during a traversal. For example, consider one process doing
+
+```
+ets:new(t, [ordered_set, named_table]),
+ets:insert(t, {1}),
+ets:insert(t, {2}),
+ets:insert(t, {3}),
+```
+
+A concurrent call to `ets:first(t)`, done by another process, may then in rare cases return `2` even though `2` has never existed in the table ordered as the first key. In the same way, a concurrent call to `ets:next(t, 1)` may return `3` even though `3` never existed in the table ordered directly after `1`.
+
+Effects like this are improbable but possible. The probability will further be reduced (if not vanish) if table option `write_concurrency` is not enabled. This can also only be a potential concern for `ordered_set` where the traversal order is defined.
+
+
+Traversals using `match` and `select` functions may not need to scan the entire table depending on how the key is specified. A match pattern with a <em >fully bound key</em> (without any match variables) will optimize the operation to a single key lookup without any table traversal at all. For `ordered_set` a <em >partially bound key</em> will limit the traversal to only scan a subset of the table based on term order. A partially bound key is either a list or a tuple with a prefix that is fully bound. Example:
+
+```
+1> T = ets:new(t,[ordered_set]), ets:insert(T, {"555-1234", "John Smith"}).
+true
+2> %% Efficient search of all with area code 555
+2> ets:match(T,{[$5,$5,$5,$- |'$1'],'$2'}).
+[["1234","John Smith"]]
+```
+<a id="match_spec"></a><h2 id="module-match-specifications" class="section-heading">
+  <a href="#module-match-specifications" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Match Specifications
+</h2>
+
+Some of the functions use a <em >match specification</em>, `match_spec`. For a brief explanation, see [`select/2`](#select/2). For a detailed description, see section Match Specifications in Erlang in ERTS User's Guide.        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:access/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:comp_match_spec/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A compiled match specification.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:continuation/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Opaque continuation used by <a href="#select/1"><code class="inline">select/1,3</code></a>, <a href="#select_reverse/1"><code class="inline">select_reverse/1,3</code></a>, <a href="#match/1"><code class="inline">match/1,3</code></a>, and <a href="#match_object/1"><code class="inline">match_object/1,3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:match_pattern/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:match_spec/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A match specification, see above.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tab/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tid/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A table identifier, as returned by <a href="#new/2"><code class="inline">new/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:type/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all/0">all/0</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of all tables at the node. Named tables are specified by their names, unnamed tables are specified by their table identifiers.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/1">delete/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes the entire table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/2">delete/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes all objects with key <a type="anno">Key</a> from table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_all_objects/1">delete_all_objects/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Delete all objects in the ETS table <a type="anno">Tab</a>. The operation is guaranteed to be atomic and isolated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_object/2">delete_object/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Delete the exact object <a type="anno">Object</a> from the ETS table, leaving objects with the same key but other differences (useful for type <code class="inline">bag</code>). In a <code class="inline">duplicate_bag</code> table, all instances of the object are deleted.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#file2tab/1">file2tab/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads a file produced by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a> and creates the corresponding table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#file2tab/2">file2tab/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads a file produced by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a> and creates the corresponding table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#first/1">first/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the first key <a type="anno">Key</a> in table <a type="anno">Tab</a>. For an <code class="inline">ordered_set</code> table, the first key in Erlang term order is returned. For other table types, the first key according to the internal order of the table is returned. If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#foldl/3">foldl/3</a>
+  </div>
+    <div class="summary-synopsis"><p><a type="anno">Acc0</a> is returned if the table is empty. This function is similar to <code class="inline">lists:foldl/3</code>. The table elements are traversed in an unspecified order, except for <code class="inline">ordered_set</code> tables, where they are traversed first to last.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#foldr/3">foldr/3</a>
+  </div>
+    <div class="summary-synopsis"><p><a type="anno">Acc0</a> is returned if the table is empty. This function is similar to <code class="inline">lists:foldr/3</code>. The table elements are traversed in an unspecified order, except for <code class="inline">ordered_set</code> tables, where they are traversed last to first.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#from_dets/2">from_dets/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Fills an already created ETS table with the objects in the already opened Dets table <a type="anno">DetsTab</a>. Existing objects in the ETS table are kept unless overwritten.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fun2ms/1">fun2ms/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Pseudo function that by a <code class="inline">parse_transform</code> translates <a type="anno">LiteralFun</a> typed as parameter in the function call to a match specification. With &quot;literal&quot; is meant that the fun must textually be written as the parameter of the function, it cannot be held in a variable that in turn is passed to the function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#give_away/3">give_away/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Make process <a type="anno">Pid</a> the new owner of table <a type="anno">Tab</a>. If successful, message <code class="inline">{&#39;ETS-TRANSFER&#39;,Tab,FromPid,GiftData}</code> is sent to the new owner.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#i/0">i/0</a>
+  </div>
+    <div class="summary-synopsis"><p>Displays information about all ETS tables on a terminal.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#i/1">i/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Browses table <a type="anno">Tab</a> on a terminal.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about table <a type="anno">Tab</a> as a list of tuples. If <a type="anno">Tab</a> has the correct type for a table identifier, but does not refer to an existing ETS table, <code class="inline">undefined</code> is returned. If <a type="anno">Tab</a> is not of the correct type, a <code class="inline">badarg</code> exception is raised.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/2">info/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the information associated with <code class="inline">Item</code> for table <a type="anno">Tab</a>, or returns <code class="inline">undefined</code> if <code class="inline">Tab</code> does not refer an existing ETS table. If <a type="anno">Tab</a> is not of the correct type, or if <a type="anno">Item</a> is not one of the allowed values, a <code class="inline">badarg</code> exception is raised.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init_table/2">init_table/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Replaces the existing objects of table <a type="anno">Tab</a> with objects created by calling the input function <a type="anno">InitFun</a>, see below. This function is provided for compatibility with the <code class="inline">dets</code> module, it is not more efficient than filling a table by using <a href="#insert/2"><code class="inline">insert/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/2">insert/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Inserts the object or all of the objects in list <a type="anno">ObjectOrObjects</a> into table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert_new/2">insert_new/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Same as <a href="#insert/2"><code class="inline">insert/2</code></a> except that instead of overwriting objects with the same key (for <code class="inline">set</code> or <code class="inline">ordered_set</code>) or adding more objects with keys already existing in the table (for <code class="inline">bag</code> and <code class="inline">duplicate_bag</code>), <code class="inline">false</code> is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_compiled_ms/1">is_compiled_ms/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Checks if a term represent a valid compiled match specification. A compiled match specifications is only valid on the Erlang node where it was compiled by calling <a href="#match_spec_compile/1"><code class="inline">match_spec_compile/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#last/1">last/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the last key <a type="anno">Key</a> according to Erlang term order in table <code class="inline">Tab</code> of type <code class="inline">ordered_set</code>. For other table types, the function is synonymous to <a href="#first/1"><code class="inline">first/1</code></a>. If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lookup/2">lookup/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of all objects with key <a type="anno">Key</a> in table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lookup_element/3">lookup_element/3</a>
+  </div>
+    <div class="summary-synopsis"><p>For a table <a type="anno">Tab</a> of type <code class="inline">set</code> or <code class="inline">ordered_set</code>, the function returns the <a type="anno">Pos</a>:th element of the object with key <a type="anno">Key</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match/1">match/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Continues a match started with <a href="#match/3"><code class="inline">match/3</code></a>. The next chunk of the size specified in the initial <a href="#match/3"><code class="inline">match/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match/2">match/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in table <a type="anno">Tab</a> against pattern <a type="anno">Pattern</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match/3">match/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#match/2"><code class="inline">match/2</code></a>, but returns only a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#match/1"><code class="inline">match/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_delete/2">match_delete/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes all objects that match pattern <a type="anno">Pattern</a> from table <a type="anno">Tab</a>. For a description of patterns, see <a href="#match/2"><code class="inline">match/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_object/1">match_object/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Continues a match started with <a href="#match_object/3"><code class="inline">match_object/3</code></a>. The next chunk of the size specified in the initial <a href="#match_object/3"><code class="inline">match_object/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_object/2">match_object/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in table <a type="anno">Tab</a> against pattern <a type="anno">Pattern</a>. For a description of patterns, see <a href="#match/2"><code class="inline">match/2</code></a>. The function returns a list of all objects that match the pattern.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_object/3">match_object/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#match_object/2"><code class="inline">match_object/2</code></a>, but only returns a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#match_object/1"><code class="inline">match_object/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_spec_compile/1">match_spec_compile/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Transforms a match specification into an internal representation that can be used in subsequent calls to <a href="#match_spec_run/2"><code class="inline">match_spec_run/2</code></a>. The internal representation is opaque. To check the validity of a compiled match specification, use <a href="#is_compiled_ms/1"><code class="inline">is_compiled_ms/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match_spec_run/2">match_spec_run/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Executes the matching specified in a compiled match specification on a list of terms. Term <a type="anno">CompiledMatchSpec</a> is to be the result of a call to <a href="#match_spec_compile/1"><code class="inline">match_spec_compile/1</code></a> and is hence the internal representation of the match specification one wants to use.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#member/2">member/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#lookup/2"><code class="inline">lookup/2</code></a>, but does not return the objects. Returns <code class="inline">true</code> if one or more elements in the table has key <a type="anno">Key</a>, otherwise <code class="inline">false</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/2">new/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a new table and returns a table identifier that can be used in subsequent operations. The table identifier can be sent to other processes so that a table can be shared between different processes within a node.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next/2">next/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the next key <a type="anno">Key2</a>, following key <a type="anno">Key1</a> in table <a type="anno">Tab</a>. For table type <code class="inline">ordered_set</code>, the next key in Erlang term order is returned. For other table types, the next key according to the internal order of the table is returned. If no next key exists, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prev/2">prev/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the previous key <a type="anno">Key2</a>, preceding key <a type="anno">Key1</a> according to Erlang term order in table <a type="anno">Tab</a> of type <code class="inline">ordered_set</code>. For other table types, the function is synonymous to <a href="#next/2"><code class="inline">next/2</code></a>. If no previous key exists, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rename/2">rename/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Renames the named table <a type="anno">Tab</a> to the new name <a type="anno">Name</a>. Afterwards, the old name cannot be used to access the table. Renaming an unnamed table has no effect.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#repair_continuation/2">repair_continuation/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Restores an opaque continuation returned by <a href="#select/3"><code class="inline">select/3</code></a> or <a href="#select/1"><code class="inline">select/1</code></a> if the continuation has passed through external term format (been sent between nodes or stored on disk).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#safe_fixtable/2">safe_fixtable/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Fixes a table of type <code class="inline">set</code>, <code class="inline">bag</code>, or <code class="inline">duplicate_bag</code> for safe traversal using <a href="#first/1"><code class="inline">first/1</code></a> &amp; <a href="#next/2"><code class="inline">next/2</code></a>, <a href="#match/3"><code class="inline">match/3</code></a> &amp; <a href="#match/1"><code class="inline">match/1</code></a>, <a href="#match_object/3"><code class="inline">match_object/3</code></a> &amp; <a href="#match_object/1"><code class="inline">match_object/1</code></a>, or <a href="#select/3"><code class="inline">select/3</code></a> &amp; <a href="#select/1"><code class="inline">select/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select/1">select/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Continues a match started with <a href="#select/3"><code class="inline">select/3</code></a>. The next chunk of the size specified in the initial <a href="#select/3"><code class="inline">select/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select/2">select/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in table <a type="anno">Tab</a> using a match specification. This is a more general call than <a href="#match/2"><code class="inline">match/2</code></a> and <a href="#match_object/2"><code class="inline">match_object/2</code></a> calls. In its simplest form, the match specification is as follows</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select/3">select/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#select/2"><code class="inline">select/2</code></a>, but only returns a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#select/1"><code class="inline">select/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is still faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_count/2">select_count/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in table <a type="anno">Tab</a> using a match specification. If the match specification returns <code class="inline">true</code> for an object, that object considered a match and is counted. For any other result from the match specification the object is not considered a match and is therefore not counted.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_delete/2">select_delete/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in table <a type="anno">Tab</a> using a match specification. If the match specification returns <code class="inline">true</code> for an object, that object is removed from the table. For any other result from the match specification the object is retained. This is a more general call than the <a href="#match_delete/2"><code class="inline">match_delete/2</code></a> call.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_replace/2">select_replace/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Matches the objects in the table <a type="anno">Tab</a> using a match specification. For each matched object, the existing object is replaced with the match specification result.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_reverse/1">select_reverse/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Continues a match started with <a href="#select_reverse/3"><code class="inline">select_reverse/3</code></a>. For tables of type <code class="inline">ordered_set</code>, the traversal of the table continues to objects with keys earlier in the Erlang term order. The returned list also contains objects with keys in reverse order. For all other table types, the behavior is exactly that of <a href="#select/1"><code class="inline">select/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_reverse/2">select_reverse/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#select/2"><code class="inline">select/2</code></a>, but returns the list in reverse order for table type <code class="inline">ordered_set</code>. For all other table types, the return value is identical to that of <a href="#select/2"><code class="inline">select/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#select_reverse/3">select_reverse/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Works like <a href="#select/3"><code class="inline">select/3</code></a>, but for table type <code class="inline">ordered_set</code> traversing is done starting at the last object in Erlang term order and moves to the first. For all other table types, the return value is identical to that of <a href="#select/3"><code class="inline">select/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setopts/2">setopts/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets table options. The only allowed option to be set after the table has been created is <code class="inline">heir</code>. The calling process must be the table owner.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#slot/2">slot/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function is mostly for debugging purposes, Normally <code class="inline">first</code>/<code class="inline">next</code> or <code class="inline">last</code>/<code class="inline">prev</code> are to be used instead.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tab2file/2">tab2file/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Dumps table <a type="anno">Tab</a> to file <a type="anno">Filename</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tab2file/3">tab2file/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Dumps table <a type="anno">Tab</a> to file <a type="anno">Filename</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tab2list/1">tab2list/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of all objects in table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tabfile_info/1">tabfile_info/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about the table dumped to file by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table/1">table/1 table/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a Query List Comprehension (QLC) query handle. The <code class="inline">qlc</code> module provides a query language aimed mainly at Mnesia, but ETS tables, Dets tables, and lists are also recognized by QLC as sources of data. Calling <a href="#table/1"><code class="inline">table/1,2</code></a> is the means to make the ETS table <code class="inline">Tab</code> usable to QLC.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table/2">table/1 table/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a Query List Comprehension (QLC) query handle. The <code class="inline">qlc</code> module provides a query language aimed mainly at Mnesia, but ETS tables, Dets tables, and lists are also recognized by QLC as sources of data. Calling <a href="#table/1"><code class="inline">table/1,2</code></a> is the means to make the ETS table <code class="inline">Tab</code> usable to QLC.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/2">take/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns and removes a list of all objects with key <a type="anno">Key</a> in table <a type="anno">Tab</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#test_ms/2">test_ms/2</a>
+  </div>
+    <div class="summary-synopsis"><p>This function is a utility to test a match specification used in calls to <a href="#select/2"><code class="inline">select/2</code></a>. The function both tests <a type="anno">MatchSpec</a> for &quot;syntactic&quot; correctness and runs the match specification against object <a type="anno">Tuple</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_dets/2">to_dets/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Fills an already created/opened Dets table with the objects in the already opened ETS table named <a type="anno">Tab</a>. The Dets table is emptied before the objects are inserted.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_counter/3">update_counter/3 update_counter/4 update_counter/3 update_counter/4 update_counter/3 update_counter/4</a>
+  </div>
+    <div class="summary-synopsis"><p>This function provides an efficient way to update one or more counters, without the trouble of having to look up an object, update the object by incrementing an element, and insert the resulting object into the table again. The operation is guaranteed to be atomic and isolated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_counter/4">update_counter/3 update_counter/4 update_counter/3 update_counter/4 update_counter/3 update_counter/4</a>
+  </div>
+    <div class="summary-synopsis"><p>This function provides an efficient way to update one or more counters, without the trouble of having to look up an object, update the object by incrementing an element, and insert the resulting object into the table again. The operation is guaranteed to be atomic and isolated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_element/3">update_element/3 update_element/3</a>
+  </div>
+    <div class="summary-synopsis"><p>This function provides an efficient way to update one or more elements within an object, without the trouble of having to look up, update, and write back the entire object.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#whereis/1">whereis/1</a>
+  </div>
+    <div class="summary-synopsis"><p>This function returns the <code class="inline">tid()</code> of the named table identified by <a type="anno">TableName</a>, or <code class="inline">undefined</code> if no such table exists. The <code class="inline">tid()</code> can be used in place of the table name in all operations, which is slightly faster since the name does not have to be resolved on each call.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:access/0">
+  <div class="detail-header">
+    <a href="#t:access/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>access() :: public | protected | private.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:comp_match_spec/0">
+  <div class="detail-header">
+    <a href="#t:comp_match_spec/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <span class="note">(opaque)</span>
+      <div class="specs">
+          <pre>comp_match_spec() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">reference</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A compiled match specification.</p>
+  </section>
+</section>
+<section class="detail" id="t:continuation/0">
+  <div class="detail-header">
+    <a href="#t:continuation/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>continuation() ::
+    '$end_of_table' |
+    {<a href="#t:tab/0">tab</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+     <a href="#t:comp_match_spec/0">comp_match_spec</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()} |
+    {<a href="#t:tab/0">tab</a>(),
+     _, _,
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+     <a href="#t:comp_match_spec/0">comp_match_spec</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+     <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Opaque continuation used by <a href="#select/1"><code class="inline">select/1,3</code></a>, <a href="#select_reverse/1"><code class="inline">select_reverse/1,3</code></a>, <a href="#match/1"><code class="inline">match/1,3</code></a>, and <a href="#match_object/1"><code class="inline">match_object/1,3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:match_pattern/0">
+  <div class="detail-header">
+    <a href="#t:match_pattern/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>match_pattern() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:match_spec/0">
+  <div class="detail-header">
+    <a href="#t:match_spec/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>match_spec() :: [{<a href="#t:match_pattern/0">match_pattern</a>(), [_], [_]}].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A match specification, see above.</p>
+  </section>
+</section>
+<section class="detail" id="t:tab/0">
+  <div class="detail-header">
+    <a href="#t:tab/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>tab() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>() | <a href="#t:tid/0">tid</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:tid/0">
+  <div class="detail-header">
+    <a href="#t:tid/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <span class="note">(opaque)</span>
+      <div class="specs">
+          <pre>tid() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">reference</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A table identifier, as returned by <a href="#new/2"><code class="inline">new/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:type/0">
+  <div class="detail-header">
+    <a href="#t:type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>type() :: set | ordered_set | bag | duplicate_bag.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="all/0">
+  <div class="detail-header">
+    <a href="#all/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all/0</h1>
+      <div class="specs">
+          <pre>all() -> [Tab] when Tab :: <a href="#t:tab/0">tab</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of all tables at the node. Named tables are specified by their names, unnamed tables are specified by their table identifiers.</p>
+<p>There is no guarantee of consistency in the returned list. Tables created or deleted by other processes &quot;during&quot; the <code class="inline">ets:all()</code> call either are or are not included in the list. Only tables created/deleted <em >before</em> <code class="inline">ets:all()</code> is called are guaranteed to be included/excluded.</p>
+  </section>
+</section>
+<section class="detail" id="delete/1">
+  <div class="detail-header">
+    <a href="#delete/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete/1</h1>
+      <div class="specs">
+          <pre>delete(Tab) -> true when Tab :: <a href="#t:tab/0">tab</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Deletes the entire table <a type="anno">Tab</a>.</p>
+  </section>
+</section>
+<section class="detail" id="delete/2">
+  <div class="detail-header">
+    <a href="#delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete/2</h1>
+      <div class="specs">
+          <pre>delete(Tab, Key) -> true when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Deletes all objects with key <a type="anno">Key</a> from table <a type="anno">Tab</a>.</p>
+  </section>
+</section>
+<section class="detail" id="delete_all_objects/1">
+  <div class="detail-header">
+    <a href="#delete_all_objects/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_all_objects/1</h1>
+      <div class="specs">
+          <pre>delete_all_objects(Tab) -> true when Tab :: <a href="#t:tab/0">tab</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Delete all objects in the ETS table <a type="anno">Tab</a>. The operation is guaranteed to be atomic and isolated.</p>
+  </section>
+</section>
+<section class="detail" id="delete_object/2">
+  <div class="detail-header">
+    <a href="#delete_object/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_object/2</h1>
+      <div class="specs">
+          <pre>delete_object(Tab, Object) -> true
+                 when Tab :: <a href="#t:tab/0">tab</a>(), Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Delete the exact object <a type="anno">Object</a> from the ETS table, leaving objects with the same key but other differences (useful for type <code class="inline">bag</code>). In a <code class="inline">duplicate_bag</code> table, all instances of the object are deleted.</p>
+  </section>
+</section>
+<section class="detail" id="file2tab/1">
+  <div class="detail-header">
+    <a href="#file2tab/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">file2tab/1</h1>
+      <div class="specs">
+          <pre>file2tab(Filename) -> {ok, Tab} | {error, Reason}
+            when
+                Filename :: file:name(),
+                Tab :: <a href="#t:tab/0">tab</a>(),
+                Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Reads a file produced by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a> and creates the corresponding table <a type="anno">Tab</a>.</p>
+<p>Equivalent to <code class="inline">file2tab(Filename, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="file2tab/2">
+  <div class="detail-header">
+    <a href="#file2tab/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">file2tab/2</h1>
+      <div class="specs">
+          <pre>file2tab(Filename, Options) -> {ok, Tab} | {error, Reason}
+            when
+                Filename :: file:name(),
+                Tab :: <a href="#t:tab/0">tab</a>(),
+                Options :: [Option],
+                Option :: {verify, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()},
+                Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Reads a file produced by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a> and creates the corresponding table <a type="anno">Tab</a>.</p>
+<p>The only supported option is <code class="inline">{verify,boolean()}</code>. If verification is turned on (by specifying <code class="inline">{verify,true}</code>), the function uses whatever information is present in the file to assert that the information is not damaged. How this is done depends on which <code class="inline">extended_info</code> was written using <a href="#tab2file/3"><code class="inline">tab2file/3</code></a>.</p>
+<p>If no <code class="inline">extended_info</code> is present in the file and <code class="inline">{verify,true}</code> is specified, the number of objects written is compared to the size of the original table when the dump was started. This can make verification fail if the table was <code class="inline">public</code> and objects were added or removed while the table was dumped to file. To avoid this problem, either do not verify files dumped while updated simultaneously or use option <code class="inline">{extended_info, [object_count]}</code> to <a href="#tab2file/3"><code class="inline">tab2file/3</code></a>, which extends the information in the file with the number of objects written.</p>
+<p>If verification is turned on and the file was written with option <code class="inline">{extended_info, [md5sum]}</code>, reading the file is slower and consumes radically more CPU time than otherwise.</p>
+<p><code class="inline">{verify,false}</code> is the default.</p>
+  </section>
+</section>
+<section class="detail" id="first/1">
+  <div class="detail-header">
+    <a href="#first/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">first/1</h1>
+      <div class="specs">
+          <pre>first(Tab) -> Key | '$end_of_table'
+         when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the first key <a type="anno">Key</a> in table <a type="anno">Tab</a>. For an <code class="inline">ordered_set</code> table, the first key in Erlang term order is returned. For other table types, the first key according to the internal order of the table is returned. If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>To find subsequent keys in the table, use <a href="#next/2"><code class="inline">next/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="foldl/3">
+  <div class="detail-header">
+    <a href="#foldl/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">foldl/3</h1>
+      <div class="specs">
+          <pre>foldl(Function, Acc0, Tab) -> Acc1
+         when
+             Function :: fun((Element :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), AccIn) -> AccOut),
+             Tab :: <a href="#t:tab/0">tab</a>(),
+             Acc0 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             Acc1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             AccIn :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             AccOut :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a type="anno">Acc0</a> is returned if the table is empty. This function is similar to <code class="inline">lists:foldl/3</code>. The table elements are traversed in an unspecified order, except for <code class="inline">ordered_set</code> tables, where they are traversed first to last.</p>
+<p>If <a type="anno">Function</a> inserts objects into the table, or another process inserts objects into the table, those objects <em >can</em> (depending on key ordering) be included in the traversal.</p>
+  </section>
+</section>
+<section class="detail" id="foldr/3">
+  <div class="detail-header">
+    <a href="#foldr/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">foldr/3</h1>
+      <div class="specs">
+          <pre>foldr(Function, Acc0, Tab) -> Acc1
+         when
+             Function :: fun((Element :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), AccIn) -> AccOut),
+             Tab :: <a href="#t:tab/0">tab</a>(),
+             Acc0 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             Acc1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             AccIn :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             AccOut :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p><a type="anno">Acc0</a> is returned if the table is empty. This function is similar to <code class="inline">lists:foldr/3</code>. The table elements are traversed in an unspecified order, except for <code class="inline">ordered_set</code> tables, where they are traversed last to first.</p>
+<p>If <a type="anno">Function</a> inserts objects into the table, or another process inserts objects into the table, those objects <em >can</em> (depending on key ordering) be included in the traversal.</p>
+  </section>
+</section>
+<section class="detail" id="from_dets/2">
+  <div class="detail-header">
+    <a href="#from_dets/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">from_dets/2</h1>
+      <div class="specs">
+          <pre>from_dets(Tab, DetsTab) -> true
+             when Tab :: <a href="#t:tab/0">tab</a>(), DetsTab :: dets:tab_name().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Fills an already created ETS table with the objects in the already opened Dets table <a type="anno">DetsTab</a>. Existing objects in the ETS table are kept unless overwritten.</p>
+<p>If any of the tables does not exist or the Dets table is not open, a <code class="inline">badarg</code> exception is raised.</p>
+  </section>
+</section>
+<section class="detail" id="fun2ms/1">
+  <div class="detail-header">
+    <a href="#fun2ms/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fun2ms/1</h1>
+      <div class="specs">
+          <pre>fun2ms(LiteralFun) -> MatchSpec
+          when LiteralFun :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">function</a>(), MatchSpec :: <a href="#t:match_spec/0">match_spec</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Pseudo function that by a <code class="inline">parse_transform</code> translates <a type="anno">LiteralFun</a> typed as parameter in the function call to a match specification. With &quot;literal&quot; is meant that the fun must textually be written as the parameter of the function, it cannot be held in a variable that in turn is passed to the function.</p>
+<p>The parse transform is provided in the <code class="inline">ms_transform</code> module and the source <em >must</em> include file <code class="inline">ms_transform.hrl</code> in STDLIB for this pseudo function to work. Failing to include the hrl file in the source results in a runtime error, not a compile time error. The include file is easiest included by adding line <code class="inline">-include_lib(&quot;stdlib/include/ms_transform.hrl&quot;).</code> to the source file.</p>
+<p>The fun is very restricted, it can take only a single parameter (the object to match): a sole variable or a tuple. It must use the <code class="inline">is_</code> guard tests. Language constructs that have no representation in a match specification (<code class="inline">if</code>, <code class="inline">case</code>, <code class="inline">receive</code>, and so on) are not allowed.</p>
+<p>The return value is the resulting match specification.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:fun2ms</span><span class="p" data-group-id="2399161879-1">(</span><span class="n">fun</span><span class="p" data-group-id="2399161879-2">(</span><span class="p" data-group-id="2399161879-3">{</span><span class="nc">M</span><span class="p">,</span><span class="nc">N</span><span class="p" data-group-id="2399161879-3">}</span><span class="p" data-group-id="2399161879-2">)</span><span class="w"> </span><span class="ow">when</span><span class="w"> </span><span class="nc">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">M</span><span class="w"> </span><span class="k">end</span><span class="p" data-group-id="2399161879-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2399161879-4">[</span><span class="p" data-group-id="2399161879-5">{</span><span class="p" data-group-id="2399161879-6">{</span><span class="sc">&#39;$1&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="2399161879-6">}</span><span class="p">,</span><span class="p" data-group-id="2399161879-7">[</span><span class="p" data-group-id="2399161879-8">{</span><span class="sc">&#39;&gt;&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="2399161879-8">}</span><span class="p" data-group-id="2399161879-7">]</span><span class="p">,</span><span class="p" data-group-id="2399161879-9">[</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="2399161879-9">]</span><span class="p" data-group-id="2399161879-5">}</span><span class="p" data-group-id="2399161879-4">]</span></code></pre>
+<p>Variables from the environment can be imported, so that the following works:</p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">X</span><span class="o">=</span><span class="mi">3</span><span class="o">.</span><span class="w">
+</span><span class="mi">3</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:fun2ms</span><span class="p" data-group-id="8080767256-1">(</span><span class="n">fun</span><span class="p" data-group-id="8080767256-2">(</span><span class="p" data-group-id="8080767256-3">{</span><span class="nc">M</span><span class="p">,</span><span class="nc">N</span><span class="p" data-group-id="8080767256-3">}</span><span class="p" data-group-id="8080767256-2">)</span><span class="w"> </span><span class="ow">when</span><span class="w"> </span><span class="nc">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">M</span><span class="w"> </span><span class="k">end</span><span class="p" data-group-id="8080767256-1">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8080767256-4">[</span><span class="p" data-group-id="8080767256-5">{</span><span class="p" data-group-id="8080767256-6">{</span><span class="sc">&#39;$1&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="8080767256-6">}</span><span class="p">,</span><span class="p" data-group-id="8080767256-7">[</span><span class="p" data-group-id="8080767256-8">{</span><span class="sc">&#39;&gt;&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p">,</span><span class="p" data-group-id="8080767256-9">{</span><span class="n">const</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="8080767256-9">}</span><span class="p" data-group-id="8080767256-8">}</span><span class="p" data-group-id="8080767256-7">]</span><span class="p">,</span><span class="p" data-group-id="8080767256-10">[</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="8080767256-10">]</span><span class="p" data-group-id="8080767256-5">}</span><span class="p" data-group-id="8080767256-4">]</span></code></pre>
+<p>The imported variables are replaced by match specification <code class="inline">const</code> expressions, which is consistent with the static scoping for Erlang funs. However, local or global function calls cannot be in the guard or body of the fun. Calls to built-in match specification functions is of course allowed:</p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:fun2ms</span><span class="p" data-group-id="2498799647-1">(</span><span class="n">fun</span><span class="p" data-group-id="2498799647-2">(</span><span class="p" data-group-id="2498799647-3">{</span><span class="nc">M</span><span class="p">,</span><span class="nc">N</span><span class="p" data-group-id="2498799647-3">}</span><span class="p" data-group-id="2498799647-2">)</span><span class="w"> </span><span class="ow">when</span><span class="w"> </span><span class="nc">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nc">X</span><span class="p">,</span><span class="w"> </span><span class="n">my_fun</span><span class="p" data-group-id="2498799647-4">(</span><span class="nc">M</span><span class="p" data-group-id="2498799647-4">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">M</span><span class="w"> </span><span class="k">end</span><span class="p" data-group-id="2498799647-1">)</span><span class="o">.</span><span class="w">
+</span><span class="ss">Error</span><span class="p">:</span><span class="w"> </span><span class="n">fun</span><span class="w"> </span><span class="n">containing</span><span class="w"> </span><span class="n">local</span><span class="w"> </span><span class="nc">Erlang</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="n">calls</span><span class="w">
+</span><span class="p" data-group-id="2498799647-5">(</span><span class="sc">&#39;my_fun&#39;</span><span class="w"> </span><span class="n">called</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">guard</span><span class="p" data-group-id="2498799647-5">)</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">translated</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">match_spec</span><span class="w">
+</span><span class="p" data-group-id="2498799647-6">{</span><span class="n">error</span><span class="p">,</span><span class="n">transform_error</span><span class="p" data-group-id="2498799647-6">}</span><span class="w">
+</span><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:fun2ms</span><span class="p" data-group-id="2498799647-7">(</span><span class="n">fun</span><span class="p" data-group-id="2498799647-8">(</span><span class="p" data-group-id="2498799647-9">{</span><span class="nc">M</span><span class="p">,</span><span class="nc">N</span><span class="p" data-group-id="2498799647-9">}</span><span class="p" data-group-id="2498799647-8">)</span><span class="w"> </span><span class="ow">when</span><span class="w"> </span><span class="nc">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nc">X</span><span class="p">,</span><span class="w"> </span><span class="n">is_atom</span><span class="p" data-group-id="2498799647-10">(</span><span class="nc">M</span><span class="p" data-group-id="2498799647-10">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">M</span><span class="w"> </span><span class="k">end</span><span class="p" data-group-id="2498799647-7">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2498799647-11">[</span><span class="p" data-group-id="2498799647-12">{</span><span class="p" data-group-id="2498799647-13">{</span><span class="sc">&#39;$1&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="2498799647-13">}</span><span class="p">,</span><span class="p" data-group-id="2498799647-14">[</span><span class="p" data-group-id="2498799647-15">{</span><span class="sc">&#39;&gt;&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p">,</span><span class="p" data-group-id="2498799647-16">{</span><span class="n">const</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="2498799647-16">}</span><span class="p" data-group-id="2498799647-15">}</span><span class="p">,</span><span class="p" data-group-id="2498799647-17">{</span><span class="n">is_atom</span><span class="p">,</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="2498799647-17">}</span><span class="p" data-group-id="2498799647-14">]</span><span class="p">,</span><span class="p" data-group-id="2498799647-18">[</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="2498799647-18">]</span><span class="p" data-group-id="2498799647-12">}</span><span class="p" data-group-id="2498799647-11">]</span></code></pre>
+<p>As shown by the example, the function can be called from the shell also. The fun must be literally in the call when used from the shell as well.</p>
+<p>If the <code class="inline">parse_transform</code> is not applied to a module that calls this pseudo function, the call fails in runtime (with a <code class="inline">badarg</code>). The <code class="inline">ets</code> module exports a function with this name, but it is never to be called except when using the function in the shell. If the <code class="inline">parse_transform</code> is properly applied by including header file <code class="inline">ms_transform.hrl</code>, compiled code never calls the function, but the function call is replaced by a literal match specification.</p>
+<p>For more information, see <code class="inline">ms_transform(3)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="give_away/3">
+  <div class="detail-header">
+    <a href="#give_away/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">give_away/3</h1>
+      <div class="specs">
+          <pre>give_away(Tab, Pid, GiftData) -> true
+             when Tab :: <a href="#t:tab/0">tab</a>(), Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(), GiftData :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Make process <a type="anno">Pid</a> the new owner of table <a type="anno">Tab</a>. If successful, message <code class="inline">{&#39;ETS-TRANSFER&#39;,Tab,FromPid,GiftData}</code> is sent to the new owner.</p>
+<p>The process <a type="anno">Pid</a> must be alive, local, and not already the owner of the table. The calling process must be the table owner.</p>
+<p>Notice that this function does not affect option <code class="inline">heir</code> of the table. A table owner can, for example, set <code class="inline">heir</code> to itself, give the table away, and then get it back if the receiver terminates.</p>
+  </section>
+</section>
+<section class="detail" id="i/0">
+  <div class="detail-header">
+    <a href="#i/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">i/0</h1>
+      <div class="specs">
+          <pre>i() -> ok.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Displays information about all ETS tables on a terminal.</p>
+  </section>
+</section>
+<section class="detail" id="i/1">
+  <div class="detail-header">
+    <a href="#i/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">i/1</h1>
+      <div class="specs">
+          <pre>i(Tab) -> ok when Tab :: <a href="#t:tab/0">tab</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Browses table <a type="anno">Tab</a> on a terminal.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1</h1>
+      <div class="specs">
+          <pre>info(Tab) -> InfoList | undefined
+        when
+            Tab :: <a href="#t:tab/0">tab</a>(),
+            InfoList :: [InfoTuple],
+            InfoTuple ::
+                {compressed, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                {decentralized_counters, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                {heir, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>() | none} |
+                {id, <a href="#t:tid/0">tid</a>()} |
+                {keypos, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()} |
+                {memory, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                {name, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()} |
+                {named_table, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                {node, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">node</a>()} |
+                {owner, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()} |
+                {protection, <a href="#t:access/0">access</a>()} |
+                {size, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                {type, <a href="#t:type/0">type</a>()} |
+                {write_concurrency, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                {read_concurrency, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns information about table <a type="anno">Tab</a> as a list of tuples. If <a type="anno">Tab</a> has the correct type for a table identifier, but does not refer to an existing ETS table, <code class="inline">undefined</code> is returned. If <a type="anno">Tab</a> is not of the correct type, a <code class="inline">badarg</code> exception is raised.</p>
+<dl ><dt >`{compressed, boolean()}`</dt><dd >
+Indicates if the table is compressed.
+</dd><dt >`{decentralized_counters, boolean()}`</dt><dd >
+Indicates whether the table uses `decentralized_counters`.
+</dd><dt >`{heir, pid() | none}`</dt><dd >
+The pid of the heir of the table, or `none` if no heir is set.
+</dd><dt >`{id,` `tid()``}`</dt><dd >
+The table identifier.
+</dd><dt >`{keypos, integer() >= 1}`</dt><dd >
+The key position.
+</dd><dt >`{memory, integer() >= 0`</dt><dd >
+The number of words allocated to the table.
+</dd><dt >`{name, atom()}`</dt><dd >
+The table name.
+</dd><dt >`{named_table, boolean()}`</dt><dd >
+Indicates if the table is named.
+</dd><dt >`{node, node()}`</dt><dd >
+The node where the table is stored. This field is no longer meaningful, as tables cannot be accessed from other nodes.
+</dd><dt >`{owner, pid()}`</dt><dd >
+The pid of the owner of the table.
+</dd><dt >`{protection,` `access()``}`</dt><dd >
+The table access rights.
+</dd><dt >`{size, integer() >= 0`</dt><dd >
+The number of objects inserted in the table.
+</dd><dt >`{type,` `type()``}`</dt><dd >
+The table type.
+</dd><dt >`{read_concurrency, boolean()}`</dt><dd >
+Indicates whether the table uses `read_concurrency` or not.
+</dd><dt >`{write_concurrency, boolean()}`</dt><dd >
+Indicates whether the table uses `write_concurrency`.
+</dd></dl>
+
+The execution time of this function is affected by the `decentralized_counters` table option. The execution time is much longer when the `decentralized_counters` option is set to `true` than when the `decentralized_counters` option is set to `false`.  </section>
+</section>
+<section class="detail" id="info/2">
+  <div class="detail-header">
+    <a href="#info/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/2</h1>
+      <div class="specs">
+          <pre>info(Tab, Item) -> Value | undefined
+        when
+            Tab :: <a href="#t:tab/0">tab</a>(),
+            Item ::
+                binary | compressed | decentralized_counters |
+                fixed | heir | id | keypos | memory | name |
+                named_table | node | owner | protection |
+                safe_fixed | safe_fixed_monotonic_time | size |
+                stats | type | write_concurrency |
+                read_concurrency,
+            Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the information associated with <code class="inline">Item</code> for table <a type="anno">Tab</a>, or returns <code class="inline">undefined</code> if <code class="inline">Tab</code> does not refer an existing ETS table. If <a type="anno">Tab</a> is not of the correct type, or if <a type="anno">Item</a> is not one of the allowed values, a <code class="inline">badarg</code> exception is raised.</p>
+<p>In addition to the <code class="inline">{Item,Value}</code> pairs defined for <a href="#info/1"><code class="inline">info/1</code></a>, the following items are allowed:</p>
+<ul ><li >
+`Item=binary, Value=BinInfo`
+
+`BinInfo` is a list containing miscellaneous information about binaries kept by the table. This <a type="anno">Item</a> can be changed or removed without prior notice. In the current implementation `BinInfo` is a list of tuples `{BinaryId,BinarySize,BinaryRefcCount}`.
+</li><li >
+`Item=fixed, Value=boolean()`
+
+Indicates if the table is fixed by any process.
+</li><li >
+<a id="info_2_safe_fixed_monotonic_time"></a>
+
+`Item=safe_fixed|safe_fixed_monotonic_time, Value={FixationTime,Info}|false`
+
+If the table is fixed using [`safe_fixtable/2`](#safe_fixtable/2), the call returns a tuple where `FixationTime` is the last time when the table changed from unfixed to fixed.
+
+The format and value of `FixationTime` depends on `Item`:
+<dl ><dt >`safe_fixed`</dt><dd >
+`FixationTime` corresponds to the result returned by `erlang:timestamp/0` at the time of fixation. Notice that when the system uses single or multi time warp modes this can produce strange results, as the use of `safe_fixed` is not time warp safe. Time warp safe code must use `safe_fixed_monotonic_time` instead.
+</dd><dt >`safe_fixed_monotonic_time`</dt><dd >
+`FixationTime` corresponds to the result returned by `erlang:monotonic_time/0` at the time of fixation. The use of `safe_fixed_monotonic_time` is time warp safe.
+</dd></dl>
+`Info` is a possibly empty lists of tuples `{Pid,RefCount}`, one tuple for every process the table is fixed by now. `RefCount` is the value of the reference counter and it keeps track of how many times the table has been fixed by the process.
+
+Table fixations are not limited to [`safe_fixtable/2`](#safe_fixtable/2). Temporary fixations may also be done by for example traversing functions like `select` and `match`. Such table fixations are automatically released before the corresponding functions returns, but they may be seen by a concurrent call to `ets:info(T,safe_fixed|safe_fixed_monotonic_time)`.
+
+If the table is not fixed at all, the call returns `false`.
+</li><li >
+`Item=stats, Value=tuple()`
+
+Returns internal statistics about tables on an internal format used by OTP test suites. Not for production use.
+</li></ul>
+
+The execution time of this function is affected by the `decentralized_counters` table option when the second argument of the function is `size` or `memory`. The execution time is much longer when the `decentralized_counters` option is set to `true` than when the `decentralized_counters` option is set to `false`.  </section>
+</section>
+<section class="detail" id="init_table/2">
+  <div class="detail-header">
+    <a href="#init_table/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init_table/2</h1>
+      <div class="specs">
+          <pre>init_table(Tab, InitFun) -> true
+              when
+                  Tab :: <a href="#t:tab/0">tab</a>(),
+                  InitFun :: fun((Arg) -> Res),
+                  Arg :: read | close,
+                  Res ::
+                      end_of_input |
+                      {Objects :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()], InitFun} |
+                      <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Replaces the existing objects of table <a type="anno">Tab</a> with objects created by calling the input function <a type="anno">InitFun</a>, see below. This function is provided for compatibility with the <code class="inline">dets</code> module, it is not more efficient than filling a table by using <a href="#insert/2"><code class="inline">insert/2</code></a>.</p>
+<p>When called with argument <code class="inline">read</code>, the function <a type="anno">InitFun</a> is assumed to return <code class="inline">end_of_input</code> when there is no more input, or <code class="inline">{Objects, Fun}</code>, where <a type="anno">Objects</a> is a list of objects and <code class="inline">Fun</code> is a new input function. Any other value <code class="inline">Value</code> is returned as an error <code class="inline">{error, {init_fun, Value}}</code>. Each input function is called exactly once, and if an error occur, the last function is called with argument <code class="inline">close</code>, the reply of which is ignored.</p>
+<p>If the table type is <code class="inline">set</code> and more than one object exists with a given key, one of the objects is chosen. This is not necessarily the last object with the given key in the sequence of objects returned by the input functions. This holds also for duplicated objects stored in tables of type <code class="inline">bag</code>.</p>
+  </section>
+</section>
+<section class="detail" id="insert/2">
+  <div class="detail-header">
+    <a href="#insert/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/2</h1>
+      <div class="specs">
+          <pre>insert(Tab, ObjectOrObjects) -> true
+          when
+              Tab :: <a href="#t:tab/0">tab</a>(), ObjectOrObjects :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>() | [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Inserts the object or all of the objects in list <a type="anno">ObjectOrObjects</a> into table <a type="anno">Tab</a>.</p>
+<ul ><li >
+If the table type is `set` and the key of the inserted objects <em >matches</em> the key of any object in the table, the old object is replaced.
+</li><li >
+If the table type is `ordered_set` and the key of the inserted object <em >compares equal</em> to the key of any object in the table, the old object is replaced.
+</li><li >
+If the list contains more than one object with <em >matching</em> keys and the table type is `set`, one is inserted, which one is not defined. The same holds for table type `ordered_set` if the keys <em >compare equal</em>.
+</li></ul>
+The entire operation is guaranteed to be atomic and isolated, even when a list of objects is inserted.  </section>
+</section>
+<section class="detail" id="insert_new/2">
+  <div class="detail-header">
+    <a href="#insert_new/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert_new/2</h1>
+      <div class="specs">
+          <pre>insert_new(Tab, ObjectOrObjects) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+              when
+                  Tab :: <a href="#t:tab/0">tab</a>(),
+                  ObjectOrObjects :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>() | [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Same as <a href="#insert/2"><code class="inline">insert/2</code></a> except that instead of overwriting objects with the same key (for <code class="inline">set</code> or <code class="inline">ordered_set</code>) or adding more objects with keys already existing in the table (for <code class="inline">bag</code> and <code class="inline">duplicate_bag</code>), <code class="inline">false</code> is returned.</p>
+<p>If <a type="anno">ObjectOrObjects</a> is a list, the function checks <em >every</em> key before inserting anything. Nothing is inserted unless <em >all</em> keys present in the list are absent from the table. Like <a href="#insert/2"><code class="inline">insert/2</code></a>, the entire operation is guaranteed to be atomic and isolated.</p>
+  </section>
+</section>
+<section class="detail" id="is_compiled_ms/1">
+  <div class="detail-header">
+    <a href="#is_compiled_ms/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_compiled_ms/1</h1>
+      <div class="specs">
+          <pre>is_compiled_ms(Term) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() when Term :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Checks if a term represent a valid compiled match specification. A compiled match specifications is only valid on the Erlang node where it was compiled by calling <a href="#match_spec_compile/1"><code class="inline">match_spec_compile/1</code></a>.</p>
+<p>Before STDLIB 3.4 (OTP 20.0) compiled match specifications did not have an external representation. If passed through <code class="inline">binary_to_term(term_to_binary(CMS))</code> or sent to another node and back, the result was always an empty binary <code class="inline">&lt;&lt;&gt;&gt;</code>.</p>
+<p>After STDLIB 3.4 (OTP 20.0) compiled match specifications have an external representation as a node specific reference to the original compiled match specification. If passed through <code class="inline">binary_to_term(term_to_binary(CMS))</code> or sent to another node and back, the result <em >may or may not</em> be a valid compiled match specification depending on if the original compiled match specification was still alive.</p>
+  </section>
+</section>
+<section class="detail" id="last/1">
+  <div class="detail-header">
+    <a href="#last/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">last/1</h1>
+      <div class="specs">
+          <pre>last(Tab) -> Key | '$end_of_table'
+        when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the last key <a type="anno">Key</a> according to Erlang term order in table <code class="inline">Tab</code> of type <code class="inline">ordered_set</code>. For other table types, the function is synonymous to <a href="#first/1"><code class="inline">first/1</code></a>. If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>To find preceding keys in the table, use <a href="#prev/2"><code class="inline">prev/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="lookup/2">
+  <div class="detail-header">
+    <a href="#lookup/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lookup/2</h1>
+      <div class="specs">
+          <pre>lookup(Tab, Key) -> [Object]
+          when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of all objects with key <a type="anno">Key</a> in table <a type="anno">Tab</a>.</p>
+<ul ><li >
+For tables of type `set`, `bag`, or `duplicate_bag`, an object is returned only if the specified key <em >matches</em> the key of the object in the table.
+</li><li >
+For tables of type `ordered_set`, an object is returned if the specified key <em >compares equal</em> to the key of an object in the table.
+</li></ul>
+The difference is the same as between `=:=` and `==`.
+
+As an example, one can insert an object with `integer()` `1` as a key in an `ordered_set` and get the object returned as a result of doing a [`lookup/2`](#lookup/2) with `float()` `1.0` as the key to search for.
+
+For tables of type `set` or `ordered_set`, the function returns either the empty list or a list with one element, as there cannot be more than one object with the same key. For tables of type `bag` or `duplicate_bag`, the function returns a list of arbitrary length.
+
+Notice that the time order of object insertions is preserved; the first object inserted with the specified key is the first in the resulting list, and so on.
+
+Insert and lookup times in tables of type `set`, `bag`, and `duplicate_bag` are constant, regardless of the table size. For the `ordered_set` datatype, time is proportional to the (binary) logarithm of the number of objects.  </section>
+</section>
+<section class="detail" id="lookup_element/3">
+  <div class="detail-header">
+    <a href="#lookup_element/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lookup_element/3</h1>
+      <div class="specs">
+          <pre>lookup_element(Tab, Key, Pos) -> Elem
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                      Elem :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>() | [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>For a table <a type="anno">Tab</a> of type <code class="inline">set</code> or <code class="inline">ordered_set</code>, the function returns the <a type="anno">Pos</a>:th element of the object with key <a type="anno">Key</a>.</p>
+<p>For tables of type <code class="inline">bag</code> or <code class="inline">duplicate_bag</code>, the functions returns a list with the <a type="anno">Pos</a>:th element of every object with key <a type="anno">Key</a>.</p>
+<p>If no object with key <a type="anno">Key</a> exists, the function exits with reason <code class="inline">badarg</code>.</p>
+<p>The difference between <code class="inline">set</code>, <code class="inline">bag</code>, and <code class="inline">duplicate_bag</code> on one hand, and <code class="inline">ordered_set</code> on the other, regarding the fact that <code class="inline">ordered_set</code> view keys as equal when they <em >compare equal</em> whereas the other table types regard them equal only when they <em >match</em>, holds for <a href="#lookup_element/3"><code class="inline">lookup_element/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="match/1">
+  <div class="detail-header">
+    <a href="#match/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match/1</h1>
+      <div class="specs">
+          <pre>match(Continuation) -> {[Match], Continuation} | '$end_of_table'
+         when Match :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()], Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Continues a match started with <a href="#match/3"><code class="inline">match/3</code></a>. The next chunk of the size specified in the initial <a href="#match/3"><code class="inline">match/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p>
+<p>When there are no more objects in the table, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="match/2">
+  <div class="detail-header">
+    <a href="#match/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match/2</h1>
+      <div class="specs">
+          <pre>match(Tab, Pattern) -> [Match]
+         when
+             Tab :: <a href="#t:tab/0">tab</a>(),
+             Pattern :: <a href="#t:match_pattern/0">match_pattern</a>(),
+             Match :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in table <a type="anno">Tab</a> against pattern <a type="anno">Pattern</a>.</p>
+<p>A pattern is a term that can contain:</p>
+<ul ><li >Bound parts (Erlang terms)</li><li >`'_'` that matches any Erlang term</li><li >Pattern variables `'$N'`, where `N`=0,1,...</li></ul><p>The function returns a list with one element for each matching object, where each element is an ordered list of pattern variable bindings, for example:</p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:match</span><span class="p" data-group-id="6763553798-1">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="6763553798-1">)</span><span class="o">.</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="nc">Matches</span><span class="w"> </span><span class="n">every</span><span class="w"> </span><span class="n">object</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">table</span><span class="w">
+</span><span class="p" data-group-id="6763553798-2">[</span><span class="p" data-group-id="6763553798-3">[</span><span class="p" data-group-id="6763553798-4">{</span><span class="n">rufsen</span><span class="p">,</span><span class="n">dog</span><span class="p">,</span><span class="mi">7</span><span class="p" data-group-id="6763553798-4">}</span><span class="p" data-group-id="6763553798-3">]</span><span class="p">,</span><span class="p" data-group-id="6763553798-5">[</span><span class="p" data-group-id="6763553798-6">{</span><span class="n">brunte</span><span class="p">,</span><span class="n">horse</span><span class="p">,</span><span class="mi">5</span><span class="p" data-group-id="6763553798-6">}</span><span class="p" data-group-id="6763553798-5">]</span><span class="p">,</span><span class="p" data-group-id="6763553798-7">[</span><span class="p" data-group-id="6763553798-8">{</span><span class="n">ludde</span><span class="p">,</span><span class="n">dog</span><span class="p">,</span><span class="mi">5</span><span class="p" data-group-id="6763553798-8">}</span><span class="p" data-group-id="6763553798-7">]</span><span class="p" data-group-id="6763553798-2">]</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:match</span><span class="p" data-group-id="6763553798-9">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6763553798-10">{</span><span class="sc">&#39;_&#39;</span><span class="p">,</span><span class="n">dog</span><span class="p">,</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="6763553798-10">}</span><span class="p" data-group-id="6763553798-9">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6763553798-11">[</span><span class="p" data-group-id="6763553798-12">[</span><span class="mi">7</span><span class="p" data-group-id="6763553798-12">]</span><span class="p">,</span><span class="p" data-group-id="6763553798-13">[</span><span class="mi">5</span><span class="p" data-group-id="6763553798-13">]</span><span class="p" data-group-id="6763553798-11">]</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:match</span><span class="p" data-group-id="6763553798-14">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6763553798-15">{</span><span class="sc">&#39;_&#39;</span><span class="p">,</span><span class="n">cow</span><span class="p">,</span><span class="sc">&#39;$1&#39;</span><span class="p" data-group-id="6763553798-15">}</span><span class="p" data-group-id="6763553798-14">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6763553798-16">[</span><span class="p" data-group-id="6763553798-16">]</span></code></pre>
+<p>If the key is specified in the pattern, the match is very efficient. If the key is not specified, that is, if it is a variable or an underscore, the entire table must be searched. The search time can be substantial if the table is very large.</p>
+<p>For tables of type <code class="inline">ordered_set</code>, the result is in the same order as in a <code class="inline">first</code>/<code class="inline">next</code> traversal.</p>
+  </section>
+</section>
+<section class="detail" id="match/3">
+  <div class="detail-header">
+    <a href="#match/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match/3</h1>
+      <div class="specs">
+          <pre>match(Tab, Pattern, Limit) ->
+         {[Match], Continuation} | '$end_of_table'
+         when
+             Tab :: <a href="#t:tab/0">tab</a>(),
+             Pattern :: <a href="#t:match_pattern/0">match_pattern</a>(),
+             Limit :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+             Match :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+             Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#match/2"><code class="inline">match/2</code></a>, but returns only a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#match/1"><code class="inline">match/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p>
+<p>If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>Use <a href="#safe_fixtable/2"><code class="inline">safe_fixtable/2</code></a> to guarantee safe traversal for subsequent calls to <a href="#match/1"><code class="inline">match/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="match_delete/2">
+  <div class="detail-header">
+    <a href="#match_delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_delete/2</h1>
+      <div class="specs">
+          <pre>match_delete(Tab, Pattern) -> true
+                when Tab :: <a href="#t:tab/0">tab</a>(), Pattern :: <a href="#t:match_pattern/0">match_pattern</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Deletes all objects that match pattern <a type="anno">Pattern</a> from table <a type="anno">Tab</a>. For a description of patterns, see <a href="#match/2"><code class="inline">match/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="match_object/1">
+  <div class="detail-header">
+    <a href="#match_object/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_object/1</h1>
+      <div class="specs">
+          <pre>match_object(Continuation) ->
+                {[Object], Continuation} | '$end_of_table'
+                when
+                    Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>(),
+                    Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Continues a match started with <a href="#match_object/3"><code class="inline">match_object/3</code></a>. The next chunk of the size specified in the initial <a href="#match_object/3"><code class="inline">match_object/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p>
+<p>When there are no more objects in the table, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="match_object/2">
+  <div class="detail-header">
+    <a href="#match_object/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_object/2</h1>
+      <div class="specs">
+          <pre>match_object(Tab, Pattern) -> [Object]
+                when
+                    Tab :: <a href="#t:tab/0">tab</a>(),
+                    Pattern :: <a href="#t:match_pattern/0">match_pattern</a>(),
+                    Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in table <a type="anno">Tab</a> against pattern <a type="anno">Pattern</a>. For a description of patterns, see <a href="#match/2"><code class="inline">match/2</code></a>. The function returns a list of all objects that match the pattern.</p>
+<p>If the key is specified in the pattern, the match is very efficient. If the key is not specified, that is, if it is a variable or an underscore, the entire table must be searched. The search time can be substantial if the table is very large.</p>
+<p>For tables of type <code class="inline">ordered_set</code>, the result is in the same order as in a <code class="inline">first</code>/<code class="inline">next</code> traversal.</p>
+  </section>
+</section>
+<section class="detail" id="match_object/3">
+  <div class="detail-header">
+    <a href="#match_object/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_object/3</h1>
+      <div class="specs">
+          <pre>match_object(Tab, Pattern, Limit) ->
+                {[Object], Continuation} | '$end_of_table'
+                when
+                    Tab :: <a href="#t:tab/0">tab</a>(),
+                    Pattern :: <a href="#t:match_pattern/0">match_pattern</a>(),
+                    Limit :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                    Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>(),
+                    Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#match_object/2"><code class="inline">match_object/2</code></a>, but only returns a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#match_object/1"><code class="inline">match_object/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p>
+<p>If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>Use <a href="#safe_fixtable/2"><code class="inline">safe_fixtable/2</code></a> to guarantee safe traversal for subsequent calls to <a href="#match_object/1"><code class="inline">match_object/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="match_spec_compile/1">
+  <div class="detail-header">
+    <a href="#match_spec_compile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_spec_compile/1</h1>
+      <div class="specs">
+          <pre>match_spec_compile(MatchSpec) -> CompiledMatchSpec
+                      when
+                          MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                          CompiledMatchSpec :: <a href="#t:comp_match_spec/0">comp_match_spec</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Transforms a match specification into an internal representation that can be used in subsequent calls to <a href="#match_spec_run/2"><code class="inline">match_spec_run/2</code></a>. The internal representation is opaque. To check the validity of a compiled match specification, use <a href="#is_compiled_ms/1"><code class="inline">is_compiled_ms/1</code></a>.</p>
+<p>If term <a type="anno">MatchSpec</a> cannot be compiled (does not represent a valid match specification), a <code class="inline">badarg</code> exception is raised.</p>
+<p>This function has limited use in normal code. It is used by the <code class="inline">dets</code> module to perform the <code class="inline">dets:select()</code> operations.</p>
+  </section>
+</section>
+<section class="detail" id="match_spec_run/2">
+  <div class="detail-header">
+    <a href="#match_spec_run/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match_spec_run/2</h1>
+      <div class="specs">
+          <pre>match_spec_run(List, CompiledMatchSpec) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>()
+                  when
+                      List :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+                      CompiledMatchSpec :: <a href="#t:comp_match_spec/0">comp_match_spec</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Executes the matching specified in a compiled match specification on a list of terms. Term <a type="anno">CompiledMatchSpec</a> is to be the result of a call to <a href="#match_spec_compile/1"><code class="inline">match_spec_compile/1</code></a> and is hence the internal representation of the match specification one wants to use.</p>
+<p>The matching is executed on each element in <a type="anno">List</a> and the function returns a list containing all results. If an element in <a type="anno">List</a> does not match, nothing is returned for that element. The length of the result list is therefore equal or less than the length of parameter <a type="anno">List</a>.</p>
+<p><em >Example:</em></p>
+<p>The following two calls give the same result (but certainly not the same execution time):</p>
+<code type="none">Table = ets:new...
+MatchSpec = ...
+% The following call...
+ets:match_spec_run(ets:tab2list(Table),
+                   ets:match_spec_compile(MatchSpec)),
+% ...gives the same result as the more common (and more efficient)
+ets:select(Table, MatchSpec),</code>
+
+This function has limited use in normal code. It is used by the `dets` module to perform the `dets:select()` operations and by Mnesia during transactions.  </section>
+</section>
+<section class="detail" id="member/2">
+  <div class="detail-header">
+    <a href="#member/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">member/2</h1>
+      <div class="specs">
+          <pre>member(Tab, Key) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#lookup/2"><code class="inline">lookup/2</code></a>, but does not return the objects. Returns <code class="inline">true</code> if one or more elements in the table has key <a type="anno">Key</a>, otherwise <code class="inline">false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="new/2">
+  <div class="detail-header">
+    <a href="#new/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/2</h1>
+      <div class="specs">
+          <pre>new(Name, Options) -> <a href="#t:tid/0">tid</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()
+       when
+           Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+           Options :: [Option],
+           Option ::
+               Type | Access | named_table |
+               {keypos, Pos} |
+               {heir, Pid :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(), HeirData} |
+               {heir, none} |
+               Tweaks,
+           Type :: <a href="#t:type/0">type</a>(),
+           Access :: <a href="#t:access/0">access</a>(),
+           Tweaks ::
+               {write_concurrency, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+               {read_concurrency, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+               {decentralized_counters, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+               compressed,
+           Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+           HeirData :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a new table and returns a table identifier that can be used in subsequent operations. The table identifier can be sent to other processes so that a table can be shared between different processes within a node.</p>
+<p>Parameter <a type="anno">Options</a> is a list of options that specifies table type, access rights, key position, and whether the table is named. Default values are used for omitted options. This means that not specifying any options (<code class="inline">[]</code>) is the same as specifying <code class="inline">[set, protected, {keypos,1}, {heir,none}, {write_concurrency,false}, {read_concurrency,false}, {decentralized_counters,false}]</code>.</p>
+<dl ><dt >`set`</dt><dd >
+The table is a `set` table: one key, one object, no order among objects. This is the default table type.
+</dd><dt >`ordered_set`</dt><dd >
+The table is a `ordered_set` table: one key, one object, ordered in Erlang term order, which is the order implied by the < and > operators. Tables of this type have a somewhat different behavior in some situations than tables of other types. Most notably, the `ordered_set` tables regard keys as equal when they <em >compare equal</em>, not only when they match. This means that to an `ordered_set` table, `integer()` `1` and `float()` `1.0` are regarded as equal. This also means that the key used to lookup an element not necessarily <em >matches</em> the key in the returned elements, if `float()`'s and `integer()`'s are mixed in keys of a table.
+</dd><dt >`bag`</dt><dd >
+The table is a `bag` table, which can have many objects, but only one instance of each object, per key.
+</dd><dt >`duplicate_bag`</dt><dd >
+The table is a `duplicate_bag` table, which can have many objects, including multiple copies of the same object, per key.
+</dd><dt >`public`</dt><dd >
+Any process can read or write to the table.
+<a id="protected"></a></dd><dt >`protected`</dt><dd >
+The owner process can read and write to the table. Other processes can only read the table. This is the default setting for the access rights.
+<a id="private"></a></dd><dt >`private`</dt><dd >
+Only the owner process can read or write to the table.
+</dd><dt >`named_table`</dt><dd >
+If this option is present, the table is registered under its <a type="anno">Name</a> which can then be used instead of the table identifier in subsequent operations.
+
+The function will also return the <a type="anno">Name</a> instead of the table identifier. To get the table identifier of a named table, use [`whereis/1`](#whereis/1).
+</dd><dt >`{keypos,Pos}`</dt><dd >
+Specifies which element in the stored tuples to use as key. By default, it is the first element, that is, `Pos=1`. However, this is not always appropriate. In particular, we do not want the first element to be the key if we want to store Erlang records in a table.
+
+Notice that any tuple stored in the table must have at least <a type="anno">Pos</a> number of elements.
+<a id="heir"></a></dd><dt >`{heir,Pid,HeirData} | {heir,none}`</dt><dd >
+Set a process as heir. The heir inherits the table if the owner terminates. Message `{'ETS-TRANSFER',tid(),FromPid,HeirData}` is sent to the heir when that occurs. The heir must be a local process. Default heir is `none`, which destroys the table when the owner terminates.
+<a id="new_2_write_concurrency"></a></dd><dt >`{write_concurrency,boolean()}`</dt><dd >
+Performance tuning. Defaults to `false`, in which case an operation that mutates (writes to) the table obtains exclusive access, blocking any concurrent access of the same table until finished. If set to `true`, the table is optimized to concurrent write access. Different objects of the same table can be mutated (and read) by concurrent processes. This is achieved to some degree at the expense of memory consumption and the performance of sequential access and concurrent reading.
+
+The `write_concurrency` option can be combined with the options `read_concurrency` and `decentralized_counters`. You typically want to combine `write_concurrency` with `read_concurrency` when large concurrent read bursts and large concurrent write bursts are common; for more information, see option `read_concurrency`. The `decentralized_counters` option is turned on by default for tables of type `ordered_set` with the `write_concurrency` option enabled, and the `decentralized_counters` option is turned off by default for all other table types. For more information, see the documentation for the `decentralized_counters` option.
+
+Notice that this option does not change any guarantees about atomicity and isolation. Functions that makes such promises over many objects (like [`insert/2`](#insert/2)) gain less (or nothing) from this option.
+
+The memory consumption inflicted by both `write_concurrency` and `read_concurrency` is a constant overhead per table for `set`, `bag` and `duplicate_bag`. For `ordered_set` the memory overhead depends on the number of inserted objects and the amount of actual detected concurrency in runtime. The memory overhead can be especially large when both options are combined.
+
+
+Prior to stdlib-3.7 (OTP-22.0) `write_concurrency` had no effect on `ordered_set`.
+
+<a id="new_2_read_concurrency"></a></dd><dt >`{read_concurrency,boolean()}`</dt><dd >
+Performance tuning. Defaults to `false`. When set to `true`, the table is optimized for concurrent read operations. When this option is enabled on a runtime system with SMP support, read operations become much cheaper; especially on systems with multiple physical processors. However, switching between read and write operations becomes more expensive.
+
+You typically want to enable this option when concurrent read operations are much more frequent than write operations, or when concurrent reads and writes comes in large read and write bursts (that is, many reads not interrupted by writes, and many writes not interrupted by reads).
+
+You typically do <em >not</em> want to enable this option when the common access pattern is a few read operations interleaved with a few write operations repeatedly. In this case, you would get a performance degradation by enabling this option.
+
+Option `read_concurrency` can be combined with option `write_concurrency`. You typically want to combine these when large concurrent read bursts and large concurrent write bursts are common.
+<a id="new_2_decentralized_counters"></a></dd><dt >`{decentralized_counters,boolean()}`</dt><dd >
+Performance tuning. Defaults to `true` for tables of type `ordered_set` with the `write_concurrency` option enabled, and defaults to false for all other table types. This option has no effect if the `write_concurrency` option is set to `false`.
+
+When this option is set to `true`, the table is optimized for frequent concurrent calls to operations that modify the tables size and/or its memory consumption (e.g., [`insert/2`](#insert/2) and [`delete/2`](#delete/2)). The drawback is that calls to [`info/1`](#info/1) and [`info/2`](#info/2) with `size` or `memory` as the second argument can get much slower when the `decentralized_counters` option is turned on.
+
+When this option is enabled the counters for the table size and memory consumption are distributed over several cache lines and the scheduling threads are mapped to one of those cache lines. The `erl` option `+dcg` can be used to control the number of cache lines that the counters are distributed over.
+<a id="new_2_compressed"></a></dd><dt >`compressed`</dt><dd >
+If this option is present, the table data is stored in a more compact format to consume less memory. However, it will make table operations slower. Especially operations that need to inspect entire objects, such as `match` and `select`, get much slower. The key element is not compressed.
+</dd></dl>  </section>
+</section>
+<section class="detail" id="next/2">
+  <div class="detail-header">
+    <a href="#next/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next/2</h1>
+      <div class="specs">
+          <pre>next(Tab, Key1) -> Key2 | '$end_of_table'
+        when Tab :: <a href="#t:tab/0">tab</a>(), Key1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Key2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the next key <a type="anno">Key2</a>, following key <a type="anno">Key1</a> in table <a type="anno">Tab</a>. For table type <code class="inline">ordered_set</code>, the next key in Erlang term order is returned. For other table types, the next key according to the internal order of the table is returned. If no next key exists, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>To find the first key in the table, use <a href="#first/1"><code class="inline">first/1</code></a>.</p>
+<p>Unless a table of type <code class="inline">set</code>, <code class="inline">bag</code>, or <code class="inline">duplicate_bag</code> is fixated using <a href="#safe_fixtable/2"><code class="inline">safe_fixtable/2</code></a>, a call to <a href="#next/2"><code class="inline">next/2</code></a> will fail if <a type="anno">Key1</a> no longer exists in the table. For table type <code class="inline">ordered_set</code>, the function always returns the next key after <a type="anno">Key1</a> in term order, regardless whether <a type="anno">Key1</a> ever existed in the table.</p>
+  </section>
+</section>
+<section class="detail" id="prev/2">
+  <div class="detail-header">
+    <a href="#prev/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prev/2</h1>
+      <div class="specs">
+          <pre>prev(Tab, Key1) -> Key2 | '$end_of_table'
+        when Tab :: <a href="#t:tab/0">tab</a>(), Key1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Key2 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns the previous key <a type="anno">Key2</a>, preceding key <a type="anno">Key1</a> according to Erlang term order in table <a type="anno">Tab</a> of type <code class="inline">ordered_set</code>. For other table types, the function is synonymous to <a href="#next/2"><code class="inline">next/2</code></a>. If no previous key exists, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>To find the last key in an <code class="inline">ordered_set</code> table, use <a href="#last/1"><code class="inline">last/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="rename/2">
+  <div class="detail-header">
+    <a href="#rename/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rename/2</h1>
+      <div class="specs">
+          <pre>rename(Tab, Name) -> Name when Tab :: <a href="#t:tab/0">tab</a>(), Name :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Renames the named table <a type="anno">Tab</a> to the new name <a type="anno">Name</a>. Afterwards, the old name cannot be used to access the table. Renaming an unnamed table has no effect.</p>
+  </section>
+</section>
+<section class="detail" id="repair_continuation/2">
+  <div class="detail-header">
+    <a href="#repair_continuation/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">repair_continuation/2</h1>
+      <div class="specs">
+          <pre>repair_continuation(Continuation, MatchSpec) -> Continuation
+                       when
+                           Continuation :: <a href="#t:continuation/0">continuation</a>(),
+                           MatchSpec :: <a href="#t:match_spec/0">match_spec</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Restores an opaque continuation returned by <a href="#select/3"><code class="inline">select/3</code></a> or <a href="#select/1"><code class="inline">select/1</code></a> if the continuation has passed through external term format (been sent between nodes or stored on disk).</p>
+<p>The reason for this function is that continuation terms contain compiled match specifications and may therefore be invalidated if converted to external term format. Given that the original match specification is kept intact, the continuation can be restored, meaning it can once again be used in subsequent <a href="#select/1"><code class="inline">select/1</code></a> calls even though it has been stored on disk or on another node.</p>
+<p><em >Examples:</em></p>
+<p>The following sequence of calls may fail:</p>
+<code type="none">T=ets:new(x,[]),
+...
+MS = ets:fun2ms(fun({N,_}=A) when (N rem 10) =:= 0 -> A end),
+{_,C} = ets:select(T, MS, 10),
+MaybeBroken = binary_to_term(term_to_binary(C)),
+ets:select(MaybeBroken).</code>
+The following sequence works, as the call to [`repair_continuation/2`](#repair_continuation/2) reestablishes the `MaybeBroken` continuation.
+<code type="none">T=ets:new(x,[]),
+...
+MS = ets:fun2ms(fun({N,_}=A) when (N rem 10) =:= 0 -> A end),
+{_,C} = ets:select(T,MS,10),
+MaybeBroken = binary_to_term(term_to_binary(C)),
+ets:select(ets:repair_continuation(MaybeBroken,MS)).</code>
+
+This function is rarely needed in application code. It is used by Mnesia to provide distributed [`select/3`](#select/3) and [`select/1`](#select/1) sequences. A normal application would either use Mnesia or keep the continuation from being converted to external format.
+
+The actual behavior of compiled match specifications when recreated from external format has changed and may change in future releases, but this interface remains for backward compatibility. See [`is_compiled_ms/1`](#is_compiled_ms/1).  </section>
+</section>
+<section class="detail" id="safe_fixtable/2">
+  <div class="detail-header">
+    <a href="#safe_fixtable/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">safe_fixtable/2</h1>
+      <div class="specs">
+          <pre>safe_fixtable(Tab, Fix) -> true
+                 when Tab :: <a href="#t:tab/0">tab</a>(), Fix :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Fixes a table of type <code class="inline">set</code>, <code class="inline">bag</code>, or <code class="inline">duplicate_bag</code> for safe traversal using <a href="#first/1"><code class="inline">first/1</code></a> &amp; <a href="#next/2"><code class="inline">next/2</code></a>, <a href="#match/3"><code class="inline">match/3</code></a> &amp; <a href="#match/1"><code class="inline">match/1</code></a>, <a href="#match_object/3"><code class="inline">match_object/3</code></a> &amp; <a href="#match_object/1"><code class="inline">match_object/1</code></a>, or <a href="#select/3"><code class="inline">select/3</code></a> &amp; <a href="#select/1"><code class="inline">select/1</code></a>.</p>
+<p>A process fixes a table by calling <code class="inline">safe_fixtable(Tab, true)</code>. The table remains fixed until the process releases it by calling <code class="inline">safe_fixtable(Tab, false)</code>, or until the process terminates.</p>
+<p>If many processes fix a table, the table remains fixed until all processes have released it (or terminated). A reference counter is kept on a per process basis, and N consecutive fixes requires N releases to release the table.</p>
+<p>When a table is fixed, a sequence of <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a> calls are guaranteed to succeed even if keys are removed during the traversal. The keys for objects inserted or deleted during a traversal may or may not be returned by <a href="#next/2"><code class="inline">next/2</code></a> depending on the ordering of keys within the table and if the key exists at the time <a href="#next/2"><code class="inline">next/2</code></a> is called.</p>
+<p><em >Example:</em></p>
+<code type="none">clean_all_with_value(Tab,X) ->
+    safe_fixtable(Tab,true),
+    clean_all_with_value(Tab,X,ets:first(Tab)),
+    safe_fixtable(Tab,false).
+
+clean_all_with_value(Tab,X,'$end_of_table') ->
+    true;
+clean_all_with_value(Tab,X,Key) ->
+    case ets:lookup(Tab,Key) of
+        [{Key,X}] ->
+            ets:delete(Tab,Key);
+        _ ->
+            true
+    end,
+    clean_all_with_value(Tab,X,ets:next(Tab,Key)).</code>
+Notice that deleted objects are not freed from a fixed table until it has been released. If a process fixes a table but never releases it, the memory used by the deleted objects is never freed. The performance of operations on the table also degrades significantly.
+
+To retrieve information about which processes have fixed which tables, use `info(Tab, safe_fixed_monotonic_time)`. A system with many processes fixing tables can need a monitor that sends alarms when tables have been fixed for too long.
+
+Notice that [`safe_fixtable/2`](#safe_fixtable/2) is not necessary for table type `ordered_set` and for traversals done by a single ETS function call, like [`select/2`](#select/2).  </section>
+</section>
+<section class="detail" id="select/1">
+  <div class="detail-header">
+    <a href="#select/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select/1</h1>
+      <div class="specs">
+          <pre>select(Continuation) -> {[Match], Continuation} | '$end_of_table'
+          when Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Continues a match started with <a href="#select/3"><code class="inline">select/3</code></a>. The next chunk of the size specified in the initial <a href="#select/3"><code class="inline">select/3</code></a> call is returned together with a new <a type="anno">Continuation</a>, which can be used in subsequent calls to this function.</p>
+<p>When there are no more objects in the table, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="select/2">
+  <div class="detail-header">
+    <a href="#select/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select/2</h1>
+      <div class="specs">
+          <pre>select(Tab, MatchSpec) -> [Match]
+          when
+              Tab :: <a href="#t:tab/0">tab</a>(),
+              MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+              Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in table <a type="anno">Tab</a> using a match specification. This is a more general call than <a href="#match/2"><code class="inline">match/2</code></a> and <a href="#match_object/2"><code class="inline">match_object/2</code></a> calls. In its simplest form, the match specification is as follows:</p>
+<code type="none">MatchSpec = [MatchFunction]
+MatchFunction = {MatchHead, [Guard], [Result]}
+MatchHead = "Pattern as in ets:match"
+Guard = {"Guardtest name", ...}
+Result = "Term construct"</code>
+This means that the match specification is always a list of one or more tuples (of arity 3). The first element of the tuple is to be a pattern as described in [`match/2`](#match/2). The second element of the tuple is to be a list of 0 or more guard tests (described below). The third element of the tuple is to be a list containing a description of the value to return. In almost all normal cases, the list contains exactly one term that fully describes the value to return for each object.
+
+The return value is constructed using the "match variables" bound in `MatchHead` or using the special match variables `'$_'` (the whole matching object) and `'$$'` (all match variables in a list), so that the following [`match/2`](#match/2) expression:
+<code type="none">ets:match(Tab,{'$1','$2','$3'})</code>
+is exactly equivalent to:
+<code type="none">ets:select(Tab,[{{'$1','$2','$3'},[],['$$']}])</code>
+And that the following [`match_object/2`](#match_object/2) call:
+<code type="none">ets:match_object(Tab,{'$1','$2','$1'})</code>
+is exactly equivalent to
+<code type="none">ets:select(Tab,[{{'$1','$2','$1'},[],['$_']}])</code>
+Composite terms can be constructed in the `Result` part either by simply writing a list, so that the following code:
+<code type="none">ets:select(Tab,[{{'$1','$2','$3'},[],['$$']}])</code>
+gives the same output as:
+<code type="none">ets:select(Tab,[{{'$1','$2','$3'},[],[['$1','$2','$3']]}])</code>
+That is, all the bound variables in the match head as a list. If tuples are to be constructed, one has to write a tuple of arity 1 where the single element in the tuple is the tuple one wants to construct (as an ordinary tuple can be mistaken for a `Guard`).
+
+Therefore the following call:
+<code type="none">ets:select(Tab,[{{'$1','$2','$1'},[],['$_']}])</code>
+gives the same output as:
+<code type="none">ets:select(Tab,[{{'$1','$2','$1'},[],[{{'$1','$2','$3'}}]}])</code>
+This syntax is equivalent to the syntax used in the trace patterns (see the `dbg(3)`) module in Runtime_Tools.
+
+The `Guard`s are constructed as tuples, where the first element is the test name and the remaining elements are the test parameters. To check for a specific type (say a list) of the element bound to the match variable `'$1'`, one would write the test as `{is_list, '$1'}`. If the test fails, the object in the table does not match and the next `MatchFunction` (if any) is tried. Most guard tests present in Erlang can be used, but only the new versions prefixed `is_` are allowed (`is_float`, `is_atom`, and so on).
+
+The `Guard` section can also contain logic and arithmetic operations, which are written with the same syntax as the guard tests (prefix notation), so that the following guard test written in Erlang:
+<code type="none">is_integer(X), is_integer(Y), X + Y < 4711</code>
+is expressed as follows (`X` replaced with `'$1'` and `Y` with `'$2'`):
+<code type="none">[{is_integer, '$1'}, {is_integer, '$2'}, {'<', {'+', '$1', '$2'}, 4711}]</code>
+For tables of type `ordered_set`, objects are visited in the same order as in a `first`/`next` traversal. This means that the match specification is executed against objects with keys in the `first`/`next` order and the corresponding result list is in the order of that execution.  </section>
+</section>
+<section class="detail" id="select/3">
+  <div class="detail-header">
+    <a href="#select/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select/3</h1>
+      <div class="specs">
+          <pre>select(Tab, MatchSpec, Limit) ->
+          {[Match], Continuation} | '$end_of_table'
+          when
+              Tab :: <a href="#t:tab/0">tab</a>(),
+              MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+              Limit :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+              Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+              Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#select/2"><code class="inline">select/2</code></a>, but only returns a limited (<a type="anno">Limit</a>) number of matching objects. Term <a type="anno">Continuation</a> can then be used in subsequent calls to <a href="#select/1"><code class="inline">select/1</code></a> to get the next chunk of matching objects. This is a space-efficient way to work on objects in a table, which is still faster than traversing the table object by object using <a href="#first/1"><code class="inline">first/1</code></a> and <a href="#next/2"><code class="inline">next/2</code></a>.</p>
+<p>If the table is empty, <code class="inline">&#39;$end_of_table&#39;</code> is returned.</p>
+<p>Use <a href="#safe_fixtable/2"><code class="inline">safe_fixtable/2</code></a> to guarantee safe traversal for subsequent calls to <a href="#select/1"><code class="inline">select/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="select_count/2">
+  <div class="detail-header">
+    <a href="#select_count/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_count/2</h1>
+      <div class="specs">
+          <pre>select_count(Tab, MatchSpec) -> NumMatched
+                when
+                    Tab :: <a href="#t:tab/0">tab</a>(),
+                    MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                    NumMatched :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in table <a type="anno">Tab</a> using a match specification. If the match specification returns <code class="inline">true</code> for an object, that object considered a match and is counted. For any other result from the match specification the object is not considered a match and is therefore not counted.</p>
+<p>This function can be described as a <a href="#match_delete/2"><code class="inline">match_delete/2</code></a> function that does not delete any elements, but only counts them.</p>
+<p>The function returns the number of objects matched.</p>
+  </section>
+</section>
+<section class="detail" id="select_delete/2">
+  <div class="detail-header">
+    <a href="#select_delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_delete/2</h1>
+      <div class="specs">
+          <pre>select_delete(Tab, MatchSpec) -> NumDeleted
+                 when
+                     Tab :: <a href="#t:tab/0">tab</a>(),
+                     MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                     NumDeleted :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in table <a type="anno">Tab</a> using a match specification. If the match specification returns <code class="inline">true</code> for an object, that object is removed from the table. For any other result from the match specification the object is retained. This is a more general call than the <a href="#match_delete/2"><code class="inline">match_delete/2</code></a> call.</p>
+<p>The function returns the number of objects deleted from the table.</p>
+<p>The match specification has to return the atom <code class="inline">true</code> if the object is to be deleted. No other return value gets the object deleted. So one cannot use the same match specification for looking up elements as for deleting them.</p>
+  </section>
+</section>
+<section class="detail" id="select_replace/2">
+  <div class="detail-header">
+    <a href="#select_replace/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_replace/2</h1>
+      <span class="note">(since OTP 20.0)</span>
+      <div class="specs">
+          <pre>select_replace(Tab, MatchSpec) -> NumReplaced
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                      NumReplaced :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Matches the objects in the table <a type="anno">Tab</a> using a match specification. For each matched object, the existing object is replaced with the match specification result.</p>
+<p>The match-and-replace operation for each individual object is guaranteed to be atomic and isolated. The <code class="inline">select_replace</code> table traversal as a whole, like all other select functions, does not give such guarantees.</p>
+<p>The match specifiction must be guaranteed to <em >retain the key</em> of any matched object. If not, <code class="inline">select_replace</code> will fail with <code class="inline">badarg</code> without updating any objects.</p>
+<p>For the moment, due to performance and semantic constraints, tables of type <code class="inline">bag</code> are not yet supported.</p>
+<p>The function returns the total number of replaced objects.</p>
+<p><em >Example</em></p>
+<p>For all 2-tuples with a list in second position, add atom <code class="inline">&#39;marker&#39;</code> first in the list:</p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ets</span><span class="ss">:new</span><span class="p" data-group-id="1088530718-1">(</span><span class="n">x</span><span class="p">,</span><span class="p" data-group-id="1088530718-2">[</span><span class="p" data-group-id="1088530718-2">]</span><span class="p" data-group-id="1088530718-1">)</span><span class="p">,</span><span class="w"> </span><span class="n">ets</span><span class="ss">:insert</span><span class="p" data-group-id="1088530718-3">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1088530718-4">{</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1088530718-5">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="1088530718-5">]</span><span class="p" data-group-id="1088530718-4">}</span><span class="p" data-group-id="1088530718-3">)</span><span class="o">.</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">MS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ets</span><span class="ss">:fun2ms</span><span class="p" data-group-id="1088530718-6">(</span><span class="n">fun</span><span class="p" data-group-id="1088530718-7">(</span><span class="p" data-group-id="1088530718-8">{</span><span class="nc">K</span><span class="p">,</span><span class="w"> </span><span class="nc">L</span><span class="p" data-group-id="1088530718-8">}</span><span class="p" data-group-id="1088530718-7">)</span><span class="w"> </span><span class="ow">when</span><span class="w"> </span><span class="n">is_list</span><span class="p" data-group-id="1088530718-9">(</span><span class="nc">L</span><span class="p" data-group-id="1088530718-9">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p" data-group-id="1088530718-10">{</span><span class="nc">K</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1088530718-11">[</span><span class="n">marker</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nc">L</span><span class="p" data-group-id="1088530718-11">]</span><span class="p" data-group-id="1088530718-10">}</span><span class="w"> </span><span class="k">end</span><span class="p" data-group-id="1088530718-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1088530718-12">[</span><span class="p" data-group-id="1088530718-13">{</span><span class="p" data-group-id="1088530718-14">{</span><span class="sc">&#39;$1&#39;</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="1088530718-14">}</span><span class="p">,</span><span class="p" data-group-id="1088530718-15">[</span><span class="p" data-group-id="1088530718-16">{</span><span class="n">is_list</span><span class="p">,</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="1088530718-16">}</span><span class="p" data-group-id="1088530718-15">]</span><span class="p">,</span><span class="p" data-group-id="1088530718-17">[</span><span class="p" data-group-id="1088530718-18">{</span><span class="p" data-group-id="1088530718-19">{</span><span class="sc">&#39;$1&#39;</span><span class="p">,</span><span class="p" data-group-id="1088530718-20">[</span><span class="n">marker</span><span class="o">|</span><span class="sc">&#39;$2&#39;</span><span class="p" data-group-id="1088530718-20">]</span><span class="p" data-group-id="1088530718-19">}</span><span class="p" data-group-id="1088530718-18">}</span><span class="p" data-group-id="1088530718-17">]</span><span class="p" data-group-id="1088530718-13">}</span><span class="p" data-group-id="1088530718-12">]</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:select_replace</span><span class="p" data-group-id="1088530718-21">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="nc">MS</span><span class="p" data-group-id="1088530718-21">)</span><span class="o">.</span><span class="w">
+</span><span class="mi">1</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ets</span><span class="ss">:tab2list</span><span class="p" data-group-id="1088530718-22">(</span><span class="nc">T</span><span class="p" data-group-id="1088530718-22">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1088530718-23">[</span><span class="p" data-group-id="1088530718-24">{</span><span class="n">key</span><span class="p">,</span><span class="p" data-group-id="1088530718-25">[</span><span class="n">marker</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="1088530718-25">]</span><span class="p" data-group-id="1088530718-24">}</span><span class="p" data-group-id="1088530718-23">]</span><span class="w">
+    </span></code></pre>
+<p>A generic single object compare-and-swap operation:</p>
+<pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="0791500057-1">[</span><span class="nc">Old</span><span class="p" data-group-id="0791500057-1">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ets</span><span class="ss">:lookup</span><span class="p" data-group-id="0791500057-2">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="nc">Key</span><span class="p" data-group-id="0791500057-2">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">New</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">update_object</span><span class="p" data-group-id="0791500057-3">(</span><span class="nc">Old</span><span class="p" data-group-id="0791500057-3">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">Success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="0791500057-4">(</span><span class="mi">1</span><span class="w"> </span><span class="o">=</span><span class="ss">:=</span><span class="w"> </span><span class="n">ets</span><span class="ss">:select_replace</span><span class="p" data-group-id="0791500057-5">(</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0791500057-6">[</span><span class="p" data-group-id="0791500057-7">{</span><span class="nc">Old</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0791500057-8">[</span><span class="p" data-group-id="0791500057-8">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0791500057-9">[</span><span class="p" data-group-id="0791500057-10">{</span><span class="n">const</span><span class="p">,</span><span class="w"> </span><span class="nc">New</span><span class="p" data-group-id="0791500057-10">}</span><span class="p" data-group-id="0791500057-9">]</span><span class="p" data-group-id="0791500057-7">}</span><span class="p" data-group-id="0791500057-6">]</span><span class="p" data-group-id="0791500057-5">)</span><span class="p" data-group-id="0791500057-4">)</span><span class="p">,</span><span class="w">
+    </span></code></pre>
+  </section>
+</section>
+<section class="detail" id="select_reverse/1">
+  <div class="detail-header">
+    <a href="#select_reverse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_reverse/1</h1>
+      <span class="note">(since OTP R14B)</span>
+      <div class="specs">
+          <pre>select_reverse(Continuation) ->
+                  {[Match], Continuation} | '$end_of_table'
+                  when
+                      Continuation :: <a href="#t:continuation/0">continuation</a>(),
+                      Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Continues a match started with <a href="#select_reverse/3"><code class="inline">select_reverse/3</code></a>. For tables of type <code class="inline">ordered_set</code>, the traversal of the table continues to objects with keys earlier in the Erlang term order. The returned list also contains objects with keys in reverse order. For all other table types, the behavior is exactly that of <a href="#select/1"><code class="inline">select/1</code></a>.</p>
+<p><em >Example:</em></p>
+<code >1> T = ets:new(x,[ordered_set]).
+2> [ ets:insert(T,{N}) || N <- lists:seq(1,10) ].
+...
+3> {R0,C0} = ets:select_reverse(T,[{'_',[],['$_']}],4).
+...
+4> R0.
+[{10},{9},{8},{7}]
+5> {R1,C1} = ets:select_reverse(C0).
+...
+6> R1.
+[{6},{5},{4},{3}]
+7> {R2,C2} = ets:select_reverse(C1).
+...
+8> R2.
+[{2},{1}]
+9> '$end_of_table' = ets:select_reverse(C2).
+...</code>  </section>
+</section>
+<section class="detail" id="select_reverse/2">
+  <div class="detail-header">
+    <a href="#select_reverse/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_reverse/2</h1>
+      <span class="note">(since OTP R14B)</span>
+      <div class="specs">
+          <pre>select_reverse(Tab, MatchSpec) -> [Match]
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                      Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#select/2"><code class="inline">select/2</code></a>, but returns the list in reverse order for table type <code class="inline">ordered_set</code>. For all other table types, the return value is identical to that of <a href="#select/2"><code class="inline">select/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="select_reverse/3">
+  <div class="detail-header">
+    <a href="#select_reverse/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">select_reverse/3</h1>
+      <span class="note">(since OTP R14B)</span>
+      <div class="specs">
+          <pre>select_reverse(Tab, MatchSpec, Limit) ->
+                  {[Match], Continuation} | '$end_of_table'
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+                      Limit :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                      Match :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Continuation :: <a href="#t:continuation/0">continuation</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Works like <a href="#select/3"><code class="inline">select/3</code></a>, but for table type <code class="inline">ordered_set</code> traversing is done starting at the last object in Erlang term order and moves to the first. For all other table types, the return value is identical to that of <a href="#select/3"><code class="inline">select/3</code></a>.</p>
+<p>Notice that this is <em >not</em> equivalent to reversing the result list of a <a href="#select/3"><code class="inline">select/3</code></a> call, as the result list is not only reversed, but also contains the last <a type="anno">Limit</a> matching objects in the table, not the first.</p>
+  </section>
+</section>
+<section class="detail" id="setopts/2">
+  <div class="detail-header">
+    <a href="#setopts/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setopts/2</h1>
+      <div class="specs">
+          <pre>setopts(Tab, Opts) -> true
+           when
+               Tab :: <a href="#t:tab/0">tab</a>(),
+               Opts :: Opt | [Opt],
+               Opt :: {heir, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>(), HeirData} | {heir, none},
+               HeirData :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Sets table options. The only allowed option to be set after the table has been created is <code class="inline">heir</code>. The calling process must be the table owner.</p>
+  </section>
+</section>
+<section class="detail" id="slot/2">
+  <div class="detail-header">
+    <a href="#slot/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">slot/2</h1>
+      <div class="specs">
+          <pre>slot(Tab, I) -> [Object] | '$end_of_table'
+        when
+            Tab :: <a href="#t:tab/0">tab</a>(),
+            I :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+            Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function is mostly for debugging purposes, Normally <code class="inline">first</code>/<code class="inline">next</code> or <code class="inline">last</code>/<code class="inline">prev</code> are to be used instead.</p>
+<p>Returns all objects in slot <a type="anno">I</a> of table <a type="anno">Tab</a>. A table can be traversed by repeatedly calling the function, starting with the first slot <code class="inline">I=0</code> and ending when <code class="inline">&#39;$end_of_table&#39;</code> is returned. If argument <a type="anno">I</a> is out of range, the function fails with reason <code class="inline">badarg</code>.</p>
+<p>Unless a table of type <code class="inline">set</code>, <code class="inline">bag</code>, or <code class="inline">duplicate_bag</code> is protected using <a href="#safe_fixtable/2"><code class="inline">safe_fixtable/2</code></a>, a traversal can fail if concurrent updates are made to the table. For table type <code class="inline">ordered_set</code>, the function returns a list containing object <a type="anno">I</a> in Erlang term order.</p>
+  </section>
+</section>
+<section class="detail" id="tab2file/2">
+  <div class="detail-header">
+    <a href="#tab2file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tab2file/2</h1>
+      <div class="specs">
+          <pre>tab2file(Tab, Filename) -> ok | {error, Reason}
+            when
+                Tab :: <a href="#t:tab/0">tab</a>(),
+                Filename :: file:name(),
+                Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Dumps table <a type="anno">Tab</a> to file <a type="anno">Filename</a>.</p>
+<p>Equivalent to <code class="inline">tab2file(Tab, Filename,[])</code></p>
+  </section>
+</section>
+<section class="detail" id="tab2file/3">
+  <div class="detail-header">
+    <a href="#tab2file/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tab2file/3</h1>
+      <div class="specs">
+          <pre>tab2file(Tab, Filename, Options) -> ok | {error, Reason}
+            when
+                Tab :: <a href="#t:tab/0">tab</a>(),
+                Filename :: file:name(),
+                Options :: [Option],
+                Option ::
+                    {extended_info, [ExtInfo]} | {sync, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()},
+                ExtInfo :: md5sum | object_count,
+                Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Dumps table <a type="anno">Tab</a> to file <a type="anno">Filename</a>.</p>
+<p>When dumping the table, some information about the table is dumped to a header at the beginning of the dump. This information contains data about the table type, name, protection, size, version, and if it is a named table. It also contains notes about what extended information is added to the file, which can be a count of the objects in the file or a MD5 sum of the header and records in the file.</p>
+<p>The size field in the header might not correspond to the number of records in the file if the table is public and records are added or removed from the table during dumping. Public tables updated during dump, and that one wants to verify when reading, needs at least one field of extended information for the read verification process to be reliable later.</p>
+<p>Option <code class="inline">extended_info</code> specifies what extra information is written to the table dump:</p>
+<dl ><dt >`object_count`</dt><dd >
+The number of objects written to the file is noted in the file footer, so file truncation can be verified even if the file was updated during dump.
+</dd><dt >`md5sum`</dt><dd >
+The header and objects in the file are checksummed using the built-in MD5 functions. The MD5 sum of all objects is written in the file footer, so that verification while reading detects the slightest bitflip in the file data. Using this costs a fair amount of CPU time.
+</dd></dl>
+Whenever option `extended_info` is used, it results in a file not readable by versions of ETS before that in STDLIB 1.15.1
+
+If option `sync` is set to `true`, it ensures that the content of the file is written to the disk before `tab2file` returns. Defaults to `{sync, false}`.  </section>
+</section>
+<section class="detail" id="tab2list/1">
+  <div class="detail-header">
+    <a href="#tab2list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tab2list/1</h1>
+      <div class="specs">
+          <pre>tab2list(Tab) -> [Object] when Tab :: <a href="#t:tab/0">tab</a>(), Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a list of all objects in table <a type="anno">Tab</a>.</p>
+  </section>
+</section>
+<section class="detail" id="tabfile_info/1">
+  <div class="detail-header">
+    <a href="#tabfile_info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tabfile_info/1</h1>
+      <div class="specs">
+          <pre>tabfile_info(Filename) -> {ok, TableInfo} | {error, Reason}
+                when
+                    Filename :: file:name(),
+                    TableInfo :: [InfoItem],
+                    InfoItem ::
+                        {name, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()} |
+                        {type, Type} |
+                        {protection, Protection} |
+                        {named_table, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                        {keypos, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                        {size, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} |
+                        {extended_info, [ExtInfo]} |
+                        {version,
+                         {Major :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+                          Minor :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}},
+                    ExtInfo :: md5sum | object_count,
+                    Type ::
+                        bag | duplicate_bag | ordered_set | set,
+                    Protection :: private | protected | public,
+                    Reason :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns information about the table dumped to file by <a href="#tab2file/2"><code class="inline">tab2file/2</code></a> or <a href="#tab2file/3"><code class="inline">tab2file/3</code></a>.</p>
+<p>The following items are returned:</p>
+<dl ><dt >`name`</dt><dd >
+The name of the dumped table. If the table was a named table, a table with the same name cannot exist when the table is loaded from file with [`file2tab/2`](#file2tab/2). If the table is not saved as a named table, this field has no significance when loading the table from file.
+</dd><dt >`type`</dt><dd >
+The ETS type of the dumped table (that is, `set`, `bag`, `duplicate_bag`, or `ordered_set`). This type is used when loading the table again.
+</dd><dt >`protection`</dt><dd >
+The protection of the dumped table (that is, `private`, `protected`, or `public`). A table loaded from the file gets the same protection.
+</dd><dt >`named_table`</dt><dd >
+`true` if the table was a named table when dumped to file, otherwise `false`. Notice that when a named table is loaded from a file, there cannot exist a table in the system with the same name.
+</dd><dt >`keypos`</dt><dd >
+The `keypos` of the table dumped to file, which is used when loading the table again.
+</dd><dt >`size`</dt><dd >
+The number of objects in the table when the table dump to file started. For a `public` table, this number does not need to correspond to the number of objects saved to the file, as objects can have been added or deleted by another process during table dump.
+</dd><dt >`extended_info`</dt><dd >
+The extended information written in the file footer to allow stronger verification during table loading from file, as specified to [`tab2file/3`](#tab2file/3). Notice that this function only tells <em >which</em> information is present, not the values in the file footer. The value is a list containing one or more of the atoms `object_count` and `md5sum`.
+</dd><dt >`version`</dt><dd >
+A tuple `{Major,Minor}` containing the major and minor version of the file format for ETS table dumps. This version field was added beginning with STDLIB 1.5.1. Files dumped with older versions return `{0,0}` in this field.
+</dd></dl>
+An error is returned if the file is inaccessible, badly damaged, or not produced with [`tab2file/2`](#tab2file/2) or [`tab2file/3`](#tab2file/3).  </section>
+</section>
+<section class="detail" id="table/1">
+  <div class="detail-header">
+    <a href="#table/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table/1 table/2</h1>
+      <div class="specs">
+          <pre>table(Tab) -> QueryHandle
+         when Tab :: <a href="#t:tab/0">tab</a>(), QueryHandle :: qlc:query_handle().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a Query List Comprehension (QLC) query handle. The <code class="inline">qlc</code> module provides a query language aimed mainly at Mnesia, but ETS tables, Dets tables, and lists are also recognized by QLC as sources of data. Calling <a href="#table/1"><code class="inline">table/1,2</code></a> is the means to make the ETS table <code class="inline">Tab</code> usable to QLC.</p>
+<p>When there are only simple restrictions on the key position, QLC uses <a href="#lookup/2"><code class="inline">lookup/2</code></a> to look up the keys. When that is not possible, the whole table is traversed. Option <code class="inline">traverse</code> determines how this is done:</p>
+<dl ><dt >`first_next`</dt><dd >
+The table is traversed one key at a time by calling [`first/1`](#first/1) and [`next/2`](#next/2).
+</dd><dt >`last_prev`</dt><dd >
+The table is traversed one key at a time by calling [`last/1`](#last/1) and [`prev/2`](#prev/2).
+</dd><dt >`select`</dt><dd >
+The table is traversed by calling [`select/3`](#select/3) and [`select/1`](#select/1). Option `n_objects` determines the number of objects returned (the third argument of [`select/3`](#select/3)); the default is to return `100` objects at a time. The match specification (the second argument of [`select/3`](#select/3)) is assembled by QLC: simple filters are translated into equivalent match specifications while more complicated filters must be applied to all objects returned by [`select/3`](#select/3) given a match specification that matches all objects.
+</dd><dt >`{select, MatchSpec}`</dt><dd >
+As for `select`, the table is traversed by calling [`select/3`](#select/3) and [`select/1`](#select/1). The difference is that the match specification is explicitly specified. This is how to state match specifications that cannot easily be expressed within the syntax provided by QLC.
+</dd></dl>
+<em >Examples:</em>
+
+An explicit match specification is here used to traverse the table:
+
+```
+9> true = ets:insert(Tab = ets:new(t, []), [{1,a},{2,b},{3,c},{4,d}]),
+MS = ets:fun2ms(fun({X,Y}) when (X > 1) or (X < 5) -> {Y} end),
+QH1 = ets:table(Tab, [{traverse, {select, MS}}]).
+```
+
+An example with an implicit match specification:
+
+```
+10> QH2 = qlc:q([{Y} || {X,Y} <- ets:table(Tab), (X > 1) or (X < 5)]).
+```
+
+The latter example is equivalent to the former, which can be verified using function `qlc:info/1`:
+
+```
+11> qlc:info(QH1) =:= qlc:info(QH2).
+true
+```
+
+`qlc:info/1` returns information about a query handle, and in this case identical information is returned for the two query handles.  </section>
+</section>
+<section class="detail" id="table/2">
+  <div class="detail-header">
+    <a href="#table/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table/1 table/2</h1>
+      <div class="specs">
+          <pre>table(Tab, Options) -> QueryHandle
+         when
+             Tab :: <a href="#t:tab/0">tab</a>(),
+             QueryHandle :: qlc:query_handle(),
+             Options :: [Option] | Option,
+             Option ::
+                 {n_objects, NObjects} |
+                 {traverse, TraverseMethod},
+             NObjects :: default | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+             TraverseMethod ::
+                 first_next | last_prev | select |
+                 {select, MatchSpec :: <a href="#t:match_spec/0">match_spec</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a Query List Comprehension (QLC) query handle. The <code class="inline">qlc</code> module provides a query language aimed mainly at Mnesia, but ETS tables, Dets tables, and lists are also recognized by QLC as sources of data. Calling <a href="#table/1"><code class="inline">table/1,2</code></a> is the means to make the ETS table <code class="inline">Tab</code> usable to QLC.</p>
+<p>When there are only simple restrictions on the key position, QLC uses <a href="#lookup/2"><code class="inline">lookup/2</code></a> to look up the keys. When that is not possible, the whole table is traversed. Option <code class="inline">traverse</code> determines how this is done:</p>
+<dl ><dt >`first_next`</dt><dd >
+The table is traversed one key at a time by calling [`first/1`](#first/1) and [`next/2`](#next/2).
+</dd><dt >`last_prev`</dt><dd >
+The table is traversed one key at a time by calling [`last/1`](#last/1) and [`prev/2`](#prev/2).
+</dd><dt >`select`</dt><dd >
+The table is traversed by calling [`select/3`](#select/3) and [`select/1`](#select/1). Option `n_objects` determines the number of objects returned (the third argument of [`select/3`](#select/3)); the default is to return `100` objects at a time. The match specification (the second argument of [`select/3`](#select/3)) is assembled by QLC: simple filters are translated into equivalent match specifications while more complicated filters must be applied to all objects returned by [`select/3`](#select/3) given a match specification that matches all objects.
+</dd><dt >`{select, MatchSpec}`</dt><dd >
+As for `select`, the table is traversed by calling [`select/3`](#select/3) and [`select/1`](#select/1). The difference is that the match specification is explicitly specified. This is how to state match specifications that cannot easily be expressed within the syntax provided by QLC.
+</dd></dl>
+<em >Examples:</em>
+
+An explicit match specification is here used to traverse the table:
+
+```
+9> true = ets:insert(Tab = ets:new(t, []), [{1,a},{2,b},{3,c},{4,d}]),
+MS = ets:fun2ms(fun({X,Y}) when (X > 1) or (X < 5) -> {Y} end),
+QH1 = ets:table(Tab, [{traverse, {select, MS}}]).
+```
+
+An example with an implicit match specification:
+
+```
+10> QH2 = qlc:q([{Y} || {X,Y} <- ets:table(Tab), (X > 1) or (X < 5)]).
+```
+
+The latter example is equivalent to the former, which can be verified using function `qlc:info/1`:
+
+```
+11> qlc:info(QH1) =:= qlc:info(QH2).
+true
+```
+
+`qlc:info/1` returns information about a query handle, and in this case identical information is returned for the two query handles.  </section>
+</section>
+<section class="detail" id="take/2">
+  <div class="detail-header">
+    <a href="#take/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2</h1>
+      <span class="note">(since OTP 18.0)</span>
+      <div class="specs">
+          <pre>take(Tab, Key) -> [Object]
+        when Tab :: <a href="#t:tab/0">tab</a>(), Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), Object :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns and removes a list of all objects with key <a type="anno">Key</a> in table <a type="anno">Tab</a>.</p>
+<p>The specified <a type="anno">Key</a> is used to identify the object by either <em >comparing equal</em> the key of an object in an <code class="inline">ordered_set</code> table, or <em >matching</em> in other types of tables (for details on the difference, see <a href="#lookup/2"><code class="inline">lookup/2</code></a> and <a href="#new/2"><code class="inline">new/2</code></a>).</p>
+  </section>
+</section>
+<section class="detail" id="test_ms/2">
+  <div class="detail-header">
+    <a href="#test_ms/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">test_ms/2</h1>
+      <div class="specs">
+          <pre>test_ms(Tuple, MatchSpec) -> {ok, Result} | {error, Errors}
+           when
+               Tuple :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>(),
+               MatchSpec :: <a href="#t:match_spec/0">match_spec</a>(),
+               Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+               Errors :: [{warning | error, string()}].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function is a utility to test a match specification used in calls to <a href="#select/2"><code class="inline">select/2</code></a>. The function both tests <a type="anno">MatchSpec</a> for &quot;syntactic&quot; correctness and runs the match specification against object <a type="anno">Tuple</a>.</p>
+<p>If the match specification is syntactically correct, the function either returns <code class="inline">{ok,Result}</code>, where <a type="anno">Result</a> is what would have been the result in a real <a href="#select/2"><code class="inline">select/2</code></a> call, or <code class="inline">false</code> if the match specification does not match object <a type="anno">Tuple</a>.</p>
+<p>If the match specification contains errors, tuple <code class="inline">{error, Errors}</code> is returned, where <a type="anno">Errors</a> is a list of natural language descriptions of what was wrong with the match specification.</p>
+<p>This is a useful debugging and test tool, especially when writing complicated <a href="#select/2"><code class="inline">select/2</code></a> calls.</p>
+<p>See also: erlang:match_spec_test/3.</p>
+  </section>
+</section>
+<section class="detail" id="to_dets/2">
+  <div class="detail-header">
+    <a href="#to_dets/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_dets/2</h1>
+      <div class="specs">
+          <pre>to_dets(Tab, DetsTab) -> DetsTab
+           when Tab :: <a href="#t:tab/0">tab</a>(), DetsTab :: dets:tab_name().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Fills an already created/opened Dets table with the objects in the already opened ETS table named <a type="anno">Tab</a>. The Dets table is emptied before the objects are inserted.</p>
+  </section>
+</section>
+<section class="detail" id="update_counter/3">
+  <div class="detail-header">
+    <a href="#update_counter/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_counter/3 update_counter/4 update_counter/3 update_counter/4 update_counter/3 update_counter/4</h1>
+      <span class="note">(since OTP 18.0)</span>
+      <div class="specs">
+          <pre>update_counter(Tab, Key, UpdateOp) -> Result
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      UpdateOp ::
+                          {Pos, Incr} |
+                          {Pos, Incr, Threshold, SetValue},
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Threshold :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      SetValue :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+          <pre>update_counter(Tab, Key, [UpdateOp]) -> [Result]
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      UpdateOp ::
+                          {Pos, Incr} |
+                          {Pos, Incr, Threshold, SetValue},
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Threshold :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      SetValue :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+          <pre>update_counter(Tab, Key, Incr) -> Result
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function provides an efficient way to update one or more counters, without the trouble of having to look up an object, update the object by incrementing an element, and insert the resulting object into the table again. The operation is guaranteed to be atomic and isolated.</p>
+<p>This function destructively update the object with key <a type="anno">Key</a> in table <a type="anno">Tab</a> by adding <a type="anno">Incr</a> to the element at position <a type="anno">Pos</a>. The new counter value is returned. If no position is specified, the element directly following key (<code class="inline">&lt;keypos&gt;+1</code>) is updated.</p>
+<p>If a <a type="anno">Threshold</a> is specified, the counter is reset to value <a type="anno">SetValue</a> if the following conditions occur:</p>
+<ul ><li >
+<a type="anno">Incr</a> is not negative (`>= 0`) and the result would be greater than (`>`) <a type="anno">Threshold</a>.
+</li><li >
+<a type="anno">Incr</a> is negative (`< 0`) and the result would be less than (`<`) <a type="anno">Threshold</a>.
+</li></ul>
+A list of <a type="anno">UpdateOp</a> can be supplied to do many update operations within the object. The operations are carried out in the order specified in the list. If the same counter position occurs more than once in the list, the corresponding counter is thus updated many times, each time based on the previous result. The return value is a list of the new counter values from each update operation in the same order as in the operation list. If an empty list is specified, nothing is updated and an empty list is returned. If the function fails, no updates are done.
+
+The specified <a type="anno">Key</a> is used to identify the object by either <em >matching</em> the key of an object in a `set` table, or <em >compare equal</em> to the key of an object in an `ordered_set` table (for details on the difference, see [`lookup/2`](#lookup/2) and [`new/2`](#new/2)).
+
+If a default object <a type="anno">Default</a> is specified, it is used as the object to be updated if the key is missing from the table. The value in place of the key is ignored and replaced by the proper key value. The return value is as if the default object had not been used, that is, a single updated element or a list of them.
+
+The function fails with reason `badarg` in the following situations:
+<ul ><li >The table type is not `set` or `ordered_set`.</li><li >No object with the correct key exists and no default object was supplied.</li><li >The object has the wrong arity.</li><li >The default object arity is smaller than `<keypos>`.</li><li >Any field from the default object that is updated is not an integer.</li><li >The element to update is not an integer.</li><li >The element to update is also the key.</li><li >Any of <a type="anno">Pos</a>, <a type="anno">Incr</a>, <a type="anno">Threshold</a>, or <a type="anno">SetValue</a> is not an integer.</li></ul>  </section>
+</section>
+<section class="detail" id="update_counter/4">
+  <div class="detail-header">
+    <a href="#update_counter/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_counter/3 update_counter/4 update_counter/3 update_counter/4 update_counter/3 update_counter/4</h1>
+      <span class="note">(since OTP 18.0)</span>
+      <div class="specs">
+          <pre>update_counter(Tab, Key, UpdateOp, Default) -> Result
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      UpdateOp ::
+                          {Pos, Incr} |
+                          {Pos, Incr, Threshold, SetValue},
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Threshold :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      SetValue :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Default :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+          <pre>update_counter(Tab, Key, [UpdateOp], Default) -> [Result]
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      UpdateOp ::
+                          {Pos, Incr} |
+                          {Pos, Incr, Threshold, SetValue},
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Threshold :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      SetValue :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Default :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+          <pre>update_counter(Tab, Key, Incr, Default) -> Result
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Incr :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Result :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+                      Default :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function provides an efficient way to update one or more counters, without the trouble of having to look up an object, update the object by incrementing an element, and insert the resulting object into the table again. The operation is guaranteed to be atomic and isolated.</p>
+<p>This function destructively update the object with key <a type="anno">Key</a> in table <a type="anno">Tab</a> by adding <a type="anno">Incr</a> to the element at position <a type="anno">Pos</a>. The new counter value is returned. If no position is specified, the element directly following key (<code class="inline">&lt;keypos&gt;+1</code>) is updated.</p>
+<p>If a <a type="anno">Threshold</a> is specified, the counter is reset to value <a type="anno">SetValue</a> if the following conditions occur:</p>
+<ul ><li >
+<a type="anno">Incr</a> is not negative (`>= 0`) and the result would be greater than (`>`) <a type="anno">Threshold</a>.
+</li><li >
+<a type="anno">Incr</a> is negative (`< 0`) and the result would be less than (`<`) <a type="anno">Threshold</a>.
+</li></ul>
+A list of <a type="anno">UpdateOp</a> can be supplied to do many update operations within the object. The operations are carried out in the order specified in the list. If the same counter position occurs more than once in the list, the corresponding counter is thus updated many times, each time based on the previous result. The return value is a list of the new counter values from each update operation in the same order as in the operation list. If an empty list is specified, nothing is updated and an empty list is returned. If the function fails, no updates are done.
+
+The specified <a type="anno">Key</a> is used to identify the object by either <em >matching</em> the key of an object in a `set` table, or <em >compare equal</em> to the key of an object in an `ordered_set` table (for details on the difference, see [`lookup/2`](#lookup/2) and [`new/2`](#new/2)).
+
+If a default object <a type="anno">Default</a> is specified, it is used as the object to be updated if the key is missing from the table. The value in place of the key is ignored and replaced by the proper key value. The return value is as if the default object had not been used, that is, a single updated element or a list of them.
+
+The function fails with reason `badarg` in the following situations:
+<ul ><li >The table type is not `set` or `ordered_set`.</li><li >No object with the correct key exists and no default object was supplied.</li><li >The object has the wrong arity.</li><li >The default object arity is smaller than `<keypos>`.</li><li >Any field from the default object that is updated is not an integer.</li><li >The element to update is not an integer.</li><li >The element to update is also the key.</li><li >Any of <a type="anno">Pos</a>, <a type="anno">Incr</a>, <a type="anno">Threshold</a>, or <a type="anno">SetValue</a> is not an integer.</li></ul>  </section>
+</section>
+<section class="detail" id="update_element/3">
+  <div class="detail-header">
+    <a href="#update_element/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_element/3 update_element/3</h1>
+      <div class="specs">
+          <pre>update_element(Tab, Key, ElementSpec :: {Pos, Value}) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                      Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+          <pre>update_element(Tab, Key, ElementSpec :: [{Pos, Value}]) ->
+                  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()
+                  when
+                      Tab :: <a href="#t:tab/0">tab</a>(),
+                      Key :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+                      Pos :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                      Value :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function provides an efficient way to update one or more elements within an object, without the trouble of having to look up, update, and write back the entire object.</p>
+<p>This function destructively updates the object with key <a type="anno">Key</a> in table <a type="anno">Tab</a>. The element at position <a type="anno">Pos</a> is given the value <a type="anno">Value</a>.</p>
+<p>A list of <code class="inline">{Pos,Value}</code> can be supplied to update many elements within the same object. If the same position occurs more than once in the list, the last value in the list is written. If the list is empty or the function fails, no updates are done. The function is also atomic in the sense that other processes can never see any intermediate results.</p>
+<p>Returns <code class="inline">true</code> if an object with key <a type="anno">Key</a> is found, otherwise <code class="inline">false</code>.</p>
+<p>The specified <a type="anno">Key</a> is used to identify the object by either <em >matching</em> the key of an object in a <code class="inline">set</code> table, or <em >compare equal</em> to the key of an object in an <code class="inline">ordered_set</code> table (for details on the difference, see <a href="#lookup/2"><code class="inline">lookup/2</code></a> and <a href="#new/2"><code class="inline">new/2</code></a>).</p>
+<p>The function fails with reason <code class="inline">badarg</code> in the following situations:</p>
+<ul ><li >The table type is not `set` or `ordered_set`.</li><li ><a type="anno">Pos</a> < 1.</li><li ><a type="anno">Pos</a> > object arity.</li><li >The element to update is also the key.</li></ul>  </section>
+</section>
+<section class="detail" id="whereis/1">
+  <div class="detail-header">
+    <a href="#whereis/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">whereis/1</h1>
+      <span class="note">(since OTP 21.0)</span>
+      <div class="specs">
+          <pre>whereis(TableName) -> <a href="#t:tid/0">tid</a>() | undefined when TableName :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>This function returns the <code class="inline">tid()</code> of the named table identified by <a type="anno">TableName</a>, or <code class="inline">undefined</code> if no such table exists. The <code class="inline">tid()</code> can be used in place of the table name in all operations, which is slightly faster since the name does not have to be resolved on each call.</p>
+<p>If the table is deleted, the <code class="inline">tid()</code> will be invalid even if another named table is created with the same name.</p>
+  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

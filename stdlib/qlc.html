@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.21.2">
+    <meta name="project" content="stdlib v3.11.2">
+    <title>qlc — stdlib v3.11.2</title>
+    <link rel="stylesheet" href="dist/erlang-94f16191f0a724ab8055.css" />
+    <script src="dist/sidebar_items-12ac001a03.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-a9f3287e74588dddabf3.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib      </a>
+      <h2 class="sidebar-projectVersion">
+        v3.11.2
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">stdlib v3.11.2</small>
+qlc      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides a query interface to Mnesia, ETS, Dets, and other data structures that provide an iterator style traversal of objects.</p>
+<h2 id="module-overview" class="section-heading">
+  <a href="#module-overview" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Overview
+</h2>
+<p>This module provides a query interface to <em >QLC tables</em>. Typical QLC tables are Mnesia, ETS, and Dets tables. Support is also provided for user-defined tables, see section Implementing a QLC Table. <a id="query_list_comprehension"></a>A <em >query</em> is expressed using <em >Query List Comprehensions</em> (QLCs). The answers to a query are determined by data in QLC tables that fulfill the constraints expressed by the QLCs of the query. QLCs are similar to ordinary list comprehensions as described in Erlang Reference Manual and Programming Examples, except that variables introduced in patterns cannot be used in list expressions. In the absence of optimizations and options such as <code class="inline">cache</code> and <code class="inline">unique</code> (see section Common Options, every QLC free of QLC tables evaluates to the same list of answers as the identical ordinary list comprehension.</p>
+<p>While ordinary list comprehensions evaluate to lists, calling <a href="#q/1"><code class="inline">q/1,2</code></a> returns a <a id="query_handle"></a><em >query handle</em>. To obtain all the answers to a query, <a href="#eval/1"><code class="inline">eval/1,2</code></a> is to be called with the query handle as first argument. Query handles are essentially functional objects (funs) created in the module calling <a href="#q/1"><code class="inline">q/1,2</code></a>. As the funs refer to the module code, be careful not to keep query handles too long if the module code is to be replaced. Code replacement is described in section Compilation and Code Loading in the Erlang Reference Manual. The list of answers can also be traversed in chunks by use of a <a id="query_cursor"></a><em >query cursor</em>. Query cursors are created by calling <a href="#cursor/1"><code class="inline">cursor/1,2</code></a> with a query handle as first argument. Query cursors are essentially Erlang processes. One answer at a time is sent from the query cursor process to the process that created the cursor.</p>
+<h2 id="module-syntax" class="section-heading">
+  <a href="#module-syntax" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Syntax
+</h2>
+<p>Syntactically QLCs have the same parts as ordinary list comprehensions:
+<code type="none">[Expression || Qualifier1, Qualifier2, ...]</code>
+<code class="inline">Expression</code> (the <em >template</em>) is any Erlang expression. Qualifiers are either <em >filters</em> or <em >generators</em>. Filters are Erlang expressions returning <code class="inline">boolean()</code>. Generators have the form <code class="inline">Pattern &lt;- ListExpression</code>, where <code class="inline">ListExpression</code> is an expression evaluating to a query handle or a list. Query handles are returned from <a href="#append/1"><code class="inline">append/1,2</code></a>, <a href="#keysort/2"><code class="inline">keysort/2,3</code></a>, <a href="#q/1"><code class="inline">q/1,2</code></a>, <a href="#sort/1"><code class="inline">sort/1,2</code></a>, <a href="#string_to_handle/1"><code class="inline">string_to_handle/1,2,3</code></a>, and <a href="#table/2"><code class="inline">table/2</code></a>.</p>
+<h2 id="module-evaluation" class="section-heading">
+  <a href="#module-evaluation" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Evaluation
+</h2>
+<p>A query handle is evaluated in the following order:</p>
+<ul ><li >
+Inspection of options and the collection of information about tables. As a result, qualifiers are modified during the optimization phase.
+</li><li >
+All list expressions are evaluated. If a cursor has been created, evaluation takes place in the cursor process. For list expressions that are QLCs, the list expressions of the generators of the QLCs are evaluated as well. Be careful if list expressions have side effects, as list expressions are evaluated in unspecified order.
+</li><li >
+The answers are found by evaluating the qualifiers from left to right, backtracking when some filter returns `false`, or collecting the template when all filters return `true`.
+</li></ul>
+Filters that do not return `boolean()` but fail are handled differently depending on their syntax: if the filter is a guard, it returns `false`, otherwise the query evaluation fails. This behavior makes it possible for the `qlc` module to do some optimizations without affecting the meaning of a query. For example, when testing some position of a table and one or more constants for equality, only the objects with equal values are candidates for further evaluation. The other objects are guaranteed to make the filter return `false`, but never fail. The (small) set of candidate objects can often be found by looking up some key values of the table or by traversing the table using a match specification. It is necessary to place the guard filters immediately after the table generator, otherwise the candidate objects are not restricted to a small set. The reason is that objects that could make the query evaluation fail must not be excluded by looking up a key or running a match specification.
+<h2 id="module-join" class="section-heading">
+  <a href="#module-join" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Join
+</h2>
+
+The `qlc` module supports fast join of two query handles. Fast join is possible if some position `P1` of one query handler and some position `P2` of another query handler are tested for equality. Two fast join methods are provided:
+<ul ><li >
+<em >Lookup join</em> traverses all objects of one query handle and finds objects of the other handle (a QLC table) such that the values at `P1` and `P2` match or compare equal. The `qlc` module does not create any indexes but looks up values using the key position and the indexed positions of the QLC table.
+</li><li >
+<em >Merge join</em> sorts the objects of each query handle if necessary and filters out objects where the values at `P1` and `P2` do not compare equal. If many objects with the same value of `P2` exist, a temporary file is used for the equivalence classes.
+</li></ul>
+The `qlc` module warns at compile time if a QLC combines query handles in such a way that more than one join is possible. That is, no query planner is provided that can select a good order between possible join operations. It is up to the user to order the joins by introducing query handles.
+
+The join is to be expressed as a guard filter. The filter must be placed immediately after the two joined generators, possibly after guard filters that use variables from no other generators but the two joined generators. The `qlc` module inspects the operands of `=:=/2`, [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2), `is_record/2`, `element/2`, and logical operators ([`and/2`](https://hexdocs.pm/elixir/Kernel.html#and/2), [`or/2`](https://hexdocs.pm/elixir/Kernel.html#or/2), `andalso/2`, `orelse/2`, `xor/2`) when determining which joins to consider.
+<a id="common_options"></a><h2 id="module-common-options" class="section-heading">
+  <a href="#module-common-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Common Options
+</h2>
+
+The following options are accepted by [`cursor/2`](#cursor/2), [`eval/2`](#eval/2), [`fold/4`](#fold/4), and [`info/2`](#info/2):
+<ul ><li >
+`{cache_all, Cache}`, where `Cache` is equal to `ets` or `list` adds a `{cache, Cache}` option to every list expression of the query except tables and lists. Defaults to `{cache_all, no}`. Option `cache_all` is equivalent to `{cache_all, ets}`.
+</li><li >
+<a id="max_list_size"></a>`{max_list_size, MaxListSize}`, where `MaxListSize` is the size in bytes of terms on the external format. If the accumulated size of collected objects exceeds `MaxListSize`, the objects are written onto a temporary file. This option is used by option `{cache, list}` and by the merge join method. Defaults to 512*1024 bytes.
+</li><li >
+`{tmpdir_usage, TmpFileUsage}` determines the action taken when `qlc` is about to create temporary files on the directory set by option `tmpdir`. If the value is `not_allowed`, an error tuple is returned, otherwise temporary files are created as needed. Default is `allowed`, which means that no further action is taken. The values `info_msg`, `warning_msg`, and `error_msg` mean that the function with the corresponding name in module `error_logger` is called for printing some information (currently the stacktrace).
+</li><li >
+`{tmpdir, TempDirectory}` sets the directory used by merge join for temporary files and by option `{cache, list}`. The option also overrides option `tmpdir` of [`keysort/3`](#keysort/3) and [`sort/2`](#sort/2). Defaults to `""`, which means that the directory returned by `file:get_cwd()` is used.
+</li><li >
+`{unique_all, true}` adds a `{unique, true}` option to every list expression of the query. Defaults to `{unique_all, false}`. Option `unique_all` is equivalent to `{unique_all, true}`.
+</li></ul><a id="getting_started"></a><h2 id="module-getting-started" class="section-heading">
+  <a href="#module-getting-started" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Getting Started
+</h2>
+
+As mentioned earlier, queries are expressed in the list comprehension syntax as described in section Expressions in Erlang Reference Manual. In the following, some familiarity with list comprehensions is assumed. The examples in section List Comprehensions in Programming Examples can get you started. Notice that list comprehensions do not add any computational power to the language; anything that can be done with list comprehensions can also be done without them. But they add syntax for expressing simple search problems, which is compact and clear once you get used to it.
+
+Many list comprehension expressions can be evaluated by the `qlc` module. Exceptions are expressions, such that variables introduced in patterns (or filters) are used in some generator later in the list comprehension. As an example, consider an implementation of `lists:append(L)`: `[X ||Y <- L, X <- Y]`. `Y` is introduced in the first generator and used in the second. The ordinary list comprehension is normally to be preferred when there is a choice as to which to use. One difference is that [`eval/1,2`](#eval/1) collects answers in a list that is finally reversed, while list comprehensions collect answers on the stack that is finally unwound.
+
+What the `qlc` module primarily adds to list comprehensions is that data can be read from QLC tables in small chunks. A QLC table is created by calling `qlc:table/2`. Usually `qlc:table/2` is not called directly from the query but through an interface function of some data structure. Erlang/OTP includes a few examples of such functions: `mnesia:table/1,2`, `ets:table/1,2`, and `dets:table/1,2`. For a given data structure, many functions can create QLC tables, but common for these functions is that they return a query handle created by `qlc:table/2`. Using the QLC tables provided by Erlang/OTP is usually probably sufficient, but for the more advanced user section Implementing a QLC Table describes the implementation of a function calling `qlc:table/2`.
+
+Besides `qlc:table/2`, other functions return query handles. They are used more seldom than tables, but are sometimes useful. `qlc:append/1,2` traverses objects from many tables or lists after each other. If, for example, you want to traverse all answers to a query `QH` and then finish off by a term `{finished}`, you can do that by calling `qlc:append(QH, [{finished}])`. [`append/2`](#append/2) first returns all objects of `QH`, then `{finished}`. If a tuple `{finished}` exists among the answers to `QH`, it is returned twice from [`append/2`](#append/2).
+
+As another example, consider concatenating the answers to two queries `QH1` and `QH2` while removing all duplicates. This is accomplished by using option `unique`:
+<code type="none">qlc:q([X || X <- qlc:append(QH1, QH2)], {unique, true})</code>
+The cost is substantial: every returned answer is stored in an ETS table. Before returning an answer, it is looked up in the ETS table to check if it has already been returned. Without the `unique` option, all answers to `QH1` would be returned followed by all answers to `QH2`. The `unique` option keeps the order between the remaining answers.
+
+If the order of the answers is not important, there is an alternative to the `unique` option, namely to sort the answers uniquely:
+<code type="none">qlc:sort(qlc:q([X || X <- qlc:append(QH1, QH2)], {unique, true})).</code>
+This query also removes duplicates but the answers are sorted. If there are many answers, temporary files are used. Notice that to get the first unique answer, all answers must be found and sorted. Both alternatives find duplicates by comparing answers, that is, if `A1` and `A2` are answers found in that order, then `A2` is a removed if `A1 == A2`.
+
+To return only a few answers, cursors can be used. The following code returns no more than five answers using an ETS table for storing the unique answers:
+<code type="none">C = qlc:cursor(qlc:q([X || X <- qlc:append(QH1, QH2)],{unique,true})),
+R = qlc:next_answers(C, 5),
+ok = qlc:delete_cursor(C),
+R.</code>
+QLCs are convenient for stating constraints on data from two or more tables. The following example does a natural join on two query handles on position 2:
+<code type="none">qlc:q([{X1,X2,X3,Y1} || 
+          {X1,X2,X3} <- QH1, 
+          {Y1,Y2} <- QH2, 
+          X2 =:= Y2])</code>
+The `qlc` module evaluates this differently depending on the query handles `QH1` and `QH2`. If, for example, `X2` is matched against the key of a QLC table, the lookup join method traverses the objects of `QH2` while looking up key values in the table. However, if not `X2` or `Y2` is matched against the key or an indexed position of a QLC table, the merge join method ensures that `QH1` and `QH2` are both sorted on position 2 and next do the join by traversing the objects one by one.
+
+Option `join` can be used to force the `qlc` module to use a certain join method. For the rest of this section it is assumed that the excessively slow join method called "nested loop" has been chosen:
+<code type="none">qlc:q([{X1,X2,X3,Y1} || 
+          {X1,X2,X3} <- QH1, 
+          {Y1,Y2} <- QH2, 
+          X2 =:= Y2],
+      {join, nested_loop})</code>
+In this case the filter is applied to every possible pair of answers to `QH1` and `QH2`, one at a time. If there are M answers to `QH1` and N answers to `QH2`, the filter is run M*N times.
+
+If `QH2` is a call to the function for `gb_trees`, as defined in section Implementing a QLC Table, then `gb_table:table/1`, the iterator for the gb-tree is initiated for each answer to `QH1`. The objects of the gb-tree are then returned one by one. This is probably the most efficient way of traversing the table in that case, as it takes minimal computational power to get the following object. But if `QH2` is not a table but a more complicated QLC, it can be more efficient to use some RAM memory for collecting the answers in a cache, particularly if there are only a few answers. It must then be assumed that evaluating `QH2` has no side effects so that the meaning of the query does not change if `QH2` is evaluated only once. One way of caching the answers is to evaluate `QH2` first of all and substitute the list of answers for `QH2` in the query. Another way is to use option `cache`. It is expressed like this:
+<code type="none">QH2' = qlc:q([X || X <- QH2], {cache, ets})</code>
+or only
+<code type="none">QH2' = qlc:q([X || X <- QH2], cache)</code>
+The effect of option `cache` is that when generator `QH2'` is run the first time, every answer is stored in an ETS table. When the next answer of `QH1` is tried, answers to `QH2'` are copied from the ETS table, which is very fast. As for option `unique` the cost is a possibly substantial amount of RAM memory.
+
+Option `{cache, list}` offers the possibility to store the answers in a list on the process heap. This has the potential of being faster than ETS tables, as there is no need to copy answers from the table. However, it can often result in slower evaluation because of more garbage collections of the process heap and increased RAM memory consumption because of larger heaps. Another drawback with cache lists is that if the list size exceeds a limit, a temporary file is used. Reading the answers from a file is much slower than copying them from an ETS table. But if the available RAM memory is scarce, setting the limit to some low value is an alternative.
+
+Option `cache_all` can be set to `ets` or `list` when evaluating a query. It adds a `cache` or `{cache, list}` option to every list expression except QLC tables and lists on all levels of the query. This can be used for testing if caching would improve efficiency at all. If the answer is yes, further testing is needed to pinpoint the generators that are to be cached.
+<a id="implementing_a_qlc_table"></a><h2 id="module-implementing-a-qlc-table" class="section-heading">
+  <a href="#module-implementing-a-qlc-table" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Implementing a QLC Table
+</h2>
+
+As an example of how to use function [`table/2`](#table/2), the implementation of a QLC table for the `gb_trees` module is given:
+<code type="none">-module(gb_table).
+
+-export([table/1]).
+
+table(T) ->
+    TF = fun() -> qlc_next(gb_trees:next(gb_trees:iterator(T))) end,
+    InfoFun = fun(num_of_objects) -> gb_trees:size(T);
+                 (keypos) -> 1;
+                 (is_sorted_key) -> true;
+                 (is_unique_objects) -> true;
+                 (_) -> undefined
+              end,
+    LookupFun =
+        fun(1, Ks) ->
+                lists:flatmap(fun(K) ->
+                                      case gb_trees:lookup(K, T) of
+                                          {value, V} -> [{K,V}];
+                                          none -> []
+                                      end
+                              end, Ks)
+        end,
+    FormatFun =
+        fun({all, NElements, ElementFun}) ->
+                ValsS = io_lib:format("gb_trees:from_orddict(~w)",
+                                      [gb_nodes(T, NElements, ElementFun)]),
+                io_lib:format("gb_table:table(~s)", [ValsS]);
+           ({lookup, 1, KeyValues, _NElements, ElementFun}) ->
+                ValsS = io_lib:format("gb_trees:from_orddict(~w)",
+                                      [gb_nodes(T, infinity, ElementFun)]),
+                io_lib:format("lists:flatmap(fun(K) -> "
+                              "case gb_trees:lookup(K, ~s) of "
+                              "{value, V} -> [{K,V}];none -> [] end "
+                              "end, ~w)",
+                              [ValsS, [ElementFun(KV) || KV <- KeyValues]])
+        end,
+    qlc:table(TF, [{info_fun, InfoFun}, {format_fun, FormatFun},
+                   {lookup_fun, LookupFun},{key_equality,'=='}]).
+
+qlc_next({X, V, S}) ->
+    [{X,V} | fun() -> qlc_next(gb_trees:next(S)) end];
+qlc_next(none) ->
+    [].
+
+gb_nodes(T, infinity, ElementFun) ->
+    gb_nodes(T, -1, ElementFun);
+gb_nodes(T, NElements, ElementFun) ->
+    gb_iter(gb_trees:iterator(T), NElements, ElementFun).
+
+gb_iter(_I, 0, _EFun) ->
+    '...';
+gb_iter(I0, N, EFun) ->
+    case gb_trees:next(I0) of
+        {X, V, I} ->
+            [EFun({X,V}) | gb_iter(I, N-1, EFun)];
+        none ->
+            []
+    end.</code>
+`TF` is the traversal function. The `qlc` module requires that there is a way of traversing all objects of the data structure. `gb_trees` has an iterator function suitable for that purpose. Notice that for each object returned, a new fun is created. As long as the list is not terminated by `[]`, it is assumed that the tail of the list is a nullary function and that calling the function returns further objects (and functions).
+
+The lookup function is optional. It is assumed that the lookup function always finds values much faster than it would take to traverse the table. The first argument is the position of the key. As `qlc_next/1` returns the objects as `{Key, Value}` pairs, the position is 1. Notice that the lookup function is to return `{Key, Value}` pairs, as the traversal function does.
+
+The format function is also optional. It is called by [`info/1,2`](#info/1) to give feedback at runtime of how the query is to be evaluated. Try to give as good feedback as possible without showing too much details. In the example, at most seven objects of the table are shown. The format function handles two cases: `all` means that all objects of the table are traversed; `{lookup, 1, KeyValues}` means that the lookup function is used for looking up key values.
+
+Whether the whole table is traversed or only some keys looked up depends on how the query is expressed. If the query has the form
+<code type="none">qlc:q([T || P <- LE, F])</code>
+and `P` is a tuple, the `qlc` module analyzes `P` and `F` in compile time to find positions of tuple `P` that are tested for equality to constants. If such a position at runtime turns out to be the key position, the lookup function can be used, otherwise all objects of the table must be traversed. The info function `InfoFun` returns the key position. There can be indexed positions as well, also returned by the info function. An index is an extra table that makes lookup on some position fast. Mnesia maintains indexes upon request, and introduces so called secondary keys. The `qlc` module prefers to look up objects using the key before secondary keys regardless of the number of constants to look up.
+<h2 id="module-key-equality" class="section-heading">
+  <a href="#module-key-equality" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Key Equality
+</h2>
+
+Erlang/OTP has two operators for testing term equality: [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2) and `=:=/2`. The difference is all about the integers that can be represented by floats. For example, `2 == 2.0` evaluates to `true` while `2 =:= 2.0` evaluates to `false`. Normally this is a minor issue, but the `qlc` module cannot ignore the difference, which affects the user's choice of operators in QLCs.
+
+If the `qlc` module at compile time can determine that some constant is free of integers, it does not matter which one of [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2) or `=:=/2` is used:
+
+```
+1> E1 = ets:new(t, [set]), % uses =:=/2 for key equality
+Q1 = qlc:q([K ||
+{K} <- ets:table(E1),
+K == 2.71 orelse K == a]),
+io:format("~s~n", [qlc:info(Q1)]).
+ets:match_spec_run(
+       lists:flatmap(fun(V) ->
+                ets:lookup(#Ref<0.3098908599.2283929601.256025>,
+                       V)
+             end,
+             [a, 2.71]),
+       ets:match_spec_compile([{{'$1'}, [], ['$1']}]))
+```
+
+In the example, operator [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2) has been handled exactly as `=:=/2` would have been handled. However, if it cannot be determined at compile time that some constant is free of integers, and the table uses `=:=/2` when comparing keys for equality (see option key_equality), then the `qlc` module does not try to look up the constant. The reason is that there is in the general case no upper limit on the number of key values that can compare equal to such a constant; every combination of integers and floats must be looked up:
+
+```
+2> E2 = ets:new(t, [set]),
+true = ets:insert(E2, [{{2,2},a},{{2,2.0},b},{{2.0,2},c}]),
+F2 = fun(I) ->
+qlc:q([V || {K,V} <- ets:table(E2), K == I])
+end,
+Q2 = F2({2,2}),
+io:format("~s~n", [qlc:info(Q2)]).
+ets:table(#Ref<0.3098908599.2283929601.256125>,
+          [{traverse,
+            {select,
+             [{{'$1', '$2'}, [{'==', '$1', {const, {2, 2}}}], ['$2']}]}}])
+3> lists:sort(qlc:e(Q2)).
+[a,b,c]
+```
+
+Looking up only `{2,2}` would not return `b` and `c`.
+
+If the table uses [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2) when comparing keys for equality, the `qlc` module looks up the constant regardless of which operator is used in the QLC. However, [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2) is to be preferred:
+
+```
+4> E3 = ets:new(t, [ordered_set]), % uses ==/2 for key equality
+true = ets:insert(E3, [{{2,2.0},b}]),
+F3 = fun(I) ->
+qlc:q([V || {K,V} <- ets:table(E3), K == I])
+end,
+Q3 = F3({2,2}),
+io:format("~s~n", [qlc:info(Q3)]).
+ets:match_spec_run(ets:lookup(#Ref<0.3098908599.2283929601.256211>,
+                              {2, 2}),
+                   ets:match_spec_compile([{{'$1', '$2'}, [], ['$2']}]))
+5> qlc:e(Q3).
+[b]
+```
+
+Lookup join is handled analogously to lookup of constants in a table: if the join operator is [`==/2`](https://hexdocs.pm/elixir/Kernel.html#==/2), and the table where constants are to be looked up uses `=:=/2` when testing keys for equality, then the `qlc` module does not consider lookup join for that table.
+<h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+
+`dets(3)`, `erl_eval(3)`, `erlang(3)`, `error_logger(3)`, `ets(3)`, `file(3)`, `file_sorter(3)`, `mnesia(3)`, `shell(3)`, Erlang Reference Manual, Programming Examples        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:abstract_expr/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parse trees for Erlang expression, see section The Abstract Format in the ERTS User&#39;s Guide.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:answer/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:answers/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:cache/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:key_pos/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:match_expression/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>Match specification, see section Match Specifications in Erlang in the ERTS User&#39;s Guide and <code class="inline">ms_transform(3)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:max_list_size/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:no_files/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>An integer &gt; 1.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:order/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:order_fun/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:query_cursor/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A query cursor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:query_handle/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A query handle.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:query_handle_or_list/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:query_list_comprehension/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>A literal query list comprehension.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:sort_option/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"><p>See <code class="inline">file_sorter(3)</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:sort_options/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:spawn_options/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tmp_directory/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tmp_file_usage/0">(bad signature)</a>
+  </div>
+    <div class="summary-synopsis"></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/1">append/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH</a>, all answers to the first query handle in <a type="anno">QHL</a> are returned, followed by all answers to the remaining query handles in <a type="anno">QHL</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/2">append/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH3</a>, all answers to <a type="anno">QH1</a> are returned, followed by all answers to <a type="anno">QH2</a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cursor/1">cursor/1 cursor/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a query cursor and makes the calling process the owner of the cursor. The cursor is to be used as argument to <a href="#next_answers/1"><code class="inline">next_answers/1,2</code></a> and (eventually) <a href="#delete_cursor/1"><code class="inline">delete_cursor/1</code></a>. Calls <code class="inline">erlang:spawn_opt/2</code> to spawn and link to a process that evaluates the query handle. The value of option <code class="inline">spawn_options</code> is used as last argument when calling <code class="inline">spawn_opt/2</code>. Defaults to <code class="inline">[link]</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cursor/2">cursor/1 cursor/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a query cursor and makes the calling process the owner of the cursor. The cursor is to be used as argument to <a href="#next_answers/1"><code class="inline">next_answers/1,2</code></a> and (eventually) <a href="#delete_cursor/1"><code class="inline">delete_cursor/1</code></a>. Calls <code class="inline">erlang:spawn_opt/2</code> to spawn and link to a process that evaluates the query handle. The value of option <code class="inline">spawn_options</code> is used as last argument when calling <code class="inline">spawn_opt/2</code>. Defaults to <code class="inline">[link]</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_cursor/1">delete_cursor/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes a query cursor. Only the owner of the cursor can delete the cursor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#e/1">e/1 e/2 eval/1 eval/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates a query handle in the calling process and collects all answers in a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#e/2">e/1 e/2 eval/1 eval/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates a query handle in the calling process and collects all answers in a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval/1">e/1 e/2 eval/1 eval/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates a query handle in the calling process and collects all answers in a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval/2">e/1 e/2 eval/1 eval/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates a query handle in the calling process and collects all answers in a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fold/3">fold/3 fold/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Calls <a type="anno">Function</a> on successive answers to the query handle together with an extra argument <a type="anno">AccIn</a>. The query handle and the function are evaluated in the calling process. <a type="anno">Function</a> must return a new accumulator, which is passed to the next call. <a type="anno">Acc0</a> is returned if there are no answers to the query handle.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fold/4">fold/3 fold/4</a>
+  </div>
+    <div class="summary-synopsis"><p>Calls <a type="anno">Function</a> on successive answers to the query handle together with an extra argument <a type="anno">AccIn</a>. The query handle and the function are evaluated in the calling process. <a type="anno">Function</a> must return a new accumulator, which is passed to the next call. <a type="anno">Acc0</a> is returned if there are no answers to the query handle.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_error/1">format_error/1</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a descriptive string in English of an error tuple returned by some of the functions of the <code class="inline">qlc</code> module or the parse transform. This function is mainly used by the compiler invoking the parse transform.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info/1 info/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about a query handle. The information describes the simplifications and optimizations that are the results of preparing the query for evaluation. This function is probably mainly useful during debugging.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/2">info/1 info/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about a query handle. The information describes the simplifications and optimizations that are the results of preparing the query for evaluation. This function is probably mainly useful during debugging.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keysort/2">keysort/2 keysort/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:keysort/4</code> according to the options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keysort/3">keysort/2 keysort/3</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:keysort/4</code> according to the options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_answers/1">next_answers/1 next_answers/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns some or all of the remaining answers to a query cursor. Only the owner of <a type="anno">QueryCursor</a> can retrieve answers.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_answers/2">next_answers/1 next_answers/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns some or all of the remaining answers to a query cursor. Only the owner of <a type="anno">QueryCursor</a> can retrieve answers.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#q/1">q/1 q/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle for a QLC. The QLC must be the first argument to this function, otherwise it is evaluated as an ordinary list comprehension. It is also necessary to add the following line to the source code:
+<code type="none">-include_lib(&quot;stdlib/include/qlc.hrl&quot;).</code>
+This causes a parse transform to substitute a fun for the QLC. The (compiled) fun is called when the query handle is evaluated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#q/2">q/1 q/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle for a QLC. The QLC must be the first argument to this function, otherwise it is evaluated as an ordinary list comprehension. It is also necessary to add the following line to the source code:
+<code type="none">-include_lib(&quot;stdlib/include/qlc.hrl&quot;).</code>
+This causes a parse transform to substitute a fun for the QLC. The (compiled) fun is called when the query handle is evaluated.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sort/1">sort/1 sort/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:sort/3</code> according to the options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sort/2">sort/1 sort/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:sort/3</code> according to the options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string_to_handle/1">string_to_handle/1 string_to_handle/2 string_to_handle/3</a>
+  </div>
+    <div class="summary-synopsis"><p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string_to_handle/2">string_to_handle/1 string_to_handle/2 string_to_handle/3</a>
+  </div>
+    <div class="summary-synopsis"><p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string_to_handle/3">string_to_handle/1 string_to_handle/2 string_to_handle/3</a>
+  </div>
+    <div class="summary-synopsis"><p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table/2">table/2</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a query handle for a QLC table. In Erlang/OTP there is support for ETS, Dets, and Mnesia tables, but many other data structures can be turned into QLC tables. This is accomplished by letting function(s) in the module implementing the data structure create a query handle by calling <code class="inline">qlc:table/2</code>. The different ways to traverse the table and properties of the table are handled by callback functions provided as options to <code class="inline">qlc:table/2</code>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:abstract_expr/0">
+  <div class="detail-header">
+    <a href="#t:abstract_expr/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>abstract_expr() :: erl_parse:<a href="#t:abstract_expr/0">abstract_expr</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Parse trees for Erlang expression, see section The Abstract Format in the ERTS User&#39;s Guide.</p>
+  </section>
+</section>
+<section class="detail" id="t:answer/0">
+  <div class="detail-header">
+    <a href="#t:answer/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>answer() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:answers/0">
+  <div class="detail-header">
+    <a href="#t:answers/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>answers() :: [<a href="#t:answer/0">answer</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:cache/0">
+  <div class="detail-header">
+    <a href="#t:cache/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>cache() :: ets | list | no.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:key_pos/0">
+  <div class="detail-header">
+    <a href="#t:key_pos/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>key_pos() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>() | [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:match_expression/0">
+  <div class="detail-header">
+    <a href="#t:match_expression/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>match_expression() :: ets:match_spec().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Match specification, see section Match Specifications in Erlang in the ERTS User&#39;s Guide and <code class="inline">ms_transform(3)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:max_list_size/0">
+  <div class="detail-header">
+    <a href="#t:max_list_size/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>max_list_size() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:no_files/0">
+  <div class="detail-header">
+    <a href="#t:no_files/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>no_files() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>An integer &gt; 1.</p>
+  </section>
+</section>
+<section class="detail" id="t:order/0">
+  <div class="detail-header">
+    <a href="#t:order/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>order() :: ascending | descending | <a href="#t:order_fun/0">order_fun</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:order_fun/0">
+  <div class="detail-header">
+    <a href="#t:order_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>order_fun() :: fun((<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()).
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:query_cursor/0">
+  <div class="detail-header">
+    <a href="#t:query_cursor/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <span class="note">(opaque)</span>
+      <div class="specs">
+          <pre>query_cursor() :: {qlc_cursor, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A query cursor.</p>
+  </section>
+</section>
+<section class="detail" id="t:query_handle/0">
+  <div class="detail-header">
+    <a href="#t:query_handle/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <span class="note">(opaque)</span>
+      <div class="specs">
+          <pre>query_handle() :: {qlc_handle, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A query handle.</p>
+  </section>
+</section>
+<section class="detail" id="t:query_handle_or_list/0">
+  <div class="detail-header">
+    <a href="#t:query_handle_or_list/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>query_handle_or_list() :: <a href="#t:query_handle/0">query_handle</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">list</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:query_list_comprehension/0">
+  <div class="detail-header">
+    <a href="#t:query_list_comprehension/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>query_list_comprehension() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A literal query list comprehension.</p>
+  </section>
+</section>
+<section class="detail" id="t:sort_option/0">
+  <div class="detail-header">
+    <a href="#t:sort_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>sort_option() ::
+    {compressed, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+    {no_files, <a href="#t:no_files/0">no_files</a>()} |
+    {order, <a href="#t:order/0">order</a>()} |
+    {size, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()} |
+    {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+    {unique, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()}.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>See <code class="inline">file_sorter(3)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:sort_options/0">
+  <div class="detail-header">
+    <a href="#t:sort_options/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>sort_options() :: [<a href="#t:sort_option/0">sort_option</a>()] | <a href="#t:sort_option/0">sort_option</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:spawn_options/0">
+  <div class="detail-header">
+    <a href="#t:spawn_options/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>spawn_options() :: default | [proc_lib:spawn_option()].
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:tmp_directory/0">
+  <div class="detail-header">
+    <a href="#t:tmp_directory/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>tmp_directory() :: [] | file:name().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="t:tmp_file_usage/0">
+  <div class="detail-header">
+    <a href="#t:tmp_file_usage/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">(bad signature)</h1>
+      <div class="specs">
+          <pre>tmp_file_usage() ::
+    allowed | not_allowed | info_msg | warning_msg | error_msg.
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="append/1">
+  <div class="detail-header">
+    <a href="#append/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/1</h1>
+      <div class="specs">
+          <pre>append(QHL) -> QH
+          when
+              QHL :: [<a href="#t:query_handle_or_list/0">query_handle_or_list</a>()],
+              QH :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH</a>, all answers to the first query handle in <a type="anno">QHL</a> are returned, followed by all answers to the remaining query handles in <a type="anno">QHL</a>.</p>
+  </section>
+</section>
+<section class="detail" id="append/2">
+  <div class="detail-header">
+    <a href="#append/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/2</h1>
+      <div class="specs">
+          <pre>append(QH1, QH2) -> QH3
+          when
+              QH1 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+              QH2 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+              QH3 :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH3</a>, all answers to <a type="anno">QH1</a> are returned, followed by all answers to <a type="anno">QH2</a>.</p>
+<p><code class="inline">append(QH1, QH2)</code> is equivalent to <code class="inline">append([QH1, QH2])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cursor/1">
+  <div class="detail-header">
+    <a href="#cursor/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cursor/1 cursor/2</h1>
+      <div class="specs">
+          <pre>cursor(QH) -> Cursor
+          when
+              QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+              Cursor :: <a href="#t:query_cursor/0">query_cursor</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a query cursor and makes the calling process the owner of the cursor. The cursor is to be used as argument to <a href="#next_answers/1"><code class="inline">next_answers/1,2</code></a> and (eventually) <a href="#delete_cursor/1"><code class="inline">delete_cursor/1</code></a>. Calls <code class="inline">erlang:spawn_opt/2</code> to spawn and link to a process that evaluates the query handle. The value of option <code class="inline">spawn_options</code> is used as last argument when calling <code class="inline">spawn_opt/2</code>. Defaults to <code class="inline">[link]</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="4046601540-1">(</span><span class="p" data-group-id="4046601540-2">[</span><span class="p" data-group-id="4046601540-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="4046601540-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="4046601540-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="4046601540-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="4046601540-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4046601540-5">]</span><span class="p" data-group-id="4046601540-2">]</span><span class="p" data-group-id="4046601540-1">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">QC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:cursor</span><span class="p" data-group-id="4046601540-6">(</span><span class="nc">QH</span><span class="p" data-group-id="4046601540-6">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="4046601540-7">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="4046601540-7">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4046601540-8">[</span><span class="p" data-group-id="4046601540-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="4046601540-9">}</span><span class="p" data-group-id="4046601540-8">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="4046601540-10">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="4046601540-10">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4046601540-11">[</span><span class="p" data-group-id="4046601540-12">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4046601540-12">}</span><span class="p" data-group-id="4046601540-11">]</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="4046601540-13">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="n">all_remaining</span><span class="p" data-group-id="4046601540-13">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4046601540-14">[</span><span class="p" data-group-id="4046601540-15">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="4046601540-15">}</span><span class="p">,</span><span class="p" data-group-id="4046601540-16">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4046601540-16">}</span><span class="p" data-group-id="4046601540-14">]</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:delete_cursor</span><span class="p" data-group-id="4046601540-17">(</span><span class="nc">QC</span><span class="p" data-group-id="4046601540-17">)</span><span class="o">.</span><span class="w">
+</span><span class="n">ok</span></code></pre>
+<p><code class="inline">cursor(QH)</code> is equivalent to <code class="inline">cursor(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cursor/2">
+  <div class="detail-header">
+    <a href="#cursor/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cursor/1 cursor/2</h1>
+      <div class="specs">
+          <pre>cursor(QH, Options) -> Cursor
+          when
+              QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+              Options :: [Option] | Option,
+              Option ::
+                  {cache_all, <a href="#t:cache/0">cache</a>()} |
+                  cache_all |
+                  {max_list_size, <a href="#t:max_list_size/0">max_list_size</a>()} |
+                  {spawn_options, <a href="#t:spawn_options/0">spawn_options</a>()} |
+                  {tmpdir_usage, <a href="#t:tmp_file_usage/0">tmp_file_usage</a>()} |
+                  {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+                  {unique_all, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                  unique_all,
+              Cursor :: <a href="#t:query_cursor/0">query_cursor</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Creates a query cursor and makes the calling process the owner of the cursor. The cursor is to be used as argument to <a href="#next_answers/1"><code class="inline">next_answers/1,2</code></a> and (eventually) <a href="#delete_cursor/1"><code class="inline">delete_cursor/1</code></a>. Calls <code class="inline">erlang:spawn_opt/2</code> to spawn and link to a process that evaluates the query handle. The value of option <code class="inline">spawn_options</code> is used as last argument when calling <code class="inline">spawn_opt/2</code>. Defaults to <code class="inline">[link]</code>.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="1239686950-1">(</span><span class="p" data-group-id="1239686950-2">[</span><span class="p" data-group-id="1239686950-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="1239686950-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="1239686950-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="1239686950-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="1239686950-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1239686950-5">]</span><span class="p" data-group-id="1239686950-2">]</span><span class="p" data-group-id="1239686950-1">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">QC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:cursor</span><span class="p" data-group-id="1239686950-6">(</span><span class="nc">QH</span><span class="p" data-group-id="1239686950-6">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="1239686950-7">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="1239686950-7">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1239686950-8">[</span><span class="p" data-group-id="1239686950-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="1239686950-9">}</span><span class="p" data-group-id="1239686950-8">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="1239686950-10">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="1239686950-10">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1239686950-11">[</span><span class="p" data-group-id="1239686950-12">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1239686950-12">}</span><span class="p" data-group-id="1239686950-11">]</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:next_answers</span><span class="p" data-group-id="1239686950-13">(</span><span class="nc">QC</span><span class="p">,</span><span class="w"> </span><span class="n">all_remaining</span><span class="p" data-group-id="1239686950-13">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1239686950-14">[</span><span class="p" data-group-id="1239686950-15">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="1239686950-15">}</span><span class="p">,</span><span class="p" data-group-id="1239686950-16">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1239686950-16">}</span><span class="p" data-group-id="1239686950-14">]</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:delete_cursor</span><span class="p" data-group-id="1239686950-17">(</span><span class="nc">QC</span><span class="p" data-group-id="1239686950-17">)</span><span class="o">.</span><span class="w">
+</span><span class="n">ok</span></code></pre>
+<p><code class="inline">cursor(QH)</code> is equivalent to <code class="inline">cursor(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="delete_cursor/1">
+  <div class="detail-header">
+    <a href="#delete_cursor/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_cursor/1</h1>
+      <div class="specs">
+          <pre>delete_cursor(QueryCursor) -> ok
+                 when QueryCursor :: <a href="#t:query_cursor/0">query_cursor</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Deletes a query cursor. Only the owner of the cursor can delete the cursor.</p>
+  </section>
+</section>
+<section class="detail" id="e/1">
+  <div class="detail-header">
+    <a href="#e/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">e/1 e/2 eval/1 eval/2</h1>
+      <div class="specs">
+          <pre>e(QH) -> Answers | Error
+     when
+         QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+         Answers :: <a href="#t:answers/0">answers</a>(),
+         Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+         Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates a query handle in the calling process and collects all answers in a list.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="7849686764-1">(</span><span class="p" data-group-id="7849686764-2">[</span><span class="p" data-group-id="7849686764-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="7849686764-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="7849686764-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="7849686764-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="7849686764-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="7849686764-5">]</span><span class="p" data-group-id="7849686764-2">]</span><span class="p" data-group-id="7849686764-1">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="7849686764-6">(</span><span class="nc">QH</span><span class="p" data-group-id="7849686764-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="7849686764-7">[</span><span class="p" data-group-id="7849686764-8">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="7849686764-8">}</span><span class="p">,</span><span class="p" data-group-id="7849686764-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="7849686764-9">}</span><span class="p">,</span><span class="p" data-group-id="7849686764-10">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="7849686764-10">}</span><span class="p">,</span><span class="p" data-group-id="7849686764-11">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="7849686764-11">}</span><span class="p" data-group-id="7849686764-7">]</span></code></pre>
+<p><code class="inline">eval(QH)</code> is equivalent to <code class="inline">eval(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="e/2">
+  <div class="detail-header">
+    <a href="#e/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">e/1 e/2 eval/1 eval/2</h1>
+      <div class="specs">
+          <pre>e(QH, Options) -> Answers | Error
+     when
+         QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+         Options :: [Option] | Option,
+         Option ::
+             {cache_all, <a href="#t:cache/0">cache</a>()} |
+             cache_all |
+             {max_list_size, <a href="#t:max_list_size/0">max_list_size</a>()} |
+             {tmpdir_usage, <a href="#t:tmp_file_usage/0">tmp_file_usage</a>()} |
+             {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+             {unique_all, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+             unique_all,
+         Answers :: <a href="#t:answers/0">answers</a>(),
+         Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+         Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates a query handle in the calling process and collects all answers in a list.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="8352722812-1">(</span><span class="p" data-group-id="8352722812-2">[</span><span class="p" data-group-id="8352722812-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="8352722812-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="8352722812-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="8352722812-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="8352722812-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8352722812-5">]</span><span class="p" data-group-id="8352722812-2">]</span><span class="p" data-group-id="8352722812-1">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="8352722812-6">(</span><span class="nc">QH</span><span class="p" data-group-id="8352722812-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8352722812-7">[</span><span class="p" data-group-id="8352722812-8">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8352722812-8">}</span><span class="p">,</span><span class="p" data-group-id="8352722812-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8352722812-9">}</span><span class="p">,</span><span class="p" data-group-id="8352722812-10">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8352722812-10">}</span><span class="p">,</span><span class="p" data-group-id="8352722812-11">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8352722812-11">}</span><span class="p" data-group-id="8352722812-7">]</span></code></pre>
+<p><code class="inline">eval(QH)</code> is equivalent to <code class="inline">eval(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="eval/1">
+  <div class="detail-header">
+    <a href="#eval/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">e/1 e/2 eval/1 eval/2</h1>
+      <div class="specs">
+          <pre>eval(QH) -> Answers | Error
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Answers :: <a href="#t:answers/0">answers</a>(),
+            Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+            Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates a query handle in the calling process and collects all answers in a list.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="1484055558-1">(</span><span class="p" data-group-id="1484055558-2">[</span><span class="p" data-group-id="1484055558-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="1484055558-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="1484055558-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="1484055558-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="1484055558-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1484055558-5">]</span><span class="p" data-group-id="1484055558-2">]</span><span class="p" data-group-id="1484055558-1">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="1484055558-6">(</span><span class="nc">QH</span><span class="p" data-group-id="1484055558-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="1484055558-7">[</span><span class="p" data-group-id="1484055558-8">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="1484055558-8">}</span><span class="p">,</span><span class="p" data-group-id="1484055558-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1484055558-9">}</span><span class="p">,</span><span class="p" data-group-id="1484055558-10">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="1484055558-10">}</span><span class="p">,</span><span class="p" data-group-id="1484055558-11">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="1484055558-11">}</span><span class="p" data-group-id="1484055558-7">]</span></code></pre>
+<p><code class="inline">eval(QH)</code> is equivalent to <code class="inline">eval(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="eval/2">
+  <div class="detail-header">
+    <a href="#eval/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">e/1 e/2 eval/1 eval/2</h1>
+      <div class="specs">
+          <pre>eval(QH, Options) -> Answers | Error
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Answers :: <a href="#t:answers/0">answers</a>(),
+            Options :: [Option] | Option,
+            Option ::
+                {cache_all, <a href="#t:cache/0">cache</a>()} |
+                cache_all |
+                {max_list_size, <a href="#t:max_list_size/0">max_list_size</a>()} |
+                {tmpdir_usage, <a href="#t:tmp_file_usage/0">tmp_file_usage</a>()} |
+                {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+                {unique_all, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                unique_all,
+            Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+            Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Evaluates a query handle in the calling process and collects all answers in a list.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="2949885623-1">(</span><span class="p" data-group-id="2949885623-2">[</span><span class="p" data-group-id="2949885623-3">{</span><span class="nc">X</span><span class="p">,</span><span class="nc">Y</span><span class="p" data-group-id="2949885623-3">}</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="2949885623-4">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p" data-group-id="2949885623-4">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="2949885623-5">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="2949885623-5">]</span><span class="p" data-group-id="2949885623-2">]</span><span class="p" data-group-id="2949885623-1">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="2949885623-6">(</span><span class="nc">QH</span><span class="p" data-group-id="2949885623-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="2949885623-7">[</span><span class="p" data-group-id="2949885623-8">{</span><span class="n">a</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="2949885623-8">}</span><span class="p">,</span><span class="p" data-group-id="2949885623-9">{</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="2949885623-9">}</span><span class="p">,</span><span class="p" data-group-id="2949885623-10">{</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="2949885623-10">}</span><span class="p">,</span><span class="p" data-group-id="2949885623-11">{</span><span class="n">b</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="2949885623-11">}</span><span class="p" data-group-id="2949885623-7">]</span></code></pre>
+<p><code class="inline">eval(QH)</code> is equivalent to <code class="inline">eval(QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="fold/3">
+  <div class="detail-header">
+    <a href="#fold/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fold/3 fold/4</h1>
+      <div class="specs">
+          <pre>fold(Function, Acc0, QH) -> Acc1 | Error
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Function :: fun((<a href="#t:answer/0">answer</a>(), AccIn) -> AccOut),
+            Acc0 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            Acc1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            AccIn :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            AccOut :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+            Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Calls <a type="anno">Function</a> on successive answers to the query handle together with an extra argument <a type="anno">AccIn</a>. The query handle and the function are evaluated in the calling process. <a type="anno">Function</a> must return a new accumulator, which is passed to the next call. <a type="anno">Acc0</a> is returned if there are no answers to the query handle.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1292985092-1">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p" data-group-id="1292985092-1">]</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:fold</span><span class="p" data-group-id="1292985092-2">(</span><span class="n">fun</span><span class="p" data-group-id="1292985092-3">(</span><span class="nc">X</span><span class="p">,</span><span class="w"> </span><span class="nc">Sum</span><span class="p" data-group-id="1292985092-3">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Sum</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">QH</span><span class="p" data-group-id="1292985092-2">)</span><span class="o">.</span><span class="w">
+</span><span class="mi">21</span></code></pre>
+<p><code class="inline">fold(Function, Acc0, QH)</code> is equivalent to <code class="inline">fold(Function, Acc0, QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="fold/4">
+  <div class="detail-header">
+    <a href="#fold/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fold/3 fold/4</h1>
+      <div class="specs">
+          <pre>fold(Function, Acc0, QH, Options) -> Acc1 | Error
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Function :: fun((<a href="#t:answer/0">answer</a>(), AccIn) -> AccOut),
+            Acc0 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            Acc1 :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            AccIn :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            AccOut :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+            Options :: [Option] | Option,
+            Option ::
+                {cache_all, <a href="#t:cache/0">cache</a>()} |
+                cache_all |
+                {max_list_size, <a href="#t:max_list_size/0">max_list_size</a>()} |
+                {tmpdir_usage, <a href="#t:tmp_file_usage/0">tmp_file_usage</a>()} |
+                {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+                {unique_all, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                unique_all,
+            Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+            Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Calls <a type="anno">Function</a> on successive answers to the query handle together with an extra argument <a type="anno">AccIn</a>. The query handle and the function are evaluated in the calling process. <a type="anno">Function</a> must return a new accumulator, which is passed to the next call. <a type="anno">Acc0</a> is returned if there are no answers to the query handle.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2625894201-1">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p" data-group-id="2625894201-1">]</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:fold</span><span class="p" data-group-id="2625894201-2">(</span><span class="n">fun</span><span class="p" data-group-id="2625894201-3">(</span><span class="nc">X</span><span class="p">,</span><span class="w"> </span><span class="nc">Sum</span><span class="p" data-group-id="2625894201-3">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nc">Sum</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">QH</span><span class="p" data-group-id="2625894201-2">)</span><span class="o">.</span><span class="w">
+</span><span class="mi">21</span></code></pre>
+<p><code class="inline">fold(Function, Acc0, QH)</code> is equivalent to <code class="inline">fold(Function, Acc0, QH, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="format_error/1">
+  <div class="detail-header">
+    <a href="#format_error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_error/1</h1>
+      <div class="specs">
+          <pre>format_error(Error) -> Chars
+                when
+                    Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+                    Chars :: io_lib:chars().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a descriptive string in English of an error tuple returned by some of the functions of the <code class="inline">qlc</code> module or the parse transform. This function is mainly used by the compiler invoking the parse transform.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1 info/2</h1>
+      <div class="specs">
+          <pre>info(QH) -> Info
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Info :: <a href="#t:abstract_expr/0">abstract_expr</a>() | string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns information about a query handle. The information describes the simplifications and optimizations that are the results of preparing the query for evaluation. This function is probably mainly useful during debugging.</p>
+<p>The information has the form of an Erlang expression where QLCs most likely occur. Depending on the format functions of mentioned QLC tables, it is not certain that the information is absolutely accurate.</p>
+<p>Options:</p>
+<ul ><li >
+The default is to return a sequence of QLCs in a block, but if option `{flat, false}` is specified, one single QLC is returned.
+</li><li >
+The default is to return a string, but if option `{format, abstract_code}` is specified, abstract code is returned instead. In the abstract code, port identifiers, references, and pids are represented by strings.
+</li><li >
+The default is to return all elements in lists, but if option `{n_elements, NElements}` is specified, only a limited number of elements are returned.
+</li><li >
+The default is to show all parts of objects and match specifications, but if option `{depth, Depth}` is specified, parts of terms below a certain depth are replaced by `'...'`.
+</li></ul>
+`info(QH)` is equivalent to `info(QH, [])`.
+
+<em >Examples:</em>
+
+In the following example two simple QLCs are inserted only to hold option `{unique, true}`:
+
+```
+1> QH = qlc:q([{X,Y} || X <- [x,y], Y <- [a,b]]),
+io:format("~s~n", [qlc:info(QH, unique_all)]).
+begin
+    V1 =
+        qlc:q([
+               SQV ||
+                   SQV <- [x, y]
+              ],
+              [{unique, true}]),
+    V2 =
+        qlc:q([
+               SQV ||
+                   SQV <- [a, b]
+              ],
+              [{unique, true}]),
+    qlc:q([
+           {X,Y} ||
+               X <- V1,
+               Y <- V2
+          ],
+          [{unique, true}])
+end
+```
+
+In the following example QLC `V2` has been inserted to show the joined generators and the join method chosen. A convention is used for lookup join: the first generator (`G2`) is the one traversed, the second (`G1`) is the table where constants are looked up.
+
+```
+1> E1 = ets:new(e1, []),
+E2 = ets:new(e2, []),
+true = ets:insert(E1, [{1,a},{2,b}]),
+true = ets:insert(E2, [{a,1},{b,2}]),
+Q = qlc:q([{X,Z,W} ||
+{X, Z} <- ets:table(E1),
+{W, Y} <- ets:table(E2),
+X =:= Y]),
+io:format("~s~n", [qlc:info(Q)]).
+begin
+    V1 =
+        qlc:q([
+               P0 ||
+                   P0 = {W, Y} <-
+                       ets:table(#Ref<0.3098908599.2283929601.256549>)
+              ]),
+    V2 =
+        qlc:q([
+               [G1 | G2] ||
+                   G2 <- V1,
+                   G1 <-
+                       ets:table(#Ref<0.3098908599.2283929601.256548>),
+                   element(2, G1) =:= element(1, G2)
+              ],
+              [{join, lookup}]),
+    qlc:q([
+           {X, Z, W} ||
+               [{X, Z} | {W, Y}] <- V2
+          ])
+end
+```  </section>
+</section>
+<section class="detail" id="info/2">
+  <div class="detail-header">
+    <a href="#info/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1 info/2</h1>
+      <div class="specs">
+          <pre>info(QH, Options) -> Info
+        when
+            QH :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            Options :: [Option] | Option,
+            Option :: EvalOption | ReturnOption,
+            EvalOption ::
+                {cache_all, <a href="#t:cache/0">cache</a>()} |
+                cache_all |
+                {max_list_size, <a href="#t:max_list_size/0">max_list_size</a>()} |
+                {tmpdir_usage, <a href="#t:tmp_file_usage/0">tmp_file_usage</a>()} |
+                {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+                {unique_all, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                unique_all,
+            ReturnOption ::
+                {depth, Depth} |
+                {flat, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                {format, Format} |
+                {n_elements, NElements},
+            Depth :: infinity | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+            Format :: abstract_code | string,
+            NElements :: infinity | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+            Info :: <a href="#t:abstract_expr/0">abstract_expr</a>() | string().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns information about a query handle. The information describes the simplifications and optimizations that are the results of preparing the query for evaluation. This function is probably mainly useful during debugging.</p>
+<p>The information has the form of an Erlang expression where QLCs most likely occur. Depending on the format functions of mentioned QLC tables, it is not certain that the information is absolutely accurate.</p>
+<p>Options:</p>
+<ul ><li >
+The default is to return a sequence of QLCs in a block, but if option `{flat, false}` is specified, one single QLC is returned.
+</li><li >
+The default is to return a string, but if option `{format, abstract_code}` is specified, abstract code is returned instead. In the abstract code, port identifiers, references, and pids are represented by strings.
+</li><li >
+The default is to return all elements in lists, but if option `{n_elements, NElements}` is specified, only a limited number of elements are returned.
+</li><li >
+The default is to show all parts of objects and match specifications, but if option `{depth, Depth}` is specified, parts of terms below a certain depth are replaced by `'...'`.
+</li></ul>
+`info(QH)` is equivalent to `info(QH, [])`.
+
+<em >Examples:</em>
+
+In the following example two simple QLCs are inserted only to hold option `{unique, true}`:
+
+```
+1> QH = qlc:q([{X,Y} || X <- [x,y], Y <- [a,b]]),
+io:format("~s~n", [qlc:info(QH, unique_all)]).
+begin
+    V1 =
+        qlc:q([
+               SQV ||
+                   SQV <- [x, y]
+              ],
+              [{unique, true}]),
+    V2 =
+        qlc:q([
+               SQV ||
+                   SQV <- [a, b]
+              ],
+              [{unique, true}]),
+    qlc:q([
+           {X,Y} ||
+               X <- V1,
+               Y <- V2
+          ],
+          [{unique, true}])
+end
+```
+
+In the following example QLC `V2` has been inserted to show the joined generators and the join method chosen. A convention is used for lookup join: the first generator (`G2`) is the one traversed, the second (`G1`) is the table where constants are looked up.
+
+```
+1> E1 = ets:new(e1, []),
+E2 = ets:new(e2, []),
+true = ets:insert(E1, [{1,a},{2,b}]),
+true = ets:insert(E2, [{a,1},{b,2}]),
+Q = qlc:q([{X,Z,W} ||
+{X, Z} <- ets:table(E1),
+{W, Y} <- ets:table(E2),
+X =:= Y]),
+io:format("~s~n", [qlc:info(Q)]).
+begin
+    V1 =
+        qlc:q([
+               P0 ||
+                   P0 = {W, Y} <-
+                       ets:table(#Ref<0.3098908599.2283929601.256549>)
+              ]),
+    V2 =
+        qlc:q([
+               [G1 | G2] ||
+                   G2 <- V1,
+                   G1 <-
+                       ets:table(#Ref<0.3098908599.2283929601.256548>),
+                   element(2, G1) =:= element(1, G2)
+              ],
+              [{join, lookup}]),
+    qlc:q([
+           {X, Z, W} ||
+               [{X, Z} | {W, Y}] <- V2
+          ])
+end
+```  </section>
+</section>
+<section class="detail" id="keysort/2">
+  <div class="detail-header">
+    <a href="#keysort/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keysort/2 keysort/3</h1>
+      <div class="specs">
+          <pre>keysort(KeyPos, QH1) -> QH2
+           when
+               KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+               QH1 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+               QH2 :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:keysort/4</code> according to the options.</p>
+<p>The sorter uses temporary files only if <a type="anno">QH1</a> does not evaluate to a list and the size of the binary representation of the answers exceeds <code class="inline">Size</code> bytes, where <code class="inline">Size</code> is the value of option <code class="inline">size</code>.</p>
+<p><code class="inline">keysort(KeyPos, QH1)</code> is equivalent to <code class="inline">keysort(KeyPos, QH1, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="keysort/3">
+  <div class="detail-header">
+    <a href="#keysort/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keysort/2 keysort/3</h1>
+      <div class="specs">
+          <pre>keysort(KeyPos, QH1, SortOptions) -> QH2
+           when
+               KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+               SortOptions :: <a href="#t:sort_options/0">sort_options</a>(),
+               QH1 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+               QH2 :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:keysort/4</code> according to the options.</p>
+<p>The sorter uses temporary files only if <a type="anno">QH1</a> does not evaluate to a list and the size of the binary representation of the answers exceeds <code class="inline">Size</code> bytes, where <code class="inline">Size</code> is the value of option <code class="inline">size</code>.</p>
+<p><code class="inline">keysort(KeyPos, QH1)</code> is equivalent to <code class="inline">keysort(KeyPos, QH1, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="next_answers/1">
+  <div class="detail-header">
+    <a href="#next_answers/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_answers/1 next_answers/2</h1>
+      <div class="specs">
+          <pre>next_answers(QueryCursor) -> Answers | Error
+                when
+                    QueryCursor :: <a href="#t:query_cursor/0">query_cursor</a>(),
+                    Answers :: <a href="#t:answers/0">answers</a>(),
+                    Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+                    Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns some or all of the remaining answers to a query cursor. Only the owner of <a type="anno">QueryCursor</a> can retrieve answers.</p>
+<p>Optional argument <code class="inline">NumberOfAnswers</code> determines the maximum number of answers returned. Defaults to <code class="inline">10</code>. If less than the requested number of answers is returned, subsequent calls to <code class="inline">next_answers</code> return <code class="inline">[]</code>.</p>
+  </section>
+</section>
+<section class="detail" id="next_answers/2">
+  <div class="detail-header">
+    <a href="#next_answers/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_answers/1 next_answers/2</h1>
+      <div class="specs">
+          <pre>next_answers(QueryCursor, NumberOfAnswers) -> Answers | Error
+                when
+                    QueryCursor :: <a href="#t:query_cursor/0">query_cursor</a>(),
+                    Answers :: <a href="#t:answers/0">answers</a>(),
+                    NumberOfAnswers ::
+                        all_remaining | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+                    Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+                    Reason :: file_sorter:reason().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns some or all of the remaining answers to a query cursor. Only the owner of <a type="anno">QueryCursor</a> can retrieve answers.</p>
+<p>Optional argument <code class="inline">NumberOfAnswers</code> determines the maximum number of answers returned. Defaults to <code class="inline">10</code>. If less than the requested number of answers is returned, subsequent calls to <code class="inline">next_answers</code> return <code class="inline">[]</code>.</p>
+  </section>
+</section>
+<section class="detail" id="q/1">
+  <div class="detail-header">
+    <a href="#q/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">q/1 q/2</h1>
+      <div class="specs">
+          <pre>q(QLC) -> QH
+     when QLC :: <a href="#t:query_list_comprehension/0">query_list_comprehension</a>(), QH :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle for a QLC. The QLC must be the first argument to this function, otherwise it is evaluated as an ordinary list comprehension. It is also necessary to add the following line to the source code:
+<code type="none">-include_lib(&quot;stdlib/include/qlc.hrl&quot;).</code>
+This causes a parse transform to substitute a fun for the QLC. The (compiled) fun is called when the query handle is evaluated.</p>
+<p>When calling <code class="inline">qlc:q/1,2</code> from the Erlang shell, the parse transform is automatically called. When this occurs, the fun substituted for the QLC is not compiled but is evaluated by <code class="inline">erl_eval(3)</code>. This is also true when expressions are evaluated by <code class="inline">file:eval/1,2</code> or in the debugger.</p>
+<p>To be explicit, this does not work:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">...</span><span class="w">
+</span><span class="nc">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="0765244157-1">[</span><span class="nc">X</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p" data-group-id="0765244157-2">{</span><span class="nc">X</span><span class="p" data-group-id="0765244157-2">}</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="0765244157-3">[</span><span class="p" data-group-id="0765244157-4">{</span><span class="mi">1</span><span class="p" data-group-id="0765244157-4">}</span><span class="p">,</span><span class="p" data-group-id="0765244157-5">{</span><span class="mi">2</span><span class="p" data-group-id="0765244157-5">}</span><span class="p" data-group-id="0765244157-3">]</span><span class="p" data-group-id="0765244157-1">]</span><span class="p">,</span><span class="w">
+</span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="0765244157-6">(</span><span class="nc">A</span><span class="p" data-group-id="0765244157-6">)</span><span class="p">,</span><span class="w">
+</span><span class="n">...</span></code></pre>
+<p>Variable <code class="inline">A</code> is bound to the evaluated value of the list comprehension (<code class="inline">[1,2]</code>). The compiler complains with an error message (&quot;argument is not a query list comprehension&quot;); the shell process stops with a <code class="inline">badarg</code> reason.</p>
+<p><code class="inline">q(QLC)</code> is equivalent to <code class="inline">q(QLC, [])</code>.</p>
+<p>Options:</p>
+<ul ><li >
+Option `{cache, ets}` can be used to cache the answers to a QLC. The answers are stored in one ETS table for each cached QLC. When a cached QLC is evaluated again, answers are fetched from the table without any further computations. Therefore, when all answers to a cached QLC have been found, the ETS tables used for caching answers to the qualifiers of the QLC can be emptied. Option `cache` is equivalent to `{cache, ets}`.
+</li><li >
+Option `{cache, list}` can be used to cache the answers to a QLC like `{cache, ets}`. The difference is that the answers are kept in a list (on the process heap). If the answers would occupy more than a certain amount of RAM memory, a temporary file is used for storing the answers. Option `max_list_size` sets the limit in bytes and the temporary file is put on the directory set by option `tmpdir`.
+
+Option `cache` has no effect if it is known that the QLC is to be evaluated at most once. This is always true for the top-most QLC and also for the list expression of the first generator in a list of qualifiers. Notice that in the presence of side effects in filters or callback functions, the answers to QLCs can be affected by option `cache`.
+</li><li >
+Option `{unique, true}` can be used to remove duplicate answers to a QLC. The unique answers are stored in one ETS table for each QLC. The table is emptied every time it is known that there are no more answers to the QLC. Option `unique` is equivalent to `{unique, true}`. If option `unique` is combined with option `{cache, ets}`, two ETS tables are used, but the full answers are stored in one table only. If option `unique` is combined with option `{cache, list}`, the answers are sorted twice using [`keysort/3`](#keysort/3); once to remove duplicates and once to restore the order.
+</li></ul>
+Options `cache` and `unique` apply not only to the QLC itself but also to the results of looking up constants, running match specifications, and joining handles.
+
+<em >Example:</em>
+
+In the following example the cached results of the merge join are traversed for each value of `A`. Notice that without option `cache` the join would have been carried out three times, once for each value of `A`.
+
+```
+1> Q = qlc:q([{A,X,Z,W} ||
+A <- [a,b,c],
+{X,Z} <- [{a,1},{b,4},{c,6}],
+{W,Y} <- [{2,a},{3,b},{4,c}],
+X =:= Y],
+{cache, list}),
+io:format("~s~n", [qlc:info(Q)]).
+begin
+    V1 =
+        qlc:q([
+               P0 ||
+                   P0 = {X, Z} <-
+                       qlc:keysort(1, [{a, 1}, {b, 4}, {c, 6}], [])
+              ]),
+    V2 =
+        qlc:q([
+               P0 ||
+                   P0 = {W, Y} <-
+                       qlc:keysort(2, [{2, a}, {3, b}, {4, c}], [])
+              ]),
+    V3 =
+        qlc:q([
+               [G1 | G2] ||
+                   G1 <- V1,
+                   G2 <- V2,
+                   element(1, G1) == element(2, G2)
+              ],
+              [{join, merge}, {cache, list}]),
+    qlc:q([
+           {A, X, Z, W} ||
+               A <- [a, b, c],
+               [{X, Z} | {W, Y}] <- V3,
+               X =:= Y
+          ])
+end
+```
+
+[`sort/1,2`](#sort/1) and [`keysort/2,3`](#keysort/2) can also be used for caching answers and for removing duplicates. When sorting answers are cached in a list, possibly stored on a temporary file, and no ETS tables are used.
+
+Sometimes (see [`table/2`](#table/2)) traversal of tables can be done by looking up key values, which is assumed to be fast. Under certain (rare) circumstances there can be too many key values to look up. <a id="max_lookup"></a>Option `{max_lookup, MaxLookup}` can then be used to limit the number of lookups: if more than `MaxLookup` lookups would be required, no lookups are done but the table is traversed instead. Defaults to `infinity`, which means that there is no limit on the number of keys to look up.
+
+<em >Example:</em>
+
+In the following example, using the `gb_table` module from section Implementing a QLC Table, there are six keys to look up: `{1,a}`, `{1,b}`, `{1,c}`, `{2,a}`, `{2,b}`, and `{2,c}`. The reason is that the two elements of key `{X, Y}` are compared separately.
+
+```
+1> T = gb_trees:empty(),
+QH = qlc:q([X || {{X,Y},_} <- gb_table:table(T),
+((X == 1) or (X == 2)) andalso
+((Y == a) or (Y == b) or (Y == c))]),
+io:format("~s~n", [qlc:info(QH)]).
+ets:match_spec_run(
+       lists:flatmap(fun(K) ->
+                            case
+                                gb_trees:lookup(K,
+                                                gb_trees:from_orddict([]))
+                            of
+                                {value, V} ->
+                                    [{K, V}];
+                                none ->
+                                    []
+                            end
+                     end,
+                     [{1, a},
+                      {1, b},
+                      {1, c},
+                      {2, a},
+                      {2, b},
+                      {2, c}]),
+       ets:match_spec_compile([{{{'$1', '$2'}, '_'},
+                                [],
+                                ['$1']}]))
+```
+
+Options:
+<ul ><li >
+Option `{lookup, true}` can be used to ensure that the `qlc` module looks up constants in some QLC table. If there are more than one QLC table among the list expressions of the generators, constants must be looked up in at least one of the tables. The evaluation of the query fails if there are no constants to look up. This option is useful when it would be unacceptable to traverse all objects in some table. Setting option `lookup` to `false` ensures that no constants are looked up (`{max_lookup, 0}` has the same effect). Defaults to `any`, which means that constants are looked up whenever possible.
+</li><li >
+Option `{join, Join}` can be used to ensure that a certain join method is used:
+<ul ><li >`{join, lookup}` invokes the lookup join method.</li><li >`{join, merge}` invokes the merge join method.</li><li >`{join, nested_loop}` invokes the method of matching every pair of objects from two handles. This method is mostly very slow.</li></ul>
+The evaluation of the query fails if the `qlc` module cannot carry out the chosen join method. Defaults to `any`, which means that some fast join method is used if possible.
+</li></ul>  </section>
+</section>
+<section class="detail" id="q/2">
+  <div class="detail-header">
+    <a href="#q/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">q/1 q/2</h1>
+      <div class="specs">
+          <pre>q(QLC, Options) -> QH
+     when
+         QH :: <a href="#t:query_handle/0">query_handle</a>(),
+         Options :: [Option] | Option,
+         Option ::
+             {max_lookup, MaxLookup} |
+             {cache, <a href="#t:cache/0">cache</a>()} |
+             cache |
+             {join, Join} |
+             {lookup, Lookup} |
+             {unique, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+             unique,
+         MaxLookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | infinity,
+         Join :: any | lookup | merge | nested_loop,
+         Lookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() | any,
+         QLC :: <a href="#t:query_list_comprehension/0">query_list_comprehension</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle for a QLC. The QLC must be the first argument to this function, otherwise it is evaluated as an ordinary list comprehension. It is also necessary to add the following line to the source code:
+<code type="none">-include_lib(&quot;stdlib/include/qlc.hrl&quot;).</code>
+This causes a parse transform to substitute a fun for the QLC. The (compiled) fun is called when the query handle is evaluated.</p>
+<p>When calling <code class="inline">qlc:q/1,2</code> from the Erlang shell, the parse transform is automatically called. When this occurs, the fun substituted for the QLC is not compiled but is evaluated by <code class="inline">erl_eval(3)</code>. This is also true when expressions are evaluated by <code class="inline">file:eval/1,2</code> or in the debugger.</p>
+<p>To be explicit, this does not work:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">...</span><span class="w">
+</span><span class="nc">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="6999313620-1">[</span><span class="nc">X</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p" data-group-id="6999313620-2">{</span><span class="nc">X</span><span class="p" data-group-id="6999313620-2">}</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p" data-group-id="6999313620-3">[</span><span class="p" data-group-id="6999313620-4">{</span><span class="mi">1</span><span class="p" data-group-id="6999313620-4">}</span><span class="p">,</span><span class="p" data-group-id="6999313620-5">{</span><span class="mi">2</span><span class="p" data-group-id="6999313620-5">}</span><span class="p" data-group-id="6999313620-3">]</span><span class="p" data-group-id="6999313620-1">]</span><span class="p">,</span><span class="w">
+</span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:q</span><span class="p" data-group-id="6999313620-6">(</span><span class="nc">A</span><span class="p" data-group-id="6999313620-6">)</span><span class="p">,</span><span class="w">
+</span><span class="n">...</span></code></pre>
+<p>Variable <code class="inline">A</code> is bound to the evaluated value of the list comprehension (<code class="inline">[1,2]</code>). The compiler complains with an error message (&quot;argument is not a query list comprehension&quot;); the shell process stops with a <code class="inline">badarg</code> reason.</p>
+<p><code class="inline">q(QLC)</code> is equivalent to <code class="inline">q(QLC, [])</code>.</p>
+<p>Options:</p>
+<ul ><li >
+Option `{cache, ets}` can be used to cache the answers to a QLC. The answers are stored in one ETS table for each cached QLC. When a cached QLC is evaluated again, answers are fetched from the table without any further computations. Therefore, when all answers to a cached QLC have been found, the ETS tables used for caching answers to the qualifiers of the QLC can be emptied. Option `cache` is equivalent to `{cache, ets}`.
+</li><li >
+Option `{cache, list}` can be used to cache the answers to a QLC like `{cache, ets}`. The difference is that the answers are kept in a list (on the process heap). If the answers would occupy more than a certain amount of RAM memory, a temporary file is used for storing the answers. Option `max_list_size` sets the limit in bytes and the temporary file is put on the directory set by option `tmpdir`.
+
+Option `cache` has no effect if it is known that the QLC is to be evaluated at most once. This is always true for the top-most QLC and also for the list expression of the first generator in a list of qualifiers. Notice that in the presence of side effects in filters or callback functions, the answers to QLCs can be affected by option `cache`.
+</li><li >
+Option `{unique, true}` can be used to remove duplicate answers to a QLC. The unique answers are stored in one ETS table for each QLC. The table is emptied every time it is known that there are no more answers to the QLC. Option `unique` is equivalent to `{unique, true}`. If option `unique` is combined with option `{cache, ets}`, two ETS tables are used, but the full answers are stored in one table only. If option `unique` is combined with option `{cache, list}`, the answers are sorted twice using [`keysort/3`](#keysort/3); once to remove duplicates and once to restore the order.
+</li></ul>
+Options `cache` and `unique` apply not only to the QLC itself but also to the results of looking up constants, running match specifications, and joining handles.
+
+<em >Example:</em>
+
+In the following example the cached results of the merge join are traversed for each value of `A`. Notice that without option `cache` the join would have been carried out three times, once for each value of `A`.
+
+```
+1> Q = qlc:q([{A,X,Z,W} ||
+A <- [a,b,c],
+{X,Z} <- [{a,1},{b,4},{c,6}],
+{W,Y} <- [{2,a},{3,b},{4,c}],
+X =:= Y],
+{cache, list}),
+io:format("~s~n", [qlc:info(Q)]).
+begin
+    V1 =
+        qlc:q([
+               P0 ||
+                   P0 = {X, Z} <-
+                       qlc:keysort(1, [{a, 1}, {b, 4}, {c, 6}], [])
+              ]),
+    V2 =
+        qlc:q([
+               P0 ||
+                   P0 = {W, Y} <-
+                       qlc:keysort(2, [{2, a}, {3, b}, {4, c}], [])
+              ]),
+    V3 =
+        qlc:q([
+               [G1 | G2] ||
+                   G1 <- V1,
+                   G2 <- V2,
+                   element(1, G1) == element(2, G2)
+              ],
+              [{join, merge}, {cache, list}]),
+    qlc:q([
+           {A, X, Z, W} ||
+               A <- [a, b, c],
+               [{X, Z} | {W, Y}] <- V3,
+               X =:= Y
+          ])
+end
+```
+
+[`sort/1,2`](#sort/1) and [`keysort/2,3`](#keysort/2) can also be used for caching answers and for removing duplicates. When sorting answers are cached in a list, possibly stored on a temporary file, and no ETS tables are used.
+
+Sometimes (see [`table/2`](#table/2)) traversal of tables can be done by looking up key values, which is assumed to be fast. Under certain (rare) circumstances there can be too many key values to look up. <a id="max_lookup"></a>Option `{max_lookup, MaxLookup}` can then be used to limit the number of lookups: if more than `MaxLookup` lookups would be required, no lookups are done but the table is traversed instead. Defaults to `infinity`, which means that there is no limit on the number of keys to look up.
+
+<em >Example:</em>
+
+In the following example, using the `gb_table` module from section Implementing a QLC Table, there are six keys to look up: `{1,a}`, `{1,b}`, `{1,c}`, `{2,a}`, `{2,b}`, and `{2,c}`. The reason is that the two elements of key `{X, Y}` are compared separately.
+
+```
+1> T = gb_trees:empty(),
+QH = qlc:q([X || {{X,Y},_} <- gb_table:table(T),
+((X == 1) or (X == 2)) andalso
+((Y == a) or (Y == b) or (Y == c))]),
+io:format("~s~n", [qlc:info(QH)]).
+ets:match_spec_run(
+       lists:flatmap(fun(K) ->
+                            case
+                                gb_trees:lookup(K,
+                                                gb_trees:from_orddict([]))
+                            of
+                                {value, V} ->
+                                    [{K, V}];
+                                none ->
+                                    []
+                            end
+                     end,
+                     [{1, a},
+                      {1, b},
+                      {1, c},
+                      {2, a},
+                      {2, b},
+                      {2, c}]),
+       ets:match_spec_compile([{{{'$1', '$2'}, '_'},
+                                [],
+                                ['$1']}]))
+```
+
+Options:
+<ul ><li >
+Option `{lookup, true}` can be used to ensure that the `qlc` module looks up constants in some QLC table. If there are more than one QLC table among the list expressions of the generators, constants must be looked up in at least one of the tables. The evaluation of the query fails if there are no constants to look up. This option is useful when it would be unacceptable to traverse all objects in some table. Setting option `lookup` to `false` ensures that no constants are looked up (`{max_lookup, 0}` has the same effect). Defaults to `any`, which means that constants are looked up whenever possible.
+</li><li >
+Option `{join, Join}` can be used to ensure that a certain join method is used:
+<ul ><li >`{join, lookup}` invokes the lookup join method.</li><li >`{join, merge}` invokes the merge join method.</li><li >`{join, nested_loop}` invokes the method of matching every pair of objects from two handles. This method is mostly very slow.</li></ul>
+The evaluation of the query fails if the `qlc` module cannot carry out the chosen join method. Defaults to `any`, which means that some fast join method is used if possible.
+</li></ul>  </section>
+</section>
+<section class="detail" id="sort/1">
+  <div class="detail-header">
+    <a href="#sort/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sort/1 sort/2</h1>
+      <div class="specs">
+          <pre>sort(QH1) -> QH2
+        when QH1 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(), QH2 :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:sort/3</code> according to the options.</p>
+<p>The sorter uses temporary files only if <a type="anno">QH1</a> does not evaluate to a list and the size of the binary representation of the answers exceeds <code class="inline">Size</code> bytes, where <code class="inline">Size</code> is the value of option <code class="inline">size</code>.</p>
+<p><code class="inline">sort(QH1)</code> is equivalent to <code class="inline">sort(QH1, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sort/2">
+  <div class="detail-header">
+    <a href="#sort/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sort/1 sort/2</h1>
+      <div class="specs">
+          <pre>sort(QH1, SortOptions) -> QH2
+        when
+            SortOptions :: <a href="#t:sort_options/0">sort_options</a>(),
+            QH1 :: <a href="#t:query_handle_or_list/0">query_handle_or_list</a>(),
+            QH2 :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle. When evaluating query handle <a type="anno">QH2</a>, the answers to query handle <a type="anno">QH1</a> are sorted by <code class="inline">file_sorter:sort/3</code> according to the options.</p>
+<p>The sorter uses temporary files only if <a type="anno">QH1</a> does not evaluate to a list and the size of the binary representation of the answers exceeds <code class="inline">Size</code> bytes, where <code class="inline">Size</code> is the value of option <code class="inline">size</code>.</p>
+<p><code class="inline">sort(QH1)</code> is equivalent to <code class="inline">sort(QH1, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="string_to_handle/1">
+  <div class="detail-header">
+    <a href="#string_to_handle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string_to_handle/1 string_to_handle/2 string_to_handle/3</h1>
+      <div class="specs">
+          <pre>string_to_handle(QueryString) -> QH | Error
+                    when
+                        QueryString :: string(),
+                        QH :: <a href="#t:query_handle/0">query_handle</a>(),
+                        Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+                        Reason ::
+                            erl_parse:error_info() |
+                            erl_scan:error_info().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="6776315281-1">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="6776315281-1">]</span><span class="p">,</span><span class="w">
+</span><span class="nc">Bs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:add_binding</span><span class="p" data-group-id="6776315281-2">(</span><span class="sc">&#39;L&#39;</span><span class="p">,</span><span class="w"> </span><span class="nc">L</span><span class="p">,</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:new_bindings</span><span class="p" data-group-id="6776315281-3">(</span><span class="p" data-group-id="6776315281-3">)</span><span class="p" data-group-id="6776315281-2">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:string_to_handle</span><span class="p" data-group-id="6776315281-4">(</span><span class="s">&quot;[X+1 || X &lt;- L].&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6776315281-5">[</span><span class="p" data-group-id="6776315281-5">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Bs</span><span class="p" data-group-id="6776315281-4">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="6776315281-6">(</span><span class="nc">QH</span><span class="p" data-group-id="6776315281-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="6776315281-7">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="6776315281-7">]</span></code></pre>
+<p><code class="inline">string_to_handle(QueryString)</code> is equivalent to <code class="inline">string_to_handle(QueryString, [])</code>.</p>
+<p><code class="inline">string_to_handle(QueryString, Options)</code> is equivalent to <code class="inline">string_to_handle(QueryString, Options, erl_eval:new_bindings())</code>.</p>
+<p>This function is probably mainly useful when called from outside of Erlang, for example from a driver written in C.</p>
+  </section>
+</section>
+<section class="detail" id="string_to_handle/2">
+  <div class="detail-header">
+    <a href="#string_to_handle/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string_to_handle/1 string_to_handle/2 string_to_handle/3</h1>
+      <div class="specs">
+          <pre>string_to_handle(QueryString, Options) -> QH | Error
+                    when
+                        QueryString :: string(),
+                        Options :: [Option] | Option,
+                        Option ::
+                            {max_lookup, MaxLookup} |
+                            {cache, <a href="#t:cache/0">cache</a>()} |
+                            cache |
+                            {join, Join} |
+                            {lookup, Lookup} |
+                            {unique, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                            unique,
+                        MaxLookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | infinity,
+                        Join :: any | lookup | merge | nested_loop,
+                        Lookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() | any,
+                        QH :: <a href="#t:query_handle/0">query_handle</a>(),
+                        Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+                        Reason ::
+                            erl_parse:error_info() |
+                            erl_scan:error_info().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4124399955-1">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="4124399955-1">]</span><span class="p">,</span><span class="w">
+</span><span class="nc">Bs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:add_binding</span><span class="p" data-group-id="4124399955-2">(</span><span class="sc">&#39;L&#39;</span><span class="p">,</span><span class="w"> </span><span class="nc">L</span><span class="p">,</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:new_bindings</span><span class="p" data-group-id="4124399955-3">(</span><span class="p" data-group-id="4124399955-3">)</span><span class="p" data-group-id="4124399955-2">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:string_to_handle</span><span class="p" data-group-id="4124399955-4">(</span><span class="s">&quot;[X+1 || X &lt;- L].&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4124399955-5">[</span><span class="p" data-group-id="4124399955-5">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Bs</span><span class="p" data-group-id="4124399955-4">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="4124399955-6">(</span><span class="nc">QH</span><span class="p" data-group-id="4124399955-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="4124399955-7">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="4124399955-7">]</span></code></pre>
+<p><code class="inline">string_to_handle(QueryString)</code> is equivalent to <code class="inline">string_to_handle(QueryString, [])</code>.</p>
+<p><code class="inline">string_to_handle(QueryString, Options)</code> is equivalent to <code class="inline">string_to_handle(QueryString, Options, erl_eval:new_bindings())</code>.</p>
+<p>This function is probably mainly useful when called from outside of Erlang, for example from a driver written in C.</p>
+  </section>
+</section>
+<section class="detail" id="string_to_handle/3">
+  <div class="detail-header">
+    <a href="#string_to_handle/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string_to_handle/1 string_to_handle/2 string_to_handle/3</h1>
+      <div class="specs">
+          <pre>string_to_handle(QueryString, Options, Bindings) -> QH | Error
+                    when
+                        QueryString :: string(),
+                        Options :: [Option] | Option,
+                        Option ::
+                            {max_lookup, MaxLookup} |
+                            {cache, <a href="#t:cache/0">cache</a>()} |
+                            cache |
+                            {join, Join} |
+                            {lookup, Lookup} |
+                            {unique, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()} |
+                            unique,
+                        MaxLookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | infinity,
+                        Join :: any | lookup | merge | nested_loop,
+                        Lookup :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() | any,
+                        Bindings :: erl_eval:binding_struct(),
+                        QH :: <a href="#t:query_handle/0">query_handle</a>(),
+                        Error :: {error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), Reason},
+                        Reason ::
+                            erl_parse:error_info() |
+                            erl_scan:error_info().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>A string version of <a href="#q/1"><code class="inline">q/1,2</code></a>. When the query handle is evaluated, the fun created by the parse transform is interpreted by <code class="inline">erl_eval(3)</code>. The query string is to be one single QLC terminated by a period.</p>
+<p><em >Example:</em></p>
+<pre><code class="nohighlight makeup elixir"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="8726726183-1">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="8726726183-1">]</span><span class="p">,</span><span class="w">
+</span><span class="nc">Bs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:add_binding</span><span class="p" data-group-id="8726726183-2">(</span><span class="sc">&#39;L&#39;</span><span class="p">,</span><span class="w"> </span><span class="nc">L</span><span class="p">,</span><span class="w"> </span><span class="n">erl_eval</span><span class="ss">:new_bindings</span><span class="p" data-group-id="8726726183-3">(</span><span class="p" data-group-id="8726726183-3">)</span><span class="p" data-group-id="8726726183-2">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">QH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qlc</span><span class="ss">:string_to_handle</span><span class="p" data-group-id="8726726183-4">(</span><span class="s">&quot;[X+1 || X &lt;- L].&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8726726183-5">[</span><span class="p" data-group-id="8726726183-5">]</span><span class="p">,</span><span class="w"> </span><span class="nc">Bs</span><span class="p" data-group-id="8726726183-4">)</span><span class="p">,</span><span class="w">
+</span><span class="n">qlc</span><span class="ss">:eval</span><span class="p" data-group-id="8726726183-6">(</span><span class="nc">QH</span><span class="p" data-group-id="8726726183-6">)</span><span class="o">.</span><span class="w">
+</span><span class="p" data-group-id="8726726183-7">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="8726726183-7">]</span></code></pre>
+<p><code class="inline">string_to_handle(QueryString)</code> is equivalent to <code class="inline">string_to_handle(QueryString, [])</code>.</p>
+<p><code class="inline">string_to_handle(QueryString, Options)</code> is equivalent to <code class="inline">string_to_handle(QueryString, Options, erl_eval:new_bindings())</code>.</p>
+<p>This function is probably mainly useful when called from outside of Erlang, for example from a driver written in C.</p>
+  </section>
+</section>
+<section class="detail" id="table/2">
+  <div class="detail-header">
+    <a href="#table/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table/2</h1>
+      <div class="specs">
+          <pre>table(TraverseFun, Options) -> QH
+         when
+             TraverseFun :: TraverseFun0 | TraverseFun1,
+             TraverseFun0 :: fun(() -> TraverseResult),
+             TraverseFun1 ::
+                 fun((<a href="#t:match_expression/0">match_expression</a>()) -> TraverseResult),
+             TraverseResult :: Objects | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             Objects :: [] | [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>() | ObjectList],
+             ObjectList :: TraverseFun0 | Objects,
+             Options :: [Option] | Option,
+             Option ::
+                 {format_fun, FormatFun} |
+                 {info_fun, InfoFun} |
+                 {lookup_fun, LookupFun} |
+                 {parent_fun, ParentFun} |
+                 {post_fun, PostFun} |
+                 {pre_fun, PreFun} |
+                 {key_equality, KeyComparison},
+             FormatFun ::
+                 undefined |
+                 fun((SelectedObjects) -> FormatedTable),
+             SelectedObjects ::
+                 all |
+                 {all, NElements, DepthFun} |
+                 {match_spec, <a href="#t:match_expression/0">match_expression</a>()} |
+                 {lookup, Position, Keys} |
+                 {lookup, Position, Keys, NElements, DepthFun},
+             NElements :: infinity | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+             DepthFun :: fun((<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()),
+             FormatedTable ::
+                 {Mod, Fun, Args} | <a href="#t:abstract_expr/0">abstract_expr</a>() | string(),
+             InfoFun :: undefined | fun((InfoTag) -> InfoValue),
+             InfoTag ::
+                 indices | is_unique_objects | keypos |
+                 num_of_objects,
+             InfoValue :: undefined | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             LookupFun ::
+                 undefined | fun((Position, Keys) -> LookupResult),
+             LookupResult :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()] | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             ParentFun :: undefined | fun(() -> ParentFunValue),
+             PostFun :: undefined | fun(() -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()),
+             PreFun :: undefined | fun((PreArgs) -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()),
+             PreArgs :: [PreArg],
+             PreArg ::
+                 {parent_value, ParentFunValue} |
+                 {stop_fun, StopFun},
+             ParentFunValue :: undefined | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+             StopFun :: undefined | fun(() -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()),
+             KeyComparison :: '=:=' | '==',
+             Position :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>(),
+             Keys :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+             Mod :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+             Fun :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+             Args :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()],
+             QH :: <a href="#t:query_handle/0">query_handle</a>().
+</pre>
+      </div>
+  </div>
+  <section class="docstring">
+<p>Returns a query handle for a QLC table. In Erlang/OTP there is support for ETS, Dets, and Mnesia tables, but many other data structures can be turned into QLC tables. This is accomplished by letting function(s) in the module implementing the data structure create a query handle by calling <code class="inline">qlc:table/2</code>. The different ways to traverse the table and properties of the table are handled by callback functions provided as options to <code class="inline">qlc:table/2</code>.</p>
+<ul ><li >
+Callback function <a type="anno">TraverseFun</a> is used for traversing the table. It is to return a list of objects terminated by either `[]` or a nullary fun to be used for traversing the not yet traversed objects of the table. Any other return value is immediately returned as value of the query evaluation. Unary <a type="anno">TraverseFun</a>s are to accept a match specification as argument. The match specification is created by the parse transform by analyzing the pattern of the generator calling `qlc:table/2` and filters using variables introduced in the pattern. If the parse transform cannot find a match specification equivalent to the pattern and filters, <a type="anno">TraverseFun</a> is called with a match specification returning every object.
+<ul ><li >
+Modules that can use match specifications for optimized traversal of tables are to call `qlc:table/2` with an unary <a type="anno">TraverseFun</a>. An example is `ets:table/2`.
+</li><li >
+Other modules can provide a nullary <a type="anno">TraverseFun</a>. An example is `gb_table:table/1` in section Implementing a QLC Table.
+</li></ul></li><li >
+Unary callback function <a type="anno">PreFun</a> is called once before the table is read for the first time. If the call fails, the query evaluation fails.
+
+Argument <a type="anno">PreArgs</a> is a list of tagged values. There are two tags, `parent_value` and `stop_fun`, used by Mnesia for managing transactions.
+<ul ><li >
+The value of `parent_value` is the value returned by <a type="anno">ParentFun</a>, or `undefined` if there is no `ParentFun`. <a type="anno">ParentFun</a> is called once just before the call of <a type="anno">PreFun</a> in the context of the process calling [`eval/1,2`](#eval/1), [`fold/3,4`](#fold/3), or [`cursor/1,2`](#cursor/1).
+</li><li >
+The value of `stop_fun` is a nullary fun that deletes the cursor if called from the parent, or `undefined` if there is no cursor.
+</li></ul></li><li >
+Nullary callback function <a type="anno">PostFun</a> is called once after the table was last read. The return value, which is caught, is ignored. If <a type="anno">PreFun</a> has been called for a table, <a type="anno">PostFun</a> is guaranteed to be called for that table, even if the evaluation of the query fails for some reason.
+
+The pre (post) functions for different tables are evaluated in unspecified order.
+
+Other table access than reading, such as calling <a type="anno">InfoFun</a>, is assumed to be OK at any time.
+</li><li >
+<a id="lookup_fun"></a>Binary callback function <a type="anno">LookupFun</a> is used for looking up objects in the table. The first argument <a type="anno">Position</a> is the key position or an indexed position and the second argument <a type="anno">Keys</a> is a sorted list of unique values. The return value is to be a list of all objects (tuples), such that the element at `Position` is a member of <a type="anno">Keys</a>. Any other return value is immediately returned as value of the query evaluation. <a type="anno">LookupFun</a> is called instead of traversing the table if the parse transform at compile time can determine that the filters match and compare the element at <a type="anno">Position</a> in such a way that only <a type="anno">Keys</a> need to be looked up to find all potential answers.
+
+The key position is obtained by calling `InfoFun(keypos)` and the indexed positions by calling `InfoFun(indices)`. If the key position can be used for lookup, it is always chosen, otherwise the indexed position requiring the least number of lookups is chosen. If there is a tie between two indexed positions, the one occurring first in the list returned by <a type="anno">InfoFun</a> is chosen. Positions requiring more than max_lookup lookups are ignored.
+</li><li >
+Unary callback function <a type="anno">InfoFun</a> is to return information about the table. `undefined` is to be returned if the value of some tag is unknown:
+<dl ><dt >`indices`</dt><dd >Returns a list of indexed positions, a list of positive integers.</dd><dt >`is_unique_objects`</dt><dd >Returns `true` if the objects returned by `TraverseFun` are unique.</dd><dt >`keypos`</dt><dd >Returns the position of the table key, a positive integer.</dd><dt >`is_sorted_key`</dt><dd >Returns `true` if the objects returned by `TraverseFun` are sorted on the key.</dd><dt >`num_of_objects`</dt><dd >Returns the number of objects in the table, a non-negative integer.</dd></dl></li><li >
+Unary callback function <a type="anno">FormatFun</a> is used by [`info/1,2`](#info/1) for displaying the call that created the query handle of the table. Defaults to `undefined`, which means that [`info/1,2`](#info/1) displays a call to `'$MOD':'$FUN'/0`. It is up to <a type="anno">FormatFun</a> to present the selected objects of the table in a suitable way. However, if a character list is chosen for presentation, it must be an Erlang expression that can be scanned and parsed (a trailing dot is added by [`info/1,2`](#info/1) though).
+
+<a type="anno">FormatFun</a> is called with an argument that describes the selected objects based on optimizations done as a result of analyzing the filters of the QLC where the call to `qlc:table/2` occurs. The argument can have the following values:
+<dl ><dt >`{lookup, Position, Keys, NElements, DepthFun}`.</dt><dd >
+`LookupFun` is used for looking up objects in the table.
+</dd><dt >`{match_spec, MatchExpression}`</dt><dd >
+No way of finding all possible answers by looking up keys was found, but the filters could be transformed into a match specification. All answers are found by calling `TraverseFun(MatchExpression)`.
+</dd><dt >`{all, NElements, DepthFun}`</dt><dd >
+No optimization was found. A match specification matching all objects is used if `TraverseFun` is unary.
+
+`NElements` is the value of the [`info/1,2`](#info/1) option `n_elements`.
+
+`DepthFun` is a function that can be used for limiting the size of terms; calling `DepthFun(Term)` substitutes `'...'` for parts of `Term` below the depth specified by the [`info/1,2`](#info/1) option `depth`.
+
+If calling <a type="anno">FormatFun</a> with an argument including `NElements` and `DepthFun` fails, <a type="anno">FormatFun</a> is called once again with an argument excluding `NElements` and `DepthFun` (`{lookup, Position, Keys}` or `all`).
+</dd></dl></li><li >
+<a id="key_equality"></a>The value of option `key_equality` is to be `'=:='` if the table considers two keys equal if they match, and to be `'=='` if two keys are equal if they compare equal. Defaults to `'=:='`.
+</li></ul>
+For the various options recognized by `table/1,2` in respective module, see `ets(3)`, `dets(3)`, and `mnesia(3)`.  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.21.2),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>
