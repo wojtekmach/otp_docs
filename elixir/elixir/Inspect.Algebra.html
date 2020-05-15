@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Inspect.Algebra — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Inspect.Algebra.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Inspect.Algebra          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L115" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>A set of functions for creating and manipulating algebra
+documents.</p><p>This module implements the functionality described in
+<a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.34.2200" title="">&quot;Strictly Pretty&quot; (2000) by Christian Lindig</a> with small
+additions, like support for binary nodes and a break mode that
+maximises use of horizontal space.</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">empty</span><span class="p" data-group-id="9782439881-1">(</span><span class="p" data-group-id="9782439881-1">)</span><span class="w">
+</span><span class="ss">:doc_nil</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="s">&quot;foo&quot;</span><span class="w">
+</span><span class="s">&quot;foo&quot;</span></code></pre><p>With the functions in this module, we can concatenate different
+elements together and render them:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="2139898305-1">(</span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">empty</span><span class="p" data-group-id="2139898305-2">(</span><span class="p" data-group-id="2139898305-2">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="2139898305-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="2139898305-3">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="2139898305-3">)</span><span class="w">
+</span><span class="p" data-group-id="2139898305-4">[</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="2139898305-4">]</span></code></pre><p>The functions <a href="#nest/2"><code class="inline">nest/2</code></a>, <a href="#space/2"><code class="inline">space/2</code></a> and <a href="#line/2"><code class="inline">line/2</code></a> help you put the
+document together into a rigid structure. However, the document
+algebra gets interesting when using functions like <a href="#glue/3"><code class="inline">glue/3</code></a> and
+<a href="#group/1"><code class="inline">group/1</code></a>. A glue inserts a break between two documents. A group
+indicates a document that must fit the current line, otherwise
+breaks are rendered as new lines. Let's glue two docs together
+with a break, group it and then render it:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="9624707268-1">(</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="9624707268-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="9624707268-2">(</span><span class="n">doc</span><span class="p" data-group-id="9624707268-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="9624707268-3">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="9624707268-3">)</span><span class="w">
+</span><span class="p" data-group-id="9624707268-4">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="9624707268-4">]</span></code></pre><p>Notice the break was represented as is, because we haven't reached
+a line limit. Once we do, it is replaced by a newline:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="6242250426-1">(</span><span class="nc">String</span><span class="o">.</span><span class="n">duplicate</span><span class="p" data-group-id="6242250426-2">(</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="6242250426-2">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="6242250426-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="6242250426-3">(</span><span class="n">doc</span><span class="p" data-group-id="6242250426-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6242250426-4">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="6242250426-4">)</span><span class="w">
+</span><span class="p" data-group-id="6242250426-5">[</span><span class="s">&quot;aaaaaaaaaaaaaaaaaaaa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="6242250426-5">]</span></code></pre><p>This module uses the byte size to compute how much space there is
+left. If your document contains strings, then those need to be
+wrapped in <a href="#string/1"><code class="inline">string/1</code></a>, which then relies on <a href="String.html#length/1"><code class="inline">String.length/1</code></a> to
+precompute the document size.</p><p>Finally, this module also contains Elixir related functions, a bit
+tied to Elixir formatting, such as <a href="#to_doc/2"><code class="inline">to_doc/2</code></a>.</p><h2 id="module-implementation-details" class="section-heading">
+  <a href="#module-implementation-details" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Implementation details
+</h2>
+<p>The implementation of <a href="#content"><code class="inline">Inspect.Algebra</code></a> is based on the Strictly Pretty
+paper by <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.34.2200" title="">Lindig</a> which builds on top of previous pretty printing
+algorithms but is tailored to strict languages, such as Elixir.
+The core idea in the paper is the use of explicit document groups which
+are rendered as flat (breaks as spaces) or as break (breaks as newlines).</p><p>This implementation provides two types of breaks: <code class="inline">:strict</code> and <code class="inline">:flex</code>.
+When a group does not fit, all strict breaks are treated as newlines.
+Flex breaks however are re-evaluated on every occurrence and may still
+be rendered flat. See <a href="#break/1"><code class="inline">break/1</code></a> and <a href="#flex_break/1"><code class="inline">flex_break/1</code></a> for more information.</p><p>This implementation also adds <a href="#force_unfit/1"><code class="inline">force_unfit/1</code></a> and <a href="#next_break_fits/2"><code class="inline">next_break_fits/2</code></a> which
+give more control over the document fitting.</p>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-guards summary">
+    <h2>
+      <a href="#guards">Guards</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_doc/1">is_doc(doc)</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#break/1">break(string \\ &quot; &quot;)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a break document based on the given <code class="inline">string</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#collapse_lines/1">collapse_lines(max)</a>
+  </div>
+    <div class="summary-synopsis"><p>Collapse any new lines and whitespace following this
+node, emitting up to <code class="inline">max</code> new lines.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#color/3">color(doc, color_key, opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Colors a document if the <code class="inline">color_key</code> has a color in the options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#concat/1">concat(docs)</a>
+  </div>
+    <div class="summary-synopsis"><p>Concatenates a list of documents returning a new document.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#concat/2">concat(doc1, doc2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Concatenates two document entities returning a new document.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#container_doc/6">container_doc(left, collection, right, inspect_opts, fun, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Wraps <code class="inline">collection</code> in <code class="inline">left</code> and <code class="inline">right</code> according to limit and contents.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#empty/0">empty()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a document entity used to represent nothingness.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flex_break/1">flex_break(string \\ &quot; &quot;)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a flex break document based on the given <code class="inline">string</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flex_glue/3">flex_glue(doc1, break_string \\ &quot; &quot;, doc2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Glues two documents (<code class="inline">doc1</code> and <code class="inline">doc2</code>) inserting a
+<a href="#flex_break/1"><code class="inline">flex_break/1</code></a> given by <code class="inline">break_string</code> between them.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fold_doc/2">fold_doc(docs, folder_fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Folds a list of documents into a document using the given folder function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#force_unfit/1">force_unfit(doc)</a>
+  </div>
+    <div class="summary-synopsis"><p>Forces the current group to be unfit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format/2">format(doc, width)</a>
+  </div>
+    <div class="summary-synopsis"><p>Formats a given document for a given width.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#glue/3">glue(doc1, break_string \\ &quot; &quot;, doc2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Glues two documents (<code class="inline">doc1</code> and <code class="inline">doc2</code>) inserting the given
+break <code class="inline">break_string</code> between them.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#group/2">group(doc, mode \\ :self)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a group containing the specified document <code class="inline">doc</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#line/0">line()</a>
+  </div>
+    <div class="summary-synopsis"><p>A mandatory linebreak.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#line/2">line(doc1, doc2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Inserts a mandatory linebreak between two documents.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nest/3">nest(doc, level, mode \\ :always)</a>
+  </div>
+    <div class="summary-synopsis"><p>Nests the given document at the given <code class="inline">level</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_break_fits/2">next_break_fits(doc, mode \\ :enabled)</a>
+  </div>
+    <div class="summary-synopsis"><p>Considers the next break as fit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#space/2">space(doc1, doc2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Inserts a mandatory single space between two documents.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string/1">string(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a document represented by string.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_doc/2">to_doc(term, opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts an Elixir term to an algebra document
+according to the <a href="Inspect.html"><code class="inline">Inspect</code></a> protocol.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:t/0">
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L194" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>t() ::
+  <a href="typespecs.html#built-in-types">binary</a>()
+  | :doc_line
+  | :doc_nil
+  | doc_break()
+  | doc_collapse()
+  | doc_color()
+  | doc_cons()
+  | doc_fits()
+  | doc_force()
+  | doc_group()
+  | doc_nest()
+  | doc_string()</pre>
+      </div>
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="guards" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#guards">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Guards          </h1>
+          <div class="guards-list">
+<section class="detail" id="is_doc/1">
+  <div class="detail-header">
+    <a href="#is_doc/1" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">is_doc(doc)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L265" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="break/1">
+    <span id="break/0"></span>
+  <div class="detail-header">
+    <a href="#break/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">break(string \\ &quot; &quot;)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L609" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>break(<a href="typespecs.html#built-in-types">binary</a>()) :: doc_break()</pre>
+      </div>
+
+<p>Returns a break document based on the given <code class="inline">string</code>.</p><p>This break can be rendered as a linebreak or as the given <code class="inline">string</code>,
+depending on the <code class="inline">mode</code> of the chosen layout.</p><h2 id="break/1-examples" class="section-heading">
+  <a href="#break/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>Let's create a document by concatenating two strings with a break between
+them:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6053127666-1">(</span><span class="p" data-group-id="6053127666-2">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">break</span><span class="p" data-group-id="6053127666-3">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p" data-group-id="6053127666-3">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="6053127666-2">]</span><span class="p" data-group-id="6053127666-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6053127666-4">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="6053127666-4">)</span><span class="w">
+</span><span class="p" data-group-id="6053127666-5">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="6053127666-5">]</span></code></pre><p>Notice the break was represented with the given string, because we didn't
+reach a line limit. Once we do, it is replaced by a newline:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">break</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">break</span><span class="p" data-group-id="7445977935-1">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p" data-group-id="7445977935-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="7445977935-2">(</span><span class="p" data-group-id="7445977935-3">[</span><span class="nc">String</span><span class="o">.</span><span class="n">duplicate</span><span class="p" data-group-id="7445977935-4">(</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="7445977935-4">)</span><span class="p">,</span><span class="w"> </span><span class="n">break</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="7445977935-3">]</span><span class="p" data-group-id="7445977935-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="7445977935-5">(</span><span class="n">doc</span><span class="p" data-group-id="7445977935-5">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="7445977935-6">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="7445977935-6">)</span><span class="w">
+</span><span class="p" data-group-id="7445977935-7">[</span><span class="s">&quot;aaaaaaaaaaaaaaaaaaaa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p" data-group-id="7445977935-7">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="collapse_lines/1">
+  <div class="detail-header">
+    <a href="#collapse_lines/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">collapse_lines(max)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L619" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>collapse_lines(<a href="typespecs.html#basic-types">pos_integer</a>()) :: doc_collapse()</pre>
+      </div>
+
+<p>Collapse any new lines and whitespace following this
+node, emitting up to <code class="inline">max</code> new lines.</p>  </section>
+</section>
+<section class="detail" id="color/3">
+  <div class="detail-header">
+    <a href="#color/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">color(doc, color_key, opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L534" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.4.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>color(<a href="#t:t/0">t</a>(), <a href="Inspect.Opts.html#t:color_key/0">Inspect.Opts.color_key</a>(), <a href="Inspect.Opts.html#t:t/0">Inspect.Opts.t</a>()) :: doc_color()</pre>
+      </div>
+
+<p>Colors a document if the <code class="inline">color_key</code> has a color in the options.</p>  </section>
+</section>
+<section class="detail" id="concat/1">
+  <div class="detail-header">
+    <a href="#concat/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">concat(docs)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L525" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>concat([<a href="#t:t/0">t</a>()]) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Concatenates a list of documents returning a new document.</p><h2 id="concat/1-examples" class="section-heading">
+  <a href="#concat/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6726256959-1">(</span><span class="p" data-group-id="6726256959-2">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="p" data-group-id="6726256959-2">]</span><span class="p" data-group-id="6726256959-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6726256959-3">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="6726256959-3">)</span><span class="w">
+</span><span class="p" data-group-id="6726256959-4">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="p" data-group-id="6726256959-4">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="concat/2">
+  <div class="detail-header">
+    <a href="#concat/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">concat(doc1, doc2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L510" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>concat(<a href="#t:t/0">t</a>(), <a href="#t:t/0">t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Concatenates two document entities returning a new document.</p><h2 id="concat/2-examples" class="section-heading">
+  <a href="#concat/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6807960944-1">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="6807960944-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6807960944-2">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="6807960944-2">)</span><span class="w">
+</span><span class="p" data-group-id="6807960944-3">[</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="6807960944-3">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="container_doc/6">
+    <span id="container_doc/5"></span>
+  <div class="detail-header">
+    <a href="#container_doc/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">container_doc(left, collection, right, inspect_opts, fun, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L368" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>container_doc(
+  <a href="#t:t/0">t</a>(),
+  [<a href="typespecs.html#basic-types">any</a>()],
+  <a href="#t:t/0">t</a>(),
+  <a href="Inspect.Opts.html#t:t/0">Inspect.Opts.t</a>(),
+  (<a href="typespecs.html#built-in-types">term</a>(), <a href="Inspect.Opts.html#t:t/0">Inspect.Opts.t</a>() -> <a href="#t:t/0">t</a>()),
+  <a href="typespecs.html#built-in-types">keyword</a>()
+) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Wraps <code class="inline">collection</code> in <code class="inline">left</code> and <code class="inline">right</code> according to limit and contents.</p><p>It uses the given <code class="inline">left</code> and <code class="inline">right</code> documents as surrounding and the
+separator document <code class="inline">separator</code> to separate items in <code class="inline">docs</code>. If all entries
+in the collection are simple documents (texts or strings), then this function
+attempts to put as much as possible on the same line. If they are not simple,
+only one entry is shown per line if they do not fit.</p><p>The limit in the given <code class="inline">inspect_opts</code> is respected and when reached this
+function stops processing and outputs <code class="inline">&quot;...&quot;</code> instead.</p><h2 id="container_doc/6-options" class="section-heading">
+  <a href="#container_doc/6-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><code class="inline">:separator</code> - the separator used between each doc</li><li><code class="inline">:break</code> - If <code class="inline">:strict</code>, always break between each element. If <code class="inline">:flex</code>,
+breaks only when necessary. If <code class="inline">:maybe</code>, chooses <code class="inline">:flex</code> only if all
+elements are text-based, otherwise is <code class="inline">:strict</code></li></ul><h2 id="container_doc/6-examples" class="section-heading">
+  <a href="#container_doc/6-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">inspect_opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4514814631-1">%</span><span class="nc" data-group-id="4514814631-1">Inspect.Opts</span><span class="p" data-group-id="4514814631-1">{</span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="ss">:infinity</span><span class="p" data-group-id="4514814631-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">fun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k" data-group-id="4514814631-2">fn</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="c">_opts</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">to_string</span><span class="p" data-group-id="4514814631-3">(</span><span class="n">i</span><span class="p" data-group-id="4514814631-3">)</span><span class="w"> </span><span class="k" data-group-id="4514814631-2">end</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">container_doc</span><span class="p" data-group-id="4514814631-4">(</span><span class="s">&quot;[&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="4514814631-5">(</span><span class="mi">1</span><span class="o">.</span><span class="o">.</span><span class="mi">5</span><span class="p" data-group-id="4514814631-5">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">inspect_opts</span><span class="p">,</span><span class="w"> </span><span class="n">fun</span><span class="p" data-group-id="4514814631-4">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4514814631-6">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="4514814631-6">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">iodata_to_binary</span><span class="p" data-group-id="4514814631-7">(</span><span class="p" data-group-id="4514814631-7">)</span><span class="w">
+</span><span class="s">&quot;[1,</span><span class="se">\n</span><span class="s"> 2,</span><span class="se">\n</span><span class="s"> 3,</span><span class="se">\n</span><span class="s"> 4,</span><span class="se">\n</span><span class="s"> 5]&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">inspect_opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4514814631-8">%</span><span class="nc" data-group-id="4514814631-8">Inspect.Opts</span><span class="p" data-group-id="4514814631-8">{</span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="4514814631-8">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">fun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k" data-group-id="4514814631-9">fn</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="c">_opts</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">to_string</span><span class="p" data-group-id="4514814631-10">(</span><span class="n">i</span><span class="p" data-group-id="4514814631-10">)</span><span class="w"> </span><span class="k" data-group-id="4514814631-9">end</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">container_doc</span><span class="p" data-group-id="4514814631-11">(</span><span class="s">&quot;[&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="4514814631-12">(</span><span class="mi">1</span><span class="o">.</span><span class="o">.</span><span class="mi">5</span><span class="p" data-group-id="4514814631-12">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">inspect_opts</span><span class="p">,</span><span class="w"> </span><span class="n">fun</span><span class="p" data-group-id="4514814631-11">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4514814631-13">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="4514814631-13">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">iodata_to_binary</span><span class="p" data-group-id="4514814631-14">(</span><span class="p" data-group-id="4514814631-14">)</span><span class="w">
+</span><span class="s">&quot;[1, 2, 3, ...]&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">inspect_opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4514814631-15">%</span><span class="nc" data-group-id="4514814631-15">Inspect.Opts</span><span class="p" data-group-id="4514814631-15">{</span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="4514814631-15">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">fun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k" data-group-id="4514814631-16">fn</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="c">_opts</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">to_string</span><span class="p" data-group-id="4514814631-17">(</span><span class="n">i</span><span class="p" data-group-id="4514814631-17">)</span><span class="w"> </span><span class="k" data-group-id="4514814631-16">end</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4514814631-18">[</span><span class="ss">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p" data-group-id="4514814631-18">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">container_doc</span><span class="p" data-group-id="4514814631-19">(</span><span class="s">&quot;[&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="4514814631-20">(</span><span class="mi">1</span><span class="o">.</span><span class="o">.</span><span class="mi">5</span><span class="p" data-group-id="4514814631-20">)</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">inspect_opts</span><span class="p">,</span><span class="w"> </span><span class="n">fun</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="p" data-group-id="4514814631-19">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4514814631-21">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="4514814631-21">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">iodata_to_binary</span><span class="p" data-group-id="4514814631-22">(</span><span class="p" data-group-id="4514814631-22">)</span><span class="w">
+</span><span class="s">&quot;[1! 2! 3! ...]&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="empty/0">
+  <div class="detail-header">
+    <a href="#empty/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">empty()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L463" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>empty() :: :doc_nil</pre>
+      </div>
+
+<p>Returns a document entity used to represent nothingness.</p><h2 id="empty/0-examples" class="section-heading">
+  <a href="#empty/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">empty</span><span class="p" data-group-id="1387695419-1">(</span><span class="p" data-group-id="1387695419-1">)</span><span class="w">
+</span><span class="ss">:doc_nil</span></code></pre>  </section>
+</section>
+<section class="detail" id="flex_break/1">
+    <span id="flex_break/0"></span>
+  <div class="detail-header">
+    <a href="#flex_break/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flex_break(string \\ &quot; &quot;)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L710" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>flex_break(<a href="typespecs.html#built-in-types">binary</a>()) :: doc_break()</pre>
+      </div>
+
+<p>Returns a flex break document based on the given <code class="inline">string</code>.</p><p>A flex break still causes a group to break, like <a href="#break/1"><code class="inline">break/1</code></a>,
+but it is re-evaluated when the documented is rendered.</p><p>For example, take a group document represented as <code class="inline">[1, 2, 3]</code>
+where the space after every comma is a break. When the document
+above does not fit a single line, all breaks are enabled,
+causing the document to be rendered as:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="4873173111-1">[</span><span class="mi">1</span><span class="p">,</span><span class="w">
+ </span><span class="mi">2</span><span class="p">,</span><span class="w">
+ </span><span class="mi">3</span><span class="p" data-group-id="4873173111-1">]</span></code></pre><p>However, if flex breaks are used, then each break is re-evaluated
+when rendered, so the document could be possible rendered as:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="0447818034-1">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+ </span><span class="mi">3</span><span class="p" data-group-id="0447818034-1">]</span></code></pre><p>Hence the name &quot;flex&quot;. they are more flexible when it comes
+to the document fitting. On the other hand, they are more expensive
+since each break needs to be re-evaluated.</p><p>This function is used by <a href="#container_doc/6"><code class="inline">container_doc/6</code></a> and friends to the
+maximum number of entries on the same line.</p>  </section>
+</section>
+<section class="detail" id="flex_glue/3">
+    <span id="flex_glue/2"></span>
+  <div class="detail-header">
+    <a href="#flex_glue/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flex_glue(doc1, break_string \\ &quot; &quot;, doc2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L723" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>flex_glue(<a href="#t:t/0">t</a>(), <a href="typespecs.html#built-in-types">binary</a>(), <a href="#t:t/0">t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Glues two documents (<code class="inline">doc1</code> and <code class="inline">doc2</code>) inserting a
+<a href="#flex_break/1"><code class="inline">flex_break/1</code></a> given by <code class="inline">break_string</code> between them.</p><p>This function is used by <a href="#container_doc/6"><code class="inline">container_doc/6</code></a> and friends
+to the maximum number of entries on the same line.</p>  </section>
+</section>
+<section class="detail" id="fold_doc/2">
+  <div class="detail-header">
+    <a href="#fold_doc/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fold_doc(docs, folder_fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L859" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fold_doc([<a href="#t:t/0">t</a>()], (<a href="#t:t/0">t</a>(), <a href="#t:t/0">t</a>() -> <a href="#t:t/0">t</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Folds a list of documents into a document using the given folder function.</p><p>The list of documents is folded &quot;from the right&quot;; in that, this function is
+similar to <a href="List.html#foldr/3"><code class="inline">List.foldr/3</code></a>, except that it doesn't expect an initial
+accumulator and uses the last element of <code class="inline">docs</code> as the initial accumulator.</p><h2 id="fold_doc/2-examples" class="section-heading">
+  <a href="#fold_doc/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">docs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="7259898422-1">[</span><span class="s">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="p" data-group-id="7259898422-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">docs</span><span class="w"> </span><span class="o">=</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">fold_doc</span><span class="p" data-group-id="7259898422-2">(</span><span class="n">docs</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="7259898422-3">fn</span><span class="w"> </span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="7259898422-4">(</span><span class="p" data-group-id="7259898422-5">[</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">acc</span><span class="p" data-group-id="7259898422-5">]</span><span class="p" data-group-id="7259898422-4">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="k" data-group-id="7259898422-3">end</span><span class="p" data-group-id="7259898422-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="7259898422-6">(</span><span class="n">docs</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="7259898422-6">)</span><span class="w">
+</span><span class="p" data-group-id="7259898422-7">[</span><span class="s">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="p" data-group-id="7259898422-7">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="force_unfit/1">
+  <div class="detail-header">
+    <a href="#force_unfit/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">force_unfit(doc)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L676" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>force_unfit(<a href="#t:t/0">t</a>()) :: doc_force()</pre>
+      </div>
+
+<p>Forces the current group to be unfit.</p>  </section>
+</section>
+<section class="detail" id="format/2">
+  <div class="detail-header">
+    <a href="#format/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format(doc, width)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L887" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>format(<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">non_neg_integer</a>() | :infinity) :: <a href="typespecs.html#built-in-types">iodata</a>()</pre>
+      </div>
+
+<p>Formats a given document for a given width.</p><p>Takes the maximum width and a document to print as its arguments
+and returns an IO data representation of the best layout for the
+document to fit in the given width.</p><p>The document starts flat (without breaks) until a group is found.</p><h2 id="format/2-examples" class="section-heading">
+  <a href="#format/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="5406903593-1">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="5406903593-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="5406903593-2">(</span><span class="n">doc</span><span class="p" data-group-id="5406903593-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="5406903593-3">(</span><span class="mi">30</span><span class="p" data-group-id="5406903593-3">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">iodata_to_binary</span><span class="p" data-group-id="5406903593-4">(</span><span class="p" data-group-id="5406903593-4">)</span><span class="w">
+</span><span class="s">&quot;hello world&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="5406903593-5">(</span><span class="mi">10</span><span class="p" data-group-id="5406903593-5">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">iodata_to_binary</span><span class="p" data-group-id="5406903593-6">(</span><span class="p" data-group-id="5406903593-6">)</span><span class="w">
+</span><span class="s">&quot;hello</span><span class="se">\n</span><span class="s">world&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="glue/3">
+    <span id="glue/2"></span>
+  <div class="detail-header">
+    <a href="#glue/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">glue(doc1, break_string \\ &quot; &quot;, doc2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L745" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>glue(<a href="#t:t/0">t</a>(), <a href="typespecs.html#built-in-types">binary</a>(), <a href="#t:t/0">t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Glues two documents (<code class="inline">doc1</code> and <code class="inline">doc2</code>) inserting the given
+break <code class="inline">break_string</code> between them.</p><p>For more information on how the break is inserted, see <a href="#break/1"><code class="inline">break/1</code></a>.</p><h2 id="glue/3-examples" class="section-heading">
+  <a href="#glue/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="4028203641-1">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="4028203641-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4028203641-2">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="4028203641-2">)</span><span class="w">
+</span><span class="p" data-group-id="4028203641-3">[</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="4028203641-3">]</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="4028203641-4">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="4028203641-4">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4028203641-5">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="4028203641-5">)</span><span class="w">
+</span><span class="p" data-group-id="4028203641-6">[</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="4028203641-6">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="group/2">
+    <span id="group/1"></span>
+  <div class="detail-header">
+    <a href="#group/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">group(doc, mode \\ :self)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L785" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>group(<a href="#t:t/0">t</a>(), :self | :inherit) :: doc_group()</pre>
+      </div>
+
+<p>Returns a group containing the specified document <code class="inline">doc</code>.</p><p>Documents in a group are attempted to be rendered together
+to the best of the renderer ability.</p><p>The group mode can also be set to <code class="inline">:inherit</code>, which means it
+automatically breaks if the parent group has broken too.</p><h2 id="group/2-examples" class="section-heading">
+  <a href="#group/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="6070370934-1">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6070370934-2">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="6070370934-3">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">        </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6070370934-4">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">          </span><span class="s">&quot;Hello,&quot;</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">          </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6070370934-5">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">            </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">break</span><span class="p" data-group-id="6070370934-6">(</span><span class="p" data-group-id="6070370934-6">)</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">            </span><span class="s">&quot;A&quot;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">          </span><span class="p" data-group-id="6070370934-5">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">        </span><span class="p" data-group-id="6070370934-4">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="p" data-group-id="6070370934-3">)</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="6070370934-7">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">        </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">break</span><span class="p" data-group-id="6070370934-8">(</span><span class="p" data-group-id="6070370934-8">)</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">        </span><span class="s">&quot;B&quot;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="p" data-group-id="6070370934-7">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="p" data-group-id="6070370934-2">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="6070370934-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6070370934-9">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="6070370934-9">)</span><span class="w">
+</span><span class="p" data-group-id="6070370934-10">[</span><span class="s">&quot;Hello,&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p" data-group-id="6070370934-10">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="6070370934-11">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p" data-group-id="6070370934-11">)</span><span class="w">
+</span><span class="p" data-group-id="6070370934-12">[</span><span class="s">&quot;Hello,&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p" data-group-id="6070370934-12">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="line/0">
+  <div class="detail-header">
+    <a href="#line/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">line()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L823" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>line() :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>A mandatory linebreak.</p><p>A group with linebreaks will fit if all lines in the group fit.</p><h2 id="line/0-examples" class="section-heading">
+  <a href="#line/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="8516477855-1">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">concat</span><span class="p" data-group-id="8516477855-2">(</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">      </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">line</span><span class="p" data-group-id="8516477855-3">(</span><span class="p" data-group-id="8516477855-3">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="p" data-group-id="8516477855-2">)</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">    </span><span class="s">&quot;Wadler&quot;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="8516477855-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="8516477855-4">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="8516477855-4">)</span><span class="w">
+</span><span class="p" data-group-id="8516477855-5">[</span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Wadler&quot;</span><span class="p" data-group-id="8516477855-5">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="line/2">
+  <div class="detail-header">
+    <a href="#line/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">line(doc1, doc2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L838" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>line(<a href="#t:t/0">t</a>(), <a href="#t:t/0">t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Inserts a mandatory linebreak between two documents.</p><p>See <a href="#line/0"><code class="inline">line/0</code></a>.</p><h2 id="line/2-examples" class="section-heading">
+  <a href="#line/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">line</span><span class="p" data-group-id="2584619857-1">(</span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Wadler&quot;</span><span class="p" data-group-id="2584619857-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="2584619857-2">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p" data-group-id="2584619857-2">)</span><span class="w">
+</span><span class="p" data-group-id="2584619857-3">[</span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Wadler&quot;</span><span class="p" data-group-id="2584619857-3">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="nest/3">
+    <span id="nest/2"></span>
+  <div class="detail-header">
+    <a href="#nest/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nest(doc, level, mode \\ :always)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L564" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>nest(<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">non_neg_integer</a>() | :cursor | :reset, :always | :break) :: doc_nest()</pre>
+      </div>
+
+<p>Nests the given document at the given <code class="inline">level</code>.</p><p>If <code class="inline">level</code> is an integer, that's the indentation appended
+to line breaks whenever they occur. If the level is <code class="inline">:cursor</code>,
+the current position of the &quot;cursor&quot; in the document becomes
+the nesting. If the level is <code class="inline">:reset</code>, it is set back to 0.</p><p><code class="inline">mode</code> can be <code class="inline">:always</code>, which means nesting always happen,
+or <code class="inline">:break</code>, which means nesting only happens inside a group
+that has been broken.</p><h2 id="nest/3-examples" class="section-heading">
+  <a href="#nest/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">nest</span><span class="p" data-group-id="9761244179-1">(</span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="9761244179-2">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="9761244179-2">)</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="9761244179-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="9761244179-3">(</span><span class="n">doc</span><span class="p" data-group-id="9761244179-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="9761244179-4">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="9761244179-4">)</span><span class="w">
+</span><span class="p" data-group-id="9761244179-5">[</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">     &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="9761244179-5">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="next_break_fits/2">
+    <span id="next_break_fits/1"></span>
+  <div class="detail-header">
+    <a href="#next_break_fits/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_break_fits(doc, mode \\ :enabled)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L666" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>next_break_fits(<a href="#t:t/0">t</a>(), :enabled | :disabled) :: doc_fits()</pre>
+      </div>
+
+<p>Considers the next break as fit.</p><p><code class="inline">mode</code> can be <code class="inline">:enabled</code> or <code class="inline">:disabled</code>. When <code class="inline">:enabled</code>,
+it will consider the document as fit as soon as it finds
+the next break, effectively cancelling the break. It will
+also ignore any <a href="#force_unfit/1"><code class="inline">force_unfit/1</code></a> in search of the next break.</p><p>When disabled, it behaves as usual and it will ignore
+any further <a href="#next_break_fits/2"><code class="inline">next_break_fits/2</code></a> instruction.</p><h2 id="next_break_fits/2-examples" class="section-heading">
+  <a href="#next_break_fits/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>This is used by Elixir's code formatter to avoid breaking
+code at some specific locations. For example, consider this
+code:</p><pre><code class="nohighlight makeup elixir"><span class="n">some_function_call</span><span class="p" data-group-id="5612704244-1">(</span><span class="p" data-group-id="5612704244-2">%{</span><span class="n">...</span><span class="p">,</span><span class="w"> </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="5612704244-2">}</span><span class="p" data-group-id="5612704244-1">)</span></code></pre><p>Now imagine that this code does not fit its line. The code
+formatter introduces breaks inside <code class="inline">(</code> and <code class="inline">)</code> and inside
+<code class="inline">%{</code> and <code class="inline">}</code>. Therefore the document would break as:</p><pre><code class="nohighlight makeup elixir"><span class="n">some_function_call</span><span class="p" data-group-id="8634354427-1">(</span><span class="w">
+  </span><span class="p" data-group-id="8634354427-2">%{</span><span class="w">
+    </span><span class="n">...</span><span class="p">,</span><span class="w">
+    </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w">
+    </span><span class="n">...</span><span class="w">
+  </span><span class="p" data-group-id="8634354427-2">}</span><span class="w">
+</span><span class="p" data-group-id="8634354427-1">)</span></code></pre><p>The formatter wraps the algebra document representing the
+map in <a href="#next_break_fits/1"><code class="inline">next_break_fits/1</code></a> so the code is formatted as:</p><pre><code class="nohighlight makeup elixir"><span class="n">some_function_call</span><span class="p" data-group-id="1880550094-1">(</span><span class="p" data-group-id="1880550094-2">%{</span><span class="w">
+  </span><span class="n">...</span><span class="p">,</span><span class="w">
+  </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="p" data-group-id="1880550094-2">}</span><span class="p" data-group-id="1880550094-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="space/2">
+  <div class="detail-header">
+    <a href="#space/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">space(doc1, doc2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L800" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>space(<a href="#t:t/0">t</a>(), <a href="#t:t/0">t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Inserts a mandatory single space between two documents.</p><h2 id="space/2-examples" class="section-heading">
+  <a href="#space/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">space</span><span class="p" data-group-id="2856678096-1">(</span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Wadler&quot;</span><span class="p" data-group-id="2856678096-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="2856678096-2">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="2856678096-2">)</span><span class="w">
+</span><span class="p" data-group-id="2856678096-3">[</span><span class="s">&quot;Hughes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Wadler&quot;</span><span class="p" data-group-id="2856678096-3">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="string/1">
+  <div class="detail-header">
+    <a href="#string/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L495" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>string(<a href="String.html#t:t/0">String.t</a>()) :: doc_string()</pre>
+      </div>
+
+<p>Creates a document represented by string.</p><p>While <a href="#content"><code class="inline">Inspect.Algebra</code></a> accepts binaries as documents,
+those are counted by binary size. On the other hand,
+<code class="inline">string</code> documents are measured in terms of graphemes
+towards the document size.</p><h2 id="string/1-examples" class="section-heading">
+  <a href="#string/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>The following document has 10 bytes and therefore it
+does not format to width 9 without breaks:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="4132958556-1">(</span><span class="s">&quot;olá&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mundo&quot;</span><span class="p" data-group-id="4132958556-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="4132958556-2">(</span><span class="n">doc</span><span class="p" data-group-id="4132958556-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="4132958556-3">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p" data-group-id="4132958556-3">)</span><span class="w">
+</span><span class="p" data-group-id="4132958556-4">[</span><span class="s">&quot;olá&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mundo&quot;</span><span class="p" data-group-id="4132958556-4">]</span></code></pre><p>However, if we use <code class="inline">string</code>, then the string length is
+used, instead of byte size, correctly fitting:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">string</span><span class="p" data-group-id="7892000696-1">(</span><span class="s">&quot;olá&quot;</span><span class="p" data-group-id="7892000696-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">glue</span><span class="p" data-group-id="7892000696-2">(</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mundo&quot;</span><span class="p" data-group-id="7892000696-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">doc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">group</span><span class="p" data-group-id="7892000696-3">(</span><span class="n">doc</span><span class="p" data-group-id="7892000696-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Inspect.Algebra</span><span class="o">.</span><span class="n">format</span><span class="p" data-group-id="7892000696-4">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p" data-group-id="7892000696-4">)</span><span class="w">
+</span><span class="p" data-group-id="7892000696-5">[</span><span class="s">&quot;olá&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mundo&quot;</span><span class="p" data-group-id="7892000696-5">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="to_doc/2">
+  <div class="detail-header">
+    <a href="#to_doc/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_doc(term, opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/inspect/algebra.ex#L276" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>to_doc(<a href="typespecs.html#basic-types">any</a>(), <a href="Inspect.Opts.html#t:t/0">Inspect.Opts.t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Converts an Elixir term to an algebra document
+according to the <a href="Inspect.html"><code class="inline">Inspect</code></a> protocol.</p>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

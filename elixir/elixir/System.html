@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>System — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /System.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+System          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The <a href="#content"><code class="inline">System</code></a> module provides functions that interact directly
+with the VM or the host system.</p><h2 id="module-time" class="section-heading">
+  <a href="#module-time" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Time
+</h2>
+<p>The <a href="#content"><code class="inline">System</code></a> module also provides functions that work with time,
+returning different times kept by the system with support for
+different time units.</p><p>One of the complexities in relying on system times is that they
+may be adjusted. For example, when you enter and leave daylight
+saving time, the system clock will be adjusted, often adding
+or removing one hour. We call such changes &quot;time warps&quot;. In
+order to understand how such changes may be harmful, imagine
+the following code:</p><pre><code class="nohighlight makeup elixir"><span class="c1">## DO NOT DO THIS</span><span class="w">
+</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">os_time</span><span class="p" data-group-id="7672086283-1">(</span><span class="p" data-group-id="7672086283-1">)</span><span class="w">
+</span><span class="c1"># ... execute some code ...</span><span class="w">
+</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">os_time</span><span class="p" data-group-id="7672086283-2">(</span><span class="p" data-group-id="7672086283-2">)</span><span class="w">
+</span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">prev</span></code></pre><p>If, while the code is executing, the system clock changes,
+some code that executed in 1 second may be reported as taking
+over 1 hour! To address such concerns, the VM provides a
+monotonic time via <a href="#monotonic_time/0"><code class="inline">System.monotonic_time/0</code></a> which never
+decreases and does not leap:</p><pre><code class="nohighlight makeup elixir"><span class="c1">## DO THIS</span><span class="w">
+</span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">monotonic_time</span><span class="p" data-group-id="2879408921-1">(</span><span class="p" data-group-id="2879408921-1">)</span><span class="w">
+</span><span class="c1"># ... execute some code ...</span><span class="w">
+</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">monotonic_time</span><span class="p" data-group-id="2879408921-2">(</span><span class="p" data-group-id="2879408921-2">)</span><span class="w">
+</span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">prev</span></code></pre><p>Generally speaking, the VM provides three time measurements:</p><ul><li><p><a href="#os_time/0"><code class="inline">os_time/0</code></a> - the time reported by the operating system (OS). This time may be
+adjusted forwards or backwards in time with no limitation;</p></li><li><p><a href="#system_time/0"><code class="inline">system_time/0</code></a> - the VM view of the <a href="#os_time/0"><code class="inline">os_time/0</code></a>. The system time and operating
+system time may not match in case of time warps although the VM works towards
+aligning them. This time is not monotonic (i.e., it may decrease)
+as its behaviour is configured <a href="http://www.erlang.org/doc/apps/erts/time_correction.html#Time_Warp_Modes">by the VM time warp
+mode</a>;</p></li><li><p><a href="#monotonic_time/0"><code class="inline">monotonic_time/0</code></a> - a monotonically increasing time provided
+by the Erlang VM.</p></li></ul><p>The time functions in this module work in the <code class="inline">:native</code> unit
+(unless specified otherwise), which is operating system dependent. Most of
+the time, all calculations are done in the <code class="inline">:native</code> unit, to
+avoid loss of precision, with <a href="#convert_time_unit/3"><code class="inline">convert_time_unit/3</code></a> being
+invoked at the end to convert to a specific time unit like
+<code class="inline">:millisecond</code> or <code class="inline">:microsecond</code>. See the <a href="#t:time_unit/0"><code class="inline">time_unit/0</code></a> type for
+more information.</p><p>For a more complete rundown on the VM support for different
+times, see the <a href="http://www.erlang.org/doc/apps/erts/time_correction.html">chapter on time and time
+correction</a>
+in the Erlang docs.</p>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:time_unit/0">time_unit()</a>
+  </div>
+    <div class="summary-synopsis"><p>The time unit to be passed to functions like <a href="#monotonic_time/1"><code class="inline">monotonic_time/1</code></a> and others.</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#argv/0">argv()</a>
+  </div>
+    <div class="summary-synopsis"><p>Lists command line arguments.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#argv/1">argv(args)</a>
+  </div>
+    <div class="summary-synopsis"><p>Modifies command line arguments.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#at_exit/1">at_exit(fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers a program exit handler function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#build_info/0">build_info()</a>
+  </div>
+    <div class="summary-synopsis"><p>Elixir build information.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmd/3">cmd(command, args, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Executes the given <code class="inline">command</code> with <code class="inline">args</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compiled_endianness/0">compiled_endianness()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the endianness the system was compiled with.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convert_time_unit/3">convert_time_unit(time, from_unit, to_unit)</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts <code class="inline">time</code> from time unit <code class="inline">from_unit</code> to time unit <code class="inline">to_unit</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cwd/0">cwd()</a>
+      <span class="deprecated" title="Use File.cwd/0 instead">deprecated</span>
+  </div>
+    <div class="summary-synopsis"><p>Current working directory.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cwd!/0">cwd!()</a>
+      <span class="deprecated" title="Use File.cwd!/0 instead">deprecated</span>
+  </div>
+    <div class="summary-synopsis"><p>Current working directory, exception on error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_env/1">delete_env(varname)</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes an environment variable.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#endianness/0">endianness()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the endianness.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fetch_env/1">fetch_env(varname)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the value of the given environment variable or <code class="inline">:error</code> if not found.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fetch_env!/1">fetch_env!(varname)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the value of the given environment variable or raises if not found.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_executable/1">find_executable(program)</a>
+  </div>
+    <div class="summary-synopsis"><p>Locates an executable on the system.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_env/0">get_env()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all system environment variables.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_env/2">get_env(varname, default \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the value of the given environment variable.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_pid/0">get_pid()</a>
+      <span class="deprecated" title="Use System.pid/0 instead">deprecated</span>
+  </div>
+    <div class="summary-synopsis"><p>Erlang VM process identifier.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#halt/1">halt(status \\ 0)</a>
+  </div>
+    <div class="summary-synopsis"><p>Immediately halts the Erlang runtime system.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monotonic_time/0">monotonic_time()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current monotonic time in the <code class="inline">:native</code> time unit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monotonic_time/1">monotonic_time(unit)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current monotonic time in the given time unit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#no_halt/0">no_halt()</a>
+  </div>
+    <div class="summary-synopsis"><p>Checks if the system will halt or not at the end of ARGV processing.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#no_halt/1">no_halt(boolean)</a>
+  </div>
+    <div class="summary-synopsis"><p>Marks if the system should halt or not at the end of ARGV processing.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#os_time/0">os_time()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current operating system (OS) time.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#os_time/1">os_time(unit)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current operating system (OS) time in the given time <code class="inline">unit</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#otp_release/0">otp_release()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the Erlang/OTP release number.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pid/0">pid()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the operating system PID for the current Erlang runtime system instance.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_env/1">put_env(enum)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets multiple environment variables.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_env/2">put_env(varname, value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets an environment variable value.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart/0">restart()</a>
+  </div>
+    <div class="summary-synopsis"><p>Restarts all applications in the Erlang runtime system.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#schedulers/0">schedulers()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of schedulers in the VM.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#schedulers_online/0">schedulers_online()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the number of schedulers online in the VM.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stacktrace/0">stacktrace()</a>
+  </div>
+    <div class="summary-synopsis"><p>Deprecated mechanism to retrieve the last exception stacktrace.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop(status \\ 0)</a>
+  </div>
+    <div class="summary-synopsis"><p>Carefully stops the Erlang runtime system.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#system_time/0">system_time()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current system time in the <code class="inline">:native</code> time unit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#system_time/1">system_time(unit)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current system time in the given time unit.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#time_offset/0">time_offset()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current time offset between the Erlang VM monotonic
+time and the Erlang VM system time.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#time_offset/1">time_offset(unit)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the current time offset between the Erlang VM monotonic
+time and the Erlang VM system time.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tmp_dir/0">tmp_dir()</a>
+  </div>
+    <div class="summary-synopsis"><p>Writable temporary directory.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tmp_dir!/0">tmp_dir!()</a>
+  </div>
+    <div class="summary-synopsis"><p>Writable temporary directory, exception on error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unique_integer/1">unique_integer(modifiers \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Generates and returns an integer that is unique in the current runtime
+instance.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#user_home/0">user_home()</a>
+  </div>
+    <div class="summary-synopsis"><p>User home directory.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#user_home!/0">user_home!()</a>
+  </div>
+    <div class="summary-synopsis"><p>User home directory, exception on error.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#version/0">version()</a>
+  </div>
+    <div class="summary-synopsis"><p>Elixir version information.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:time_unit/0">
+  <div class="detail-header">
+    <a href="#t:time_unit/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">time_unit()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L77" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>time_unit() ::
+  :second | :millisecond | :microsecond | :nanosecond | <a href="typespecs.html#basic-types">pos_integer</a>()</pre>
+      </div>
+
+<p>The time unit to be passed to functions like <a href="#monotonic_time/1"><code class="inline">monotonic_time/1</code></a> and others.</p><p>The <code class="inline">:second</code>, <code class="inline">:millisecond</code>, <code class="inline">:microsecond</code> and <code class="inline">:nanosecond</code> time
+units controls the return value of the functions that accept a time unit.</p><p>A time unit can also be a strictly positive integer. In this case, it
+represents the &quot;parts per second&quot;: the time will be returned in <code class="inline">1 / parts_per_second</code> seconds. For example, using the <code class="inline">:millisecond</code> time unit
+is equivalent to using <code class="inline">1000</code> as the time unit (as the time will be returned
+in 1/1000 seconds - milliseconds).</p>  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="argv/0">
+  <div class="detail-header">
+    <a href="#argv/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">argv()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L243" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>argv() :: [<a href="String.html#t:t/0">String.t</a>()]</pre>
+      </div>
+
+<p>Lists command line arguments.</p><p>Returns the list of command line arguments passed to the program.</p>  </section>
+</section>
+<section class="detail" id="argv/1">
+  <div class="detail-header">
+    <a href="#argv/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">argv(args)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L254" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>argv([<a href="String.html#t:t/0">String.t</a>()]) :: :ok</pre>
+      </div>
+
+<p>Modifies command line arguments.</p><p>Changes the list of command line arguments. Use it with caution,
+as it destroys any previous argv information.</p>  </section>
+</section>
+<section class="detail" id="at_exit/1">
+  <div class="detail-header">
+    <a href="#at_exit/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">at_exit(fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L407" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>at_exit((<a href="typespecs.html#basic-types">non_neg_integer</a>() -> <a href="typespecs.html#basic-types">any</a>())) :: :ok</pre>
+      </div>
+
+<p>Registers a program exit handler function.</p><p>Registers a function that will be invoked at the end of program execution.
+Useful for invoking a hook in &quot;script&quot; mode.</p><p>The handler always executes in a different process from the one it was
+registered in. As a consequence, any resources managed by the calling process
+(ETS tables, open files, and others) won't be available by the time the handler
+function is invoked.</p><p>The function must receive the exit status code as an argument.</p>  </section>
+</section>
+<section class="detail" id="build_info/0">
+  <div class="detail-header">
+    <a href="#build_info/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">build_info()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L217" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>build_info() :: %{
+  build: <a href="String.html#t:t/0">String.t</a>(),
+  date: <a href="String.html#t:t/0">String.t</a>(),
+  revision: <a href="String.html#t:t/0">String.t</a>(),
+  version: <a href="String.html#t:t/0">String.t</a>(),
+  otp_release: <a href="String.html#t:t/0">String.t</a>()
+}</pre>
+      </div>
+
+<p>Elixir build information.</p><p>Returns a map with the Elixir version, the Erlang/OTP release it was compiled
+with, a short Git revision hash and the date and time it was built.</p><p>Every value in the map is a string, and these are:</p><ul><li><code class="inline">:build</code> - the Elixir version, short Git revision hash and
+Erlang/OTP release it was compiled with</li><li><code class="inline">:date</code> - a string representation of the ISO8601 date and time it was built</li><li><code class="inline">:otp_release</code> - OTP release it was compiled with</li><li><code class="inline">:revision</code> - short Git revision hash. If Git was not available at building
+time, it is set to <code class="inline">&quot;&quot;</code></li><li><code class="inline">:version</code> - the Elixir version</li></ul><p>One should not rely on the specific formats returned by each of those fields.
+Instead one should use specialized functions, such as <a href="#version/0"><code class="inline">version/0</code></a> to retrieve
+the Elixir version and <a href="#otp_release/0"><code class="inline">otp_release/0</code></a> to retrieve the Erlang/OTP release.</p><h2 id="build_info/0-examples" class="section-heading">
+  <a href="#build_info/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">build_info</span><span class="p" data-group-id="2195566070-1">(</span><span class="p" data-group-id="2195566070-1">)</span><span class="w">
+</span><span class="p" data-group-id="2195566070-2">%{</span><span class="w">
+  </span><span class="ss">build</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.9.0-dev (772a00a0c) (compiled with Erlang/OTP 21)&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">date</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2018-12-24T01:09:21Z&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">otp_release</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;21&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">revision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;772a00a0c&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.9.0-dev&quot;</span><span class="w">
+</span><span class="p" data-group-id="2195566070-2">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="cmd/3">
+    <span id="cmd/2"></span>
+  <div class="detail-header">
+    <a href="#cmd/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmd(command, args, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L782" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>cmd(<a href="typespecs.html#built-in-types">binary</a>(), [<a href="typespecs.html#built-in-types">binary</a>()], <a href="typespecs.html#built-in-types">keyword</a>()) ::
+  {<a href="Collectable.html#t:t/0">Collectable.t</a>(), exit_status :: <a href="typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+      </div>
+
+<p>Executes the given <code class="inline">command</code> with <code class="inline">args</code>.</p><p><code class="inline">command</code> is expected to be an executable available in PATH
+unless an absolute path is given.</p><p><code class="inline">args</code> must be a list of binaries which the executable will receive
+as its arguments as is. This means that:</p><ul><li>environment variables will not be interpolated</li><li>wildcard expansion will not happen (unless <a href="Path.html#wildcard/2"><code class="inline">Path.wildcard/2</code></a> is used
+explicitly)</li><li>arguments do not need to be escaped or quoted for shell safety</li></ul><p>This function returns a tuple containing the collected result
+and the command exit status.</p><p>Internally, this function uses a <a href="Port.html"><code class="inline">Port</code></a> for interacting with the
+outside world. However, if you plan to run a long-running program,
+ports guarantee stdin/stdout devices will be closed but it does not
+automatically terminate the program. The documentation for the
+<a href="Port.html"><code class="inline">Port</code></a> module describes this problem and possible solutions under
+the &quot;Zombie processes&quot; section.</p><h2 id="cmd/3-examples" class="section-heading">
+  <a href="#cmd/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">cmd</span><span class="p" data-group-id="8308524524-1">(</span><span class="s">&quot;echo&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8308524524-2">[</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="8308524524-2">]</span><span class="p" data-group-id="8308524524-1">)</span><span class="w">
+</span><span class="p" data-group-id="8308524524-3">{</span><span class="s">&quot;hello</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="8308524524-3">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">cmd</span><span class="p" data-group-id="8308524524-4">(</span><span class="s">&quot;echo&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8308524524-5">[</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="8308524524-5">]</span><span class="p">,</span><span class="w"> </span><span class="ss">env</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="8308524524-6">[</span><span class="p" data-group-id="8308524524-7">{</span><span class="s">&quot;MIX_ENV&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p" data-group-id="8308524524-7">}</span><span class="p" data-group-id="8308524524-6">]</span><span class="p" data-group-id="8308524524-4">)</span><span class="w">
+</span><span class="p" data-group-id="8308524524-8">{</span><span class="s">&quot;hello</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="8308524524-8">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">cmd</span><span class="p" data-group-id="8308524524-9">(</span><span class="s">&quot;echo&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8308524524-10">[</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="8308524524-10">]</span><span class="p">,</span><span class="w"> </span><span class="ss">into</span><span class="p">:</span><span class="w"> </span><span class="nc">IO</span><span class="o">.</span><span class="n">stream</span><span class="p" data-group-id="8308524524-11">(</span><span class="ss">:stdio</span><span class="p">,</span><span class="w"> </span><span class="ss">:line</span><span class="p" data-group-id="8308524524-11">)</span><span class="p" data-group-id="8308524524-9">)</span><span class="w">
+</span><span class="n">hello</span><span class="w">
+</span><span class="p" data-group-id="8308524524-12">{</span><span class="p" data-group-id="8308524524-13">%</span><span class="nc" data-group-id="8308524524-13">IO.Stream</span><span class="p" data-group-id="8308524524-13">{</span><span class="p" data-group-id="8308524524-13">}</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="8308524524-12">}</span></code></pre><h2 id="cmd/3-options" class="section-heading">
+  <a href="#cmd/3-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><code class="inline">:into</code> - injects the result into the given collectable, defaults to <code class="inline">&quot;&quot;</code></li><li><code class="inline">:cd</code> - the directory to run the command in</li><li><code class="inline">:env</code> - an enumerable of tuples containing environment key-value as binary</li><li><code class="inline">:arg0</code> - sets the command arg0</li><li><code class="inline">:stderr_to_stdout</code> - redirects stderr to stdout when <code class="inline">true</code></li><li><code class="inline">:parallelism</code> - when <code class="inline">true</code>, the VM will schedule port tasks to improve
+parallelism in the system. If set to <code class="inline">false</code>, the VM will try to perform
+commands immediately, improving latency at the expense of parallelism.
+The default can be set on system startup by passing the &quot;+spp&quot; argument
+to <code class="inline">--erl</code>.</li></ul><h2 id="cmd/3-error-reasons" class="section-heading">
+  <a href="#cmd/3-error-reasons" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Error reasons
+</h2>
+<p>If invalid arguments are given, <a href="ArgumentError.html"><code class="inline">ArgumentError</code></a> is raised by
+<a href="#cmd/3"><code class="inline">System.cmd/3</code></a>. <a href="#cmd/3"><code class="inline">System.cmd/3</code></a> also expects a strict set of
+options and will raise if unknown or invalid options are given.</p><p>Furthermore, <a href="#cmd/3"><code class="inline">System.cmd/3</code></a> may fail with one of the POSIX reasons
+detailed below:</p><ul><li><p><code class="inline">:system_limit</code> - all available ports in the Erlang emulator are in use</p></li><li><p><code class="inline">:enomem</code> - there was not enough memory to create the port</p></li><li><p><code class="inline">:eagain</code> - there are no more available operating system processes</p></li><li><p><code class="inline">:enametoolong</code> - the external command given was too long</p></li><li><p><code class="inline">:emfile</code> - there are no more available file descriptors
+(for the operating system process that the Erlang emulator runs in)</p></li><li><p><code class="inline">:enfile</code> - the file table is full (for the entire operating system)</p></li><li><p><code class="inline">:eacces</code> - the command does not point to an executable file</p></li><li><p><code class="inline">:enoent</code> - the command does not point to an existing file</p></li></ul><h2 id="cmd/3-shell-commands" class="section-heading">
+  <a href="#cmd/3-shell-commands" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Shell commands
+</h2>
+<p>If you desire to execute a trusted command inside a shell, with pipes,
+redirecting and so on, please check <a href="http://www.erlang.org/doc/man/os.html#cmd-1"><code class="inline">:os.cmd/1</code></a>.</p>  </section>
+</section>
+<section class="detail" id="compiled_endianness/0">
+  <div class="detail-header">
+    <a href="#compiled_endianness/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compiled_endianness()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L166" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compiled_endianness() :: :little | :big</pre>
+      </div>
+
+<p>Returns the endianness the system was compiled with.</p>  </section>
+</section>
+<section class="detail" id="convert_time_unit/3">
+  <div class="detail-header">
+    <a href="#convert_time_unit/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convert_time_unit(time, from_unit, to_unit)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L927" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>convert_time_unit(<a href="typespecs.html#basic-types">integer</a>(), <a href="#t:time_unit/0">time_unit</a>() | :native, <a href="#t:time_unit/0">time_unit</a>() | :native) ::
+  <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Converts <code class="inline">time</code> from time unit <code class="inline">from_unit</code> to time unit <code class="inline">to_unit</code>.</p><p>The result is rounded via the floor function.</p><p><a href="#convert_time_unit/3"><code class="inline">convert_time_unit/3</code></a> accepts an additional time unit (other than the
+ones in the <a href="#t:time_unit/0"><code class="inline">time_unit/0</code></a> type) called <code class="inline">:native</code>. <code class="inline">:native</code> is the time
+unit used by the Erlang runtime system. It's determined when the runtime
+starts and stays the same until the runtime is stopped, but could differ
+the next time the runtime is started on the same machine. For this reason,
+you should use this function to convert <code class="inline">:native</code> time units to a predictable
+unit before you display them to humans.</p><p>To determine how many seconds the <code class="inline">:native</code> unit represents in your current
+runtime, you can can call this function to convert 1 second to the <code class="inline">:native</code>
+time unit: <code class="inline">System.convert_time_unit(1, :second, :native)</code>.</p>  </section>
+</section>
+<section class="detail" id="cwd/0">
+  <div class="detail-header">
+    <a href="#cwd/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cwd()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L284" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+    <div class="deprecated">
+      This function is deprecated. Use File.cwd/0 instead.
+    </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>cwd() :: <a href="String.html#t:t/0">String.t</a>() | nil</pre>
+      </div>
+
+<p>Current working directory.</p><p>Returns the current working directory or <code class="inline">nil</code> if one
+is not available.</p>  </section>
+</section>
+<section class="detail" id="cwd!/0">
+  <div class="detail-header">
+    <a href="#cwd!/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cwd!()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L298" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+    <div class="deprecated">
+      This function is deprecated. Use File.cwd!/0 instead.
+    </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>cwd!() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Current working directory, exception on error.</p><p>Returns the current working directory or raises <a href="RuntimeError.html"><code class="inline">RuntimeError</code></a>.</p>  </section>
+</section>
+<section class="detail" id="delete_env/1">
+  <div class="detail-header">
+    <a href="#delete_env/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_env(varname)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L572" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>delete_env(<a href="String.html#t:t/0">String.t</a>()) :: :ok</pre>
+      </div>
+
+<p>Deletes an environment variable.</p><p>Removes the variable <code class="inline">varname</code> from the environment.</p>  </section>
+</section>
+<section class="detail" id="endianness/0">
+  <div class="detail-header">
+    <a href="#endianness/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">endianness()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L157" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>endianness() :: :little | :big</pre>
+      </div>
+
+<p>Returns the endianness.</p>  </section>
+</section>
+<section class="detail" id="fetch_env/1">
+  <div class="detail-header">
+    <a href="#fetch_env/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fetch_env(varname)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L494" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch_env(<a href="String.html#t:t/0">String.t</a>()) :: {:ok, <a href="String.html#t:t/0">String.t</a>()} | :error</pre>
+      </div>
+
+<p>Returns the value of the given environment variable or <code class="inline">:error</code> if not found.</p><p>If the environment variable <code class="inline">varname</code> is set, then <code class="inline">{:ok, value}</code> is returned
+where <code class="inline">value</code> is a string. If <code class="inline">varname</code> is not set, <code class="inline">:error</code> is returned.</p><h2 id="fetch_env/1-examples" class="section-heading">
+  <a href="#fetch_env/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env</span><span class="p" data-group-id="8830099282-1">(</span><span class="s">&quot;PORT&quot;</span><span class="p" data-group-id="8830099282-1">)</span><span class="w">
+</span><span class="p" data-group-id="8830099282-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;4000&quot;</span><span class="p" data-group-id="8830099282-2">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env</span><span class="p" data-group-id="8830099282-3">(</span><span class="s">&quot;NOT_SET&quot;</span><span class="p" data-group-id="8830099282-3">)</span><span class="w">
+</span><span class="ss">:error</span></code></pre>  </section>
+</section>
+<section class="detail" id="fetch_env!/1">
+  <div class="detail-header">
+    <a href="#fetch_env!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fetch_env!(varname)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L518" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch_env!(<a href="String.html#t:t/0">String.t</a>()) :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Returns the value of the given environment variable or raises if not found.</p><p>Same as <a href="#get_env/1"><code class="inline">get_env/1</code></a> but raises instead of returning <code class="inline">nil</code> when the variable is
+not set.</p><h2 id="fetch_env!/1-examples" class="section-heading">
+  <a href="#fetch_env!/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p" data-group-id="0591663917-1">(</span><span class="s">&quot;PORT&quot;</span><span class="p" data-group-id="0591663917-1">)</span><span class="w">
+</span><span class="s">&quot;4000&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p" data-group-id="0591663917-2">(</span><span class="s">&quot;NOT_SET&quot;</span><span class="p" data-group-id="0591663917-2">)</span><span class="w">
+</span><span class="gt">** (ArgumentError) could not fetch environment variable &quot;NOT_SET&quot; because it is not set</span></code></pre>  </section>
+</section>
+<section class="detail" id="find_executable/1">
+  <div class="detail-header">
+    <a href="#find_executable/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_executable(program)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L422" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>find_executable(<a href="typespecs.html#built-in-types">binary</a>()) :: <a href="typespecs.html#built-in-types">binary</a>() | nil</pre>
+      </div>
+
+<p>Locates an executable on the system.</p><p>This function looks up an executable program given
+its name using the environment variable PATH on Windows and Unix-like
+operating systems. It also considers the proper executable
+extension for each operating system, so for Windows it will try to
+lookup files with <code class="inline">.com</code>, <code class="inline">.cmd</code> or similar extensions.</p>  </section>
+</section>
+<section class="detail" id="get_env/0">
+  <div class="detail-header">
+    <a href="#get_env/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_env()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L438" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_env() :: %{optional(<a href="String.html#t:t/0">String.t</a>()) => <a href="String.html#t:t/0">String.t</a>()}</pre>
+      </div>
+
+<p>Returns all system environment variables.</p><p>The returned value is a map containing name-value pairs.
+Variable names and their values are strings.</p>  </section>
+</section>
+<section class="detail" id="get_env/2">
+    <span id="get_env/1"></span>
+  <div class="detail-header">
+    <a href="#get_env/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_env(varname, default \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L468" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_env(<a href="String.html#t:t/0">String.t</a>(), <a href="String.html#t:t/0">String.t</a>() | nil) :: <a href="String.html#t:t/0">String.t</a>() | nil</pre>
+      </div>
+
+<p>Returns the value of the given environment variable.</p><p>The returned value of the environment variable
+<code class="inline">varname</code> is a string. If the environment variable
+is not set, returns the string specified in <code class="inline">default</code> or
+<code class="inline">nil</code> if none is specified.</p><h2 id="get_env/2-examples" class="section-heading">
+  <a href="#get_env/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">get_env</span><span class="p" data-group-id="5141393946-1">(</span><span class="s">&quot;PORT&quot;</span><span class="p" data-group-id="5141393946-1">)</span><span class="w">
+</span><span class="s">&quot;4000&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">get_env</span><span class="p" data-group-id="5141393946-2">(</span><span class="s">&quot;NOT_SET&quot;</span><span class="p" data-group-id="5141393946-2">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">System</span><span class="o">.</span><span class="n">get_env</span><span class="p" data-group-id="5141393946-3">(</span><span class="s">&quot;NOT_SET&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;4001&quot;</span><span class="p" data-group-id="5141393946-3">)</span><span class="w">
+</span><span class="s">&quot;4001&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="get_pid/0">
+  <div class="detail-header">
+    <a href="#get_pid/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_pid()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L535" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+    <div class="deprecated">
+      This function is deprecated. Use System.pid/0 instead.
+    </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_pid() :: <a href="typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+
+<p>Erlang VM process identifier.</p><p>Returns the process identifier of the current Erlang emulator
+in the format most commonly used by the operating system environment.</p><p>For more information, see <a href="http://www.erlang.org/doc/man/os.html#getpid-0"><code class="inline">:os.getpid/0</code></a>.</p>  </section>
+</section>
+<section class="detail" id="halt/1">
+    <span id="halt/0"></span>
+  <div class="detail-header">
+    <a href="#halt/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">halt(status \\ 0)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L627" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>halt(<a href="typespecs.html#basic-types">non_neg_integer</a>() | <a href="typespecs.html#built-in-types">binary</a>() | :abort) :: <a href="typespecs.html#built-in-types">no_return</a>()</pre>
+      </div>
+
+<p>Immediately halts the Erlang runtime system.</p><p>Terminates the Erlang runtime system without properly shutting down
+applications and ports. Please see <a href="#stop/1"><code class="inline">stop/1</code></a> for a careful shutdown of the
+system.</p><p><code class="inline">status</code> must be a non-negative integer, the atom <code class="inline">:abort</code> or a binary.</p><ul><li><p>If an integer, the runtime system exits with the integer value which
+is returned to the operating system.</p></li><li><p>If <code class="inline">:abort</code>, the runtime system aborts producing a core dump, if that is
+enabled in the operating system.</p></li><li><p>If a string, an Erlang crash dump is produced with status as slogan,
+and then the runtime system exits with status code 1.</p></li></ul><p>Note that on many platforms, only the status codes 0-255 are supported
+by the operating system.</p><p>For more information, see <a href="http://www.erlang.org/doc/man/erlang.html#halt-1"><code class="inline">:erlang.halt/1</code></a>.</p><h2 id="halt/1-examples" class="section-heading">
+  <a href="#halt/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">System</span><span class="o">.</span><span class="n">halt</span><span class="p" data-group-id="0976167875-1">(</span><span class="mi">0</span><span class="p" data-group-id="0976167875-1">)</span><span class="w">
+</span><span class="nc">System</span><span class="o">.</span><span class="n">halt</span><span class="p" data-group-id="0976167875-2">(</span><span class="mi">1</span><span class="p" data-group-id="0976167875-2">)</span><span class="w">
+</span><span class="nc">System</span><span class="o">.</span><span class="n">halt</span><span class="p" data-group-id="0976167875-3">(</span><span class="ss">:abort</span><span class="p" data-group-id="0976167875-3">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="monotonic_time/0">
+  <div class="detail-header">
+    <a href="#monotonic_time/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monotonic_time()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L868" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>monotonic_time() :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current monotonic time in the <code class="inline">:native</code> time unit.</p><p>This time is monotonically increasing and starts in an unspecified
+point in time.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="monotonic_time/1">
+  <div class="detail-header">
+    <a href="#monotonic_time/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monotonic_time(unit)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L879" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>monotonic_time(<a href="#t:time_unit/0">time_unit</a>()) :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current monotonic time in the given time unit.</p><p>This time is monotonically increasing and starts in an unspecified
+point in time.</p>  </section>
+</section>
+<section class="detail" id="no_halt/0">
+  <div class="detail-header">
+    <a href="#no_halt/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">no_halt()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L272" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>no_halt() :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Checks if the system will halt or not at the end of ARGV processing.</p>  </section>
+</section>
+<section class="detail" id="no_halt/1">
+  <div class="detail-header">
+    <a href="#no_halt/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">no_halt(boolean)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L263" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>no_halt(<a href="typespecs.html#built-in-types">boolean</a>()) :: :ok</pre>
+      </div>
+
+<p>Marks if the system should halt or not at the end of ARGV processing.</p>  </section>
+</section>
+<section class="detail" id="os_time/0">
+  <div class="detail-header">
+    <a href="#os_time/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">os_time()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L971" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>os_time() :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current operating system (OS) time.</p><p>The result is returned in the <code class="inline">:native</code> time unit.</p><p>This time may be adjusted forwards or backwards in time
+with no limitation and is not monotonic.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="os_time/1">
+  <div class="detail-header">
+    <a href="#os_time/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">os_time(unit)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L982" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>os_time(<a href="#t:time_unit/0">time_unit</a>()) :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current operating system (OS) time in the given time <code class="inline">unit</code>.</p><p>This time may be adjusted forwards or backwards in time
+with no limitation and is not monotonic.</p>  </section>
+</section>
+<section class="detail" id="otp_release/0">
+  <div class="detail-header">
+    <a href="#otp_release/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">otp_release()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L990" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>otp_release() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Returns the Erlang/OTP release number.</p>  </section>
+</section>
+<section class="detail" id="pid/0">
+  <div class="detail-header">
+    <a href="#pid/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pid()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L652" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>pid() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Returns the operating system PID for the current Erlang runtime system instance.</p><p>Returns a string containing the (usually) numerical identifier for a process.
+On Unix-like operating systems, this is typically the return value of the <code class="inline">getpid()</code> system call.
+On Windows, the process ID as returned by the <code class="inline">GetCurrentProcessId()</code> system
+call is used.</p><h2 id="pid/0-examples" class="section-heading">
+  <a href="#pid/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">System</span><span class="o">.</span><span class="n">pid</span><span class="p" data-group-id="3262256329-1">(</span><span class="p" data-group-id="3262256329-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="put_env/1">
+  <div class="detail-header">
+    <a href="#put_env/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_env(enum)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L562" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>put_env(<a href="Enumerable.html#t:t/0">Enumerable.t</a>()) :: :ok</pre>
+      </div>
+
+<p>Sets multiple environment variables.</p><p>Sets a new value for each environment variable corresponding
+to each <code class="inline">{key, value}</code> pair in <code class="inline">enum</code>.</p>  </section>
+</section>
+<section class="detail" id="put_env/2">
+  <div class="detail-header">
+    <a href="#put_env/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_env(varname, value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L543" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>put_env(<a href="typespecs.html#built-in-types">binary</a>(), <a href="typespecs.html#built-in-types">binary</a>()) :: :ok</pre>
+      </div>
+
+<p>Sets an environment variable value.</p><p>Sets a new <code class="inline">value</code> for the environment variable <code class="inline">varname</code>.</p>  </section>
+</section>
+<section class="detail" id="restart/0">
+  <div class="detail-header">
+    <a href="#restart/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L669" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.9.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>restart() :: :ok</pre>
+      </div>
+
+<p>Restarts all applications in the Erlang runtime system.</p><p>All applications are taken down smoothly, all code is unloaded, and all ports
+are closed before the system starts all applications once again.</p><h2 id="restart/0-examples" class="section-heading">
+  <a href="#restart/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">System</span><span class="o">.</span><span class="n">restart</span><span class="p" data-group-id="1829501194-1">(</span><span class="p" data-group-id="1829501194-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="schedulers/0">
+  <div class="detail-header">
+    <a href="#schedulers/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">schedulers()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L998" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>schedulers() :: <a href="typespecs.html#basic-types">pos_integer</a>()</pre>
+      </div>
+
+<p>Returns the number of schedulers in the VM.</p>  </section>
+</section>
+<section class="detail" id="schedulers_online/0">
+  <div class="detail-header">
+    <a href="#schedulers_online/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">schedulers_online()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L1006" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>schedulers_online() :: <a href="typespecs.html#basic-types">pos_integer</a>()</pre>
+      </div>
+
+<p>Returns the number of schedulers online in the VM.</p>  </section>
+</section>
+<section class="detail" id="stacktrace/0">
+  <div class="detail-header">
+    <a href="#stacktrace/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stacktrace()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L592" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Deprecated mechanism to retrieve the last exception stacktrace.</p><p>Accessing the stacktrace outside of a rescue/catch is deprecated.
+If you want to support only Elixir v1.7+, you must access
+<code class="inline">__STACKTRACE__/0</code> inside a rescue/catch. If you want to support
+earlier Elixir versions, move <a href="#stacktrace/0"><code class="inline">System.stacktrace/0</code></a> inside a rescue/catch.</p><p>Note that the Erlang VM (and therefore this function) does not
+return the current stacktrace but rather the stacktrace of the
+latest exception. To retrieve the stacktrace of the current process,
+use <code class="inline">Process.info(self(), :current_stacktrace)</code> instead.</p>  </section>
+</section>
+<section class="detail" id="stop/1">
+    <span id="stop/0"></span>
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop(status \\ 0)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L691" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.5.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>stop(<a href="typespecs.html#basic-types">non_neg_integer</a>() | <a href="typespecs.html#built-in-types">binary</a>()) :: <a href="typespecs.html#built-in-types">no_return</a>()</pre>
+      </div>
+
+<p>Carefully stops the Erlang runtime system.</p><p>All applications are taken down smoothly, all code is unloaded, and all ports
+are closed before the system terminates by calling <a href="#halt/1"><code class="inline">halt/1</code></a>.</p><p><code class="inline">status</code> must be a non-negative integer value which is returned by the
+runtime system to the operating system.</p><p>Note that on many platforms, only the status codes 0-255 are supported
+by the operating system.</p><h2 id="stop/1-examples" class="section-heading">
+  <a href="#stop/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">System</span><span class="o">.</span><span class="n">stop</span><span class="p" data-group-id="6156432155-1">(</span><span class="mi">0</span><span class="p" data-group-id="6156432155-1">)</span><span class="w">
+</span><span class="nc">System</span><span class="o">.</span><span class="n">stop</span><span class="p" data-group-id="6156432155-2">(</span><span class="mi">1</span><span class="p" data-group-id="6156432155-2">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="system_time/0">
+  <div class="detail-header">
+    <a href="#system_time/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">system_time()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L893" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>system_time() :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current system time in the <code class="inline">:native</code> time unit.</p><p>It is the VM view of the <a href="#os_time/0"><code class="inline">os_time/0</code></a>. They may not match in
+case of time warps although the VM works towards aligning
+them. This time is not monotonic.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="system_time/1">
+  <div class="detail-header">
+    <a href="#system_time/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">system_time(unit)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L905" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>system_time(<a href="#t:time_unit/0">time_unit</a>()) :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current system time in the given time unit.</p><p>It is the VM view of the <a href="#os_time/0"><code class="inline">os_time/0</code></a>. They may not match in
+case of time warps although the VM works towards aligning
+them. This time is not monotonic.</p>  </section>
+</section>
+<section class="detail" id="time_offset/0">
+  <div class="detail-header">
+    <a href="#time_offset/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">time_offset()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L942" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>time_offset() :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current time offset between the Erlang VM monotonic
+time and the Erlang VM system time.</p><p>The result is returned in the <code class="inline">:native</code> time unit.</p><p>See <a href="#time_offset/1"><code class="inline">time_offset/1</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="time_offset/1">
+  <div class="detail-header">
+    <a href="#time_offset/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">time_offset(unit)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L956" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>time_offset(<a href="#t:time_unit/0">time_unit</a>()) :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Returns the current time offset between the Erlang VM monotonic
+time and the Erlang VM system time.</p><p>The result is returned in the given time unit <code class="inline">unit</code>. The returned
+offset, added to an Erlang monotonic time (for instance, one obtained with
+<a href="#monotonic_time/1"><code class="inline">monotonic_time/1</code></a>), gives the Erlang system time that corresponds
+to that monotonic time.</p>  </section>
+</section>
+<section class="detail" id="tmp_dir/0">
+  <div class="detail-header">
+    <a href="#tmp_dir/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tmp_dir()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L346" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>tmp_dir() :: <a href="String.html#t:t/0">String.t</a>() | nil</pre>
+      </div>
+
+<p>Writable temporary directory.</p><p>Returns a writable temporary directory.
+Searches for directories in the following order:</p><ol><li>the directory named by the TMPDIR environment variable</li><li>the directory named by the TEMP environment variable</li><li>the directory named by the TMP environment variable</li><li><code class="inline">C:\TMP</code> on Windows or <code class="inline">/tmp</code> on Unix-like operating systems</li><li>as a last resort, the current working directory</li></ol><p>Returns <code class="inline">nil</code> if none of the above are writable.</p>  </section>
+</section>
+<section class="detail" id="tmp_dir!/0">
+  <div class="detail-header">
+    <a href="#tmp_dir!/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tmp_dir!()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L365" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>tmp_dir!() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Writable temporary directory, exception on error.</p><p>Same as <a href="#tmp_dir/0"><code class="inline">tmp_dir/0</code></a> but raises <a href="RuntimeError.html"><code class="inline">RuntimeError</code></a>
+instead of returning <code class="inline">nil</code> if no temp dir is set.</p>  </section>
+</section>
+<section class="detail" id="unique_integer/1">
+    <span id="unique_integer/0"></span>
+  <div class="detail-header">
+    <a href="#unique_integer/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unique_integer(modifiers \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L1034" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unique_integer([:positive | :monotonic]) :: <a href="typespecs.html#basic-types">integer</a>()</pre>
+      </div>
+
+<p>Generates and returns an integer that is unique in the current runtime
+instance.</p><p>&quot;Unique&quot; means that this function, called with the same list of <code class="inline">modifiers</code>,
+will never return the same integer more than once on the current runtime
+instance.</p><p>If <code class="inline">modifiers</code> is <code class="inline">[]</code>, then a unique integer (that can be positive or negative) is returned.
+Other modifiers can be passed to change the properties of the returned integer:</p><ul><li><code class="inline">:positive</code> - the returned integer is guaranteed to be positive.</li><li><code class="inline">:monotonic</code> - the returned integer is monotonically increasing. This
+means that, on the same runtime instance (but even on different
+processes), integers returned using the <code class="inline">:monotonic</code> modifier will always
+be strictly less than integers returned by successive calls with the
+<code class="inline">:monotonic</code> modifier.</li></ul><p>All modifiers listed above can be combined; repeated modifiers in <code class="inline">modifiers</code>
+will be ignored.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="user_home/0">
+  <div class="detail-header">
+    <a href="#user_home/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">user_home()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L314" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>user_home() :: <a href="String.html#t:t/0">String.t</a>() | nil</pre>
+      </div>
+
+<p>User home directory.</p><p>Returns the user home directory (platform independent).</p>  </section>
+</section>
+<section class="detail" id="user_home!/0">
+  <div class="detail-header">
+    <a href="#user_home!/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">user_home!()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L327" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>user_home!() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>User home directory, exception on error.</p><p>Same as <a href="#user_home/0"><code class="inline">user_home/0</code></a> but raises <a href="RuntimeError.html"><code class="inline">RuntimeError</code></a>
+instead of returning <code class="inline">nil</code> if no user home is set.</p>  </section>
+</section>
+<section class="detail" id="version/0">
+  <div class="detail-header">
+    <a href="#version/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">version()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/system.ex#L176" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>version() :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Elixir version information.</p><p>Returns Elixir's version as binary.</p>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="ExUnit v1.10.3">
+    <title>ExUnit.Callbacks — ExUnit v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/ex_unit/v1.10/ /ExUnit.Callbacks.html" />
+    <script src="dist/sidebar_items-1dc387aa8c.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+ExUnit      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">ExUnit v1.10.3</small>
+ExUnit.Callbacks          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Defines ExUnit callbacks.</p><p>This module defines the <a href="#setup/1"><code class="inline">setup/1</code></a>, <a href="#setup/2"><code class="inline">setup/2</code></a>, <a href="#setup_all/1"><code class="inline">setup_all/1</code></a>, and
+<a href="#setup_all/2"><code class="inline">setup_all/2</code></a> callbacks, as well as the <a href="#on_exit/2"><code class="inline">on_exit/2</code></a>, <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a>
+and <a href="#stop_supervised/1"><code class="inline">stop_supervised/1</code></a> functions.</p><p>The setup callbacks may be used to define <a href="https://en.wikipedia.org/wiki/Test_fixture#Software">test fixtures</a>
+and run any initialization code which help bring the system into a known
+state. They are defined via macros and each one can optionally receive a map
+with test state and metadata, usually referred to as the <code class="inline">context</code>.
+Optionally, the context to be used in the tests can be extended by the
+setup callbacks by returning a properly structured value (see below).</p><p>The <code class="inline">setup_all</code> callbacks are invoked only once per module, before any
+test is run. All <code class="inline">setup</code> callbacks are run before each test. No callback
+is run if the test case has no tests or all tests have been filtered out.</p><p><code class="inline">setup</code> and <code class="inline">setup_all</code> callbacks can be defined by a block, by passing
+an atom naming a one-arity function, or by passing a list of such
+atoms. Both can opt to receive the current context by specifying it
+as parameter if defined by a block. Functions used to define a test
+setup must accept the context as single argument.</p><p>A test module can define multiple <code class="inline">setup</code> and <code class="inline">setup_all</code> callbacks,
+and they are invoked in order of appearance.</p><p><a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a> is used to start processes under a supervisor. The
+supervisor is linked to the current test process. The supervisor as well
+as all child processes are guaranteed to terminate before any <a href="#on_exit/2"><code class="inline">on_exit/2</code></a>
+callback runs.</p><p><a href="#on_exit/2"><code class="inline">on_exit/2</code></a> callbacks are registered on demand, usually to undo an action
+performed by a setup callback. <a href="#on_exit/2"><code class="inline">on_exit/2</code></a> may also take a reference,
+allowing the callback to be overridden in the future. A registered <a href="#on_exit/2"><code class="inline">on_exit/2</code></a>
+callback will always run, while failures in <code class="inline">setup</code> and <code class="inline">setup_all</code> will stop
+all remaining setup callbacks from executing.</p><p>Finally, <code class="inline">setup_all</code> callbacks run in a separate process per module, while
+all <code class="inline">setup</code> callbacks run in the same process as the test itself. <a href="#on_exit/2"><code class="inline">on_exit/2</code></a>
+callbacks always run in a separate process, as implied by their name. The
+test process always exits with reason <code class="inline">:shutdown</code>, which means any process
+linked to the test process will also exit, although asynchronously. Therefore
+it is preferred to use <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a> to guarantee synchronous termination.</p><p>Here is a rundown of the life-cycle of the test process:</p><ol><li>the test process is spawned</li><li>it runs <a href="#setup/2"><code class="inline">setup/2</code></a> callbacks</li><li>it runs the test itself</li><li>it stops all supervised processes</li><li>the test process exits with reason <code class="inline">:shutdown</code></li><li><a href="#on_exit/2"><code class="inline">on_exit/2</code></a> callbacks are executed in a separate process</li></ol><h2 id="module-context" class="section-heading">
+  <a href="#module-context" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Context
+</h2>
+<p>If <code class="inline">setup_all</code> or <code class="inline">setup</code> return a keyword list, a map, or a tuple in the shape
+of <code class="inline">{:ok, keyword() | map()}</code>, the keyword list or map will be merged into the
+current context and will be available in all subsequent <code class="inline">setup_all</code>,
+<code class="inline">setup</code>, and the <code class="inline">test</code> itself.</p><p>Returning <code class="inline">:ok</code> leaves the context unchanged (in <code class="inline">setup</code> and <code class="inline">setup_all</code>
+callbacks).</p><p>Returning anything else from <code class="inline">setup_all</code> will force all tests to fail,
+while a bad response from <code class="inline">setup</code> causes the current test to fail.</p><h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">AssertionTest</span><span class="w"> </span><span class="k" data-group-id="9096000567-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="p">,</span><span class="w"> </span><span class="ss">async</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+
+  </span><span class="c1"># &quot;setup_all&quot; is called once per module before any test runs</span><span class="w">
+  </span><span class="n">setup_all</span><span class="w"> </span><span class="k" data-group-id="9096000567-2">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="p" data-group-id="9096000567-3">(</span><span class="s">&quot;Starting AssertionTest&quot;</span><span class="p" data-group-id="9096000567-3">)</span><span class="w">
+
+    </span><span class="c1"># Context is not updated here</span><span class="w">
+    </span><span class="ss">:ok</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-2">end</span><span class="w">
+
+  </span><span class="c1"># &quot;setup&quot; is called before each test</span><span class="w">
+  </span><span class="n">setup</span><span class="w"> </span><span class="k" data-group-id="9096000567-4">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="p" data-group-id="9096000567-5">(</span><span class="s">&quot;This is a setup callback for </span><span class="si" data-group-id="9096000567-6">#{</span><span class="n">inspect</span><span class="p" data-group-id="9096000567-7">(</span><span class="n">self</span><span class="p" data-group-id="9096000567-8">(</span><span class="p" data-group-id="9096000567-8">)</span><span class="p" data-group-id="9096000567-7">)</span><span class="si" data-group-id="9096000567-6">}</span><span class="s">&quot;</span><span class="p" data-group-id="9096000567-5">)</span><span class="w">
+
+    </span><span class="n">on_exit</span><span class="p" data-group-id="9096000567-9">(</span><span class="k" data-group-id="9096000567-10">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+      </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="p" data-group-id="9096000567-11">(</span><span class="s">&quot;This is invoked once the test is done. Process: </span><span class="si" data-group-id="9096000567-12">#{</span><span class="n">inspect</span><span class="p" data-group-id="9096000567-13">(</span><span class="n">self</span><span class="p" data-group-id="9096000567-14">(</span><span class="p" data-group-id="9096000567-14">)</span><span class="p" data-group-id="9096000567-13">)</span><span class="si" data-group-id="9096000567-12">}</span><span class="s">&quot;</span><span class="p" data-group-id="9096000567-11">)</span><span class="w">
+    </span><span class="k" data-group-id="9096000567-10">end</span><span class="p" data-group-id="9096000567-9">)</span><span class="w">
+
+    </span><span class="c1"># Returns extra metadata to be merged into context.</span><span class="w">
+    </span><span class="c1"># Any of the following would also work:</span><span class="w">
+    </span><span class="c1">#</span><span class="w">
+    </span><span class="c1">#     {:ok, %{hello: &quot;world&quot;}}</span><span class="w">
+    </span><span class="c1">#     {:ok, [hello: &quot;world&quot;]}</span><span class="w">
+    </span><span class="c1">#     %{hello: &quot;world&quot;}</span><span class="w">
+    </span><span class="c1">#</span><span class="w">
+    </span><span class="p" data-group-id="9096000567-15">[</span><span class="ss">hello</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="p" data-group-id="9096000567-15">]</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-4">end</span><span class="w">
+
+  </span><span class="c1"># Same as above, but receives the context as argument</span><span class="w">
+  </span><span class="n">setup</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="9096000567-16">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="p" data-group-id="9096000567-17">(</span><span class="s">&quot;Setting up: </span><span class="si" data-group-id="9096000567-18">#{</span><span class="n">context</span><span class="o">.</span><span class="n">test</span><span class="si" data-group-id="9096000567-18">}</span><span class="s">&quot;</span><span class="p" data-group-id="9096000567-17">)</span><span class="w">
+
+    </span><span class="c1"># We can simply return :ok when we don&#39;t want add any extra metadata</span><span class="w">
+    </span><span class="ss">:ok</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-16">end</span><span class="w">
+
+  </span><span class="c1"># Setups can also invoke a local or imported function that returns a context</span><span class="w">
+  </span><span class="n">setup</span><span class="w"> </span><span class="ss">:invoke_local_or_imported_function</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;always pass&quot;</span><span class="w"> </span><span class="k" data-group-id="9096000567-19">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="no">true</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-19">end</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;uses metadata from setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="9096000567-20">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="9096000567-21">[</span><span class="ss">:hello</span><span class="p" data-group-id="9096000567-21">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;world&quot;</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="9096000567-22">[</span><span class="ss">:from_named_setup</span><span class="p" data-group-id="9096000567-22">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="no">true</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-20">end</span><span class="w">
+
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">invoke_local_or_imported_function</span><span class="p" data-group-id="9096000567-23">(</span><span class="n">context</span><span class="p" data-group-id="9096000567-23">)</span><span class="w"> </span><span class="k" data-group-id="9096000567-24">do</span><span class="w">
+    </span><span class="p" data-group-id="9096000567-25">[</span><span class="ss">from_named_setup</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="9096000567-25">]</span><span class="w">
+  </span><span class="k" data-group-id="9096000567-24">end</span><span class="w">
+</span><span class="k" data-group-id="9096000567-1">end</span></code></pre><p>It is also common to define your setup as a series of functions,
+which are put together by calling <code class="inline">setup</code> or <code class="inline">setup_all</code> with a
+list of atoms. Each of these functions receive the context and can
+return any of the values allowed in <code class="inline">setup</code> blocks:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">ExampleContextTest</span><span class="w"> </span><span class="k" data-group-id="5149485279-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="n">setup</span><span class="w"> </span><span class="p" data-group-id="5149485279-2">[</span><span class="ss">:step1</span><span class="p">,</span><span class="w"> </span><span class="ss">:step2</span><span class="p">,</span><span class="w"> </span><span class="ss">:step3</span><span class="p" data-group-id="5149485279-2">]</span><span class="w">
+
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">step1</span><span class="p" data-group-id="5149485279-3">(</span><span class="c">_context</span><span class="p" data-group-id="5149485279-3">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5149485279-4">[</span><span class="ss">step_one</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="5149485279-4">]</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">step2</span><span class="p" data-group-id="5149485279-5">(</span><span class="c">_context</span><span class="p" data-group-id="5149485279-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5149485279-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">step_two</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="5149485279-6">}</span><span class="w"> </span><span class="c1"># return values with shape of {:ok, keyword() | map()} allowed</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">step3</span><span class="p" data-group-id="5149485279-7">(</span><span class="c">_context</span><span class="p" data-group-id="5149485279-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">  </span><span class="c1"># Context not modified</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;context was modified&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="5149485279-8">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="5149485279-9">[</span><span class="ss">:step_one</span><span class="p" data-group-id="5149485279-9">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="no">true</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="5149485279-10">[</span><span class="ss">:step_two</span><span class="p" data-group-id="5149485279-10">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="no">true</span><span class="w">
+  </span><span class="k" data-group-id="5149485279-8">end</span><span class="w">
+</span><span class="k" data-group-id="5149485279-1">end</span></code></pre><p>Finally, as discussed in the <a href="ExUnit.Case.html"><code class="inline">ExUnit.Case</code></a> documentation, remember
+that the initial context metadata can also be set via <code class="inline">@tag</code>s, which
+can then be accessed in the <code class="inline">setup</code> block:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">ExampleTagModificationTest</span><span class="w"> </span><span class="k" data-group-id="1706604482-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="n">setup</span><span class="w"> </span><span class="p" data-group-id="1706604482-2">%{</span><span class="ss">login_as</span><span class="p">:</span><span class="w"> </span><span class="n">username</span><span class="p" data-group-id="1706604482-2">}</span><span class="w"> </span><span class="k" data-group-id="1706604482-3">do</span><span class="w">
+    </span><span class="p" data-group-id="1706604482-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">current_user</span><span class="p">:</span><span class="w"> </span><span class="n">username</span><span class="p" data-group-id="1706604482-4">}</span><span class="w">
+  </span><span class="k" data-group-id="1706604482-3">end</span><span class="w">
+
+  </span><span class="na">@tag</span><span class="w"> </span><span class="ss">login_as</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;max&quot;</span><span class="w">
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;tags modify context&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="1706604482-5">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="1706604482-6">[</span><span class="ss">:login_as</span><span class="p" data-group-id="1706604482-6">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;max&quot;</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="1706604482-7">[</span><span class="ss">:current_user</span><span class="p" data-group-id="1706604482-7">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;max&quot;</span><span class="w">
+  </span><span class="k" data-group-id="1706604482-5">end</span><span class="w">
+</span><span class="k" data-group-id="1706604482-1">end</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#on_exit/2">on_exit(name_or_ref \\ make_ref(), callback)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a callback that runs once the test exits.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setup/1">setup(block)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a callback to be run before each test in a case.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setup/2">setup(context, block)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a callback to be run before each test in a case.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setup_all/1">setup_all(block)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a callback to be run before all tests in a case.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setup_all/2">setup_all(context, block)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a callback to be run before all tests in a case.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_supervised/2">start_supervised(child_spec_or_module, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts a child process under the test supervisor.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_supervised!/2">start_supervised!(child_spec_or_module, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Same as <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a> but returns the PID on success and raises if
+not started properly.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop_supervised/1">stop_supervised(id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Stops a child process started via <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop_supervised!/1">stop_supervised!(id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Same as <a href="#stop_supervised/1"><code class="inline">stop_supervised/1</code></a> but raises if it cannot be stopped.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="on_exit/2">
+    <span id="on_exit/1"></span>
+  <div class="detail-header">
+    <a href="#on_exit/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">on_exit(name_or_ref \\ make_ref(), callback)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L335" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>on_exit(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(), (() -> <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())) :: :ok</pre>
+      </div>
+
+<p>Defines a callback that runs once the test exits.</p><p><code class="inline">callback</code> is a function that receives no arguments and
+runs in a separate process than the caller.</p><p><a href="#on_exit/2"><code class="inline">on_exit/2</code></a> is usually called from <code class="inline">setup</code> and <code class="inline">setup_all</code>
+callbacks, often to undo the action performed during the setup.
+However, <a href="#on_exit/2"><code class="inline">on_exit/2</code></a> may also be called dynamically, where a
+reference can be used to guarantee the callback will be invoked
+only once.</p>  </section>
+</section>
+<section class="detail" id="setup/1">
+  <div class="detail-header">
+    <a href="#setup/1" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">setup(block)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L204" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a callback to be run before each test in a case.</p><p>Accepts a block or the name of a one-arity function in the form of an atom,
+or a list of such atoms.</p><p>Can return values to be merged into the context, to set up the state for
+tests. For more details, see the &quot;Context&quot; section shown above.</p><h2 id="setup/1-examples" class="section-heading">
+  <a href="#setup/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">clean_up_tmp_directory</span><span class="p" data-group-id="4279561363-1">(</span><span class="n">context</span><span class="p" data-group-id="4279561363-1">)</span><span class="w"> </span><span class="k" data-group-id="4279561363-2">do</span><span class="w">
+  </span><span class="c1"># perform setup</span><span class="w">
+  </span><span class="ss">:ok</span><span class="w">
+</span><span class="k" data-group-id="4279561363-2">end</span><span class="w">
+
+</span><span class="n">setup</span><span class="w"> </span><span class="ss">:clean_up_tmp_directory</span><span class="w">
+
+</span><span class="n">setup</span><span class="w"> </span><span class="k" data-group-id="4279561363-3">do</span><span class="w">
+  </span><span class="p" data-group-id="4279561363-4">[</span><span class="ss">conn</span><span class="p">:</span><span class="w"> </span><span class="nc">Plug.Conn</span><span class="o">.</span><span class="n">build_conn</span><span class="p" data-group-id="4279561363-5">(</span><span class="p" data-group-id="4279561363-5">)</span><span class="p" data-group-id="4279561363-4">]</span><span class="w">
+</span><span class="k" data-group-id="4279561363-3">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="setup/2">
+  <div class="detail-header">
+    <a href="#setup/2" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">setup(context, block)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L231" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a callback to be run before each test in a case.</p><p>Accepts a block or the name of a one-arity function in the form of an atom,
+or a list of such atoms.</p><p>Can return values to be merged into the <code class="inline">context</code>, to set up the state for
+tests. For more details, see the &quot;Context&quot; section shown above.</p><h2 id="setup/2-examples" class="section-heading">
+  <a href="#setup/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">setup</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="6259290934-1">do</span><span class="w">
+  </span><span class="p" data-group-id="6259290934-2">[</span><span class="ss">conn</span><span class="p">:</span><span class="w"> </span><span class="nc">Plug.Conn</span><span class="o">.</span><span class="n">build_conn</span><span class="p" data-group-id="6259290934-3">(</span><span class="p" data-group-id="6259290934-3">)</span><span class="p" data-group-id="6259290934-2">]</span><span class="w">
+</span><span class="k" data-group-id="6259290934-1">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="setup_all/1">
+  <div class="detail-header">
+    <a href="#setup_all/1" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">setup_all(block)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L278" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a callback to be run before all tests in a case.</p><p>Accepts a block or the name of a one-arity function in the form of an atom,
+or a list of such atoms.</p><p>Can return values to be merged into the <code class="inline">context</code>, to set up the state for
+tests. For more details, see the &quot;Context&quot; section shown above.</p><h2 id="setup_all/1-examples" class="section-heading">
+  <a href="#setup_all/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># one-arity function name</span><span class="w">
+</span><span class="n">setup_all</span><span class="w"> </span><span class="ss">:clean_up_tmp_directory</span><span class="w">
+
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">clean_up_tmp_directory</span><span class="p" data-group-id="4506157638-1">(</span><span class="c">_context</span><span class="p" data-group-id="4506157638-1">)</span><span class="w"> </span><span class="k" data-group-id="4506157638-2">do</span><span class="w">
+  </span><span class="c1"># perform setup</span><span class="w">
+  </span><span class="ss">:ok</span><span class="w">
+</span><span class="k" data-group-id="4506157638-2">end</span><span class="w">
+
+</span><span class="c1"># block</span><span class="w">
+</span><span class="n">setup_all</span><span class="w"> </span><span class="k" data-group-id="4506157638-3">do</span><span class="w">
+  </span><span class="p" data-group-id="4506157638-4">[</span><span class="ss">conn</span><span class="p">:</span><span class="w"> </span><span class="nc">Plug.Conn</span><span class="o">.</span><span class="n">build_conn</span><span class="p" data-group-id="4506157638-5">(</span><span class="p" data-group-id="4506157638-5">)</span><span class="p" data-group-id="4506157638-4">]</span><span class="w">
+</span><span class="k" data-group-id="4506157638-3">end</span></code></pre><p><code class="inline">setup_all</code> can return a keyword list, a map, or a tuple in the shape
+of <code class="inline">{:ok, keyword() | map()}</code>, the keyword list or map will be merged
+into the current context and will be available in all subsequent <code class="inline">setup_all</code>,
+<code class="inline">setup</code>, and the <code class="inline">test</code> itself. For instance, the <code class="inline">conn</code> from the previous
+example can be accessed as:</p><pre><code class="nohighlight makeup elixir"><span class="n">test</span><span class="w"> </span><span class="s">&quot;fetches current users&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2120466986-1">%{</span><span class="ss">conn</span><span class="p">:</span><span class="w"> </span><span class="n">conn</span><span class="p" data-group-id="2120466986-1">}</span><span class="w"> </span><span class="k" data-group-id="2120466986-2">do</span><span class="w">
+  </span><span class="c1"># ...</span><span class="w">
+</span><span class="k" data-group-id="2120466986-2">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="setup_all/2">
+  <div class="detail-header">
+    <a href="#setup_all/2" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">setup_all(context, block)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L309" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a callback to be run before all tests in a case.</p><p>Accepts a block or the name of a one-arity function in the form of an atom,
+or a list of such atoms.</p><p>Can return values to be merged into the <code class="inline">context</code>, to set up the state for
+tests. For more details, see the &quot;Context&quot; section shown above.</p><h2 id="setup_all/2-examples" class="section-heading">
+  <a href="#setup_all/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">setup_all</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="9971201440-1">do</span><span class="w">
+  </span><span class="p" data-group-id="9971201440-2">[</span><span class="ss">conn</span><span class="p">:</span><span class="w"> </span><span class="nc">Plug.Conn</span><span class="o">.</span><span class="n">build_conn</span><span class="p" data-group-id="9971201440-3">(</span><span class="p" data-group-id="9971201440-3">)</span><span class="p" data-group-id="9971201440-2">]</span><span class="w">
+</span><span class="k" data-group-id="9971201440-1">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="start_supervised/2">
+    <span id="start_supervised/1"></span>
+  <div class="detail-header">
+    <a href="#start_supervised/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_supervised(child_spec_or_module, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L383" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.5.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>start_supervised(
+  <a href="https://hexdocs.pm/elixir/Supervisor.html#t:child_spec/0">Supervisor.child_spec</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>() | {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
+) :: <a href="https://hexdocs.pm/elixir/Supervisor.html#t:on_start_child/0">Supervisor.on_start_child</a>()</pre>
+      </div>
+
+<p>Starts a child process under the test supervisor.</p><p>It expects a child specification or a module, similar to the ones
+given to <a href="https://hexdocs.pm/elixir/Supervisor.html#start_link/2"><code class="inline">Supervisor.start_link/2</code></a>. For example, if your application
+starts a supervision tree by running:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Supervisor</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="7650828945-1">(</span><span class="p" data-group-id="7650828945-2">[</span><span class="nc">MyServer</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7650828945-3">{</span><span class="nc">OtherSupervisor</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="7650828945-3">}</span><span class="p" data-group-id="7650828945-2">]</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="7650828945-1">)</span></code></pre><p>You can start those processes under test in isolation by running:</p><pre><code class="nohighlight makeup elixir"><span class="n">start_supervised</span><span class="p" data-group-id="1190387079-1">(</span><span class="nc">MyServer</span><span class="p" data-group-id="1190387079-1">)</span><span class="w">
+</span><span class="n">start_supervised</span><span class="p" data-group-id="1190387079-2">(</span><span class="p" data-group-id="1190387079-3">{</span><span class="nc">OtherSupervisor</span><span class="p">,</span><span class="w"> </span><span class="ss">:initial_value</span><span class="p" data-group-id="1190387079-3">}</span><span class="p" data-group-id="1190387079-2">)</span></code></pre><p>A keyword list can also be given if there is a need to change
+the child specification for the given child process:</p><pre><code class="nohighlight makeup elixir"><span class="n">start_supervised</span><span class="p" data-group-id="1288200279-1">(</span><span class="p" data-group-id="1288200279-2">{</span><span class="nc">MyServer</span><span class="p">,</span><span class="w"> </span><span class="ss">:initial_value</span><span class="p" data-group-id="1288200279-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">restart</span><span class="p">:</span><span class="w"> </span><span class="ss">:temporary</span><span class="p" data-group-id="1288200279-1">)</span></code></pre><p>See the <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a> module for a discussion on child specifications
+and the available specification keys.</p><p>The advantage of starting a process under the test supervisor is that
+it is guaranteed to exit before the next test starts. Therefore, you
+don't need to remove the process at the end of your tests via
+<a href="#stop_supervised/1"><code class="inline">stop_supervised/1</code></a>. You only need to use <a href="#stop_supervised/1"><code class="inline">stop_supervised/1</code></a> if you
+want to remove a process from the supervision tree in the middle of a
+test, as simply shutting down the process would cause it to be restarted
+according to its <code class="inline">:restart</code> value.</p><p>This function returns <code class="inline">{:ok, pid}</code> in case of success, otherwise it
+returns <code class="inline">{:error, reason}</code>.</p>  </section>
+</section>
+<section class="detail" id="start_supervised!/2">
+    <span id="start_supervised!/1"></span>
+  <div class="detail-header">
+    <a href="#start_supervised!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_supervised!(child_spec_or_module, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L415" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>start_supervised!(
+  <a href="https://hexdocs.pm/elixir/Supervisor.html#t:child_spec/0">Supervisor.child_spec</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>() | {<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()},
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
+) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pid</a>()</pre>
+      </div>
+
+<p>Same as <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a> but returns the PID on success and raises if
+not started properly.</p>  </section>
+</section>
+<section class="detail" id="stop_supervised/1">
+  <div class="detail-header">
+    <a href="#stop_supervised/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop_supervised(id)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L451" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.5.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>stop_supervised(id :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) :: :ok | {:error, :not_found}</pre>
+      </div>
+
+<p>Stops a child process started via <a href="#start_supervised/2"><code class="inline">start_supervised/2</code></a>.</p><p>This function expects the <code class="inline">id</code> in the child specification.
+For example:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="6554984078-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="6554984078-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start_supervised</span><span class="p" data-group-id="6554984078-2">(</span><span class="nc">MyServer</span><span class="p" data-group-id="6554984078-2">)</span><span class="w">
+</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stop_supervised</span><span class="p" data-group-id="6554984078-3">(</span><span class="nc">MyServer</span><span class="p" data-group-id="6554984078-3">)</span></code></pre><p>It returns <code class="inline">:ok</code> if there is a supervised process with such
+<code class="inline">id</code>, <code class="inline">{:error, :not_found}</code> otherwise.</p>  </section>
+</section>
+<section class="detail" id="stop_supervised!/1">
+  <div class="detail-header">
+    <a href="#stop_supervised!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop_supervised!(id)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/callbacks.ex#L471" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>stop_supervised!(id :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()) :: :ok</pre>
+      </div>
+
+<p>Same as <a href="#stop_supervised/1"><code class="inline">stop_supervised/1</code></a> but raises if it cannot be stopped.</p>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

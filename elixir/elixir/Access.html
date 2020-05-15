@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Access — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Access.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Access <small>behaviour</small>          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Key-based access to data structures.</p><p>The <a href="#content"><code class="inline">Access</code></a> module defines a behaviour for dynamically accessing
+keys of any type in a data structure via the <code class="inline">data[key]</code> syntax.</p><p><a href="#content"><code class="inline">Access</code></a> supports keyword lists (<a href="Keyword.html"><code class="inline">Keyword</code></a>) and maps (<a href="Map.html"><code class="inline">Map</code></a>) out
+of the box. The key can be of any type and it returns <code class="inline">nil</code> if
+the key does not exist:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">keywords</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9625661883-1">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="9625661883-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">keywords</span><span class="p" data-group-id="9625661883-2">[</span><span class="ss">:a</span><span class="p" data-group-id="9625661883-2">]</span><span class="w">
+</span><span class="mi">1</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">keywords</span><span class="p" data-group-id="9625661883-3">[</span><span class="ss">:c</span><span class="p" data-group-id="9625661883-3">]</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9625661883-4">%{</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="9625661883-4">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">map</span><span class="p" data-group-id="9625661883-5">[</span><span class="ss">:a</span><span class="p" data-group-id="9625661883-5">]</span><span class="w">
+</span><span class="mi">1</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">star_ratings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9625661883-6">%{</span><span class="mf">1.0</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="s">&quot;★&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="s">&quot;★☆&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="s">&quot;★★&quot;</span><span class="p" data-group-id="9625661883-6">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">star_ratings</span><span class="p" data-group-id="9625661883-7">[</span><span class="mf">1.5</span><span class="p" data-group-id="9625661883-7">]</span><span class="w">
+</span><span class="s">&quot;★☆&quot;</span></code></pre><p>This syntax is very convenient as it can be nested arbitrarily:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">keywords</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4597648222-1">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4597648222-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">keywords</span><span class="p" data-group-id="4597648222-2">[</span><span class="ss">:c</span><span class="p" data-group-id="4597648222-2">]</span><span class="p" data-group-id="4597648222-3">[</span><span class="ss">:unknown</span><span class="p" data-group-id="4597648222-3">]</span><span class="w">
+</span><span class="no">nil</span></code></pre><p>This works because accessing anything on a <code class="inline">nil</code> value, returns
+<code class="inline">nil</code> itself:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="no">nil</span><span class="p" data-group-id="2702022690-1">[</span><span class="ss">:a</span><span class="p" data-group-id="2702022690-1">]</span><span class="w">
+</span><span class="no">nil</span></code></pre><p>The access syntax can also be used with the <a href="Kernel.html#put_in/2"><code class="inline">Kernel.put_in/2</code></a>,
+<a href="Kernel.html#update_in/2"><code class="inline">Kernel.update_in/2</code></a> and <a href="Kernel.html#get_and_update_in/2"><code class="inline">Kernel.get_and_update_in/2</code></a> macros
+to allow values to be set in nested data structures:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1666197841-1">%{</span><span class="s">&quot;john&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1666197841-2">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">27</span><span class="p" data-group-id="1666197841-2">}</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1666197841-3">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">23</span><span class="p" data-group-id="1666197841-3">}</span><span class="p" data-group-id="1666197841-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">put_in</span><span class="p" data-group-id="1666197841-4">(</span><span class="n">users</span><span class="p" data-group-id="1666197841-5">[</span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="1666197841-5">]</span><span class="p" data-group-id="1666197841-6">[</span><span class="ss">:age</span><span class="p" data-group-id="1666197841-6">]</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p" data-group-id="1666197841-4">)</span><span class="w">
+</span><span class="p" data-group-id="1666197841-7">%{</span><span class="s">&quot;john&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1666197841-8">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p" data-group-id="1666197841-8">}</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1666197841-9">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">23</span><span class="p" data-group-id="1666197841-9">}</span><span class="p" data-group-id="1666197841-7">}</span></code></pre><blockquote><p>Attention! While the access syntax is allowed in maps via
+<code class="inline">map[key]</code>, if your map is made of predefined atom keys,
+you should prefer to access those atom keys with <code class="inline">map.key</code>
+instead of <code class="inline">map[key]</code>, as <code class="inline">map.key</code> will raise if the key
+is missing. This is important because, if a map has a predefined
+set of keys and a key is missing, it is most likely a bug
+in your software or a typo on the key name. For this reason,
+because structs are predefined in nature, they only allow
+the <code class="inline">struct.key</code> syntax and they do not allow the <code class="inline">struct[key]</code>
+access syntax. See the <a href="Map.html"><code class="inline">Map</code></a> module for more information.</p></blockquote><h2 id="module-nested-data-structures" class="section-heading">
+  <a href="#module-nested-data-structures" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Nested data structures
+</h2>
+<p>Both key-based access syntaxes can be used with the nested update
+functions and macros in <a href="Kernel.html"><code class="inline">Kernel</code></a>, such as <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#put_in/3"><code class="inline">Kernel.put_in/3</code></a>, <a href="Kernel.html#update_in/3"><code class="inline">Kernel.update_in/3</code></a>, <a href="Kernel.html#pop_in/2"><code class="inline">Kernel.pop_in/2</code></a>, and
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>.</p><p>For example, to update a map inside another map:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4227573688-1">%{</span><span class="s">&quot;john&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4227573688-2">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">27</span><span class="p" data-group-id="4227573688-2">}</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4227573688-3">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">23</span><span class="p" data-group-id="4227573688-3">}</span><span class="p" data-group-id="4227573688-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">put_in</span><span class="p" data-group-id="4227573688-4">(</span><span class="n">users</span><span class="p" data-group-id="4227573688-5">[</span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="4227573688-5">]</span><span class="o">.</span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p" data-group-id="4227573688-4">)</span><span class="w">
+</span><span class="p" data-group-id="4227573688-6">%{</span><span class="s">&quot;john&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4227573688-7">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p" data-group-id="4227573688-7">}</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="4227573688-8">%{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">23</span><span class="p" data-group-id="4227573688-8">}</span><span class="p" data-group-id="4227573688-6">}</span></code></pre><p>This module provides convenience functions for traversing other
+structures, like tuples and lists. These functions can be used
+in all the <a href="#content"><code class="inline">Access</code></a>-related functions and macros in <a href="Kernel.html"><code class="inline">Kernel</code></a>.</p><p>For instance, given a user map with the <code class="inline">:name</code> and <code class="inline">:languages</code>
+keys, here is how to deeply traverse the map and convert all
+language names to uppercase:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">languages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9581233473-1">[</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="9581233473-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:functional</span><span class="p" data-group-id="9581233473-2">}</span><span class="p">,</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="9581233473-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:procedural</span><span class="p" data-group-id="9581233473-3">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="p" data-group-id="9581233473-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9581233473-4">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">languages</span><span class="p">:</span><span class="w"> </span><span class="n">languages</span><span class="p" data-group-id="9581233473-4">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">update_in</span><span class="p" data-group-id="9581233473-5">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9581233473-6">[</span><span class="ss">:languages</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="9581233473-7">(</span><span class="p" data-group-id="9581233473-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="9581233473-6">]</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="9581233473-5">)</span><span class="w">
+</span><span class="p" data-group-id="9581233473-8">%{</span><span class="w">
+  </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">languages</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9581233473-9">[</span><span class="w">
+    </span><span class="p" data-group-id="9581233473-10">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ELIXIR&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:functional</span><span class="p" data-group-id="9581233473-10">}</span><span class="p">,</span><span class="w">
+    </span><span class="p" data-group-id="9581233473-11">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:procedural</span><span class="p" data-group-id="9581233473-11">}</span><span class="w">
+  </span><span class="p" data-group-id="9581233473-9">]</span><span class="w">
+</span><span class="p" data-group-id="9581233473-8">}</span></code></pre><p>See the functions <a href="#key/1"><code class="inline">key/1</code></a>, <a href="#key!/1"><code class="inline">key!/1</code></a>, <a href="#elem/1"><code class="inline">elem/1</code></a>, and <a href="#all/0"><code class="inline">all/0</code></a> for
+some of the available accessors.</p>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:access_fun/2">access_fun(data, get_value)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:any_container/0">any_container()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:container/0">container()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:get_and_update_fun/2">get_and_update_fun(data, get_value)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:get_fun/2">get_fun(data, get_value)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:key/0">key()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:nil_container/0">nil_container()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:value/0">value()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all/0">all()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses all the elements in a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#at/1">at(index)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses the element at <code class="inline">index</code> (zero based) of a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#elem/1">elem(index)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses the element at the given index in a tuple.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fetch/2">fetch(container, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Fetches the value for the given key in a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fetch!/2">fetch!(container, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Same as <a href="#fetch/2"><code class="inline">fetch/2</code></a> but returns the value directly,
+or raises a <a href="KeyError.html"><code class="inline">KeyError</code></a> exception if <code class="inline">key</code> is not found.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filter/1">filter(func)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses all elements of a list that match the provided predicate.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/3">get(container, key, default \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets the value for the given key in a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_and_update/3">get_and_update(container, key, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets and updates the given key in a <code class="inline">container</code> (a map, a keyword list,
+a struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#key/2">key(key, default \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses the given key in a map/struct.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#key!/1">key!(key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a function that accesses the given key in a map/struct.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pop/2">pop(container, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes the entry with a given key from a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p></div>
+</div>
+  </div>
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:fetch/2">fetch(term, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Invoked in order to access the value stored under <code class="inline">key</code> in the given term <code class="inline">term</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:get_and_update/3">get_and_update(data, key, function)</a>
+  </div>
+    <div class="summary-synopsis"><p>Invoked in order to access the value under <code class="inline">key</code> and update it at the same time.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:pop/2">pop(data, key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Invoked to &quot;pop&quot; the value under <code class="inline">key</code> out of the given data structure.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:access_fun/2">
+  <div class="detail-header">
+    <a href="#t:access_fun/2" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">access_fun(data, get_value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L111" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>access_fun(data, get_value) ::
+  <a href="#t:get_fun/2">get_fun</a>(data, get_value) | <a href="#t:get_and_update_fun/2">get_and_update_fun</a>(data, get_value)</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:any_container/0">
+  <div class="detail-header">
+    <a href="#t:any_container/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">any_container()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L98" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>any_container() :: <a href="typespecs.html#basic-types">any</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:container/0">
+  <div class="detail-header">
+    <a href="#t:container/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">container()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L96" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>container() :: <a href="typespecs.html#built-in-types">keyword</a>() | <a href="typespecs.html#basic-types">struct</a>() | <a href="typespecs.html#basic-types">map</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:get_and_update_fun/2">
+  <div class="detail-header">
+    <a href="#t:get_and_update_fun/2" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">get_and_update_fun(data, get_value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L107" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_and_update_fun(data, get_value) ::
+  (:get_and_update, data, (<a href="typespecs.html#built-in-types">term</a>() -> <a href="typespecs.html#built-in-types">term</a>()) ->
+     {get_value, new_data :: <a href="#t:container/0">container</a>()} | :pop)</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:get_fun/2">
+  <div class="detail-header">
+    <a href="#t:get_fun/2" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">get_fun(data, get_value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L103" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_fun(data, get_value) ::
+  (:get, data, (<a href="typespecs.html#built-in-types">term</a>() -> <a href="typespecs.html#built-in-types">term</a>()) -> {get_value, new_data :: <a href="#t:container/0">container</a>()})</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:key/0">
+  <div class="detail-header">
+    <a href="#t:key/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">key()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L100" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>key() :: <a href="typespecs.html#basic-types">any</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:nil_container/0">
+  <div class="detail-header">
+    <a href="#t:nil_container/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">nil_container()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L97" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>nil_container() :: nil</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L99" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>t() :: <a href="#t:container/0">container</a>() | <a href="#t:nil_container/0">nil_container</a>() | <a href="#t:any_container/0">any_container</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:value/0">
+  <div class="detail-header">
+    <a href="#t:value/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">value()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L101" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>value() :: <a href="typespecs.html#basic-types">any</a>()</pre>
+      </div>
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="all/0">
+  <div class="detail-header">
+    <a href="#all/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L602" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>all() :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#built-in-types">list</a>(), get_value :: <a href="typespecs.html#built-in-types">list</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses all the elements in a list.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><h2 id="all/0-examples" class="section-heading">
+  <a href="#all/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1843088655-1">[</span><span class="p" data-group-id="1843088655-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="1843088655-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="1843088655-3">}</span><span class="p" data-group-id="1843088655-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="1843088655-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="1843088655-6">(</span><span class="p" data-group-id="1843088655-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="1843088655-5">]</span><span class="p" data-group-id="1843088655-4">)</span><span class="w">
+</span><span class="p" data-group-id="1843088655-7">[</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="1843088655-7">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="1843088655-8">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-9">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="1843088655-10">(</span><span class="p" data-group-id="1843088655-10">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="1843088655-9">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="1843088655-11">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="1843088655-12">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="1843088655-13">(</span><span class="n">prev</span><span class="p" data-group-id="1843088655-13">)</span><span class="p" data-group-id="1843088655-12">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="1843088655-11">end</span><span class="p" data-group-id="1843088655-8">)</span><span class="w">
+</span><span class="p" data-group-id="1843088655-14">{</span><span class="p" data-group-id="1843088655-15">[</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="1843088655-15">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-16">[</span><span class="p" data-group-id="1843088655-17">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JOHN&quot;</span><span class="p" data-group-id="1843088655-17">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-18">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MARY&quot;</span><span class="p" data-group-id="1843088655-18">}</span><span class="p" data-group-id="1843088655-16">]</span><span class="p" data-group-id="1843088655-14">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="1843088655-19">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-20">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="1843088655-21">(</span><span class="p" data-group-id="1843088655-21">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="1843088655-20">]</span><span class="p" data-group-id="1843088655-19">)</span><span class="w">
+</span><span class="p" data-group-id="1843088655-22">{</span><span class="p" data-group-id="1843088655-23">[</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="1843088655-23">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-24">[</span><span class="p" data-group-id="1843088655-25">%{</span><span class="p" data-group-id="1843088655-25">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1843088655-26">%{</span><span class="p" data-group-id="1843088655-26">}</span><span class="p" data-group-id="1843088655-24">]</span><span class="p" data-group-id="1843088655-22">}</span></code></pre><p>Here is an example that traverses the list dropping even
+numbers and multiplying odd numbers by 2:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="kn">require</span><span class="w"> </span><span class="nc">Integer</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="2328790539-1">(</span><span class="p" data-group-id="2328790539-2">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="2328790539-2">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2328790539-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="2328790539-4">(</span><span class="p" data-group-id="2328790539-4">)</span><span class="p" data-group-id="2328790539-3">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="2328790539-5">fn</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="nc">Integer</span><span class="o">.</span><span class="n">is_even</span><span class="p" data-group-id="2328790539-6">(</span><span class="n">num</span><span class="p" data-group-id="2328790539-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:pop</span><span class="p">,</span><span class="w"> </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2328790539-7">{</span><span class="n">num</span><span class="p">,</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="2328790539-7">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="2328790539-5">end</span><span class="p" data-group-id="2328790539-1">)</span><span class="w">
+</span><span class="p" data-group-id="2328790539-8">{</span><span class="p" data-group-id="2328790539-9">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="2328790539-9">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2328790539-10">[</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="2328790539-10">]</span><span class="p" data-group-id="2328790539-8">}</span></code></pre><p>An error is raised if the accessed structure is not a list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="8463225663-1">(</span><span class="p" data-group-id="8463225663-2">%{</span><span class="p" data-group-id="8463225663-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8463225663-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="8463225663-4">(</span><span class="p" data-group-id="8463225663-4">)</span><span class="p" data-group-id="8463225663-3">]</span><span class="p" data-group-id="8463225663-1">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) Access.all/0 expected a list, got: %{}</span></code></pre>  </section>
+</section>
+<section class="detail" id="at/1">
+  <div class="detail-header">
+    <a href="#at/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">at(index)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L677" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>at(<a href="typespecs.html#basic-types">integer</a>()) :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#built-in-types">list</a>(), get_value :: <a href="typespecs.html#built-in-types">term</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses the element at <code class="inline">index</code> (zero based) of a list.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><h2 id="at/1-examples" class="section-heading">
+  <a href="#at/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="8698971322-1">[</span><span class="p" data-group-id="8698971322-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="8698971322-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="8698971322-3">}</span><span class="p" data-group-id="8698971322-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="8698971322-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="8698971322-6">(</span><span class="mi">1</span><span class="p" data-group-id="8698971322-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="8698971322-5">]</span><span class="p" data-group-id="8698971322-4">)</span><span class="w">
+</span><span class="s">&quot;mary&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="8698971322-7">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-8">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="8698971322-9">(</span><span class="o">-</span><span class="mi">1</span><span class="p" data-group-id="8698971322-9">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="8698971322-8">]</span><span class="p" data-group-id="8698971322-7">)</span><span class="w">
+</span><span class="s">&quot;mary&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="8698971322-10">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-11">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="8698971322-12">(</span><span class="mi">0</span><span class="p" data-group-id="8698971322-12">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="8698971322-11">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="8698971322-13">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="8698971322-14">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="8698971322-15">(</span><span class="n">prev</span><span class="p" data-group-id="8698971322-15">)</span><span class="p" data-group-id="8698971322-14">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="8698971322-13">end</span><span class="p" data-group-id="8698971322-10">)</span><span class="w">
+</span><span class="p" data-group-id="8698971322-16">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-17">[</span><span class="p" data-group-id="8698971322-18">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JOHN&quot;</span><span class="p" data-group-id="8698971322-18">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-19">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="8698971322-19">}</span><span class="p" data-group-id="8698971322-17">]</span><span class="p" data-group-id="8698971322-16">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="8698971322-20">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-21">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="8698971322-22">(</span><span class="o">-</span><span class="mi">1</span><span class="p" data-group-id="8698971322-22">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="8698971322-21">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="8698971322-23">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="8698971322-24">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="8698971322-25">(</span><span class="n">prev</span><span class="p" data-group-id="8698971322-25">)</span><span class="p" data-group-id="8698971322-24">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="8698971322-23">end</span><span class="p" data-group-id="8698971322-20">)</span><span class="w">
+</span><span class="p" data-group-id="8698971322-26">{</span><span class="s">&quot;mary&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-27">[</span><span class="p" data-group-id="8698971322-28">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="8698971322-28">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8698971322-29">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MARY&quot;</span><span class="p" data-group-id="8698971322-29">}</span><span class="p" data-group-id="8698971322-27">]</span><span class="p" data-group-id="8698971322-26">}</span></code></pre><p><a href="#at/1"><code class="inline">at/1</code></a> can also be used to pop elements out of a list or
+a key inside of a list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="7419872565-1">[</span><span class="p" data-group-id="7419872565-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="7419872565-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="7419872565-3">}</span><span class="p" data-group-id="7419872565-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="7419872565-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="7419872565-6">(</span><span class="mi">0</span><span class="p" data-group-id="7419872565-6">)</span><span class="p" data-group-id="7419872565-5">]</span><span class="p" data-group-id="7419872565-4">)</span><span class="w">
+</span><span class="p" data-group-id="7419872565-7">{</span><span class="p" data-group-id="7419872565-8">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="7419872565-8">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-9">[</span><span class="p" data-group-id="7419872565-10">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="7419872565-10">}</span><span class="p" data-group-id="7419872565-9">]</span><span class="p" data-group-id="7419872565-7">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="7419872565-11">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-12">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="7419872565-13">(</span><span class="mi">0</span><span class="p" data-group-id="7419872565-13">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="7419872565-12">]</span><span class="p" data-group-id="7419872565-11">)</span><span class="w">
+</span><span class="p" data-group-id="7419872565-14">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-15">[</span><span class="p" data-group-id="7419872565-16">%{</span><span class="p" data-group-id="7419872565-16">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7419872565-17">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="7419872565-17">}</span><span class="p" data-group-id="7419872565-15">]</span><span class="p" data-group-id="7419872565-14">}</span></code></pre><p>When the index is out of bounds, <code class="inline">nil</code> is returned and the update function is never called:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="7286562275-1">[</span><span class="p" data-group-id="7286562275-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="7286562275-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7286562275-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="7286562275-3">}</span><span class="p" data-group-id="7286562275-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="7286562275-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7286562275-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="7286562275-6">(</span><span class="mi">10</span><span class="p" data-group-id="7286562275-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="7286562275-5">]</span><span class="p" data-group-id="7286562275-4">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="7286562275-7">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7286562275-8">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="7286562275-9">(</span><span class="mi">10</span><span class="p" data-group-id="7286562275-9">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="7286562275-8">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="7286562275-10">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="7286562275-11">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="7286562275-12">(</span><span class="n">prev</span><span class="p" data-group-id="7286562275-12">)</span><span class="p" data-group-id="7286562275-11">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="7286562275-10">end</span><span class="p" data-group-id="7286562275-7">)</span><span class="w">
+</span><span class="p" data-group-id="7286562275-13">{</span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7286562275-14">[</span><span class="p" data-group-id="7286562275-15">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="7286562275-15">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7286562275-16">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mary&quot;</span><span class="p" data-group-id="7286562275-16">}</span><span class="p" data-group-id="7286562275-14">]</span><span class="p" data-group-id="7286562275-13">}</span></code></pre><p>An error is raised if the accessed structure is not a list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="2760729197-1">(</span><span class="p" data-group-id="2760729197-2">%{</span><span class="p" data-group-id="2760729197-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2760729197-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="2760729197-4">(</span><span class="mi">1</span><span class="p" data-group-id="2760729197-4">)</span><span class="p" data-group-id="2760729197-3">]</span><span class="p" data-group-id="2760729197-1">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) Access.at/1 expected a list, got: %{}</span></code></pre>  </section>
+</section>
+<section class="detail" id="elem/1">
+  <div class="detail-header">
+    <a href="#elem/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">elem(index)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L548" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>elem(<a href="typespecs.html#basic-types">non_neg_integer</a>()) :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#basic-types">tuple</a>(), get_value :: <a href="typespecs.html#built-in-types">term</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses the element at the given index in a tuple.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><p>The returned function raises if <code class="inline">index</code> is out of bounds.</p><p>Note that popping elements out of tuples is not possible and raises an
+error.</p><h2 id="elem/1-examples" class="section-heading">
+  <a href="#elem/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="5706862734-1">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5706862734-2">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p" data-group-id="5706862734-2">}</span><span class="p" data-group-id="5706862734-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="5706862734-3">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5706862734-4">[</span><span class="ss">:user</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">elem</span><span class="p" data-group-id="5706862734-5">(</span><span class="mi">0</span><span class="p" data-group-id="5706862734-5">)</span><span class="p" data-group-id="5706862734-4">]</span><span class="p" data-group-id="5706862734-3">)</span><span class="w">
+</span><span class="s">&quot;john&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="5706862734-6">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5706862734-7">[</span><span class="ss">:user</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">elem</span><span class="p" data-group-id="5706862734-8">(</span><span class="mi">0</span><span class="p" data-group-id="5706862734-8">)</span><span class="p" data-group-id="5706862734-7">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="5706862734-9">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="5706862734-10">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="5706862734-11">(</span><span class="n">prev</span><span class="p" data-group-id="5706862734-11">)</span><span class="p" data-group-id="5706862734-10">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="5706862734-9">end</span><span class="p" data-group-id="5706862734-6">)</span><span class="w">
+</span><span class="p" data-group-id="5706862734-12">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5706862734-13">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5706862734-14">{</span><span class="s">&quot;JOHN&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p" data-group-id="5706862734-14">}</span><span class="p" data-group-id="5706862734-13">}</span><span class="p" data-group-id="5706862734-12">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="5706862734-15">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5706862734-16">[</span><span class="ss">:user</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">elem</span><span class="p" data-group-id="5706862734-17">(</span><span class="mi">0</span><span class="p" data-group-id="5706862734-17">)</span><span class="p" data-group-id="5706862734-16">]</span><span class="p" data-group-id="5706862734-15">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) cannot pop data from a tuple</span></code></pre><p>An error is raised if the accessed structure is not a tuple:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="9022101626-1">(</span><span class="p" data-group-id="9022101626-2">%{</span><span class="p" data-group-id="9022101626-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9022101626-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">elem</span><span class="p" data-group-id="9022101626-4">(</span><span class="mi">0</span><span class="p" data-group-id="9022101626-4">)</span><span class="p" data-group-id="9022101626-3">]</span><span class="p" data-group-id="9022101626-1">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) Access.elem/1 expected a tuple, got: %{}</span></code></pre>  </section>
+</section>
+<section class="detail" id="fetch/2">
+  <div class="detail-header">
+    <a href="#fetch/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fetch(container, key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L207" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch(<a href="#t:container/0">container</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: {:ok, <a href="typespecs.html#built-in-types">term</a>()} | :error</pre>
+          <pre>fetch(<a href="#t:nil_container/0">nil_container</a>(), <a href="typespecs.html#basic-types">any</a>()) :: :error</pre>
+      </div>
+
+<p>Fetches the value for the given key in a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p><p>Returns <code class="inline">{:ok, value}</code> where <code class="inline">value</code> is the value under <code class="inline">key</code> if there is such
+a key, or <code class="inline">:error</code> if <code class="inline">key</code> is not found.</p><h2 id="fetch/2-examples" class="section-heading">
+  <a href="#fetch/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">fetch</span><span class="p" data-group-id="9339653033-1">(</span><span class="p" data-group-id="9339653033-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">26</span><span class="p" data-group-id="9339653033-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="9339653033-1">)</span><span class="w">
+</span><span class="p" data-group-id="9339653033-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="p" data-group-id="9339653033-3">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">fetch</span><span class="p" data-group-id="9339653033-4">(</span><span class="p" data-group-id="9339653033-5">[</span><span class="ss">ordered</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">on_timeout</span><span class="p">:</span><span class="w"> </span><span class="ss">:exit</span><span class="p" data-group-id="9339653033-5">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:timeout</span><span class="p" data-group-id="9339653033-4">)</span><span class="w">
+</span><span class="ss">:error</span></code></pre>  </section>
+</section>
+<section class="detail" id="fetch!/2">
+  <div class="detail-header">
+    <a href="#fetch!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fetch!(container, key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L251" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch!(<a href="#t:container/0">container</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: <a href="typespecs.html#built-in-types">term</a>()</pre>
+      </div>
+
+<p>Same as <a href="#fetch/2"><code class="inline">fetch/2</code></a> but returns the value directly,
+or raises a <a href="KeyError.html"><code class="inline">KeyError</code></a> exception if <code class="inline">key</code> is not found.</p><h2 id="fetch!/2-examples" class="section-heading">
+  <a href="#fetch!/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">fetch!</span><span class="p" data-group-id="9580612926-1">(</span><span class="p" data-group-id="9580612926-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">26</span><span class="p" data-group-id="9580612926-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="9580612926-1">)</span><span class="w">
+</span><span class="s">&quot;meg&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="filter/1">
+  <div class="detail-header">
+    <a href="#filter/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filter(func)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L766" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>filter((<a href="typespecs.html#built-in-types">term</a>() -> <a href="typespecs.html#built-in-types">boolean</a>())) :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#built-in-types">list</a>(), get_value :: <a href="typespecs.html#built-in-types">list</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses all elements of a list that match the provided predicate.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><h2 id="filter/1-examples" class="section-heading">
+  <a href="#filter/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="9315871571-1">[</span><span class="p" data-group-id="9315871571-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="9315871571-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9315871571-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="9315871571-3">}</span><span class="p" data-group-id="9315871571-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="9315871571-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9315871571-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="9315871571-6">(</span><span class="o">&amp;</span><span class="p" data-group-id="9315871571-7">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="9315871571-7">)</span><span class="p" data-group-id="9315871571-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="9315871571-5">]</span><span class="p" data-group-id="9315871571-4">)</span><span class="w">
+</span><span class="p" data-group-id="9315871571-8">[</span><span class="s">&quot;francine&quot;</span><span class="p" data-group-id="9315871571-8">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="9315871571-9">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9315871571-10">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="9315871571-11">(</span><span class="o">&amp;</span><span class="p" data-group-id="9315871571-12">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="9315871571-12">)</span><span class="p" data-group-id="9315871571-11">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="9315871571-10">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="9315871571-13">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="9315871571-14">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="9315871571-15">(</span><span class="n">prev</span><span class="p" data-group-id="9315871571-15">)</span><span class="p" data-group-id="9315871571-14">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="9315871571-13">end</span><span class="p" data-group-id="9315871571-9">)</span><span class="w">
+</span><span class="p" data-group-id="9315871571-16">{</span><span class="p" data-group-id="9315871571-17">[</span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="9315871571-17">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9315871571-18">[</span><span class="p" data-group-id="9315871571-19">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JOHN&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="9315871571-19">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9315871571-20">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="9315871571-20">}</span><span class="p" data-group-id="9315871571-18">]</span><span class="p" data-group-id="9315871571-16">}</span></code></pre><p><a href="#filter/1"><code class="inline">filter/1</code></a> can also be used to pop elements out of a list or
+a key inside of a list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="0476689742-1">[</span><span class="p" data-group-id="0476689742-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="0476689742-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="0476689742-3">}</span><span class="p" data-group-id="0476689742-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="0476689742-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="0476689742-6">(</span><span class="o">&amp;</span><span class="p" data-group-id="0476689742-7">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="0476689742-7">)</span><span class="p" data-group-id="0476689742-6">)</span><span class="p" data-group-id="0476689742-5">]</span><span class="p" data-group-id="0476689742-4">)</span><span class="w">
+</span><span class="p" data-group-id="0476689742-8">{</span><span class="p" data-group-id="0476689742-9">[</span><span class="p" data-group-id="0476689742-10">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="0476689742-10">}</span><span class="p" data-group-id="0476689742-9">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-11">[</span><span class="p" data-group-id="0476689742-12">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="0476689742-12">}</span><span class="p" data-group-id="0476689742-11">]</span><span class="p" data-group-id="0476689742-8">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="0476689742-13">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-14">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="0476689742-15">(</span><span class="o">&amp;</span><span class="p" data-group-id="0476689742-16">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">20</span><span class="p" data-group-id="0476689742-16">)</span><span class="p" data-group-id="0476689742-15">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="0476689742-14">]</span><span class="p" data-group-id="0476689742-13">)</span><span class="w">
+</span><span class="p" data-group-id="0476689742-17">{</span><span class="p" data-group-id="0476689742-18">[</span><span class="s">&quot;francine&quot;</span><span class="p" data-group-id="0476689742-18">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-19">[</span><span class="p" data-group-id="0476689742-20">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="0476689742-20">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0476689742-21">%{</span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="0476689742-21">}</span><span class="p" data-group-id="0476689742-19">]</span><span class="p" data-group-id="0476689742-17">}</span></code></pre><p>When no match is found, an empty list is returned and the update function is never called</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="5283095552-1">[</span><span class="p" data-group-id="5283095552-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="5283095552-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5283095552-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="5283095552-3">}</span><span class="p" data-group-id="5283095552-1">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="5283095552-4">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5283095552-5">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="5283095552-6">(</span><span class="o">&amp;</span><span class="p" data-group-id="5283095552-7">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">50</span><span class="p" data-group-id="5283095552-7">)</span><span class="p" data-group-id="5283095552-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="5283095552-5">]</span><span class="p" data-group-id="5283095552-4">)</span><span class="w">
+</span><span class="p" data-group-id="5283095552-8">[</span><span class="p" data-group-id="5283095552-8">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="5283095552-9">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5283095552-10">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="5283095552-11">(</span><span class="o">&amp;</span><span class="p" data-group-id="5283095552-12">(</span><span class="ni">&amp;1</span><span class="o">.</span><span class="n">salary</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">50</span><span class="p" data-group-id="5283095552-12">)</span><span class="p" data-group-id="5283095552-11">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="5283095552-10">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="5283095552-13">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="5283095552-14">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="5283095552-15">(</span><span class="n">prev</span><span class="p" data-group-id="5283095552-15">)</span><span class="p" data-group-id="5283095552-14">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="5283095552-13">end</span><span class="p" data-group-id="5283095552-9">)</span><span class="w">
+</span><span class="p" data-group-id="5283095552-16">{</span><span class="p" data-group-id="5283095552-17">[</span><span class="p" data-group-id="5283095552-17">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5283095552-18">[</span><span class="p" data-group-id="5283095552-19">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="5283095552-19">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5283095552-20">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;francine&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">salary</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p" data-group-id="5283095552-20">}</span><span class="p" data-group-id="5283095552-18">]</span><span class="p" data-group-id="5283095552-16">}</span></code></pre><p>An error is raised if the predicate is not a function or is of the incorrect arity:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="1806758971-1">(</span><span class="p" data-group-id="1806758971-2">[</span><span class="p" data-group-id="1806758971-2">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1806758971-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="1806758971-4">(</span><span class="mi">5</span><span class="p" data-group-id="1806758971-4">)</span><span class="p" data-group-id="1806758971-3">]</span><span class="p" data-group-id="1806758971-1">)</span><span class="w">
+</span><span class="gt">** (FunctionClauseError) no function clause matching in Access.filter/1</span></code></pre><p>An error is raised if the accessed structure is not a list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="7049186367-1">(</span><span class="p" data-group-id="7049186367-2">%{</span><span class="p" data-group-id="7049186367-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7049186367-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">filter</span><span class="p" data-group-id="7049186367-4">(</span><span class="k" data-group-id="7049186367-5">fn</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k" data-group-id="7049186367-5">end</span><span class="p" data-group-id="7049186367-4">)</span><span class="p" data-group-id="7049186367-3">]</span><span class="p" data-group-id="7049186367-1">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) Access.filter/1 expected a list, got: %{}</span></code></pre>  </section>
+</section>
+<section class="detail" id="get/3">
+    <span id="get/2"></span>
+  <div class="detail-header">
+    <a href="#get/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get(container, key, default \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L278" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get(<a href="#t:container/0">container</a>(), <a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: <a href="typespecs.html#built-in-types">term</a>()</pre>
+          <pre>get(<a href="#t:nil_container/0">nil_container</a>(), <a href="typespecs.html#basic-types">any</a>(), default) :: default when default: var</pre>
+      </div>
+
+<p>Gets the value for the given key in a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p><p>Returns the value under <code class="inline">key</code> if there is such a key, or <code class="inline">default</code> if <code class="inline">key</code> is
+not found.</p><h2 id="get/3-examples" class="section-heading">
+  <a href="#get/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="4485843161-1">(</span><span class="p" data-group-id="4485843161-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="4485843161-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;default name&quot;</span><span class="p" data-group-id="4485843161-1">)</span><span class="w">
+</span><span class="s">&quot;john&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="4485843161-3">(</span><span class="p" data-group-id="4485843161-4">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="4485843161-4">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:age</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="4485843161-3">)</span><span class="w">
+</span><span class="mi">25</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="4485843161-5">(</span><span class="p" data-group-id="4485843161-6">[</span><span class="ss">ordered</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="4485843161-6">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:timeout</span><span class="p" data-group-id="4485843161-5">)</span><span class="w">
+</span><span class="no">nil</span></code></pre>  </section>
+</section>
+<section class="detail" id="get_and_update/3">
+  <div class="detail-header">
+    <a href="#get_and_update/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_and_update(container, key, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L343" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_and_update(data, <a href="#t:key/0">key</a>(), (<a href="#t:value/0">value</a>() -> {get_value, <a href="#t:value/0">value</a>()} | :pop)) ::
+  {get_value, data}
+when data: <a href="#t:container/0">container</a>(), get_value: var</pre>
+      </div>
+
+<p>Gets and updates the given key in a <code class="inline">container</code> (a map, a keyword list,
+a struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p><p>The <code class="inline">fun</code> argument receives the value of <code class="inline">key</code> (or <code class="inline">nil</code> if <code class="inline">key</code> is not
+present in <code class="inline">container</code>) and must return a two-element tuple <code class="inline">{get_value, update_value}</code>:
+the &quot;get&quot; value <code class="inline">get_value</code> (the retrieved value, which can be operated on before
+being returned) and the new value to be stored under <code class="inline">key</code> (<code class="inline">update_value</code>).
+<code class="inline">fun</code> may also return <code class="inline">:pop</code>, which means the current value
+should be removed from the container and returned.</p><p>The returned value is a two-element tuple with the &quot;get&quot; value returned by
+<code class="inline">fun</code> and a new container with the updated value under <code class="inline">key</code>.</p><h2 id="get_and_update/3-examples" class="section-heading">
+  <a href="#get_and_update/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">get_and_update</span><span class="p" data-group-id="6465408172-1">(</span><span class="p" data-group-id="6465408172-2">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="6465408172-2">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="6465408172-3">fn</span><span class="w"> </span><span class="n">current_value</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="6465408172-4">{</span><span class="n">current_value</span><span class="p">,</span><span class="w"> </span><span class="n">current_value</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="6465408172-4">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="6465408172-3">end</span><span class="p" data-group-id="6465408172-1">)</span><span class="w">
+</span><span class="p" data-group-id="6465408172-5">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6465408172-6">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="6465408172-6">]</span><span class="p" data-group-id="6465408172-5">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="key/2">
+    <span id="key/1"></span>
+  <div class="detail-header">
+    <a href="#key/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">key(key, default \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L456" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>key(<a href="#t:key/0">key</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#basic-types">struct</a>() | <a href="typespecs.html#basic-types">map</a>(), get_value :: <a href="typespecs.html#built-in-types">term</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses the given key in a map/struct.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><p>The returned function uses the default value if the key does not exist.
+This can be used to specify defaults and safely traverse missing keys:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="0923570232-1">(</span><span class="p" data-group-id="0923570232-2">%{</span><span class="p" data-group-id="0923570232-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0923570232-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="0923570232-4">(</span><span class="ss">:user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0923570232-5">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;meg&quot;</span><span class="p" data-group-id="0923570232-5">}</span><span class="p" data-group-id="0923570232-4">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="0923570232-6">(</span><span class="ss">:name</span><span class="p" data-group-id="0923570232-6">)</span><span class="p" data-group-id="0923570232-3">]</span><span class="p" data-group-id="0923570232-1">)</span><span class="w">
+</span><span class="s">&quot;meg&quot;</span></code></pre><p>Such is also useful when using update functions, allowing us to introduce
+values as we traverse the data structure for updates:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">put_in</span><span class="p" data-group-id="5776057313-1">(</span><span class="p" data-group-id="5776057313-2">%{</span><span class="p" data-group-id="5776057313-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5776057313-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="5776057313-4">(</span><span class="ss">:user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5776057313-5">%{</span><span class="p" data-group-id="5776057313-5">}</span><span class="p" data-group-id="5776057313-4">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="5776057313-6">(</span><span class="ss">:name</span><span class="p" data-group-id="5776057313-6">)</span><span class="p" data-group-id="5776057313-3">]</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Mary&quot;</span><span class="p" data-group-id="5776057313-1">)</span><span class="w">
+</span><span class="p" data-group-id="5776057313-7">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5776057313-8">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Mary&quot;</span><span class="p" data-group-id="5776057313-8">}</span><span class="p" data-group-id="5776057313-7">}</span></code></pre><h2 id="key/2-examples" class="section-heading">
+  <a href="#key/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1717143689-1">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1717143689-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="1717143689-2">}</span><span class="p" data-group-id="1717143689-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="1717143689-3">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-4">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-5">(</span><span class="ss">:unknown</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-6">%{</span><span class="p" data-group-id="1717143689-6">}</span><span class="p" data-group-id="1717143689-5">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-7">(</span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="1717143689-7">)</span><span class="p" data-group-id="1717143689-4">]</span><span class="p" data-group-id="1717143689-3">)</span><span class="w">
+</span><span class="s">&quot;john&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="1717143689-8">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-9">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-10">(</span><span class="ss">:user</span><span class="p" data-group-id="1717143689-10">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-11">(</span><span class="ss">:name</span><span class="p" data-group-id="1717143689-11">)</span><span class="p" data-group-id="1717143689-9">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="1717143689-12">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="1717143689-13">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="1717143689-14">(</span><span class="n">prev</span><span class="p" data-group-id="1717143689-14">)</span><span class="p" data-group-id="1717143689-13">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="1717143689-12">end</span><span class="p" data-group-id="1717143689-8">)</span><span class="w">
+</span><span class="p" data-group-id="1717143689-15">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-16">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1717143689-17">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JOHN&quot;</span><span class="p" data-group-id="1717143689-17">}</span><span class="p" data-group-id="1717143689-16">}</span><span class="p" data-group-id="1717143689-15">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="1717143689-18">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-19">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-20">(</span><span class="ss">:user</span><span class="p" data-group-id="1717143689-20">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="1717143689-21">(</span><span class="ss">:name</span><span class="p" data-group-id="1717143689-21">)</span><span class="p" data-group-id="1717143689-19">]</span><span class="p" data-group-id="1717143689-18">)</span><span class="w">
+</span><span class="p" data-group-id="1717143689-22">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1717143689-23">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1717143689-24">%{</span><span class="p" data-group-id="1717143689-24">}</span><span class="p" data-group-id="1717143689-23">}</span><span class="p" data-group-id="1717143689-22">}</span></code></pre><p>An error is raised if the accessed structure is not a map or a struct:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="5200923593-1">(</span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5200923593-2">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="5200923593-3">(</span><span class="ss">:foo</span><span class="p" data-group-id="5200923593-3">)</span><span class="p" data-group-id="5200923593-2">]</span><span class="p" data-group-id="5200923593-1">)</span><span class="w">
+</span><span class="gt">** (BadMapError) expected a map, got: nil</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="5200923593-4">(</span><span class="p" data-group-id="5200923593-5">[</span><span class="p" data-group-id="5200923593-5">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5200923593-6">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key</span><span class="p" data-group-id="5200923593-7">(</span><span class="ss">:foo</span><span class="p" data-group-id="5200923593-7">)</span><span class="p" data-group-id="5200923593-6">]</span><span class="p" data-group-id="5200923593-4">)</span><span class="w">
+</span><span class="gt">** (BadMapError) expected a map, got: []</span></code></pre>  </section>
+</section>
+<section class="detail" id="key!/1">
+  <div class="detail-header">
+    <a href="#key!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">key!(key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L500" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>key!(<a href="#t:key/0">key</a>()) :: <a href="#t:access_fun/2">access_fun</a>(data :: <a href="typespecs.html#basic-types">struct</a>() | <a href="typespecs.html#basic-types">map</a>(), get_value :: <a href="typespecs.html#built-in-types">term</a>())</pre>
+      </div>
+
+<p>Returns a function that accesses the given key in a map/struct.</p><p>The returned function is typically passed as an accessor to <a href="Kernel.html#get_in/2"><code class="inline">Kernel.get_in/2</code></a>,
+<a href="Kernel.html#get_and_update_in/3"><code class="inline">Kernel.get_and_update_in/3</code></a>, and friends.</p><p>Similar to <a href="#key/2"><code class="inline">key/2</code></a>, but the returned function raises if the key does not exist.</p><h2 id="key!/1-examples" class="section-heading">
+  <a href="#key!/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="6357240308-1">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6357240308-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john&quot;</span><span class="p" data-group-id="6357240308-2">}</span><span class="p" data-group-id="6357240308-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="6357240308-3">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-4">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-5">(</span><span class="ss">:user</span><span class="p" data-group-id="6357240308-5">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-6">(</span><span class="ss">:name</span><span class="p" data-group-id="6357240308-6">)</span><span class="p" data-group-id="6357240308-4">]</span><span class="p" data-group-id="6357240308-3">)</span><span class="w">
+</span><span class="s">&quot;john&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_and_update_in</span><span class="p" data-group-id="6357240308-7">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-8">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-9">(</span><span class="ss">:user</span><span class="p" data-group-id="6357240308-9">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-10">(</span><span class="ss">:name</span><span class="p" data-group-id="6357240308-10">)</span><span class="p" data-group-id="6357240308-8">]</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="6357240308-11">fn</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="p" data-group-id="6357240308-12">{</span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">upcase</span><span class="p" data-group-id="6357240308-13">(</span><span class="n">prev</span><span class="p" data-group-id="6357240308-13">)</span><span class="p" data-group-id="6357240308-12">}</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="6357240308-11">end</span><span class="p" data-group-id="6357240308-7">)</span><span class="w">
+</span><span class="p" data-group-id="6357240308-14">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-15">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6357240308-16">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JOHN&quot;</span><span class="p" data-group-id="6357240308-16">}</span><span class="p" data-group-id="6357240308-15">}</span><span class="p" data-group-id="6357240308-14">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">pop_in</span><span class="p" data-group-id="6357240308-17">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-18">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-19">(</span><span class="ss">:user</span><span class="p" data-group-id="6357240308-19">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-20">(</span><span class="ss">:name</span><span class="p" data-group-id="6357240308-20">)</span><span class="p" data-group-id="6357240308-18">]</span><span class="p" data-group-id="6357240308-17">)</span><span class="w">
+</span><span class="p" data-group-id="6357240308-21">{</span><span class="s">&quot;john&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-22">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6357240308-23">%{</span><span class="p" data-group-id="6357240308-23">}</span><span class="p" data-group-id="6357240308-22">}</span><span class="p" data-group-id="6357240308-21">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="6357240308-24">(</span><span class="n">map</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6357240308-25">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-26">(</span><span class="ss">:user</span><span class="p" data-group-id="6357240308-26">)</span><span class="p">,</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="6357240308-27">(</span><span class="ss">:unknown</span><span class="p" data-group-id="6357240308-27">)</span><span class="p" data-group-id="6357240308-25">]</span><span class="p" data-group-id="6357240308-24">)</span><span class="w">
+</span><span class="gt">** (KeyError) key :unknown not found in: %{name: &quot;john&quot;}</span></code></pre><p>An error is raised if the accessed structure is not a map/struct:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">get_in</span><span class="p" data-group-id="5837729536-1">(</span><span class="p" data-group-id="5837729536-2">[</span><span class="p" data-group-id="5837729536-2">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5837729536-3">[</span><span class="nc">Access</span><span class="o">.</span><span class="n">key!</span><span class="p" data-group-id="5837729536-4">(</span><span class="ss">:foo</span><span class="p" data-group-id="5837729536-4">)</span><span class="p" data-group-id="5837729536-3">]</span><span class="p" data-group-id="5837729536-1">)</span><span class="w">
+</span><span class="gt">** (RuntimeError) Access.key!/1 expected a map/struct, got: []</span></code></pre>  </section>
+</section>
+<section class="detail" id="pop/2">
+  <div class="detail-header">
+    <a href="#pop/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pop(container, key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L395" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>pop(data, <a href="#t:key/0">key</a>()) :: {<a href="#t:value/0">value</a>(), data} when data: <a href="#t:container/0">container</a>()</pre>
+      </div>
+
+<p>Removes the entry with a given key from a container (a map, keyword
+list, or struct that implements the <a href="#content"><code class="inline">Access</code></a> behaviour).</p><p>Returns a tuple containing the value associated with the key and the
+updated container. <code class="inline">nil</code> is returned for the value if the key isn't
+in the container.</p><h2 id="pop/2-examples" class="section-heading">
+  <a href="#pop/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>With a map:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">pop</span><span class="p" data-group-id="6027643695-1">(</span><span class="p" data-group-id="6027643695-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p" data-group-id="6027643695-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="6027643695-1">)</span><span class="w">
+</span><span class="p" data-group-id="6027643695-3">{</span><span class="s">&quot;Elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6027643695-4">%{</span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p" data-group-id="6027643695-4">}</span><span class="p" data-group-id="6027643695-3">}</span></code></pre><p>A keyword list:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">pop</span><span class="p" data-group-id="2030619693-1">(</span><span class="p" data-group-id="2030619693-2">[</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p" data-group-id="2030619693-2">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span><span class="p" data-group-id="2030619693-1">)</span><span class="w">
+</span><span class="p" data-group-id="2030619693-3">{</span><span class="s">&quot;Elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2030619693-4">[</span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p" data-group-id="2030619693-4">]</span><span class="p" data-group-id="2030619693-3">}</span></code></pre><p>An unknown key:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Access</span><span class="o">.</span><span class="n">pop</span><span class="p" data-group-id="6154170217-1">(</span><span class="p" data-group-id="6154170217-2">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Elixir&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p" data-group-id="6154170217-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:year</span><span class="p" data-group-id="6154170217-1">)</span><span class="w">
+</span><span class="p" data-group-id="6154170217-3">{</span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6154170217-4">%{</span><span class="ss">creator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Valim&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Elixir&quot;</span><span class="p" data-group-id="6154170217-4">}</span><span class="p" data-group-id="6154170217-3">}</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+        <section id="callbacks" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#callbacks">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Callbacks          </h1>
+          <div class="callbacks-list">
+<section class="detail" id="c:fetch/2">
+  <div class="detail-header">
+    <a href="#c:fetch/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">fetch(term, key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L131" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch(term :: <a href="#t:t/0">t</a>(), <a href="#t:key/0">key</a>()) :: {:ok, <a href="#t:value/0">value</a>()} | :error</pre>
+      </div>
+
+<p>Invoked in order to access the value stored under <code class="inline">key</code> in the given term <code class="inline">term</code>.</p><p>This function should return <code class="inline">{:ok, value}</code> where <code class="inline">value</code> is the value under
+<code class="inline">key</code> if the key exists in the term, or <code class="inline">:error</code> if the key does not exist in
+the term.</p><p>Many of the functions defined in the <a href="#content"><code class="inline">Access</code></a> module internally call this
+function. This function is also used when the square-brackets access syntax
+(<code class="inline">structure[key]</code>) is used: the <a href="#fetch/2"><code class="inline">fetch/2</code></a> callback implemented by the module
+that defines the <code class="inline">structure</code> struct is invoked and if it returns <code class="inline">{:ok, value}</code> then <code class="inline">value</code> is returned, or if it returns <code class="inline">:error</code> then <code class="inline">nil</code> is
+returned.</p><p>See the <a href="Map.html#fetch/2"><code class="inline">Map.fetch/2</code></a> and <a href="Keyword.html#fetch/2"><code class="inline">Keyword.fetch/2</code></a> implementations for examples of
+how to implement this callback.</p>  </section>
+</section>
+<section class="detail" id="c:get_and_update/3">
+  <div class="detail-header">
+    <a href="#c:get_and_update/3" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">get_and_update(data, key, function)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L156" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_and_update(data, <a href="#t:key/0">key</a>(), (<a href="#t:value/0">value</a>() -> {get_value, <a href="#t:value/0">value</a>()} | :pop)) ::
+  {get_value, data}
+when data: <a href="#t:container/0">container</a>() | <a href="#t:any_container/0">any_container</a>(), get_value: var</pre>
+      </div>
+
+<p>Invoked in order to access the value under <code class="inline">key</code> and update it at the same time.</p><p>The implementation of this callback should invoke <code class="inline">fun</code> with the value under
+<code class="inline">key</code> in the passed structure <code class="inline">data</code>, or with <code class="inline">nil</code> if <code class="inline">key</code> is not present in it.
+This function must return either <code class="inline">{get_value, update_value}</code> or <code class="inline">:pop</code>.</p><p>If the passed function returns <code class="inline">{get_value, update_value}</code>,
+the return value of this callback should be <code class="inline">{get_value, new_data}</code>, where:</p><ul><li><p><code class="inline">get_value</code> is the retrieved value (which can be operated on before being returned)</p></li><li><p><code class="inline">update_value</code> is the new value to be stored under <code class="inline">key</code></p></li><li><p><code class="inline">new_data</code> is <code class="inline">data</code> after updating the value of <code class="inline">key</code> with <code class="inline">update_value</code>.</p></li></ul><p>If the passed function returns <code class="inline">:pop</code>, the return value of this callback
+must be <code class="inline">{value, new_data}</code> where <code class="inline">value</code> is the value under <code class="inline">key</code>
+(or <code class="inline">nil</code> if not present) and <code class="inline">new_data</code> is <code class="inline">data</code> without <code class="inline">key</code>.</p><p>See the implementations of <a href="Map.html#get_and_update/3"><code class="inline">Map.get_and_update/3</code></a> or <a href="Keyword.html#get_and_update/3"><code class="inline">Keyword.get_and_update/3</code></a>
+for more examples.</p>  </section>
+</section>
+<section class="detail" id="c:pop/2">
+  <div class="detail-header">
+    <a href="#c:pop/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">pop(data, key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/access.ex#L171" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>pop(data, <a href="#t:key/0">key</a>()) :: {<a href="#t:value/0">value</a>(), data} when data: <a href="#t:container/0">container</a>() | <a href="#t:any_container/0">any_container</a>()</pre>
+      </div>
+
+<p>Invoked to &quot;pop&quot; the value under <code class="inline">key</code> out of the given data structure.</p><p>When <code class="inline">key</code> exists in the given structure <code class="inline">data</code>, the implementation should
+return a <code class="inline">{value, new_data}</code> tuple where <code class="inline">value</code> is the value that was under
+<code class="inline">key</code> and <code class="inline">new_data</code> is <code class="inline">term</code> without <code class="inline">key</code>.</p><p>When <code class="inline">key</code> is not present in the given structure, a tuple <code class="inline">{value, data}</code>
+should be returned, where <code class="inline">value</code> is implementation-defined.</p><p>See the implementations for <a href="Map.html#pop/3"><code class="inline">Map.pop/3</code></a> or <a href="Keyword.html#pop/3"><code class="inline">Keyword.pop/3</code></a> for more examples.</p>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Code — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Code.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Code          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Utilities for managing code compilation, code evaluation, and code loading.</p><p>This module complements Erlang's <a href="http://www.erlang.org/doc/man/code.html"> module<code class="inline">:code</code></a>
+to add behaviour which is specific to Elixir. Almost all of the functions in this module
+have global side effects on the behaviour of Elixir.</p><h2 id="module-working-with-files" class="section-heading">
+  <a href="#module-working-with-files" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Working with files
+</h2>
+<p>This module contains three functions for compiling and evaluating files.
+Here is a summary of them and their behaviour:</p><ul><li><p><a href="#require_file/2"><code class="inline">require_file/2</code></a> - compiles a file and tracks its name. It does not
+compile the file again if it has been previously required.</p></li><li><p><a href="#compile_file/2"><code class="inline">compile_file/2</code></a> - compiles a file without tracking its name. Compiles the
+file multiple times when invoked multiple times.</p></li><li><p><a href="#eval_file/2"><code class="inline">eval_file/2</code></a> - evaluates the file contents without tracking its name. It
+returns the result of the last expression in the file, instead of the modules
+defined in it. Evaluated files do not trigger the compilation tracers described
+in the next section.</p></li></ul><p>In a nutshell, the first must be used when you want to keep track of the files
+handled by the system, to avoid the same file from being compiled multiple
+times. This is common in scripts.</p><p><a href="#compile_file/2"><code class="inline">compile_file/2</code></a> must be used when you are interested in the modules defined in a
+file, without tracking. <a href="#eval_file/2"><code class="inline">eval_file/2</code></a> should be used when you are interested in
+the result of evaluating the file rather than the modules it defines.</p><h2 id="module-compilation-tracers" class="section-heading">
+  <a href="#module-compilation-tracers" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Compilation tracers
+</h2>
+<p>Elixir supports compilation tracers, which allows modules to observe constructs
+handled by the Elixir compiler when compiling files. A tracer is a module
+that implements the <code class="inline">trace/2</code> function. The function receives the event name
+as first argument and <a href="Macro.Env.html"><code class="inline">Macro.Env</code></a> as second and it must return <code class="inline">:ok</code>. It is
+very important for a tracer to do as little work as possible synchronously
+and dispatch the bulk of the work to a separate process. <strong>Slow tracers will
+slow down compilation</strong>.</p><p>You can configure your list of tracers via <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>. The
+following events are available to tracers:</p><ul><li><p><code class="inline">:start</code> - (since v1.11.0) invoked whenever the compiler starts to trace
+a new lexical context, such as a new file. Keep in mind the compiler runs
+in parallel, so multiple files may invoke <code class="inline">:start</code> and run at the same
+time. The value of the <code class="inline">lexical_tracker</code> of the macro environment, albeit
+opaque, can be used to uniquely identify the environment.</p></li><li><p><code class="inline">:stop</code> - (since v1.11.0) invoked whenever the compiler stops tracing a
+new lexical context, such as a new file.</p></li><li><p><code class="inline">{:import, meta, module, opts}</code> - traced whenever <code class="inline">module</code> is imported.
+<code class="inline">meta</code> is the import AST metadata and <code class="inline">opts</code> are the import options.</p></li><li><p><code class="inline">{:imported_function, meta, module, name, arity}</code> and
+<code class="inline">{:imported_macro, meta, module, name, arity}</code> - traced whenever an
+imported function or macro is invoked. <code class="inline">meta</code> is the call AST metadata,
+<code class="inline">module</code> is the module the import is from, followed by the <code class="inline">name</code> and <code class="inline">arity</code>
+of the imported function/macro.</p></li><li><p><code class="inline">{:alias, meta, alias, as, opts}</code> - traced whenever <code class="inline">alias</code> is aliased
+to <code class="inline">as</code>. <code class="inline">meta</code> is the alias AST metadata and <code class="inline">opts</code> are the alias options.</p></li><li><p><code class="inline">{:alias_expansion, meta, as, alias}</code> traced whenever there is an alias
+expansion for a previously defined <code class="inline">alias</code>, i.e. when the user writes <code class="inline">as</code>
+which is expanded to <code class="inline">alias</code>. <code class="inline">meta</code> is the alias expansion AST metadata.</p></li><li><p><code class="inline">{:alias_reference, meta, module}</code> - traced whenever there is an alias
+in the code, i.e. whenever the user writes <code class="inline">MyModule.Foo.Bar</code> in the code,
+regardless if it was expanded or not.</p></li><li><p><code class="inline">{:require, meta, module, opts}</code> - traced whenever <code class="inline">module</code> is required.
+<code class="inline">meta</code> is the require AST metadata and <code class="inline">opts</code> are the require options.</p></li><li><p><code class="inline">{:struct_expansion, meta, module, keys}</code> - traced whenever <code class="inline">module</code>'s struct
+is expanded. <code class="inline">meta</code> is the struct AST metadata and <code class="inline">keys</code> are the keys being
+used by expansion</p></li><li><p><code class="inline">{:remote_function, meta, module, name, arity}</code> and
+<code class="inline">{:remote_macro, meta, module, name, arity}</code> - traced whenever a remote
+function or macro is referenced. <code class="inline">meta</code> is the call AST metadata, <code class="inline">module</code>
+is the invoked module, followed by the <code class="inline">name</code> and <code class="inline">arity</code>.</p></li><li><p><code class="inline">{:local_function, meta, name, arity}</code> and
+<code class="inline">{:local_macro, meta, name, arity}</code> - traced whenever a local
+function or macro is referenced. <code class="inline">meta</code> is the call AST metadata, <code class="inline">module</code>
+is the invoked module, followed by the <code class="inline">name</code> and <code class="inline">arity</code>.</p></li><li><p><code class="inline">{:compile_env, app, path, return}</code> - traced whenever <a href="Application.html#compile_env/3"><code class="inline">Application.compile_env/3</code></a>
+or <a href="Application.html#compile_env!/2"><code class="inline">Application.compile_env!/2</code></a> are called. <code class="inline">app</code> is an atom, <code class="inline">path</code> is a list
+of keys to traverse in the application environemnt and <code class="inline">return</code> is either
+<code class="inline">{:ok, value}</code> or <code class="inline">:error</code>.</p></li></ul><p>The <code class="inline">:tracers</code> compiler option can be combined with the <code class="inline">:parser_options</code>
+compiler option to enrich the metadata of the traced events above.</p><p>New events may be added at any time in the future, therefore it is advised
+for the <code class="inline">trace/2</code> function to have a &quot;catch-all&quot; clause.</p><p>Below is an example tracer that prints all remote function invocations:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyTracer</span><span class="w"> </span><span class="k" data-group-id="5407144021-1">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">trace</span><span class="p" data-group-id="5407144021-2">(</span><span class="p" data-group-id="5407144021-3">{</span><span class="ss">:remote_function</span><span class="p">,</span><span class="w"> </span><span class="c">_meta</span><span class="p">,</span><span class="w"> </span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">arity</span><span class="p" data-group-id="5407144021-3">}</span><span class="p">,</span><span class="w"> </span><span class="n">env</span><span class="p" data-group-id="5407144021-2">)</span><span class="w"> </span><span class="k" data-group-id="5407144021-4">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="w"> </span><span class="s">&quot;</span><span class="si" data-group-id="5407144021-5">#{</span><span class="n">env</span><span class="o">.</span><span class="n">file</span><span class="si" data-group-id="5407144021-5">}</span><span class="s">:</span><span class="si" data-group-id="5407144021-6">#{</span><span class="n">env</span><span class="o">.</span><span class="n">line</span><span class="si" data-group-id="5407144021-6">}</span><span class="s"> </span><span class="si" data-group-id="5407144021-7">#{</span><span class="n">inspect</span><span class="p" data-group-id="5407144021-8">(</span><span class="n">module</span><span class="p" data-group-id="5407144021-8">)</span><span class="si" data-group-id="5407144021-7">}</span><span class="s">.</span><span class="si" data-group-id="5407144021-9">#{</span><span class="n">name</span><span class="si" data-group-id="5407144021-9">}</span><span class="s">/</span><span class="si" data-group-id="5407144021-10">#{</span><span class="n">arity</span><span class="si" data-group-id="5407144021-10">}</span><span class="s">&quot;</span><span class="w">
+    </span><span class="ss">:ok</span><span class="w">
+  </span><span class="k" data-group-id="5407144021-4">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">trace</span><span class="p" data-group-id="5407144021-11">(</span><span class="c">_event</span><span class="p">,</span><span class="w"> </span><span class="c">_env</span><span class="p" data-group-id="5407144021-11">)</span><span class="w"> </span><span class="k" data-group-id="5407144021-12">do</span><span class="w">
+    </span><span class="ss">:ok</span><span class="w">
+  </span><span class="k" data-group-id="5407144021-12">end</span><span class="w">
+</span><span class="k" data-group-id="5407144021-1">end</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:binding/0">binding()</a>
+  </div>
+    <div class="summary-synopsis"><p>A list with all variable bindings.</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append_path/1">append_path(path)</a>
+  </div>
+    <div class="summary-synopsis"><p>Appends a path to the end of the Erlang VM code path list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#available_compiler_options/0">available_compiler_options()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list with all available compiler options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_file/2">compile_file(file, relative_to \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Compiles the given file.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_quoted/2">compile_quoted(quoted, file \\ &quot;nofile&quot;)</a>
+  </div>
+    <div class="summary-synopsis"><p>Compiles the quoted expression.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_string/2">compile_string(string, file \\ &quot;nofile&quot;)</a>
+  </div>
+    <div class="summary-synopsis"><p>Compiles the given string.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compiler_options/0">compiler_options()</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets all compilation options from the code server.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compiler_options/1">compiler_options(opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Stores all given compilation options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_path/1">delete_path(path)</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes a path from the Erlang VM code path list. This is the list of
+directories the Erlang VM uses for finding module code.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ensure_compiled/1">ensure_compiled(module)</a>
+  </div>
+    <div class="summary-synopsis"><p>Ensures the given module is compiled and loaded.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ensure_loaded/1">ensure_loaded(module)</a>
+  </div>
+    <div class="summary-synopsis"><p>Ensures the given module is loaded.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ensure_loaded?/1">ensure_loaded?(module)</a>
+  </div>
+    <div class="summary-synopsis"><p>Ensures the given module is loaded.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_file/2">eval_file(file, relative_to \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Evals the given file.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_quoted/3">eval_quoted(quoted, binding \\ [], opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates the quoted contents.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_string/3">eval_string(string, binding \\ [], opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Evaluates the contents given by <code class="inline">string</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fetch_docs/1">fetch_docs(module_or_path)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the docs for the given module or path to <code class="inline">.beam</code> file.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_file!/2">format_file!(file, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Formats a file.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_string!/2">format_string!(string, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Formats the given code <code class="inline">string</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_compiler_option/1">get_compiler_option(key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the value of a given compiler option.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_docs/2">get_docs(module, kind)</a>
+      <span class="deprecated" title="Code.get_docs/2 always returns nil as its outdated documentation is no longer stored on BEAM files. Use Code.fetch_docs/1 instead">deprecated</span>
+  </div>
+    <div class="summary-synopsis"><p>Deprecated function to retrieve old documentation format.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prepend_path/1">prepend_path(path)</a>
+  </div>
+    <div class="summary-synopsis"><p>Prepends a path to the beginning of the Erlang VM code path list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#purge_compiler_modules/0">purge_compiler_modules()</a>
+  </div>
+    <div class="summary-synopsis"><p>Purge compiler modules.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_compiler_option/2">put_compiler_option(key, value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Stores a compilation option.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#require_file/2">require_file(file, relative_to \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Requires the given <code class="inline">file</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#required_files/0">required_files()</a>
+  </div>
+    <div class="summary-synopsis"><p>Lists all required files.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string_to_quoted/2">string_to_quoted(string, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts the given string to its quoted form.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#string_to_quoted!/2">string_to_quoted!(string, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts the given string to its quoted form.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unrequire_files/1">unrequire_files(files)</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes files from the required files list.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:binding/0">
+  <div class="detail-header">
+    <a href="#t:binding/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">binding()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L123" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>binding() :: [{<a href="typespecs.html#basic-types">atom</a>() | <a href="typespecs.html#basic-types">tuple</a>(), <a href="typespecs.html#basic-types">any</a>()}]</pre>
+      </div>
+
+<p>A list with all variable bindings.</p><p>The binding keys are usually atoms, but they may be a tuple for variables
+defined in a different context.</p>  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="append_path/1">
+  <div class="detail-header">
+    <a href="#append_path/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append_path(path)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L210" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>append_path(<a href="Path.html#t:t/0">Path.t</a>()) :: true | {:error, :bad_directory}</pre>
+      </div>
+
+<p>Appends a path to the end of the Erlang VM code path list.</p><p>This is the list of directories the Erlang VM uses for
+finding module code.</p><p>The path is expanded with <a href="Path.html#expand/1"><code class="inline">Path.expand/1</code></a> before being appended.
+If this path does not exist, an error is returned.</p><h2 id="append_path/1-examples" class="section-heading">
+  <a href="#append_path/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">append_path</span><span class="p" data-group-id="2323092774-1">(</span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="2323092774-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">append_path</span><span class="p" data-group-id="2323092774-2">(</span><span class="s">&quot;/does_not_exist&quot;</span><span class="p" data-group-id="2323092774-2">)</span><span class="w">
+</span><span class="c1">#=&gt; {:error, :bad_directory}</span></code></pre>  </section>
+</section>
+<section class="detail" id="available_compiler_options/0">
+  <div class="detail-header">
+    <a href="#available_compiler_options/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">available_compiler_options()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1000" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>available_compiler_options() :: [<a href="typespecs.html#basic-types">atom</a>()]</pre>
+      </div>
+
+<p>Returns a list with all available compiler options.</p><p>For a description of all options, see <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>.</p><h2 id="available_compiler_options/0-examples" class="section-heading">
+  <a href="#available_compiler_options/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">available_compiler_options</span><span class="p" data-group-id="7090382453-1">(</span><span class="p" data-group-id="7090382453-1">)</span><span class="w">
+</span><span class="c1">#=&gt; [:docs, :debug_info, ...]</span></code></pre>  </section>
+</section>
+<section class="detail" id="compile_file/2">
+    <span id="compile_file/1"></span>
+  <div class="detail-header">
+    <a href="#compile_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_file(file, relative_to \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1165" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_file(<a href="typespecs.html#built-in-types">binary</a>(), nil | <a href="typespecs.html#built-in-types">binary</a>()) :: [{<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#built-in-types">binary</a>()}]</pre>
+      </div>
+
+<p>Compiles the given file.</p><p>Accepts <code class="inline">relative_to</code> as an argument to tell where the file is located.</p><p>Returns a list of tuples where the first element is the module name and
+the second one is its bytecode (as a binary). Opposite to <a href="#require_file/2"><code class="inline">require_file/2</code></a>,
+it does not track the filename of the compiled file.</p><p>If you would like to get the result of evaluating file rather than the
+modules defined in it, see <a href="#eval_file/2"><code class="inline">eval_file/2</code></a>.</p><p>For compiling many files concurrently, see <a href="Kernel.ParallelCompiler.html#compile/2"><code class="inline">Kernel.ParallelCompiler.compile/2</code></a>.</p>  </section>
+</section>
+<section class="detail" id="compile_quoted/2">
+    <span id="compile_quoted/1"></span>
+  <div class="detail-header">
+    <a href="#compile_quoted/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_quoted(quoted, file \\ &quot;nofile&quot;)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1144" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_quoted(<a href="Macro.html#t:t/0">Macro.t</a>(), <a href="typespecs.html#built-in-types">binary</a>()) :: [{<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#built-in-types">binary</a>()}]</pre>
+      </div>
+
+<p>Compiles the quoted expression.</p><p>Returns a list of tuples where the first element is the module name and
+the second one is its bytecode (as a binary). A <code class="inline">file</code> can be
+given as second argument which will be used for reporting warnings
+and errors.</p>  </section>
+</section>
+<section class="detail" id="compile_string/2">
+    <span id="compile_string/1"></span>
+  <div class="detail-header">
+    <a href="#compile_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_string(string, file \\ &quot;nofile&quot;)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1130" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_string(<a href="List.Chars.html#t:t/0">List.Chars.t</a>(), <a href="typespecs.html#built-in-types">binary</a>()) :: [{<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#built-in-types">binary</a>()}]</pre>
+      </div>
+
+<p>Compiles the given string.</p><p>Returns a list of tuples where the first element is the module name
+and the second one is its bytecode (as a binary). A <code class="inline">file</code> can be
+given as second argument which will be used for reporting warnings
+and errors.</p><p><strong>Warning</strong>: <code class="inline">string</code> can be any Elixir code and code can be executed with
+the same privileges as the Erlang VM: this means that such code could
+compromise the machine (for example by executing system commands).
+Don't use <a href="#compile_string/2"><code class="inline">compile_string/2</code></a> with untrusted input (such as strings coming
+from the network).</p>  </section>
+</section>
+<section class="detail" id="compiler_options/0">
+  <div class="detail-header">
+    <a href="#compiler_options/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compiler_options()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L945" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compiler_options() :: <a href="typespecs.html#basic-types">map</a>()</pre>
+      </div>
+
+<p>Gets all compilation options from the code server.</p><p>To get invidual options, see <a href="#get_compiler_option/1"><code class="inline">get_compiler_option/1</code></a>.
+For a description of all options, see <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>.</p><h2 id="compiler_options/0-examples" class="section-heading">
+  <a href="#compiler_options/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">compiler_options</span><span class="p" data-group-id="4684179634-1">(</span><span class="p" data-group-id="4684179634-1">)</span><span class="w">
+</span><span class="c1">#=&gt; %{debug_info: true, docs: true, ...}</span></code></pre>  </section>
+</section>
+<section class="detail" id="compiler_options/1">
+  <div class="detail-header">
+    <a href="#compiler_options/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compiler_options(opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L964" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compiler_options(<a href="Enumerable.html#t:t/0">Enumerable.t</a>()) :: %{optional(<a href="typespecs.html#basic-types">atom</a>()) => <a href="typespecs.html#built-in-types">boolean</a>()}</pre>
+      </div>
+
+<p>Stores all given compilation options.</p><p>To store invidual options, see <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>.
+For a description of all options, see <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>.</p><h2 id="compiler_options/1-examples" class="section-heading">
+  <a href="#compiler_options/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">compiler_options</span><span class="p" data-group-id="8531419392-1">(</span><span class="p" data-group-id="8531419392-1">)</span><span class="w">
+</span><span class="c1">#=&gt; %{debug_info: true, docs: true, ...}</span></code></pre>  </section>
+</section>
+<section class="detail" id="delete_path/1">
+  <div class="detail-header">
+    <a href="#delete_path/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_path(path)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L255" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>delete_path(<a href="Path.html#t:t/0">Path.t</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Deletes a path from the Erlang VM code path list. This is the list of
+directories the Erlang VM uses for finding module code.</p><p>The path is expanded with <a href="Path.html#expand/1"><code class="inline">Path.expand/1</code></a> before being deleted. If the
+path does not exist, this function returns <code class="inline">false</code>.</p><h2 id="delete_path/1-examples" class="section-heading">
+  <a href="#delete_path/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">prepend_path</span><span class="p" data-group-id="3167684628-1">(</span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="3167684628-1">)</span><span class="w">
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">delete_path</span><span class="p" data-group-id="3167684628-2">(</span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="3167684628-2">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">delete_path</span><span class="p" data-group-id="3167684628-3">(</span><span class="s">&quot;/does_not_exist&quot;</span><span class="p" data-group-id="3167684628-3">)</span><span class="w">
+</span><span class="c1">#=&gt; false</span></code></pre>  </section>
+</section>
+<section class="detail" id="ensure_compiled/1">
+  <div class="detail-header">
+    <a href="#ensure_compiled/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ensure_compiled(module)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1275" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>ensure_compiled(<a href="typespecs.html#built-in-types">module</a>()) ::
+  {:module, <a href="typespecs.html#built-in-types">module</a>()}
+  | {:error, :embedded | :badfile | :nofile | :on_load_failure | :unavailable}</pre>
+      </div>
+
+<p>Ensures the given module is compiled and loaded.</p><p>If the module is already loaded, it works as no-op. If the module was
+not compiled yet, <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> halts the compilation of the caller
+until the module given to <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> becomes available or
+all files for the current project have been compiled. If compilation
+finishes and the module is not available, an error tuple is returned.</p><p>Given this function halts compilation, use it carefully. In particular,
+avoid using it to guess which modules are in the system. Overuse of this
+function can also lead to deadlocks, where two modules check at the same time
+if the other is compiled. This returns a specific unavailable error code,
+where we cannot successfully verify a module is available or not.</p><p>If it succeeds in loading the module, it returns <code class="inline">{:module, module}</code>.
+If not, returns <code class="inline">{:error, reason}</code> with the error reason.</p><p>If the module being checked is currently in a compiler deadlock,
+this function returns <code class="inline">{:error, :unavailable}</code>. Unavailable doesn't
+necessarily mean the module doesn't exist, just that it is not currently
+available, but it (or may not) become available in the future.</p><p>Check <a href="#ensure_loaded/1"><code class="inline">ensure_loaded/1</code></a> for more information on module loading
+and when to use <a href="#ensure_loaded/1"><code class="inline">ensure_loaded/1</code></a> or <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a>.</p>  </section>
+</section>
+<section class="detail" id="ensure_loaded/1">
+  <div class="detail-header">
+    <a href="#ensure_loaded/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ensure_loaded(module)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1224" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>ensure_loaded(<a href="typespecs.html#built-in-types">module</a>()) ::
+  {:module, <a href="typespecs.html#built-in-types">module</a>()}
+  | {:error, :embedded | :badfile | :nofile | :on_load_failure}</pre>
+      </div>
+
+<p>Ensures the given module is loaded.</p><p>If the module is already loaded, this works as no-op. If the module
+was not yet loaded, it tries to load it.</p><p>If it succeeds in loading the module, it returns <code class="inline">{:module, module}</code>.
+If not, returns <code class="inline">{:error, reason}</code> with the error reason.</p><h2 id="ensure_loaded/1-code-loading-on-the-erlang-vm" class="section-heading">
+  <a href="#ensure_loaded/1-code-loading-on-the-erlang-vm" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Code loading on the Erlang VM
+</h2>
+<p>Erlang has two modes to load code: interactive and embedded.</p><p>By default, the Erlang VM runs in interactive mode, where modules
+are loaded as needed. In embedded mode the opposite happens, as all
+modules need to be loaded upfront or explicitly.</p><p>Therefore, this function is used to check if a module is loaded
+before using it and allows one to react accordingly. For example, the <a href="URI.html"><code class="inline">URI</code></a>
+module uses this function to check if a specific parser exists for a given
+URI scheme.</p><h2 id="ensure_loaded/1-ensure_compiled-1" class="section-heading">
+  <a href="#ensure_loaded/1-ensure_compiled-1" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a>
+</h2>
+<p>Elixir also contains an <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> function that is a
+superset of <a href="#ensure_loaded/1"><code class="inline">ensure_loaded/1</code></a>.</p><p>Since Elixir's compilation happens in parallel, in some situations
+you may need to use a module that was not yet compiled, therefore
+it can't even be loaded.</p><p>When invoked, <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> halts the compilation of the caller
+until the module given to <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> becomes available or
+all files for the current project have been compiled. If compilation
+finishes and the module is not available, an error tuple is returned.</p><p><a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a> does not apply to dependencies, as dependencies
+must be compiled upfront.</p><p>In most cases, <a href="#ensure_loaded/1"><code class="inline">ensure_loaded/1</code></a> is enough. <a href="#ensure_compiled/1"><code class="inline">ensure_compiled/1</code></a>
+must be used in rare cases, usually involving macros that need to
+invoke a module for callback information.</p><h2 id="ensure_loaded/1-examples" class="section-heading">
+  <a href="#ensure_loaded/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">ensure_loaded</span><span class="p" data-group-id="5626671779-1">(</span><span class="nc">Atom</span><span class="p" data-group-id="5626671779-1">)</span><span class="w">
+</span><span class="p" data-group-id="5626671779-2">{</span><span class="ss">:module</span><span class="p">,</span><span class="w"> </span><span class="nc">Atom</span><span class="p" data-group-id="5626671779-2">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">ensure_loaded</span><span class="p" data-group-id="5626671779-3">(</span><span class="nc">DoesNotExist</span><span class="p" data-group-id="5626671779-3">)</span><span class="w">
+</span><span class="p" data-group-id="5626671779-4">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:nofile</span><span class="p" data-group-id="5626671779-4">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="ensure_loaded?/1">
+  <div class="detail-header">
+    <a href="#ensure_loaded?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ensure_loaded?(module)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1242" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>ensure_loaded?(<a href="typespecs.html#built-in-types">module</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Ensures the given module is loaded.</p><p>Similar to <a href="#ensure_loaded/1"><code class="inline">ensure_loaded/1</code></a>, but returns <code class="inline">true</code> if the module
+is already loaded or was successfully loaded. Returns <code class="inline">false</code>
+otherwise.</p><h2 id="ensure_loaded?/1-examples" class="section-heading">
+  <a href="#ensure_loaded?/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">ensure_loaded?</span><span class="p" data-group-id="6342879804-1">(</span><span class="nc">Atom</span><span class="p" data-group-id="6342879804-1">)</span><span class="w">
+</span><span class="no">true</span></code></pre>  </section>
+</section>
+<section class="detail" id="eval_file/2">
+    <span id="eval_file/1"></span>
+  <div class="detail-header">
+    <a href="#eval_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_file(file, relative_to \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L870" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>eval_file(<a href="typespecs.html#built-in-types">binary</a>(), nil | <a href="typespecs.html#built-in-types">binary</a>()) :: {<a href="typespecs.html#built-in-types">term</a>(), <a href="#t:binding/0">binding</a>()}</pre>
+      </div>
+
+<p>Evals the given file.</p><p>Accepts <code class="inline">relative_to</code> as an argument to tell where the file is located.</p><p>While <a href="#require_file/2"><code class="inline">require_file/2</code></a> and <a href="#compile_file/2"><code class="inline">compile_file/2</code></a> return the loaded modules and their
+bytecode, <a href="#eval_file/2"><code class="inline">eval_file/2</code></a> simply evaluates the file contents and returns the
+evaluation result and its binding (exactly the same return value as <a href="#eval_string/3"><code class="inline">eval_string/3</code></a>).</p>  </section>
+</section>
+<section class="detail" id="eval_quoted/3">
+    <span id="eval_quoted/1"></span>
+    <span id="eval_quoted/2"></span>
+  <div class="detail-header">
+    <a href="#eval_quoted/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_quoted(quoted, binding \\ [], opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L697" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>eval_quoted(<a href="Macro.html#t:t/0">Macro.t</a>(), <a href="#t:binding/0">binding</a>(), <a href="Macro.Env.html#t:t/0">Macro.Env.t</a>() | <a href="typespecs.html#built-in-types">keyword</a>()) ::
+  {<a href="typespecs.html#built-in-types">term</a>(), <a href="#t:binding/0">binding</a>()}</pre>
+      </div>
+
+<p>Evaluates the quoted contents.</p><p><strong>Warning</strong>: Calling this function inside a macro is considered bad
+practice as it will attempt to evaluate runtime values at compile time.
+Macro arguments are typically transformed by unquoting them into the
+returned quoted expressions (instead of evaluated).</p><p>See <a href="#eval_string/3"><code class="inline">eval_string/3</code></a> for a description of <code class="inline">binding</code> and options.</p><h2 id="eval_quoted/3-examples" class="section-heading">
+  <a href="#eval_quoted/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">quote</span><span class="p" data-group-id="4608262070-1">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">var!</span><span class="p" data-group-id="4608262070-2">(</span><span class="n">a</span><span class="p" data-group-id="4608262070-2">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">var!</span><span class="p" data-group-id="4608262070-3">(</span><span class="n">b</span><span class="p" data-group-id="4608262070-3">)</span><span class="p" data-group-id="4608262070-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_quoted</span><span class="p" data-group-id="4608262070-4">(</span><span class="n">contents</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4608262070-5">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4608262070-5">]</span><span class="p">,</span><span class="w"> </span><span class="ss">file</span><span class="p">:</span><span class="w"> </span><span class="bp">__ENV__</span><span class="o">.</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="ss">line</span><span class="p">:</span><span class="w"> </span><span class="bp">__ENV__</span><span class="o">.</span><span class="n">line</span><span class="p" data-group-id="4608262070-4">)</span><span class="w">
+</span><span class="p" data-group-id="4608262070-6">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4608262070-7">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4608262070-7">]</span><span class="p" data-group-id="4608262070-6">}</span></code></pre><p>For convenience, you can pass <code class="inline">__ENV__/0</code> as the <code class="inline">opts</code> argument and
+all options will be automatically extracted from the current environment:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">quote</span><span class="p" data-group-id="2809501280-1">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">var!</span><span class="p" data-group-id="2809501280-2">(</span><span class="n">a</span><span class="p" data-group-id="2809501280-2">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">var!</span><span class="p" data-group-id="2809501280-3">(</span><span class="n">b</span><span class="p" data-group-id="2809501280-3">)</span><span class="p" data-group-id="2809501280-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_quoted</span><span class="p" data-group-id="2809501280-4">(</span><span class="n">contents</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2809501280-5">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="2809501280-5">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__ENV__</span><span class="p" data-group-id="2809501280-4">)</span><span class="w">
+</span><span class="p" data-group-id="2809501280-6">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2809501280-7">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="2809501280-7">]</span><span class="p" data-group-id="2809501280-6">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="eval_string/3">
+    <span id="eval_string/1"></span>
+    <span id="eval_string/2"></span>
+  <div class="detail-header">
+    <a href="#eval_string/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_string(string, binding \\ [], opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L327" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>eval_string(<a href="List.Chars.html#t:t/0">List.Chars.t</a>(), <a href="#t:binding/0">binding</a>(), <a href="Macro.Env.html#t:t/0">Macro.Env.t</a>() | <a href="typespecs.html#built-in-types">keyword</a>()) ::
+  {<a href="typespecs.html#built-in-types">term</a>(), <a href="#t:binding/0">binding</a>()}</pre>
+      </div>
+
+<p>Evaluates the contents given by <code class="inline">string</code>.</p><p>The <code class="inline">binding</code> argument is a list of variable bindings.
+The <code class="inline">opts</code> argument is a keyword list of environment options.</p><p><strong>Warning</strong>: <code class="inline">string</code> can be any Elixir code and will be executed with
+the same privileges as the Erlang VM: this means that such code could
+compromise the machine (for example by executing system commands).
+Don't use <a href="#eval_string/3"><code class="inline">eval_string/3</code></a> with untrusted input (such as strings coming
+from the network).</p><h2 id="eval_string/3-options" class="section-heading">
+  <a href="#eval_string/3-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<p>Options can be:</p><ul><li><p><code class="inline">:file</code> - the file to be considered in the evaluation</p></li><li><p><code class="inline">:line</code> - the line on which the script starts</p></li></ul><p>Additionally, the following scope values can be configured:</p><ul><li><p><code class="inline">:aliases</code> - a list of tuples with the alias and its target</p></li><li><p><code class="inline">:requires</code> - a list of modules required</p></li><li><p><code class="inline">:functions</code> - a list of tuples where the first element is a module
+and the second a list of imported function names and arity; the list
+of function names and arity must be sorted</p></li><li><p><code class="inline">:macros</code> - a list of tuples where the first element is a module
+and the second a list of imported macro names and arity; the list
+of function names and arity must be sorted</p></li></ul><p>Notice that setting any of the values above overrides Elixir's default
+values. For example, setting <code class="inline">:requires</code> to <code class="inline">[]</code> will no longer
+automatically require the <a href="Kernel.html"><code class="inline">Kernel</code></a> module. In the same way setting
+<code class="inline">:macros</code> will no longer auto-import <a href="Kernel.html"><code class="inline">Kernel</code></a> macros like <a href="Kernel.html#if/2"><code class="inline">Kernel.if/2</code></a>,
+<a href="Kernel.SpecialForms.html#case/2"><code class="inline">Kernel.SpecialForms.case/2</code></a>, and so on.</p><p>Returns a tuple of the form <code class="inline">{value, binding}</code>,
+where <code class="inline">value</code> is the value returned from evaluating <code class="inline">string</code>.
+If an error occurs while evaluating <code class="inline">string</code> an exception will be raised.</p><p><code class="inline">binding</code> is a list with all variable bindings
+after evaluating <code class="inline">string</code>. The binding keys are usually atoms, but they
+may be a tuple for variables defined in a different context.</p><h2 id="eval_string/3-examples" class="section-heading">
+  <a href="#eval_string/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="4819662027-1">(</span><span class="s">&quot;a + b&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-2">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4819662027-2">]</span><span class="p">,</span><span class="w"> </span><span class="ss">file</span><span class="p">:</span><span class="w"> </span><span class="bp">__ENV__</span><span class="o">.</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="ss">line</span><span class="p">:</span><span class="w"> </span><span class="bp">__ENV__</span><span class="o">.</span><span class="n">line</span><span class="p" data-group-id="4819662027-1">)</span><span class="w">
+</span><span class="p" data-group-id="4819662027-3">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-4">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4819662027-4">]</span><span class="p" data-group-id="4819662027-3">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="4819662027-5">(</span><span class="s">&quot;c = a + b&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-6">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4819662027-6">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__ENV__</span><span class="p" data-group-id="4819662027-5">)</span><span class="w">
+</span><span class="p" data-group-id="4819662027-7">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-8">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="ss">c</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="4819662027-8">]</span><span class="p" data-group-id="4819662027-7">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="4819662027-9">(</span><span class="s">&quot;a = a + b&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-10">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4819662027-10">]</span><span class="p" data-group-id="4819662027-9">)</span><span class="w">
+</span><span class="p" data-group-id="4819662027-11">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4819662027-12">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4819662027-12">]</span><span class="p" data-group-id="4819662027-11">}</span></code></pre><p>For convenience, you can pass <code class="inline">__ENV__/0</code> as the <code class="inline">opts</code> argument and
+all imports, requires and aliases defined in the current environment
+will be automatically carried over:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="4111497955-1">(</span><span class="s">&quot;a + b&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4111497955-2">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4111497955-2">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__ENV__</span><span class="p" data-group-id="4111497955-1">)</span><span class="w">
+</span><span class="p" data-group-id="4111497955-3">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4111497955-4">[</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="4111497955-4">]</span><span class="p" data-group-id="4111497955-3">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="fetch_docs/1">
+  <div class="detail-header">
+    <a href="#fetch_docs/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fetch_docs(module_or_path)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1337" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>fetch_docs(<a href="typespecs.html#built-in-types">module</a>() | <a href="String.html#t:t/0">String.t</a>()) ::
+  {:docs_v1, annotation, beam_language, format, module_doc :: doc_content,
+   metadata, docs :: [doc_element]}
+  | {:error, :module_not_found | :chunk_not_found | {:invalid_chunk, <a href="typespecs.html#built-in-types">binary</a>()}}
+when annotation: <a href="http://www.erlang.org/doc/man/erl_anno.html#type-anno">:erl_anno.anno</a>(),
+     beam_language: :elixir | :erlang | :lfe | :alpaca | <a href="typespecs.html#basic-types">atom</a>(),
+     doc_content: %{required(<a href="typespecs.html#built-in-types">binary</a>()) => <a href="typespecs.html#built-in-types">binary</a>()} | :none | :hidden,
+     doc_element:
+       {{kind :: <a href="typespecs.html#basic-types">atom</a>(), function_name :: <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">arity</a>()}, annotation,
+        signature, doc_content, metadata},
+     format: <a href="typespecs.html#built-in-types">binary</a>(),
+     signature: [<a href="typespecs.html#built-in-types">binary</a>()],
+     metadata: <a href="typespecs.html#basic-types">map</a>()</pre>
+      </div>
+
+<p>Returns the docs for the given module or path to <code class="inline">.beam</code> file.</p><p>When given a module name, it finds its BEAM code and reads the docs from it.</p><p>When given a path to a <code class="inline">.beam</code> file, it will load the docs directly from that
+file.</p><p>It returns the term stored in the documentation chunk in the format defined by
+<a href="http://erlang.org/eep/eeps/eep-0048.html">EEP 48</a> or <code class="inline">{:error, reason}</code> if
+the chunk is not available.</p><h2 id="fetch_docs/1-examples" class="section-heading">
+  <a href="#fetch_docs/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Module documentation of an existing module</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="6703421024-1">{</span><span class="ss">:docs_v1</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="ss">:elixir</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6703421024-2">%{</span><span class="s">&quot;en&quot;</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="n">module_doc</span><span class="p" data-group-id="6703421024-2">}</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="6703421024-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Code</span><span class="o">.</span><span class="n">fetch_docs</span><span class="p" data-group-id="6703421024-3">(</span><span class="nc">Atom</span><span class="p" data-group-id="6703421024-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">module_doc</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">split</span><span class="p" data-group-id="6703421024-4">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p" data-group-id="6703421024-4">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">at</span><span class="p" data-group-id="6703421024-5">(</span><span class="mi">0</span><span class="p" data-group-id="6703421024-5">)</span><span class="w">
+</span><span class="s">&quot;Atoms are constants whose values are their own name.&quot;</span><span class="w">
+
+</span><span class="c1"># A module that doesn&#39;t exist</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Code</span><span class="o">.</span><span class="n">fetch_docs</span><span class="p" data-group-id="6703421024-6">(</span><span class="nc">ModuleNotGood</span><span class="p" data-group-id="6703421024-6">)</span><span class="w">
+</span><span class="p" data-group-id="6703421024-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:module_not_found</span><span class="p" data-group-id="6703421024-7">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="format_file!/2">
+    <span id="format_file!/1"></span>
+  <div class="detail-header">
+    <a href="#format_file!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_file!(file, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L666" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>format_file!(<a href="typespecs.html#built-in-types">binary</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) :: <a href="typespecs.html#built-in-types">iodata</a>()</pre>
+      </div>
+
+<p>Formats a file.</p><p>See <a href="#format_string!/2"><code class="inline">format_string!/2</code></a> for more information on code formatting and
+available options.</p>  </section>
+</section>
+<section class="detail" id="format_string!/2">
+    <span id="format_string!/1"></span>
+  <div class="detail-header">
+    <a href="#format_string!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_string!(string, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L652" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.6.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>format_string!(<a href="typespecs.html#built-in-types">binary</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) :: <a href="typespecs.html#built-in-types">iodata</a>()</pre>
+      </div>
+
+<p>Formats the given code <code class="inline">string</code>.</p><p>The formatter receives a string representing Elixir code and
+returns iodata representing the formatted code according to
+pre-defined rules.</p><h2 id="format_string!/2-options" class="section-heading">
+  <a href="#format_string!/2-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><p><code class="inline">:file</code> - the file which contains the string, used for error
+reporting</p></li><li><p><code class="inline">:line</code> - the line the string starts, used for error reporting</p></li><li><p><code class="inline">:line_length</code> - the line length to aim for when formatting
+the document. Defaults to 98. Note this value is used as
+reference but it is not enforced by the formatter as sometimes
+user intervention is required. See &quot;Running the formatter&quot;
+section</p></li><li><p><code class="inline">:locals_without_parens</code> - a keyword list of name and arity
+pairs that should be kept without parens whenever possible.
+The arity may be the atom <code class="inline">:*</code>, which implies all arities of
+that name. The formatter already includes a list of functions
+and this option augments this list.</p></li><li><p><code class="inline">:rename_deprecated_at</code> - rename all known deprecated functions
+at the given version to their non-deprecated equivalent. It
+expects a valid <a href="Version.html"><code class="inline">Version</code></a> which is usually the minimum Elixir
+version supported by the project.</p></li><li><p><code class="inline">:force_do_end_blocks</code> (since v1.9.0) - when <code class="inline">true</code>, converts all
+inline usages of <code class="inline">do: ...</code>,  <code class="inline">else: ...</code> and friends into <code class="inline">do/end</code>
+blocks. Defaults to <code class="inline">false</code>. Notice this option is convergent:
+once you set it to <code class="inline">true</code>, all keywords will be converted. If you
+set it to <code class="inline">false</code> later on, <code class="inline">do/end</code> blocks won't be converted
+back to keywords.</p></li></ul><h2 id="format_string!/2-design-principles" class="section-heading">
+  <a href="#format_string!/2-design-principles" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Design principles
+</h2>
+<p>The formatter was designed under three principles.</p><p>First, the formatter never changes the semantics of the code by
+default. This means the input AST and the output AST are equivalent.
+Optional behaviour, such as <code class="inline">:rename_deprecated_at</code>, is allowed to
+break this guarantee.</p><p>The second principle is to provide as little configuration as possible.
+This eases the formatter adoption by removing contention points while
+making sure a single style is followed consistently by the community as
+a whole.</p><p>The formatter does not hard code names. The formatter will not behave
+specially because a function is named <code class="inline">defmodule</code>, <code class="inline">def</code>, or the like. This
+principle mirrors Elixir's goal of being an extensible language where
+developers can extend the language with new constructs as if they were
+part of the language. When it is absolutely necessary to change behaviour
+based on the name, this behaviour should be configurable, such as the
+<code class="inline">:locals_without_parens</code> option.</p><h2 id="format_string!/2-running-the-formatter" class="section-heading">
+  <a href="#format_string!/2-running-the-formatter" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Running the formatter
+</h2>
+<p>The formatter attempts to fit the most it can on a single line and
+introduces line breaks wherever possible when it cannot.</p><p>In some cases, this may lead to undesired formatting. Therefore, <strong>some
+code generated by the formatter may not be aesthetically pleasing and
+may require explicit intervention from the developer</strong>. That's why we
+do not recommend to run the formatter blindly in an existing codebase.
+Instead you should format and sanity check each formatted file.</p><p>Let's see some examples. The code below:</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;this is a very long string ... </span><span class="si" data-group-id="3632996762-1">#{</span><span class="n">inspect</span><span class="p" data-group-id="3632996762-2">(</span><span class="n">some_value</span><span class="p" data-group-id="3632996762-2">)</span><span class="si" data-group-id="3632996762-1">}</span><span class="s">&quot;</span></code></pre><p>may be formatted as:</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;this is a very long string ... </span><span class="si" data-group-id="2287697689-1">#{</span><span class="w">
+  </span><span class="n">inspect</span><span class="p" data-group-id="2287697689-2">(</span><span class="n">some_value</span><span class="p" data-group-id="2287697689-2">)</span><span class="w">
+</span><span class="si" data-group-id="2287697689-1">}</span><span class="s">&quot;</span></code></pre><p>This happens because the only place the formatter can introduce a
+new line without changing the code semantics is in the interpolation.
+In those scenarios, we recommend developers to directly adjust the
+code. Here we can use the binary concatenation operator <code class="inline">&lt;&gt;/2</code>:</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;this is a very long string &quot;</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w">
+  </span><span class="s">&quot;... </span><span class="si" data-group-id="7877733230-1">#{</span><span class="n">inspect</span><span class="p" data-group-id="7877733230-2">(</span><span class="n">some_value</span><span class="p" data-group-id="7877733230-2">)</span><span class="si" data-group-id="7877733230-1">}</span><span class="s">&quot;</span></code></pre><p>The string concatenation makes the code fit on a single line and also
+gives more options to the formatter.</p><p>A similar example is when the formatter breaks a function definition
+over multiple clauses:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p" data-group-id="4289715301-1">(</span><span class="w">
+  </span><span class="p" data-group-id="4289715301-2">%</span><span class="nc" data-group-id="4289715301-2">User</span><span class="p" data-group-id="4289715301-2">{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="4289715301-2">}</span><span class="p">,</span><span class="w">
+  </span><span class="n">arg1</span><span class="p">,</span><span class="w">
+  </span><span class="n">arg2</span><span class="w">
+</span><span class="p" data-group-id="4289715301-1">)</span><span class="w"> </span><span class="k" data-group-id="4289715301-3">do</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="4289715301-3">end</span></code></pre><p>While the code above is completely valid, you may prefer to match on
+the struct variables inside the function body in order to keep the
+definition on a single line:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p" data-group-id="9573426985-1">(</span><span class="p" data-group-id="9573426985-2">%</span><span class="nc" data-group-id="9573426985-2">User</span><span class="p" data-group-id="9573426985-2">{</span><span class="p" data-group-id="9573426985-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="p" data-group-id="9573426985-1">)</span><span class="w"> </span><span class="k" data-group-id="9573426985-3">do</span><span class="w">
+  </span><span class="p" data-group-id="9573426985-4">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="9573426985-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="9573426985-3">end</span></code></pre><p>In some situations, you can use the fact the formatter does not generate
+elegant code as a hint for refactoring. Take this code:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">board?</span><span class="p" data-group-id="6446108919-1">(</span><span class="n">board_id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6446108919-2">%</span><span class="nc" data-group-id="6446108919-2">User</span><span class="p" data-group-id="6446108919-2">{</span><span class="p" data-group-id="6446108919-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">available_permissions</span><span class="p">,</span><span class="w"> </span><span class="n">required_permissions</span><span class="p" data-group-id="6446108919-1">)</span><span class="w"> </span><span class="k" data-group-id="6446108919-3">do</span><span class="w">
+  </span><span class="nc">Tracker.OrganizationMembers</span><span class="o">.</span><span class="n">user_in_organization?</span><span class="p" data-group-id="6446108919-4">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">board</span><span class="o">.</span><span class="n">organization_id</span><span class="p" data-group-id="6446108919-4">)</span><span class="w"> </span><span class="ow">and</span><span class="w">
+    </span><span class="n">required_permissions</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="6446108919-5">(</span><span class="nc">MapSet</span><span class="o">.</span><span class="n">intersection</span><span class="p" data-group-id="6446108919-6">(</span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="6446108919-7">(</span><span class="n">required_permissions</span><span class="p" data-group-id="6446108919-7">)</span><span class="p">,</span><span class="w"> </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="6446108919-8">(</span><span class="n">available_permissions</span><span class="p" data-group-id="6446108919-8">)</span><span class="p" data-group-id="6446108919-6">)</span><span class="p" data-group-id="6446108919-5">)</span><span class="w">
+</span><span class="k" data-group-id="6446108919-3">end</span></code></pre><p>The code above has very long lines and running the formatter is not going
+to address this issue. In fact, the formatter may make it more obvious that
+you have complex expressions:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">board?</span><span class="p" data-group-id="8665573763-1">(</span><span class="n">board_id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8665573763-2">%</span><span class="nc" data-group-id="8665573763-2">User</span><span class="p" data-group-id="8665573763-2">{</span><span class="p" data-group-id="8665573763-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">available_permissions</span><span class="p">,</span><span class="w"> </span><span class="n">required_permissions</span><span class="p" data-group-id="8665573763-1">)</span><span class="w"> </span><span class="k" data-group-id="8665573763-3">do</span><span class="w">
+  </span><span class="nc">Tracker.OrganizationMembers</span><span class="o">.</span><span class="n">user_in_organization?</span><span class="p" data-group-id="8665573763-4">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">board</span><span class="o">.</span><span class="n">organization_id</span><span class="p" data-group-id="8665573763-4">)</span><span class="w"> </span><span class="ow">and</span><span class="w">
+    </span><span class="n">required_permissions</span><span class="w"> </span><span class="o">==</span><span class="w">
+      </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="8665573763-5">(</span><span class="w">
+        </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">intersection</span><span class="p" data-group-id="8665573763-6">(</span><span class="w">
+          </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="8665573763-7">(</span><span class="n">required_permissions</span><span class="p" data-group-id="8665573763-7">)</span><span class="p">,</span><span class="w">
+          </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="8665573763-8">(</span><span class="n">available_permissions</span><span class="p" data-group-id="8665573763-8">)</span><span class="w">
+        </span><span class="p" data-group-id="8665573763-6">)</span><span class="w">
+      </span><span class="p" data-group-id="8665573763-5">)</span><span class="w">
+</span><span class="k" data-group-id="8665573763-3">end</span></code></pre><p>Take such cases as a suggestion that your code should be refactored:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">board?</span><span class="p" data-group-id="1494695992-1">(</span><span class="n">board_id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1494695992-2">%</span><span class="nc" data-group-id="1494695992-2">User</span><span class="p" data-group-id="1494695992-2">{</span><span class="p" data-group-id="1494695992-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">available_permissions</span><span class="p">,</span><span class="w"> </span><span class="n">required_permissions</span><span class="p" data-group-id="1494695992-1">)</span><span class="w"> </span><span class="k" data-group-id="1494695992-3">do</span><span class="w">
+  </span><span class="nc">Tracker.OrganizationMembers</span><span class="o">.</span><span class="n">user_in_organization?</span><span class="p" data-group-id="1494695992-4">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">board</span><span class="o">.</span><span class="n">organization_id</span><span class="p" data-group-id="1494695992-4">)</span><span class="w"> </span><span class="ow">and</span><span class="w">
+    </span><span class="n">matching_permissions?</span><span class="p" data-group-id="1494695992-5">(</span><span class="n">required_permissions</span><span class="p">,</span><span class="w"> </span><span class="n">available_permissions</span><span class="p" data-group-id="1494695992-5">)</span><span class="w">
+</span><span class="k" data-group-id="1494695992-3">end</span><span class="w">
+
+</span><span class="kd">defp</span><span class="w"> </span><span class="nf">matching_permissions?</span><span class="p" data-group-id="1494695992-6">(</span><span class="n">required_permissions</span><span class="p">,</span><span class="w"> </span><span class="n">available_permissions</span><span class="p" data-group-id="1494695992-6">)</span><span class="w"> </span><span class="k" data-group-id="1494695992-7">do</span><span class="w">
+  </span><span class="n">intersection</span><span class="w"> </span><span class="o">=</span><span class="w">
+    </span><span class="n">required_permissions</span><span class="w">
+    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="1494695992-8">(</span><span class="p" data-group-id="1494695992-8">)</span><span class="w">
+    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">MapSet</span><span class="o">.</span><span class="n">intersection</span><span class="p" data-group-id="1494695992-9">(</span><span class="nc">MapSet</span><span class="o">.</span><span class="n">new</span><span class="p" data-group-id="1494695992-10">(</span><span class="n">available_permissions</span><span class="p" data-group-id="1494695992-10">)</span><span class="p" data-group-id="1494695992-9">)</span><span class="w">
+    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Enum</span><span class="o">.</span><span class="n">to_list</span><span class="p" data-group-id="1494695992-11">(</span><span class="p" data-group-id="1494695992-11">)</span><span class="w">
+
+  </span><span class="n">required_permissions</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">intersection</span><span class="w">
+</span><span class="k" data-group-id="1494695992-7">end</span></code></pre><p>To sum it up: since the formatter cannot change the semantics of your
+code, sometimes it is necessary to tweak or refactor the code to get
+optimal formatting. To help better understand how to control the formatter,
+we describe in the next sections the cases where the formatter keeps the
+user encoding and how to control multiline expressions.</p><h2 id="format_string!/2-keeping-user-s-formatting" class="section-heading">
+  <a href="#format_string!/2-keeping-user-s-formatting" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Keeping user's formatting
+</h2>
+<p>The formatter respects the input format in some cases. Those are
+listed below:</p><ul><li><p>Insignificant digits in numbers are kept as is. The formatter
+however always inserts underscores for decimal numbers with more
+than 5 digits and converts hexadecimal digits to uppercase</p></li><li><p>Strings, charlists, atoms and sigils are kept as is. No character
+is automatically escaped or unescaped. The choice of delimiter is
+also respected from the input</p></li><li><p>Newlines inside blocks are kept as in the input except for:
+1) expressions that take multiple lines will always have an empty
+line before and after and 2) empty lines are always squeezed
+together into a single empty line</p></li><li><p>The choice between <code class="inline">:do</code> keyword and <code class="inline">do/end</code> blocks is left
+to the user</p></li><li><p>Lists, tuples, bitstrings, maps, structs and function calls will be
+broken into multiple lines if they are followed by a newline in the
+opening bracket and preceded by a new line in the closing bracket</p></li><li><p>Newlines before certain operators (such as the pipeline operators)
+and before other operators (such as comparison operators)</p></li></ul><p>The behaviours above are not guaranteed. We may remove or add new
+rules in the future. The goal of documenting them is to provide better
+understanding on what to expect from the formatter.</p><h3 id="format_string!/2-multi-line-lists-maps-tuples-and-the-like" class="section-heading">
+  <a href="#format_string!/2-multi-line-lists-maps-tuples-and-the-like" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Multi-line lists, maps, tuples, and the like
+</h3>
+<p>You can force lists, tuples, bitstrings, maps, structs and function
+calls to have one entry per line by adding a newline after the opening
+bracket and a new line before the closing bracket lines. For example:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="8536796256-1">[</span><span class="w">
+  </span><span class="n">foo</span><span class="p">,</span><span class="w">
+  </span><span class="n">bar</span><span class="w">
+</span><span class="p" data-group-id="8536796256-1">]</span></code></pre><p>If there are no newlines around the brackets, then the formatter will
+try to fit everything on a single line, such that the snippet below</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="3397503577-1">[</span><span class="n">foo</span><span class="p">,</span><span class="w">
+ </span><span class="n">bar</span><span class="p" data-group-id="3397503577-1">]</span></code></pre><p>will be formatted as</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="1185965323-1">[</span><span class="n">foo</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span><span class="p" data-group-id="1185965323-1">]</span></code></pre><p>You can also force function calls and keywords to be rendered on multiple
+lines by having each entry on its own line:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defstruct</span><span class="w"> </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
+          </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span></code></pre><p>The code above will be kept with one keyword entry per line by the
+formatter. To avoid that, just squash everything into a single line.</p><h3 id="format_string!/2-parens-and-no-parens-in-function-calls" class="section-heading">
+  <a href="#format_string!/2-parens-and-no-parens-in-function-calls" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Parens and no parens in function calls
+</h3>
+<p>Elixir has two syntaxes for function calls. With parens and no parens.
+By default, Elixir will add parens to all calls except for:</p><ol><li>calls that have do/end blocks</li><li>local calls without parens where the name and arity of the local
+call is also listed under <code class="inline">:locals_without_parens</code> (except for
+calls with arity 0, where the compiler always require parens)</li></ol><p>The choice of parens and no parens also affects indentation. When a
+function call with parens doesn't fit on the same line, the formatter
+introduces a newline around parens and indents the arguments with two
+spaces:</p><pre><code class="nohighlight makeup elixir"><span class="n">some_call</span><span class="p" data-group-id="9146395570-1">(</span><span class="w">
+  </span><span class="n">arg1</span><span class="p">,</span><span class="w">
+  </span><span class="n">arg2</span><span class="p">,</span><span class="w">
+  </span><span class="n">arg3</span><span class="w">
+</span><span class="p" data-group-id="9146395570-1">)</span></code></pre><p>On the other hand, function calls without parens are always indented
+by the function call length itself, like this:</p><pre><code class="nohighlight makeup elixir"><span class="n">some_call</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w">
+          </span><span class="n">arg2</span><span class="p">,</span><span class="w">
+          </span><span class="n">arg3</span></code></pre><p>If the last argument is a data structure, such as maps and lists, and
+the beginning of the data structure fits on the same line as the function
+call, then no indentation happens, this allows code like this:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Enum</span><span class="o">.</span><span class="n">reduce</span><span class="p" data-group-id="4198172991-1">(</span><span class="n">some_collection</span><span class="p">,</span><span class="w"> </span><span class="n">initial_value</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="4198172991-2">fn</span><span class="w"> </span><span class="n">element</span><span class="p">,</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="c1"># code</span><span class="w">
+</span><span class="k" data-group-id="4198172991-2">end</span><span class="p" data-group-id="4198172991-1">)</span><span class="w">
+
+</span><span class="n">some_function_without_parens</span><span class="w"> </span><span class="p" data-group-id="4198172991-3">%{</span><span class="w">
+  </span><span class="ss">foo</span><span class="p">:</span><span class="w"> </span><span class="ss">:bar</span><span class="p">,</span><span class="w">
+  </span><span class="ss">baz</span><span class="p">:</span><span class="w"> </span><span class="ss">:bat</span><span class="w">
+</span><span class="p" data-group-id="4198172991-3">}</span></code></pre><h2 id="format_string!/2-code-comments" class="section-heading">
+  <a href="#format_string!/2-code-comments" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Code comments
+</h2>
+<p>The formatter also handles code comments in a way to guarantee a space
+is always added between the beginning of the comment (#) and the next
+character.</p><p>The formatter also extracts all trailing comments to their previous line.
+For example, the code below</p><pre><code class="nohighlight makeup elixir"><span class="n">hello</span><span class="w"> </span><span class="c1">#world</span></code></pre><p>will be rewritten to</p><pre><code class="nohighlight makeup elixir"><span class="c1"># world</span><span class="w">
+</span><span class="n">hello</span></code></pre><p>Because code comments are handled apart from the code representation (AST),
+there are some situations where code comments are seen as ambiguous by the
+code formatter. For example, the comment in the anonymous function below</p><pre><code class="nohighlight makeup elixir"><span class="k" data-group-id="9278055950-1">fn</span><span class="w">
+  </span><span class="n">arg1</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="n">body1</span><span class="w">
+    </span><span class="c1"># comment</span><span class="w">
+
+  </span><span class="n">arg2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="n">body2</span><span class="w">
+</span><span class="k" data-group-id="9278055950-1">end</span></code></pre><p>and in this one</p><pre><code class="nohighlight makeup elixir"><span class="k" data-group-id="7066812305-1">fn</span><span class="w">
+  </span><span class="n">arg1</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="n">body1</span><span class="w">
+
+  </span><span class="c1"># comment</span><span class="w">
+  </span><span class="n">arg2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="n">body2</span><span class="w">
+</span><span class="k" data-group-id="7066812305-1">end</span></code></pre><p>are considered equivalent (the nesting is discarded alongside most of
+user formatting). In such cases, the code formatter will always format to
+the latter.</p>  </section>
+</section>
+<section class="detail" id="get_compiler_option/1">
+  <div class="detail-header">
+    <a href="#get_compiler_option/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_compiler_option(key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L984" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_compiler_option(<a href="typespecs.html#basic-types">atom</a>()) :: <a href="typespecs.html#built-in-types">term</a>()</pre>
+      </div>
+
+<p>Returns the value of a given compiler option.</p><p>For a description of all options, see <a href="#put_compiler_option/2"><code class="inline">put_compiler_option/2</code></a>.</p><h2 id="get_compiler_option/1-examples" class="section-heading">
+  <a href="#get_compiler_option/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">get_compiler_option</span><span class="p" data-group-id="0945556808-1">(</span><span class="ss">:debug_info</span><span class="p" data-group-id="0945556808-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span></code></pre>  </section>
+</section>
+<section class="detail" id="get_docs/2">
+  <div class="detail-header">
+    <a href="#get_docs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_docs(module, kind)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1377" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+    <div class="deprecated">
+      This function is deprecated. Code.get_docs/2 always returns nil as its outdated documentation is no longer stored on BEAM files. Use Code.fetch_docs/1 instead.
+    </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_docs(<a href="typespecs.html#built-in-types">module</a>(), :moduledoc | :docs | :callback_docs | :type_docs | :all) ::
+  nil</pre>
+      </div>
+
+<p>Deprecated function to retrieve old documentation format.</p><p>Elixir v1.7 adopts <a href="http://erlang.org/eep/eeps/eep-0048.html">EEP 48</a>
+which is a new documentation format meant to be shared across all
+BEAM languages. The old format, used by <a href="#get_docs/2"><code class="inline">Code.get_docs/2</code></a>, is no
+longer available, and therefore this function always returns <code class="inline">nil</code>.
+Use <a href="#fetch_docs/1"><code class="inline">Code.fetch_docs/1</code></a> instead.</p>  </section>
+</section>
+<section class="detail" id="prepend_path/1">
+  <div class="detail-header">
+    <a href="#prepend_path/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prepend_path(path)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L233" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>prepend_path(<a href="Path.html#t:t/0">Path.t</a>()) :: true | {:error, :bad_directory}</pre>
+      </div>
+
+<p>Prepends a path to the beginning of the Erlang VM code path list.</p><p>This is the list of directories the Erlang VM uses for finding
+module code.</p><p>The path is expanded with <a href="Path.html#expand/1"><code class="inline">Path.expand/1</code></a> before being prepended.
+If this path does not exist, an error is returned.</p><h2 id="prepend_path/1-examples" class="section-heading">
+  <a href="#prepend_path/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">prepend_path</span><span class="p" data-group-id="2964489463-1">(</span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="2964489463-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">prepend_path</span><span class="p" data-group-id="2964489463-2">(</span><span class="s">&quot;/does_not_exist&quot;</span><span class="p" data-group-id="2964489463-2">)</span><span class="w">
+</span><span class="c1">#=&gt; {:error, :bad_directory}</span></code></pre>  </section>
+</section>
+<section class="detail" id="purge_compiler_modules/0">
+  <div class="detail-header">
+    <a href="#purge_compiler_modules/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">purge_compiler_modules()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1111" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>purge_compiler_modules() :: {:ok, <a href="typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+      </div>
+
+<p>Purge compiler modules.</p><p>The compiler utilizes temporary modules to compile code. For example,
+<code class="inline">elixir_compiler_1</code>, <code class="inline">elixir_compiler_2</code>, and so on. In case the compiled code
+stores references to anonymous functions or similar, the Elixir compiler
+may be unable to reclaim those modules, keeping an unnecessary amount of
+code in memory and eventually leading to modules such as <code class="inline">elixir_compiler_12345</code>.</p><p>This function purges all modules currently kept by the compiler, allowing
+old compiler module names to be reused. If there are any processes running
+any code from such modules, they will be terminated too.</p><p>It returns <code class="inline">{:ok, number_of_modules_purged}</code>.</p>  </section>
+</section>
+<section class="detail" id="put_compiler_option/2">
+  <div class="detail-header">
+    <a href="#put_compiler_option/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_compiler_option(key, value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L1052" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>put_compiler_option(<a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: :ok</pre>
+      </div>
+
+<p>Stores a compilation option.</p><p>These options are global since they are stored by Elixir's code server.</p><p>Available options are:</p><ul><li><p><code class="inline">:docs</code> - when <code class="inline">true</code>, retain documentation in the compiled module.
+Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:debug_info</code> - when <code class="inline">true</code>, retain debug information in the compiled
+module. This allows a developer to reconstruct the original source
+code. Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:ignore_module_conflict</code> - when <code class="inline">true</code>, override modules that were
+already defined without raising errors. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:relative_paths</code> - when <code class="inline">true</code>, use relative paths in quoted nodes,
+warnings and errors generated by the compiler. Note disabling this option
+won't affect runtime warnings and errors. Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:warnings_as_errors</code> - causes compilation to fail when warnings are
+generated. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:no_warn_undefined</code> (since v1.10.0) - list of modules and <code class="inline">{Mod, fun, arity}</code>
+tuples that will not emit warnings that the module or function does not exist
+at compilation time. Pass atom <code class="inline">:all</code> to skip warning for all undefined
+functions. This can be useful when doing dynamic compilation. Defaults to <code class="inline">[]</code>.</p></li><li><p><code class="inline">:tracers</code> (since v1.10.0) - a list of tracers (modules) to be used during
+compilation. See the module docs for more information. Defaults to <code class="inline">[]</code>.</p></li><li><p><code class="inline">:parser_options</code> (since v1.10.0) - a keyword list of options to be given
+to the parser when compiling files. It accepts the same options as
+<a href="#string_to_quoted/2"><code class="inline">string_to_quoted/2</code></a> (except by the options that change the AST itself).
+This can be used in combination with the tracer to retrieve localized
+information about events happening during compilation. Defaults to <code class="inline">[]</code>.</p></li></ul><p>It always returns <code class="inline">:ok</code>. Raises an error for invalid options.</p><h2 id="put_compiler_option/2-examples" class="section-heading">
+  <a href="#put_compiler_option/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">put_compiler_option</span><span class="p" data-group-id="6667756767-1">(</span><span class="ss">:debug_info</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="6667756767-1">)</span><span class="w">
+</span><span class="c1">#=&gt; :ok</span></code></pre>  </section>
+</section>
+<section class="detail" id="require_file/2">
+    <span id="require_file/1"></span>
+  <div class="detail-header">
+    <a href="#require_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">require_file(file, relative_to \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L918" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>require_file(<a href="typespecs.html#built-in-types">binary</a>(), nil | <a href="typespecs.html#built-in-types">binary</a>()) :: [{<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#built-in-types">binary</a>()}] | nil</pre>
+      </div>
+
+<p>Requires the given <code class="inline">file</code>.</p><p>Accepts <code class="inline">relative_to</code> as an argument to tell where the file is located.
+If the file was already required, <a href="#require_file/2"><code class="inline">require_file/2</code></a> doesn't do anything and
+returns <code class="inline">nil</code>.</p><p>Notice that if <a href="#require_file/2"><code class="inline">require_file/2</code></a> is invoked by different processes concurrently,
+the first process to invoke <a href="#require_file/2"><code class="inline">require_file/2</code></a> acquires a lock and the remaining
+ones will block until the file is available. This means that if <a href="#require_file/2"><code class="inline">require_file/2</code></a>
+is called more than once with a given file, that file will be compiled only once.
+The first process to call <a href="#require_file/2"><code class="inline">require_file/2</code></a> will get the list of loaded modules,
+others will get <code class="inline">nil</code>.</p><p>See <a href="#compile_file/2"><code class="inline">compile_file/2</code></a> if you would like to compile a file without tracking its
+filenames. Finally, if you would like to get the result of evaluating a file rather
+than the modules defined in it, see <a href="#eval_file/2"><code class="inline">eval_file/2</code></a>.</p><h2 id="require_file/2-examples" class="section-heading">
+  <a href="#require_file/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>If the file has not been required, it returns the list of modules:</p><pre><code class="nohighlight makeup elixir"><span class="n">modules</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Code</span><span class="o">.</span><span class="n">require_file</span><span class="p" data-group-id="3250368875-1">(</span><span class="s">&quot;eex_test.exs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;../eex/test&quot;</span><span class="p" data-group-id="3250368875-1">)</span><span class="w">
+</span><span class="nc">List</span><span class="o">.</span><span class="n">first</span><span class="p" data-group-id="3250368875-2">(</span><span class="n">modules</span><span class="p" data-group-id="3250368875-2">)</span><span class="w">
+</span><span class="c1">#=&gt; {EExTest.Compiled, &lt;&lt;70, 79, 82, 49, ...&gt;&gt;}</span></code></pre><p>If the file has been required, it returns <code class="inline">nil</code>:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">require_file</span><span class="p" data-group-id="0361019746-1">(</span><span class="s">&quot;eex_test.exs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;../eex/test&quot;</span><span class="p" data-group-id="0361019746-1">)</span><span class="w">
+</span><span class="c1">#=&gt; nil</span></code></pre>  </section>
+</section>
+<section class="detail" id="required_files/0">
+  <div class="detail-header">
+    <a href="#required_files/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">required_files()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L149" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>required_files() :: [<a href="typespecs.html#built-in-types">binary</a>()]</pre>
+      </div>
+
+<p>Lists all required files.</p><h2 id="required_files/0-examples" class="section-heading">
+  <a href="#required_files/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Code</span><span class="o">.</span><span class="n">require_file</span><span class="p" data-group-id="6580192555-1">(</span><span class="s">&quot;../eex/test/eex_test.exs&quot;</span><span class="p" data-group-id="6580192555-1">)</span><span class="w">
+</span><span class="nc">List</span><span class="o">.</span><span class="n">first</span><span class="p" data-group-id="6580192555-2">(</span><span class="nc">Code</span><span class="o">.</span><span class="n">required_files</span><span class="p" data-group-id="6580192555-3">(</span><span class="p" data-group-id="6580192555-3">)</span><span class="p" data-group-id="6580192555-2">)</span><span class="w"> </span><span class="o">=~</span><span class="w"> </span><span class="s">&quot;eex_test.exs&quot;</span><span class="w">
+</span><span class="c1">#=&gt; true</span></code></pre>  </section>
+</section>
+<section class="detail" id="string_to_quoted/2">
+    <span id="string_to_quoted/1"></span>
+  <div class="detail-header">
+    <a href="#string_to_quoted/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string_to_quoted(string, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L830" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>string_to_quoted(<a href="List.Chars.html#t:t/0">List.Chars.t</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) ::
+  {:ok, <a href="Macro.html#t:t/0">Macro.t</a>()} | {:error, {line :: <a href="typespecs.html#basic-types">pos_integer</a>(), <a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#built-in-types">term</a>()}}</pre>
+      </div>
+
+<p>Converts the given string to its quoted form.</p><p>Returns <code class="inline">{:ok, quoted_form}</code> if it succeeds,
+<code class="inline">{:error, {line, error, token}}</code> otherwise.</p><h2 id="string_to_quoted/2-options" class="section-heading">
+  <a href="#string_to_quoted/2-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><p><code class="inline">:file</code> - the filename to be reported in case of parsing errors.
+Defaults to &quot;nofile&quot;.</p></li><li><p><code class="inline">:line</code> - the starting line of the string being parsed.
+Defaults to 1.</p></li><li><p><code class="inline">:columns</code> - when <code class="inline">true</code>, attach a <code class="inline">:column</code> key to the quoted
+metadata. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:existing_atoms_only</code> - when <code class="inline">true</code>, raises an error
+when non-existing atoms are found by the tokenizer.
+Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:token_metadata</code> (since v1.10.0) - when <code class="inline">true</code>, includes token-related
+metadata in the expression AST, such as metadata for <code class="inline">do</code> and <code class="inline">end</code>
+tokens, for closing tokens, end of expressions, as well as delimiters
+for sigils. See <a href="Macro.html#t:metadata/0"><code class="inline">Macro.metadata/0</code></a>. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:literal_encoder</code> (since v1.10.0) - how to encode literals in the AST.
+It must be a function that receives two arguments, the literal and its
+metadata, and it must return <code class="inline">{:ok, ast :: Macro.t}</code> or
+<code class="inline">{:error, reason :: binary}</code>. If you return anything than the literal
+itself as the <code class="inline">term</code>, then the AST is no longer valid. This option
+may still useful for textual analysis of the source code.</p></li><li><p><code class="inline">:static_atoms_encoder</code> - the static atom encoder function, see
+&quot;The <code class="inline">:static_atoms_encoder</code> function&quot; section below. Note this
+option overrides the <code class="inline">:existing_atoms_only</code> behaviour for static
+atoms but <code class="inline">:existing_atoms_only</code> is still used for dynamic atoms,
+such as atoms with interpolations.</p></li><li><p><code class="inline">:warn_on_unnecessary_quotes</code> - when <code class="inline">false</code>, does not warn
+when atoms, keywords or calls have unnecessary quotes on
+them. Defaults to <code class="inline">true</code>.</p></li></ul><h2 id="string_to_quoted/2-macro-to_string-2" class="section-heading">
+  <a href="#string_to_quoted/2-macro-to_string-2" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <a href="Macro.html#to_string/2"><code class="inline">Macro.to_string/2</code></a>
+</h2>
+<p>The opposite of converting a string to its quoted form is
+<a href="Macro.html#to_string/2"><code class="inline">Macro.to_string/2</code></a>, which converts a quoted form to a string/binary
+representation.</p><h2 id="string_to_quoted/2-the-static_atoms_encoder-function" class="section-heading">
+  <a href="#string_to_quoted/2-the-static_atoms_encoder-function" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  The <code class="inline">:static_atoms_encoder</code> function
+</h2>
+<p>When <code class="inline">static_atoms_encoder: &amp;my_encoder/2</code> is passed as an argument,
+<code class="inline">my_encoder/2</code> is called every time the tokenizer needs to create a
+&quot;static&quot; atom. Static atoms are atoms in the AST that function as
+aliases, remote calls, local calls, variable names, regular atoms
+and keyword lists.</p><p>The encoder function will receive the atom name (as a binary) and a
+keyword list with the current file, line and column. It must return
+<code class="inline">{:ok, token :: term} | {:error, reason :: binary}</code>.</p><p>The encoder function is supposed to create an atom from the given
+string. To produce a valid AST, it is required to return <code class="inline">{:ok, term}</code>,
+where <code class="inline">term</code> is an atom. It is possible to return something other than an atom,
+however, in that case the AST is no longer &quot;valid&quot; in that it cannot
+be used to compile or evaluate Elixir code. A use case for this is
+if you want to use the Elixir parser in a user-facing situation, but
+you don't want to exhaust the atom table.</p><p>The atom encoder is not called for <em>all</em> atoms that are present in
+the AST. It won't be invoked for the following atoms:</p><ul><li><p>operators (<code class="inline">:+</code>, <code class="inline">:-</code>, and so on)</p></li><li><p>syntax keywords (<code class="inline">fn</code>, <code class="inline">do</code>, <code class="inline">else</code>, and so on)</p></li><li><p>atoms containing interpolation (<code class="inline">:&quot;#{1 + 1} is two&quot;</code>), as these
+atoms are constructed at runtime.</p></li></ul>  </section>
+</section>
+<section class="detail" id="string_to_quoted!/2">
+    <span id="string_to_quoted!/1"></span>
+  <div class="detail-header">
+    <a href="#string_to_quoted!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">string_to_quoted!(string, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L854" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>string_to_quoted!(<a href="List.Chars.html#t:t/0">List.Chars.t</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) :: <a href="Macro.html#t:t/0">Macro.t</a>()</pre>
+      </div>
+
+<p>Converts the given string to its quoted form.</p><p>It returns the ast if it succeeds,
+raises an exception otherwise. The exception is a <a href="TokenMissingError.html"><code class="inline">TokenMissingError</code></a>
+in case a token is missing (usually because the expression is incomplete),
+<a href="SyntaxError.html"><code class="inline">SyntaxError</code></a> otherwise.</p><p>Check <a href="#string_to_quoted/2"><code class="inline">string_to_quoted/2</code></a> for options information.</p>  </section>
+</section>
+<section class="detail" id="unrequire_files/1">
+  <div class="detail-header">
+    <a href="#unrequire_files/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unrequire_files(files)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/code.ex#L181" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unrequire_files([<a href="typespecs.html#built-in-types">binary</a>()]) :: :ok</pre>
+      </div>
+
+<p>Removes files from the required files list.</p><p>The modules defined in the file are not removed;
+calling this function only removes them from the list,
+allowing them to be required again.</p><h2 id="unrequire_files/1-examples" class="section-heading">
+  <a href="#unrequire_files/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Require EEx test code</span><span class="w">
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">require_file</span><span class="p" data-group-id="0971562232-1">(</span><span class="s">&quot;../eex/test/eex_test.exs&quot;</span><span class="p" data-group-id="0971562232-1">)</span><span class="w">
+
+</span><span class="c1"># Now unrequire all files</span><span class="w">
+</span><span class="nc">Code</span><span class="o">.</span><span class="n">unrequire_files</span><span class="p" data-group-id="0971562232-2">(</span><span class="nc">Code</span><span class="o">.</span><span class="n">required_files</span><span class="p" data-group-id="0971562232-3">(</span><span class="p" data-group-id="0971562232-3">)</span><span class="p" data-group-id="0971562232-2">)</span><span class="w">
+
+</span><span class="c1"># Notice modules are still available</span><span class="w">
+</span><span class="n">function_exported?</span><span class="p" data-group-id="0971562232-4">(</span><span class="nc">EExTest.Compiled</span><span class="p">,</span><span class="w"> </span><span class="ss">:before_compile</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="0971562232-4">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

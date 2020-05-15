@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="EEx v1.10.3">
+    <title>EEx.SmartEngine — EEx v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/eex/v1.10/ /EEx.SmartEngine.html" />
+    <script src="dist/sidebar_items-baafdf0afe.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+EEx      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">EEx v1.10.3</small>
+EEx.SmartEngine          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The default engine used by EEx.</p><p>It includes assigns (like <code class="inline">@foo</code>) and possibly other
+conveniences in the future.</p><h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">EEx</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="0191004484-1">(</span><span class="s">&quot;&lt;%= @foo %&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">assigns</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="0191004484-2">[</span><span class="ss">foo</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="0191004484-2">]</span><span class="p" data-group-id="0191004484-1">)</span><span class="w">
+</span><span class="s">&quot;1&quot;</span></code></pre><p>In the example above, we can access the value <code class="inline">foo</code> under
+the binding <code class="inline">assigns</code> using <code class="inline">@foo</code>. This is useful because
+a template, after being compiled, can receive different
+assigns and would not require recompilation for each
+variable set.</p><p>Assigns can also be used when compiled to a function:</p><pre><code class="nohighlight makeup elixir"><span class="c1"># sample.eex</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="na">@a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="na">@b</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="c1"># sample.ex</span><span class="w">
+</span><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Sample</span><span class="w"> </span><span class="k" data-group-id="7707541536-1">do</span><span class="w">
+  </span><span class="kn">require</span><span class="w"> </span><span class="nc">EEx</span><span class="w">
+  </span><span class="nc">EEx</span><span class="o">.</span><span class="n">function_from_file</span><span class="p" data-group-id="7707541536-2">(</span><span class="ss">:def</span><span class="p">,</span><span class="w"> </span><span class="ss">:sample</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sample.eex&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7707541536-3">[</span><span class="ss">:assigns</span><span class="p" data-group-id="7707541536-3">]</span><span class="p" data-group-id="7707541536-2">)</span><span class="w">
+</span><span class="k" data-group-id="7707541536-1">end</span><span class="w">
+
+</span><span class="c1"># iex</span><span class="w">
+</span><span class="nc">Sample</span><span class="o">.</span><span class="n">sample</span><span class="p" data-group-id="7707541536-4">(</span><span class="ss">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">b</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="7707541536-4">)</span><span class="w">
+</span><span class="c1">#=&gt; &quot;3&quot;</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_begin/1">handle_begin(state)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:handle_begin/1"><code class="inline">EEx.Engine.handle_begin/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_body/1">handle_body(state)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:handle_body/1"><code class="inline">EEx.Engine.handle_body/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_end/1">handle_end(state)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:handle_end/1"><code class="inline">EEx.Engine.handle_end/1</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_expr/3">handle_expr(state, marker, expr)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:handle_expr/3"><code class="inline">EEx.Engine.handle_expr/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_text/2">handle_text(state, text)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:handle_text/2"><code class="inline">EEx.Engine.handle_text/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init/1">init(opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Callback implementation for <a href="EEx.Engine.html#c:init/1"><code class="inline">EEx.Engine.init/1</code></a>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="handle_begin/1">
+  <div class="detail-header">
+    <a href="#handle_begin/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_begin(state)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:handle_begin/1"><code class="inline">EEx.Engine.handle_begin/1</code></a>.</p>  </section>
+</section>
+<section class="detail" id="handle_body/1">
+  <div class="detail-header">
+    <a href="#handle_body/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_body(state)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:handle_body/1"><code class="inline">EEx.Engine.handle_body/1</code></a>.</p>  </section>
+</section>
+<section class="detail" id="handle_end/1">
+  <div class="detail-header">
+    <a href="#handle_end/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_end(state)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:handle_end/1"><code class="inline">EEx.Engine.handle_end/1</code></a>.</p>  </section>
+</section>
+<section class="detail" id="handle_expr/3">
+  <div class="detail-header">
+    <a href="#handle_expr/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_expr(state, marker, expr)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L38" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:handle_expr/3"><code class="inline">EEx.Engine.handle_expr/3</code></a>.</p>  </section>
+</section>
+<section class="detail" id="handle_text/2">
+  <div class="detail-header">
+    <a href="#handle_text/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_text(state, text)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:handle_text/2"><code class="inline">EEx.Engine.handle_text/2</code></a>.</p>  </section>
+</section>
+<section class="detail" id="init/1">
+  <div class="detail-header">
+    <a href="#init/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init(opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex/smart_engine.ex#L36" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Callback implementation for <a href="EEx.Engine.html#c:init/1"><code class="inline">EEx.Engine.init/1</code></a>.</p>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

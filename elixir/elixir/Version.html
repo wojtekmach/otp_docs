@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Version — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Version.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Version          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Functions for parsing and matching versions against requirements.</p><p>A version is a string in a specific format or a <a href="#content"><code class="inline">Version</code></a>
+generated after parsing via <a href="#parse/1"><code class="inline">Version.parse/1</code></a>.</p><p>Although Elixir projects are not required to follow SemVer,
+they must follow the format outlined on <a href="https://semver.org/">SemVer 2.0 schema</a>.</p><h2 id="module-versions" class="section-heading">
+  <a href="#module-versions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Versions
+</h2>
+<p>In a nutshell, a version is represented by three numbers:</p><pre><code class="nohighlight makeup elixir"><span class="nc">MAJOR.MINOR.PATCH</span></code></pre><p>Pre-releases are supported by optionally appending a hyphen and a series of
+period-separated identifiers immediately following the patch version.
+Identifiers consist of only ASCII alphanumeric characters and hyphens (<code class="inline">[0-9A-Za-z-]</code>):</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;1.0.0-alpha.3&quot;</span></code></pre><p>Build information can be added by appending a plus sign and a series of
+dot-separated identifiers immediately following the patch or pre-release version.
+Identifiers consist of only ASCII alphanumeric characters and hyphens (<code class="inline">[0-9A-Za-z-]</code>):</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;1.0.0-alpha.3+20130417140000.amd64&quot;</span></code></pre><h2 id="module-struct" class="section-heading">
+  <a href="#module-struct" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Struct
+</h2>
+<p>The version is represented by the <a href="#content"><code class="inline">Version</code></a> struct and fields
+are named according to SemVer 2.0: <code class="inline">:major</code>, <code class="inline">:minor</code>, <code class="inline">:patch</code>,
+<code class="inline">:pre</code>, and <code class="inline">:build</code>.</p><h2 id="module-requirements" class="section-heading">
+  <a href="#module-requirements" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Requirements
+</h2>
+<p>Requirements allow you to specify which versions of a given
+dependency you are willing to work against. Requirements support the common
+comparison operators such as <code class="inline">&gt;</code>, <code class="inline">&gt;=</code>, <code class="inline">&lt;</code>, <code class="inline">&lt;=</code>, <code class="inline">==</code>, <code class="inline">!=</code> that work as one would expect,
+and additionally the special operator <code class="inline">~&gt;</code> described in detail further below.</p><pre><code class="nohighlight makeup elixir"><span class="c1"># Only version 2.0.0</span><span class="w">
+</span><span class="s">&quot;== 2.0.0&quot;</span><span class="w">
+
+</span><span class="c1"># Anything later than 2.0.0</span><span class="w">
+</span><span class="s">&quot;&gt; 2.0.0&quot;</span></code></pre><p>Requirements also support <code class="inline">and</code> and <code class="inline">or</code> for complex conditions:</p><pre><code class="nohighlight makeup elixir"><span class="c1"># 2.0.0 and later until 2.1.0</span><span class="w">
+</span><span class="s">&quot;&gt;= 2.0.0 and &lt; 2.1.0&quot;</span></code></pre><p>Since the example above is such a common requirement, it can
+be expressed as:</p><pre><code class="nohighlight makeup elixir"><span class="s">&quot;~&gt; 2.0.0&quot;</span></code></pre><p><code class="inline">~&gt;</code> will never include pre-release versions of its upper bound,
+regardless of the usage of the <code class="inline">:allow_pre</code> option, or whether the operand
+is a pre-release version. It can also be used to set an upper bound on only the major
+version part. See the table below for <code class="inline">~&gt;</code> requirements and
+their corresponding translations.</p><table><thead><tr><th style="text-align: left;"><code class="inline">~&gt;</code></th><th style="text-align: left;">Translation</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0.0</code></td><td style="text-align: left;"><code class="inline">&gt;= 2.0.0 and &lt; 2.1.0</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1.2</code></td><td style="text-align: left;"><code class="inline">&gt;= 2.1.2 and &lt; 2.2.0</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1.3-dev</code></td><td style="text-align: left;"><code class="inline">&gt;= 2.1.3-dev and &lt; 2.2.0</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0</code></td><td style="text-align: left;"><code class="inline">&gt;= 2.0.0 and &lt; 3.0.0</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1</code></td><td style="text-align: left;"><code class="inline">&gt;= 2.1.0 and &lt; 3.0.0</code></td></tr></tbody></table><p>The requirement operand after the <code class="inline">~&gt;</code> is allowed to omit the patch version,
+allowing us to express <code class="inline">~&gt; 2.1</code> or <code class="inline">~&gt; 2.1-dev</code>, something that wouldn't be allowed
+when using the common comparison operators.</p><p>When the <code class="inline">:allow_pre</code> option is set <code class="inline">false</code> in <a href="#match?/3"><code class="inline">Version.match?/3</code></a>, the requirement
+will not match a pre-release version unless the operand is a pre-release version.
+The default is to always allow pre-releases but note that in
+Hex <code class="inline">:allow_pre</code> is set to <code class="inline">false</code>. See the table below for examples.</p><table><thead><tr><th style="text-align: left;">Requirement</th><th style="text-align: left;">Version</th><th style="text-align: left;"><code class="inline">:allow_pre</code></th><th style="text-align: left;">Matches</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0</code></td><td style="text-align: left;"><code class="inline">2.1.0</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0</code></td><td style="text-align: left;"><code class="inline">3.0.0</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">false</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0.0</code></td><td style="text-align: left;"><code class="inline">2.0.5</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.0.0</code></td><td style="text-align: left;"><code class="inline">2.1.0</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">false</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1.2</code></td><td style="text-align: left;"><code class="inline">2.1.6-dev</code></td><td style="text-align: left;"><code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1.2</code></td><td style="text-align: left;"><code class="inline">2.1.6-dev</code></td><td style="text-align: left;"><code class="inline">false</code></td><td style="text-align: left;"><code class="inline">false</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1-dev</code></td><td style="text-align: left;"><code class="inline">2.2.0-dev</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">~&gt; 2.1.2-dev</code></td><td style="text-align: left;"><code class="inline">2.1.6-dev</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">&gt;= 2.1.0</code></td><td style="text-align: left;"><code class="inline">2.2.0-dev</code></td><td style="text-align: left;"><code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr><tr><td style="text-align: left;"><code class="inline">&gt;= 2.1.0</code></td><td style="text-align: left;"><code class="inline">2.2.0-dev</code></td><td style="text-align: left;"><code class="inline">false</code></td><td style="text-align: left;"><code class="inline">false</code></td></tr><tr><td style="text-align: left;"><code class="inline">&gt;= 2.1.0-dev</code></td><td style="text-align: left;"><code class="inline">2.2.6-dev</code></td><td style="text-align: left;"><code class="inline">false</code> or <code class="inline">true</code></td><td style="text-align: left;"><code class="inline">true</code></td></tr></tbody></table>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:build/0">build()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:major/0">major()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:minor/0">minor()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:patch/0">patch()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:pre/0">pre()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:requirement/0">requirement()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:version/0">version()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compare/2">compare(version1, version2)</a>
+  </div>
+    <div class="summary-synopsis"><p>Compares two versions.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_requirement/1">compile_requirement(requirement)</a>
+  </div>
+    <div class="summary-synopsis"><p>Compiles a requirement to its internal representation with
+<a href="http://www.erlang.org/doc/man/ets.html#match_spec_compile-1"><code class="inline">:ets.match_spec_compile/1</code></a> for faster matching.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match?/3">match?(version, requirement, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Checks if the given version matches the specification.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parse/1">parse(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parses a version string into a <a href="#content"><code class="inline">Version</code></a> struct.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parse!/1">parse!(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parses a version string into a <a href="#content"><code class="inline">Version</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parse_requirement/1">parse_requirement(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parses a version requirement string into a <a href="Version.Requirement.html"><code class="inline">Version.Requirement</code></a> struct.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parse_requirement!/1">parse_requirement!(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Parses a version requirement string into a <a href="Version.Requirement.html"><code class="inline">Version.Requirement</code></a> struct.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:build/0">
+  <div class="detail-header">
+    <a href="#t:build/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">build()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L106" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>build() :: <a href="String.html#t:t/0">String.t</a>() | nil</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:major/0">
+  <div class="detail-header">
+    <a href="#t:major/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">major()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L102" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>major() :: <a href="typespecs.html#basic-types">non_neg_integer</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:minor/0">
+  <div class="detail-header">
+    <a href="#t:minor/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">minor()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L103" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>minor() :: <a href="typespecs.html#basic-types">non_neg_integer</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:patch/0">
+  <div class="detail-header">
+    <a href="#t:patch/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">patch()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L104" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>patch() :: <a href="typespecs.html#basic-types">non_neg_integer</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:pre/0">
+  <div class="detail-header">
+    <a href="#t:pre/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">pre()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L105" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>pre() :: [<a href="String.html#t:t/0">String.t</a>() | <a href="typespecs.html#basic-types">non_neg_integer</a>()]</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:requirement/0">
+  <div class="detail-header">
+    <a href="#t:requirement/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">requirement()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L101" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>requirement() :: <a href="String.html#t:t/0">String.t</a>() | <a href="Version.Requirement.html#t:t/0">Version.Requirement.t</a>()</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L107" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>t() :: %Version{
+  build: <a href="#t:build/0">build</a>(),
+  major: <a href="#t:major/0">major</a>(),
+  minor: <a href="#t:minor/0">minor</a>(),
+  patch: <a href="#t:patch/0">patch</a>(),
+  pre: <a href="#t:pre/0">pre</a>()
+}</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:version/0">
+  <div class="detail-header">
+    <a href="#t:version/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">version()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L100" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>version() :: <a href="String.html#t:t/0">String.t</a>() | <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="compare/2">
+  <div class="detail-header">
+    <a href="#compare/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compare(version1, version2)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L267" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compare(<a href="#t:version/0">version</a>(), <a href="#t:version/0">version</a>()) :: :gt | :eq | :lt</pre>
+      </div>
+
+<p>Compares two versions.</p><p>Returns <code class="inline">:gt</code> if the first version is greater than the second one, and <code class="inline">:lt</code>
+for vice versa. If the two versions are equal, <code class="inline">:eq</code> is returned.</p><p>Pre-releases are strictly less than their corresponding release versions.</p><p>Patch segments are compared lexicographically if they are alphanumeric, and
+numerically otherwise.</p><p>Build segments are ignored: if two versions differ only in their build segment
+they are considered to be equal.</p><p>Raises a <a href="Version.InvalidVersionError.html"><code class="inline">Version.InvalidVersionError</code></a> exception if any of the two given
+versions are not parsable. If given an already parsed version this function
+won't raise.</p><h2 id="compare/2-examples" class="section-heading">
+  <a href="#compare/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">compare</span><span class="p" data-group-id="1997133550-1">(</span><span class="s">&quot;2.0.1-alpha1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;2.0.0&quot;</span><span class="p" data-group-id="1997133550-1">)</span><span class="w">
+</span><span class="ss">:gt</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">compare</span><span class="p" data-group-id="1997133550-2">(</span><span class="s">&quot;1.0.0-beta&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0-rc1&quot;</span><span class="p" data-group-id="1997133550-2">)</span><span class="w">
+</span><span class="ss">:lt</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">compare</span><span class="p" data-group-id="1997133550-3">(</span><span class="s">&quot;1.0.0-10&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0-2&quot;</span><span class="p" data-group-id="1997133550-3">)</span><span class="w">
+</span><span class="ss">:gt</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">compare</span><span class="p" data-group-id="1997133550-4">(</span><span class="s">&quot;2.0.1+build0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;2.0.1&quot;</span><span class="p" data-group-id="1997133550-4">)</span><span class="w">
+</span><span class="ss">:eq</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">compare</span><span class="p" data-group-id="1997133550-5">(</span><span class="s">&quot;invalid&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;2.0.1&quot;</span><span class="p" data-group-id="1997133550-5">)</span><span class="w">
+</span><span class="gt">** (Version.InvalidVersionError) invalid version: &quot;invalid&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="compile_requirement/1">
+  <div class="detail-header">
+    <a href="#compile_requirement/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_requirement(requirement)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L392" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_requirement(<a href="Version.Requirement.html#t:t/0">Version.Requirement.t</a>()) :: <a href="Version.Requirement.html#t:t/0">Version.Requirement.t</a>()</pre>
+      </div>
+
+<p>Compiles a requirement to its internal representation with
+<a href="http://www.erlang.org/doc/man/ets.html#match_spec_compile-1"><code class="inline">:ets.match_spec_compile/1</code></a> for faster matching.</p><p>The internal representation is opaque and cannot be converted to external
+term format and then back again without losing its properties (meaning it
+can not be sent to a process on another node and still remain a valid
+compiled match_spec, nor can it be stored on disk).</p>  </section>
+</section>
+<section class="detail" id="match?/3">
+    <span id="match?/2"></span>
+  <div class="detail-header">
+    <a href="#match?/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match?(version, requirement, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L217" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>match?(<a href="#t:version/0">version</a>(), <a href="#t:requirement/0">requirement</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Checks if the given version matches the specification.</p><p>Returns <code class="inline">true</code> if <code class="inline">version</code> satisfies <code class="inline">requirement</code>, <code class="inline">false</code> otherwise.
+Raises a <a href="Version.InvalidRequirementError.html"><code class="inline">Version.InvalidRequirementError</code></a> exception if <code class="inline">requirement</code> is not
+parsable, or a <a href="Version.InvalidVersionError.html"><code class="inline">Version.InvalidVersionError</code></a> exception if <code class="inline">version</code> is not parsable.
+If given an already parsed version and requirement this function won't
+raise.</p><h2 id="match?/3-options" class="section-heading">
+  <a href="#match?/3-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><code class="inline">:allow_pre</code> (boolean) - when <code class="inline">false</code>, pre-release versions will not match
+unless the operand is a pre-release version. Defaults to <code class="inline">true</code>.
+For examples, please refer to the table above under the &quot;Requirements&quot; section.</li></ul><h2 id="match?/3-examples" class="section-heading">
+  <a href="#match?/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-1">(</span><span class="s">&quot;2.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&gt; 1.0.0&quot;</span><span class="p" data-group-id="6251722849-1">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-2">(</span><span class="s">&quot;2.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;== 1.0.0&quot;</span><span class="p" data-group-id="6251722849-2">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-3">(</span><span class="s">&quot;2.1.6-dev&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;~&gt; 2.1.2&quot;</span><span class="p" data-group-id="6251722849-3">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-4">(</span><span class="s">&quot;2.1.6-dev&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;~&gt; 2.1.2&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">allow_pre</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="6251722849-4">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-5">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;== 1.0.0&quot;</span><span class="p" data-group-id="6251722849-5">)</span><span class="w">
+</span><span class="gt">** (Version.InvalidVersionError) invalid version: &quot;foo&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">match?</span><span class="p" data-group-id="6251722849-6">(</span><span class="s">&quot;2.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;== == 1.0.0&quot;</span><span class="p" data-group-id="6251722849-6">)</span><span class="w">
+</span><span class="gt">** (Version.InvalidRequirementError) invalid requirement: &quot;== == 1.0.0&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="parse/1">
+  <div class="detail-header">
+    <a href="#parse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parse(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L297" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>parse(<a href="String.html#t:t/0">String.t</a>()) :: {:ok, <a href="#t:t/0">t</a>()} | :error</pre>
+      </div>
+
+<p>Parses a version string into a <a href="#content"><code class="inline">Version</code></a> struct.</p><h2 id="parse/1-examples" class="section-heading">
+  <a href="#parse/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="3540332735-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="p" data-group-id="3540332735-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse</span><span class="p" data-group-id="3540332735-2">(</span><span class="s">&quot;2.0.1-alpha1&quot;</span><span class="p" data-group-id="3540332735-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">version</span><span class="w">
+</span><span class="p" data-group-id="3540332735-3">#</span><span class="nc" data-group-id="3540332735-3">Version</span><span class="p" data-group-id="3540332735-3">&lt;</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha1</span><span class="p" data-group-id="3540332735-3">&gt;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse</span><span class="p" data-group-id="3540332735-4">(</span><span class="s">&quot;2.0-alpha1&quot;</span><span class="p" data-group-id="3540332735-4">)</span><span class="w">
+</span><span class="ss">:error</span></code></pre>  </section>
+</section>
+<section class="detail" id="parse!/1">
+  <div class="detail-header">
+    <a href="#parse!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parse!(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L324" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>parse!(<a href="String.html#t:t/0">String.t</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Parses a version string into a <a href="#content"><code class="inline">Version</code></a>.</p><p>If <code class="inline">string</code> is an invalid version, a <a href="Version.InvalidVersionError.html"><code class="inline">Version.InvalidVersionError</code></a> is raised.</p><h2 id="parse!/1-examples" class="section-heading">
+  <a href="#parse!/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse!</span><span class="p" data-group-id="3549486279-1">(</span><span class="s">&quot;2.0.1-alpha1&quot;</span><span class="p" data-group-id="3549486279-1">)</span><span class="w">
+</span><span class="p" data-group-id="3549486279-2">#</span><span class="nc" data-group-id="3549486279-2">Version</span><span class="p" data-group-id="3549486279-2">&lt;</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha1</span><span class="p" data-group-id="3549486279-2">&gt;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse!</span><span class="p" data-group-id="3549486279-3">(</span><span class="s">&quot;2.0-alpha1&quot;</span><span class="p" data-group-id="3549486279-3">)</span><span class="w">
+</span><span class="gt">** (Version.InvalidVersionError) invalid version: &quot;2.0-alpha1&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="parse_requirement/1">
+  <div class="detail-header">
+    <a href="#parse_requirement/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parse_requirement(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L345" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>parse_requirement(<a href="String.html#t:t/0">String.t</a>()) :: {:ok, <a href="Version.Requirement.html#t:t/0">Version.Requirement.t</a>()} | :error</pre>
+      </div>
+
+<p>Parses a version requirement string into a <a href="Version.Requirement.html"><code class="inline">Version.Requirement</code></a> struct.</p><h2 id="parse_requirement/1-examples" class="section-heading">
+  <a href="#parse_requirement/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="p" data-group-id="0955456257-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">requirement</span><span class="p" data-group-id="0955456257-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse_requirement</span><span class="p" data-group-id="0955456257-2">(</span><span class="s">&quot;== 2.0.1&quot;</span><span class="p" data-group-id="0955456257-2">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">requirement</span><span class="w">
+</span><span class="p" data-group-id="0955456257-3">#</span><span class="nc" data-group-id="0955456257-3">Version.Requirement</span><span class="p" data-group-id="0955456257-3">&lt;</span><span class="o">==</span><span class="w"> </span><span class="mf">2.0</span><span class="o">.</span><span class="mi">1</span><span class="p" data-group-id="0955456257-3">&gt;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse_requirement</span><span class="p" data-group-id="0955456257-4">(</span><span class="s">&quot;== == 2.0.1&quot;</span><span class="p" data-group-id="0955456257-4">)</span><span class="w">
+</span><span class="ss">:error</span></code></pre>  </section>
+</section>
+<section class="detail" id="parse_requirement!/1">
+  <div class="detail-header">
+    <a href="#parse_requirement!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parse_requirement!(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/version.ex#L372" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.8.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>parse_requirement!(<a href="String.html#t:t/0">String.t</a>()) :: <a href="Version.Requirement.html#t:t/0">Version.Requirement.t</a>()</pre>
+      </div>
+
+<p>Parses a version requirement string into a <a href="Version.Requirement.html"><code class="inline">Version.Requirement</code></a> struct.</p><p>If <code class="inline">string</code> is an invalid requirement, a <a href="Version.InvalidRequirementError.html"><code class="inline">Version.InvalidRequirementError</code></a> is raised.</p><h2 id="parse_requirement!/1-examples" class="section-heading">
+  <a href="#parse_requirement!/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse_requirement!</span><span class="p" data-group-id="5874147594-1">(</span><span class="s">&quot;== 2.0.1&quot;</span><span class="p" data-group-id="5874147594-1">)</span><span class="w">
+</span><span class="p" data-group-id="5874147594-2">#</span><span class="nc" data-group-id="5874147594-2">Version.Requirement</span><span class="p" data-group-id="5874147594-2">&lt;</span><span class="o">==</span><span class="w"> </span><span class="mf">2.0</span><span class="o">.</span><span class="mi">1</span><span class="p" data-group-id="5874147594-2">&gt;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Version</span><span class="o">.</span><span class="n">parse_requirement!</span><span class="p" data-group-id="5874147594-3">(</span><span class="s">&quot;== == 2.0.1&quot;</span><span class="p" data-group-id="5874147594-3">)</span><span class="w">
+</span><span class="gt">** (Version.InvalidRequirementError) invalid requirement: &quot;== == 2.0.1&quot;</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

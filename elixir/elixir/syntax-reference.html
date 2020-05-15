@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Syntax reference — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /syntax-reference.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="extras">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>Syntax reference</h1><p>Elixir syntax was designed to have a straightforward conversion to an abstract syntax tree (AST). This means the Elixir syntax is mostly uniform with a handful of &quot;syntax sugar&quot; constructs to reduce the noise in common Elixir idioms.</p><p>This document covers all of Elixir syntax constructs as a reference and then discuss their exact AST representation.</p><h2 id="reserved-words" class="section-heading">
+  <a href="#reserved-words" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Reserved words
+</h2>
+<p>These are the reserved words in the Elixir language. They are detailed throughout this guide but summed up here for convenience:</p><ul><li><code class="inline">true</code>, <code class="inline">false</code>, <code class="inline">nil</code> - used as atoms</li><li><code class="inline">when</code>, <code class="inline">and</code>, <code class="inline">or</code>, <code class="inline">not</code>, <code class="inline">in</code> - used as operators</li><li><code class="inline">fn</code> - used for anonymous function definitions</li><li><code class="inline">do</code>, <code class="inline">end</code>, <code class="inline">catch</code>, <code class="inline">rescue</code>, <code class="inline">after</code>, <code class="inline">else</code> - used in do/end blocks</li></ul><h2 id="data-types" class="section-heading">
+  <a href="#data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Data types
+</h2>
+<h3 id="numbers" class="section-heading">
+  <a href="#numbers" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Numbers
+</h3>
+<p>Integers (<code class="inline">1234</code>) and floats (<code class="inline">123.4</code>) in Elixir are represented as a sequence of digits that may be separated by underscore for readability purposes, such as <code class="inline">1_000_000</code>. Integers never contain a dot (<code class="inline">.</code>) in their representation. Floats contain a dot and at least one other digit after the dot. Floats also support the scientific notation, such as <code class="inline">123.4e10</code> or <code class="inline">123.4E10</code>.</p><h3 id="atoms" class="section-heading">
+  <a href="#atoms" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Atoms
+</h3>
+<p>Unquoted atoms start with a colon (<code class="inline">:</code>) which must be immediately followed by an underscore or a Unicode letter. The atom may continue using a sequence of Unicode letters, numbers, underscores, and <code class="inline">@</code>. Atoms may end in <code class="inline">!</code> or <code class="inline">?</code>. See <a href="unicode-syntax.html">Unicode Syntax</a> for a formal specification. Valid unquoted atoms are: <code class="inline">:ok</code>, <code class="inline">:ISO8601</code>, and <code class="inline">:integer?</code>.</p><p>If the colon is immediately followed by a pair of double- or single-quotes surrounding the atom name, the atom is considered quoted. In contrast with an unquoted atom, this one can be made of any Unicode character (not only letters), such as <code class="inline">:'🌢 Elixir'</code>, <code class="inline">:&quot;++olá++&quot;</code>, and <code class="inline">:&quot;123&quot;</code>.</p><p>Quoted and unquoted atoms with the same name are considered equivalent, so <code class="inline">:atom</code>, <code class="inline">:&quot;atom&quot;</code>, and <code class="inline">:'atom'</code> represent the same atom. The only catch is that the compiler will warn when quotes are used in atoms that do not need to be quoted.</p><p>All operators in Elixir are also valid atoms. Valid examples are <code class="inline">:foo</code>, <code class="inline">:FOO</code>, <code class="inline">:foo_42</code>, <code class="inline">:foo@bar</code>, and <code class="inline">:++</code>. Invalid examples are <code class="inline">:@foo</code> (<code class="inline">@</code> is not allowed at start), <code class="inline">:123</code> (numbers are not allowed at start), and <code class="inline">:(*)</code> (not a valid operator).</p><p><code class="inline">true</code>, <code class="inline">false</code>, and <code class="inline">nil</code> are reserved words that are represented by the atoms <code class="inline">:true</code>, <code class="inline">:false</code> and <code class="inline">:nil</code> respectively.</p><h3 id="strings" class="section-heading">
+  <a href="#strings" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Strings
+</h3>
+<p>Single-line strings in Elixir are written between double-quotes, such as <code class="inline">&quot;foo&quot;</code>. Any double-quote inside the string must be escaped with <code class="inline">\</code>. Strings support Unicode characters and are stored as UTF-8 encoded binaries.</p><p>Multi-line strings in Elixir are written with three double-quotes, and can have unescaped quotes within them. The resulting string will end with a newline. The indentation of the last <code class="inline">&quot;&quot;&quot;</code> is used to strip indentation from the inner string. For example:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span><span class="gp unselectable">
+...&gt; </span><span class="s">    this</span><span class="gp unselectable">
+...&gt; </span><span class="s">    is</span><span class="gp unselectable">
+...&gt; </span><span class="s">    a</span><span class="gp unselectable">
+...&gt; </span><span class="s">    test</span><span class="gp unselectable">
+...&gt; </span><span class="s">&quot;&quot;&quot;</span><span class="w">
+</span><span class="s">&quot;    this</span><span class="se">\n</span><span class="s">    is</span><span class="se">\n</span><span class="s">    a</span><span class="se">\n</span><span class="s">    test</span><span class="se">\n</span><span class="s">&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;</span><span class="gp unselectable">
+...&gt; </span><span class="s">    This</span><span class="gp unselectable">
+...&gt; </span><span class="s">    Is</span><span class="gp unselectable">
+...&gt; </span><span class="s">    A</span><span class="gp unselectable">
+...&gt; </span><span class="s">    Test</span><span class="gp unselectable">
+...&gt; </span><span class="s">    &quot;&quot;&quot;</span><span class="w">
+</span><span class="s">&quot;This</span><span class="se">\n</span><span class="s">Is</span><span class="se">\n</span><span class="s">A</span><span class="se">\n</span><span class="s">Test</span><span class="se">\n</span><span class="s">&quot;</span></code></pre><p>Strings are always represented as themselves in the AST.</p><h3 id="charlists" class="section-heading">
+  <a href="#charlists" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Charlists
+</h3>
+<p>Charlists in Elixir are written in single-quotes, such as <code class="inline">'foo'</code>. Any single-quote inside the string must be escaped with <code class="inline">\</code>. Charlists are made of non-negative integers, where each integer represents a Unicode code point.</p><p>Multi-line charlists are written with three single-quotes (<code class="inline">'''</code>), the same way multi-line strings are.</p><p>Charlists are always represented as themselves in the AST.</p><p>For more in-depth information, please read the &quot;Charlists&quot; section in the <a href="List.html"><code class="inline">List</code></a> module.</p><h3 id="lists-tuples-and-binaries" class="section-heading">
+  <a href="#lists-tuples-and-binaries" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Lists, tuples and binaries
+</h3>
+<p>Data structures such as lists, tuples, and binaries are marked respectively by the delimiters <code class="inline">[...]</code>, <code class="inline">{...}</code>, and <code class="inline">&lt;&lt;...&gt;&gt;</code>. Each element is separated by comma. A trailing comma is also allowed, such as in <code class="inline">[1, 2, 3,]</code>.</p><h3 id="maps-and-keyword-lists" class="section-heading">
+  <a href="#maps-and-keyword-lists" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Maps and keyword lists
+</h3>
+<p>Maps use the <code class="inline">%{...}</code> notation and each key-value is given by pairs marked with <code class="inline">=&gt;</code>, such as <code class="inline">%{&quot;hello&quot; =&gt; 1, 2 =&gt; &quot;world&quot;}</code>.</p><p>Both keyword lists (list of two-element tuples where the first element is atom) and maps with atom keys support a keyword notation where the colon character <code class="inline">:</code> is moved to the end of the atom. <code class="inline">%{hello: &quot;world&quot;}</code> is equivalent to <code class="inline">%{:hello =&gt; &quot;world&quot;}</code> and <code class="inline">[foo: :bar]</code> is equivalent to <code class="inline">[{:foo, :bar}]</code>. This notation is a syntax sugar that emits the same AST representation. It will be explained in later sections.</p><h3 id="structs" class="section-heading">
+  <a href="#structs" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Structs
+</h3>
+<p>Structs built on the map syntax by passing the struct name between <code class="inline">%</code> and <code class="inline">{</code>. For example, <code class="inline">%User{...}</code>.</p><h2 id="expressions" class="section-heading">
+  <a href="#expressions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Expressions
+</h2>
+<h3 id="variables" class="section-heading">
+  <a href="#variables" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Variables
+</h3>
+<p>Variables in Elixir must start with an underscore or a Unicode letter that is not in uppercase or titlecase. The variable may continue using a sequence of Unicode letters, numbers, and underscores. Variables may end in <code class="inline">?</code> or <code class="inline">!</code>. See <a href="unicode-syntax.html">Unicode Syntax</a> for a formal specification.</p><p><a href="naming-conventions.html">Elixir's naming conventions</a> recommend variables to be in <code class="inline">snake_case</code> format.</p><h3 id="non-qualified-calls-local-calls" class="section-heading">
+  <a href="#non-qualified-calls-local-calls" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Non-qualified calls (local calls)
+</h3>
+<p>Non-qualified calls, such as <code class="inline">add(1, 2)</code>, must start with an underscore or a Unicode letter that is not in uppercase or titlecase. The call may continue using a sequence of Unicode letters, numbers, and underscore. Calls may end in <code class="inline">?</code> or <code class="inline">!</code>. See <a href="unicode-syntax.html">Unicode Syntax</a> for a formal specification.</p><p>Parentheses for non-qualified calls are optional, except for zero-arity calls, which would then be ambiguous with variables. If parentheses are used, they must immediately follow the function name <em>without spaces</em>. For example, <code class="inline">add (1, 2)</code> is a syntax error, since <code class="inline">(1, 2)</code> is treated as an invalid block which is attempted to be given as a single argument to <code class="inline">add</code>.</p><p><a href="naming-conventions.html">Elixir's naming conventions</a> recommend calls to be in <code class="inline">snake_case</code> format.</p><h3 id="operators" class="section-heading">
+  <a href="#operators" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Operators
+</h3>
+<p>As many programming languages, Elixir also support operators as non-qualified calls with their precedence and associativity rules. Constructs such as <code class="inline">=</code>, <code class="inline">when</code>, <code class="inline">&amp;</code> and <code class="inline">@</code> are simply treated as operators. See <a href="operators.html">the Operators page</a> for a full reference.</p><h3 id="qualified-calls-remote-calls" class="section-heading">
+  <a href="#qualified-calls-remote-calls" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Qualified calls (remote calls)
+</h3>
+<p>Qualified calls, such as <code class="inline">Math.add(1, 2)</code>, must start with an underscore or a Unicode letter that is not in uppercase or titlecase. The call may continue using a sequence of Unicode letters, numbers, and underscores. Calls may end in <code class="inline">?</code> or <code class="inline">!</code>. See <a href="unicode-syntax.html">Unicode Syntax</a> for a formal specification.</p><p><a href="naming-conventions.html">Elixir's naming conventions</a> recommend calls to be in <code class="inline">snake_case</code> format.</p><p>For qualified calls, Elixir also allows the function name to be written between double- or single-quotes, allowing calls such as <code class="inline">Math.&quot;++add++&quot;(1, 2)</code>. Operators can be used as qualified calls without a need for quote, such as <code class="inline">Kernel.+(1, 2)</code>.</p><p>Parentheses for qualified calls are optional. If parentheses are used, they must immediately follow the function name <em>without spaces</em>.</p><h3 id="aliases" class="section-heading">
+  <a href="#aliases" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Aliases
+</h3>
+<p>Aliases are constructs that expand to atoms at compile-time. The alias <a href="String.html"><code class="inline">String</code></a> expands to the atom <code class="inline">:&quot;Elixir.String&quot;</code>. Aliases must start with an ASCII uppercase character which may be followed by any ASCII letter, number, or underscore. Non-ASCII characters are not supported in aliases.</p><p><a href="naming-conventions.html">Elixir's naming conventions</a> recommend aliases to be in <code class="inline">CamelCase</code> format.</p><h3 id="blocks" class="section-heading">
+  <a href="#blocks" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Blocks
+</h3>
+<p>Blocks are multiple Elixir expressions separated by newlines or semi-colons. A new block may be created at any moment by using parentheses.</p><h3 id="left-to-right-arrow" class="section-heading">
+  <a href="#left-to-right-arrow" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Left to right arrow
+</h3>
+<p>The left to right arrow (<code class="inline">-&gt;</code>) is used to establish a relationship between left and right, commonly referred as clauses. The left side may have zero, one, or more arguments; the right side is zero, one, or more expressions separated by new line. The <code class="inline">-&gt;</code> may appear one or more times between one of the following terminators: <code class="inline">do</code>/<code class="inline">end</code>, <code class="inline">fn</code>/<code class="inline">end</code> or <code class="inline">(</code>/<code class="inline">)</code>. When <code class="inline">-&gt;</code> is used, only other clauses are allowed between those terminators. Mixing clauses and regular expressions is invalid syntax.</p><p>It is seen on <code class="inline">case</code> and <code class="inline">cond</code> constructs between <code class="inline">do</code>/<code class="inline">end</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k" data-group-id="0846412088-1">do</span><span class="w">
+  </span><span class="mi">2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w">
+  </span><span class="mi">4</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">5</span><span class="w">
+</span><span class="k" data-group-id="0846412088-1">end</span><span class="w">
+
+</span><span class="k">cond</span><span class="w"> </span><span class="k" data-group-id="0846412088-2">do</span><span class="w">
+  </span><span class="no">true</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="no">false</span><span class="w">
+</span><span class="k" data-group-id="0846412088-2">end</span></code></pre><p>Seen in typespecs between <code class="inline">(</code>/<code class="inline">)</code>:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="7122759019-1">(</span><span class="n">integer</span><span class="p" data-group-id="7122759019-2">(</span><span class="p" data-group-id="7122759019-2">)</span><span class="p">,</span><span class="w"> </span><span class="n">boolean</span><span class="p" data-group-id="7122759019-3">(</span><span class="p" data-group-id="7122759019-3">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">integer</span><span class="p" data-group-id="7122759019-4">(</span><span class="p" data-group-id="7122759019-4">)</span><span class="p" data-group-id="7122759019-1">)</span></code></pre><p>It is also used between <code class="inline">fn/end</code> for building anonymous functions:</p><pre><code class="nohighlight makeup elixir"><span class="k" data-group-id="7741012299-1">fn</span><span class="w">
+  </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="w">
+</span><span class="k" data-group-id="7741012299-1">end</span></code></pre><h3 id="sigils" class="section-heading">
+  <a href="#sigils" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Sigils
+</h3>
+<p>Sigils start with <code class="inline">~</code> and are followed by a letter and one of the following pairs:</p><ul><li><code class="inline">(</code> and <code class="inline">)</code></li><li><code class="inline">{</code> and <code class="inline">}</code></li><li><code class="inline">[</code> and <code class="inline">]</code></li><li><code class="inline">&lt;</code> and <code class="inline">&gt;</code></li><li><code class="inline">&quot;</code> and <code class="inline">&quot;</code></li><li><code class="inline">'</code> and <code class="inline">'</code></li><li><code class="inline">|</code> and <code class="inline">|</code></li><li><code class="inline">/</code> and <code class="inline">/</code></li></ul><p>After closing the pair, zero or more ASCII letters can be given as a modifier. Sigils are expressed as non-qualified calls prefixed with <code class="inline">sigil_</code> where the first argument is the sigil contents as a string and the second argument is a list of integers as modifiers:</p><p>If the sigil letter is in uppercase, no interpolation is allowed in the sigil, otherwise its contents may be dynamic. Compare the results of the sigils below for more information:</p><pre><code class="nohighlight makeup elixir"><span class="s">~s/f</span><span class="si" data-group-id="2096667025-1">#{</span><span class="s">&quot;o&quot;</span><span class="si" data-group-id="2096667025-1">}</span><span class="s">o/</span><span class="w">
+</span><span class="s">~S/f#{&quot;o&quot;}o/</span></code></pre><p>Sigils are useful to encode text with their own escaping rules, such as regular expressions, datetimes, and others.</p><h2 id="the-elixir-ast" class="section-heading">
+  <a href="#the-elixir-ast" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  The Elixir AST
+</h2>
+<p>Elixir syntax was designed to have a straightforward conversion to an abstract syntax tree (AST). Elixir's AST is a regular Elixir data structure composed of the following elements:</p><ul><li>atoms - such as <code class="inline">:foo</code></li><li>integers - such as <code class="inline">42</code></li><li>floats - such as <code class="inline">13.1</code></li><li>strings - such as <code class="inline">&quot;hello&quot;</code></li><li>lists - such as <code class="inline">[1, 2, 3]</code></li><li>tuples with two elements - such as <code class="inline">{&quot;hello&quot;, :world}</code></li><li>tuples with three elements, representing calls or variables, as explained next</li></ul><p>The building block of Elixir's AST is a call, such as:</p><pre><code class="nohighlight makeup elixir"><span class="n">sum</span><span class="p" data-group-id="1396282521-1">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="1396282521-1">)</span></code></pre><p>which is represented as a tuple with three elements:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="1810337764-1">{</span><span class="ss">:sum</span><span class="p">,</span><span class="w"> </span><span class="n">meta</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1810337764-2">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="1810337764-2">]</span><span class="p" data-group-id="1810337764-1">}</span></code></pre><p>the first element is an atom (or another tuple), the second element is a list of two-element tuples with metadata (such as line numbers) and the third is a list of arguments.</p><p>We can retrieve the AST for any Elixir expression by calling <code class="inline">quote</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="2221048329-1">do</span><span class="w">
+  </span><span class="n">sum</span><span class="p" data-group-id="2221048329-2">(</span><span class="p" data-group-id="2221048329-2">)</span><span class="w">
+</span><span class="k" data-group-id="2221048329-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:sum, [], []}</span></code></pre><p>Variables are also represented using a tuple with three elements and a combination of lists and atoms, for example:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="3283454295-1">do</span><span class="w">
+  </span><span class="n">sum</span><span class="w">
+</span><span class="k" data-group-id="3283454295-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:sum, [], Elixir}</span></code></pre><p>You can see that variables are also represented with a tuple, except the third element is an atom expressing the variable context.</p><p>Over the course of this section, we will explore many Elixir syntax constructs alongside their AST representations.</p><h3 id="operators-1" class="section-heading">
+  <a href="#operators-1" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Operators
+</h3>
+<p>Operators are treated as non-qualified calls:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="5641083541-1">do</span><span class="w">
+  </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span><span class="k" data-group-id="5641083541-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:+, [], [1, 2]}</span></code></pre><p>Notice that <code class="inline">.</code> is also an operator. Remote calls use the dot in the AST with two arguments, where the second argument is always an atom:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="3056154655-1">do</span><span class="w">
+  </span><span class="n">foo</span><span class="o">.</span><span class="n">bar</span><span class="p" data-group-id="3056154655-2">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="3056154655-2">)</span><span class="w">
+</span><span class="k" data-group-id="3056154655-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {{:., [], [{:foo, [], Elixir}, :bar]}, [], [1, 2, 3]}</span></code></pre><p>Calling anonymous functions uses the dot in the AST with a single argument, mirroring the fact the function name is &quot;missing&quot; from right side of the dot:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="0993154182-1">do</span><span class="w">
+  </span><span class="n">foo</span><span class="o">.</span><span class="p" data-group-id="0993154182-2">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="0993154182-2">)</span><span class="w">
+</span><span class="k" data-group-id="0993154182-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {{:., [], [{:foo, [], Elixir}]}, [], [1, 2, 3]}</span></code></pre><h3 id="aliases-1" class="section-heading">
+  <a href="#aliases-1" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Aliases
+</h3>
+<p>Aliases are represented by an <code class="inline">__aliases__</code> call with each segment separated by dot as an argument:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="6077333704-1">do</span><span class="w">
+  </span><span class="nc">Foo.Bar.Baz</span><span class="w">
+</span><span class="k" data-group-id="6077333704-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:__aliases__, [], [:Foo, :Bar, :Baz]}</span><span class="w">
+
+</span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="6077333704-2">do</span><span class="w">
+  </span><span class="bp">__MODULE__</span><span class="o">.</span><span class="nc">Bar.Baz</span><span class="w">
+</span><span class="k" data-group-id="6077333704-2">end</span><span class="w">
+</span><span class="c1">#=&gt; {:__aliases__, [], [{:__MODULE__, [], Elixir}, :Bar, :Baz]}</span></code></pre><p>All arguments, except the first, are guaranteed to be atoms.</p><h3 id="data-structures" class="section-heading">
+  <a href="#data-structures" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Data structures
+</h3>
+<p>Remember lists are literals, so they are represented as themselves in the AST:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="6235746947-1">do</span><span class="w">
+  </span><span class="p" data-group-id="6235746947-2">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6235746947-2">]</span><span class="w">
+</span><span class="k" data-group-id="6235746947-1">end</span><span class="w">
+</span><span class="c1">#=&gt; [1, 2, 3]</span></code></pre><p>Tuples have their own representation, except for two-element tuples, which are represented as themselves:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="1298930098-1">do</span><span class="w">
+  </span><span class="p" data-group-id="1298930098-2">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="1298930098-2">}</span><span class="w">
+</span><span class="k" data-group-id="1298930098-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {1, 2}</span><span class="w">
+
+</span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="1298930098-3">do</span><span class="w">
+  </span><span class="p" data-group-id="1298930098-4">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="1298930098-4">}</span><span class="w">
+</span><span class="k" data-group-id="1298930098-3">end</span><span class="w">
+</span><span class="c1">#=&gt; {:{}, [], [1, 2, 3]}</span></code></pre><p>Binaries have a representation similar to tuples, except they are tagged with <code class="inline">:&lt;&lt;&gt;&gt;</code> instead of <code class="inline">:{}</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="9367548461-1">do</span><span class="w">
+  </span><span class="p" data-group-id="9367548461-2">&lt;&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="9367548461-2">&gt;&gt;</span><span class="w">
+</span><span class="k" data-group-id="9367548461-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:&lt;&lt;&gt;&gt;, [], [1, 2, 3]}</span></code></pre><p>The same applies to maps where each pair is treated as a list of tuples with two elements:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="9760781738-1">do</span><span class="w">
+  </span><span class="p" data-group-id="9760781738-2">%{</span><span class="mi">1</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">=</span><span class="o">&gt;</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="9760781738-2">}</span><span class="w">
+</span><span class="k" data-group-id="9760781738-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:%{}, [], [{1, 2}, {3, 4}]}</span></code></pre><h3 id="blocks-1" class="section-heading">
+  <a href="#blocks-1" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Blocks
+</h3>
+<p>Blocks are represented as a <code class="inline">__block__</code> call with each line as a separate argument:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="9052117521-1">do</span><span class="w">
+  </span><span class="mi">1</span><span class="w">
+  </span><span class="mi">2</span><span class="w">
+  </span><span class="mi">3</span><span class="w">
+</span><span class="k" data-group-id="9052117521-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:__block__, [], [1, 2, 3]}</span><span class="w">
+
+</span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="9052117521-2">do</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="k" data-group-id="9052117521-2">end</span><span class="w">
+</span><span class="c1">#=&gt; {:__block__, [], [1, 2, 3]}</span></code></pre><h3 id="left-to-right-arrow-1" class="section-heading">
+  <a href="#left-to-right-arrow-1" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Left to right arrow
+</h3>
+<p>The left to right arrow (<code class="inline">-&gt;</code>) is represented similar to operators except that they are always part of a list, its left side represents a list of arguments and the right side is an expression.</p><p>For example, in <code class="inline">case</code> and <code class="inline">cond</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="5894151475-1">do</span><span class="w">
+  </span><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k" data-group-id="5894151475-2">do</span><span class="w">
+    </span><span class="mi">2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w">
+    </span><span class="mi">4</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">5</span><span class="w">
+  </span><span class="k" data-group-id="5894151475-2">end</span><span class="w">
+</span><span class="k" data-group-id="5894151475-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:case, [], [1, [do: [{:-&gt;, [], [[2], 3]}, {:-&gt;, [], [[4], 5]}]]]}</span><span class="w">
+
+</span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="5894151475-3">do</span><span class="w">
+  </span><span class="k">cond</span><span class="w"> </span><span class="k" data-group-id="5894151475-4">do</span><span class="w">
+    </span><span class="no">true</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="no">false</span><span class="w">
+  </span><span class="k" data-group-id="5894151475-4">end</span><span class="w">
+</span><span class="k" data-group-id="5894151475-3">end</span><span class="w">
+</span><span class="c1">#=&gt; {:cond, [], [[do: [{:-&gt;, [], [[true], false]}]]]}</span></code></pre><p>Between <code class="inline">(</code>/<code class="inline">)</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="4823204616-1">do</span><span class="w">
+  </span><span class="p" data-group-id="4823204616-2">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w">
+   </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">6</span><span class="p" data-group-id="4823204616-2">)</span><span class="w">
+</span><span class="k" data-group-id="4823204616-1">end</span><span class="w">
+</span><span class="c1">#=&gt; [{:-&gt;, [], [[1, 2], 3]}, {:-&gt;, [], [[4, 5], 6]}]</span></code></pre><p>Between <code class="inline">fn/end</code>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="1493550271-1">do</span><span class="w">
+  </span><span class="k" data-group-id="1493550271-2">fn</span><span class="w">
+    </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">3</span><span class="w">
+    </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">6</span><span class="w">
+  </span><span class="k" data-group-id="1493550271-2">end</span><span class="w">
+</span><span class="k" data-group-id="1493550271-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:fn, [], [{:-&gt;, [], [[1, 2], 3]}, {:-&gt;, [], [[4, 5], 6]}]}</span></code></pre><h2 id="syntactic-sugar" class="section-heading">
+  <a href="#syntactic-sugar" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Syntactic sugar
+</h2>
+<p>All of the constructs above are part of Elixir's syntax and have their own representation as part of the Elixir AST. This section will discuss the remaining constructs that &quot;desugar&quot; to one of the constructs explored above. In other words, the constructs below can be represented in more than one way in your Elixir code and retain AST equivalence.</p><h3 id="integers-in-other-bases-and-unicode-code-points" class="section-heading">
+  <a href="#integers-in-other-bases-and-unicode-code-points" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Integers in other bases and Unicode code points
+</h3>
+<p>Elixir allows integers to contain <code class="inline">_</code> to separate digits and provides conveniences to represent integers in other bases:</p><pre><code class="nohighlight makeup elixir"><span class="mi">1_000_000</span><span class="w">
+</span><span class="c1">#=&gt; 1000000</span><span class="w">
+
+</span><span class="mh">0xABCD</span><span class="w">
+</span><span class="c1">#=&gt; 43981 (Hexadecimal base)</span><span class="w">
+
+</span><span class="mo">0o01234567</span><span class="w">
+</span><span class="c1">#=&gt; 342391 (Octal base)</span><span class="w">
+
+</span><span class="mb">0b10101010</span><span class="w">
+</span><span class="c1">#=&gt; 170 (Binary base)</span><span class="w">
+
+</span><span class="sc">?é</span><span class="w">
+</span><span class="c1">#=&gt; 233 (Unicode code point)</span></code></pre><p>Those constructs exist only at the syntax level. All of the examples above are represented as their underlying integers in the AST.</p><h3 id="access-syntax" class="section-heading">
+  <a href="#access-syntax" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Access syntax
+</h3>
+<p>The access syntax is represented as a call to <a href="Access.html#get/2"><code class="inline">Access.get/2</code></a>:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="6661301187-1">do</span><span class="w">
+  </span><span class="n">opts</span><span class="p" data-group-id="6661301187-2">[</span><span class="n">arg</span><span class="p" data-group-id="6661301187-2">]</span><span class="w">
+</span><span class="k" data-group-id="6661301187-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {{:., [], [Access, :get]}, [], [{:opts, [], Elixir}, {:arg, [], Elixir}]}</span></code></pre><h3 id="optional-parentheses" class="section-heading">
+  <a href="#optional-parentheses" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Optional parentheses
+</h3>
+<p>Elixir provides optional parentheses for non-qualified and qualified calls.</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="7317635444-1">do</span><span class="w">
+  </span><span class="n">sum</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="w">
+</span><span class="k" data-group-id="7317635444-1">end</span><span class="w">
+</span><span class="c1">#=&gt; {:sum, [], [1, 2, 3]}</span></code></pre><p>The above is treated the same as <code class="inline">sum(1, 2, 3)</code> by the parser.</p><p>The same applies to qualified calls such as <code class="inline">Foo.bar(1, 2, 3)</code>, which is the same as <code class="inline">Foo.bar 1, 2, 3</code>. However, remember parentheses are not optional for non-qualified calls with no arguments, such as <code class="inline">sum()</code>. Removing the parentheses for <code class="inline">sum</code> causes it to be represented as the variable <code class="inline">sum</code>, which means they would be no longer equivalent.</p><h3 id="keywords" class="section-heading">
+  <a href="#keywords" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Keywords
+</h3>
+<p>Keywords in Elixir are a list of tuples of two elements where the first element is an atom. Using the base constructs, they would be represented as:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="9837067268-1">[</span><span class="p" data-group-id="9837067268-2">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="9837067268-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9837067268-3">{</span><span class="ss">:bar</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="9837067268-3">}</span><span class="p" data-group-id="9837067268-1">]</span></code></pre><p>However Elixir introduces a syntax sugar where the keywords above may be written as follows:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="8259400522-1">[</span><span class="ss">foo</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">bar</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="8259400522-1">]</span></code></pre><p>Atoms with foreign characters, such as whitespace, must be wrapped in quotes. This rule applies to keywords as well:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="2220569848-1">[</span><span class="p" data-group-id="2220569848-2">{</span><span class="ss">:&quot;foo bar&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="2220569848-2">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2220569848-3">{</span><span class="ss">:&quot;bar baz&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="2220569848-3">}</span><span class="p" data-group-id="2220569848-1">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="2220569848-4">[</span><span class="ss">&quot;foo bar&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;bar baz&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="2220569848-4">]</span></code></pre><p>Remember that, because lists and two-element tuples are quoted literals, by definition keywords are also literals (in fact, the only reason tuples with two elements are quoted literals is to support keywords as literals).</p><h3 id="keywords-as-last-arguments" class="section-heading">
+  <a href="#keywords-as-last-arguments" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Keywords as last arguments
+</h3>
+<p>Elixir also supports a syntax where if the last argument of a call is a keyword list then the square brackets can be skipped. This means that the following:</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="p" data-group-id="9757170760-1">(</span><span class="n">condition</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">this</span><span class="p">,</span><span class="w"> </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="n">that</span><span class="p" data-group-id="9757170760-1">)</span></code></pre><p>is the same as</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="p" data-group-id="1583198922-1">(</span><span class="n">condition</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1583198922-2">[</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">this</span><span class="p">,</span><span class="w"> </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="n">that</span><span class="p" data-group-id="1583198922-2">]</span><span class="p" data-group-id="1583198922-1">)</span></code></pre><p>which in turn is the same as</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="p" data-group-id="3212246155-1">(</span><span class="n">condition</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3212246155-2">[</span><span class="p" data-group-id="3212246155-3">{</span><span class="ss">:do</span><span class="p">,</span><span class="w"> </span><span class="n">this</span><span class="p" data-group-id="3212246155-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3212246155-4">{</span><span class="ss">:else</span><span class="p">,</span><span class="w"> </span><span class="n">that</span><span class="p" data-group-id="3212246155-4">}</span><span class="p" data-group-id="3212246155-2">]</span><span class="p" data-group-id="3212246155-1">)</span></code></pre><h3 id="do-end-blocks" class="section-heading">
+  <a href="#do-end-blocks" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <code class="inline">do</code>/<code class="inline">end</code> blocks
+</h3>
+<p>The last syntax convenience are <code class="inline">do</code>/<code class="inline">end</code> blocks. <code class="inline">do</code>/<code class="inline">end</code> blocks are equivalent to keywords as the last argument of a function call where the block contents are wrapped in parentheses. For example:</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="w"> </span><span class="no">true</span><span class="w"> </span><span class="k" data-group-id="5218813700-1">do</span><span class="w">
+  </span><span class="n">this</span><span class="w">
+</span><span class="k" data-group-id="5218813700-1">else</span><span class="w">
+  </span><span class="n">that</span><span class="w">
+</span><span class="k" data-group-id="5218813700-1">end</span></code></pre><p>is the same as:</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="p" data-group-id="0939027548-1">(</span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="0939027548-2">(</span><span class="n">this</span><span class="p" data-group-id="0939027548-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="0939027548-3">(</span><span class="n">that</span><span class="p" data-group-id="0939027548-3">)</span><span class="p" data-group-id="0939027548-1">)</span></code></pre><p>which we have explored in the previous section.</p><p>Parentheses are important to support multiple expressions. This:</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="w"> </span><span class="no">true</span><span class="w"> </span><span class="k" data-group-id="3380922191-1">do</span><span class="w">
+  </span><span class="n">this</span><span class="w">
+  </span><span class="n">that</span><span class="w">
+</span><span class="k" data-group-id="3380922191-1">end</span></code></pre><p>is the same as:</p><pre><code class="nohighlight makeup elixir"><span class="k">if</span><span class="p" data-group-id="1721352708-1">(</span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1721352708-2">(</span><span class="w">
+  </span><span class="n">this</span><span class="w">
+  </span><span class="n">that</span><span class="w">
+</span><span class="p" data-group-id="1721352708-2">)</span><span class="p" data-group-id="1721352708-1">)</span></code></pre><p>Inside <code class="inline">do</code>/<code class="inline">end</code> blocks you may introduce other keywords, such as <code class="inline">else</code> used in the <code class="inline">if</code> above. The supported keywords between <code class="inline">do</code>/<code class="inline">end</code> are static and are:</p><ul><li><code class="inline">after</code></li><li><code class="inline">catch</code></li><li><code class="inline">else</code></li><li><code class="inline">rescue</code></li></ul><p>You can see them being used in constructs such as <code class="inline">receive</code>, <code class="inline">try</code>, and others.</p><h2 id="summary" class="section-heading">
+  <a href="#summary" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Summary
+</h2>
+<p>This document provides a reference to Elixir syntax, exploring its constructs and their AST equivalents.</p><p>We have also discussed a handful of syntax conveniences provided by Elixir. Those conveniences are what allow us to write</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Math</span><span class="w"> </span><span class="k" data-group-id="5065184954-1">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">add</span><span class="p" data-group-id="5065184954-2">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p" data-group-id="5065184954-2">)</span><span class="w"> </span><span class="k" data-group-id="5065184954-3">do</span><span class="w">
+    </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">
+  </span><span class="k" data-group-id="5065184954-3">end</span><span class="w">
+</span><span class="k" data-group-id="5065184954-1">end</span></code></pre><p>instead of</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="p" data-group-id="0180220476-1">(</span><span class="nc">Math</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0180220476-2">[</span><span class="w">
+  </span><span class="p" data-group-id="0180220476-3">{</span><span class="ss">:do</span><span class="p">,</span><span class="w"> </span><span class="kd">def</span><span class="p" data-group-id="0180220476-4">(</span><span class="n">add</span><span class="p" data-group-id="0180220476-5">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p" data-group-id="0180220476-5">)</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0180220476-6">[</span><span class="p" data-group-id="0180220476-7">{</span><span class="ss">:do</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p" data-group-id="0180220476-7">}</span><span class="p" data-group-id="0180220476-6">]</span><span class="p" data-group-id="0180220476-4">)</span><span class="p" data-group-id="0180220476-3">}</span><span class="w">
+</span><span class="p" data-group-id="0180220476-2">]</span><span class="p" data-group-id="0180220476-1">)</span></code></pre><p>The mapping between code and data (the underlying AST) is what allows Elixir to implement <code class="inline">defmodule</code>, <code class="inline">def</code>, <code class="inline">if</code>, and others in Elixir itself. Elixir makes the constructs available for building the language accessible to developers who want to extend the language to new domains.</p>      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

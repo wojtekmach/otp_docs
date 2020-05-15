@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="EEx v1.10.3">
+    <title>EEx — EEx v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/eex/v1.10/ /EEx.html" />
+    <script src="dist/sidebar_items-baafdf0afe.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+EEx      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">EEx v1.10.3</small>
+EEx          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L10" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>EEx stands for Embedded Elixir. It allows you to embed
+Elixir code inside a string in a robust way.</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">EEx</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="8810558436-1">(</span><span class="s">&quot;foo &lt;%= bar %&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">bar</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;baz&quot;</span><span class="p" data-group-id="8810558436-1">)</span><span class="w">
+</span><span class="s">&quot;foo baz&quot;</span></code></pre><h2 id="module-api" class="section-heading">
+  <a href="#module-api" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  API
+</h2>
+<p>This module provides 3 main APIs for you to use:</p><ol><li><p>Evaluate a string (<code class="inline">eval_string</code>) or a file (<code class="inline">eval_file</code>)
+directly. This is the simplest API to use but also the
+slowest, since the code is evaluated and not compiled before.</p></li><li><p>Define a function from a string (<code class="inline">function_from_string</code>)
+or a file (<code class="inline">function_from_file</code>). This allows you to embed
+the template as a function inside a module which will then
+be compiled. This is the preferred API if you have access
+to the template at compilation time.</p></li><li><p>Compile a string (<code class="inline">compile_string</code>) or a file (<code class="inline">compile_file</code>)
+into Elixir syntax tree. This is the API used by both functions
+above and is available to you if you want to provide your own
+ways of handling the compiled template.</p></li></ol><h2 id="module-options" class="section-heading">
+  <a href="#module-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<p>All functions in this module accept EEx-related options.
+They are:</p><ul><li><code class="inline">:line</code> - the line to be used as the template start. Defaults to 1.</li><li><code class="inline">:file</code> - the file to be used in the template. Defaults to the given
+file the template is read from or to &quot;nofile&quot; when compiling from a string.</li><li><code class="inline">:engine</code> - the EEx engine to be used for compilation.</li><li><code class="inline">:trim</code> - trims whitespace left/right of quotation tags. If a quotation
+tag appears on its own in a given line, line endings are also removed.</li></ul><h2 id="module-engine" class="section-heading">
+  <a href="#module-engine" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Engine
+</h2>
+<p>EEx has the concept of engines which allows you to modify or
+transform the code extracted from the given string or file.</p><p>By default, <a href="#content"><code class="inline">EEx</code></a> uses the <a href="EEx.SmartEngine.html"><code class="inline">EEx.SmartEngine</code></a> that provides some
+conveniences on top of the simple <a href="EEx.Engine.html"><code class="inline">EEx.Engine</code></a>.</p><h3 id="module-tags" class="section-heading">
+  <a href="#module-tags" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Tags
+</h3>
+<p><a href="EEx.SmartEngine.html"><code class="inline">EEx.SmartEngine</code></a> supports the following tags:</p><pre><code class="nohighlight makeup elixir"><span class="o">&lt;</span><span class="p">%</span><span class="w"> </span><span class="nc">Elixir</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">inline</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="nc">Elixir</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">replace</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="p">%</span><span class="w"> </span><span class="nc">EEx</span><span class="w"> </span><span class="n">quotation</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">returns</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">contents</span><span class="w"> </span><span class="n">inside</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="c1"># Comments - they are discarded from source %&gt;</span></code></pre><p>All expressions that output something to the template
+<strong>must</strong> use the equals sign (<code class="inline">=</code>). Since everything in
+Elixir is an expression, there are no exceptions for this rule.
+For example, while some template languages would special-case
+<code class="inline">if/2</code> clauses, they are treated the same in EEx and
+also require <code class="inline">=</code> in order to have their result printed:</p><pre><code class="nohighlight makeup elixir"><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="no">true</span><span class="w"> </span><span class="k" data-group-id="3996088269-1">do</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+  </span><span class="nc">It</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">obviously</span><span class="w"> </span><span class="no">true</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="w"> </span><span class="k" data-group-id="3996088269-1">else</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+  </span><span class="nc">This</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">never</span><span class="w"> </span><span class="n">appear</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="w"> </span><span class="k" data-group-id="3996088269-1">end</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span></code></pre><p>To escape an EEx expression in EEx use <code class="inline">&lt;%% content %&gt;</code>. For example:</p><pre><code class="nohighlight makeup elixir"><span class="o">&lt;</span><span class="p">%</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span></code></pre><p>will be rendered as <code class="inline">&lt;%= x + 3 %&gt;</code>.</p><p>Notice that different engines may have different rules
+for each tag. Other tags may be added in future versions.</p><h3 id="module-macros" class="section-heading">
+  <a href="#module-macros" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Macros
+</h3>
+<p><a href="EEx.SmartEngine.html"><code class="inline">EEx.SmartEngine</code></a> also adds some macros to your template.
+An example is the <code class="inline">@</code> macro which allows easy data access
+in a template:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">EEx</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="7234467605-1">(</span><span class="s">&quot;&lt;%= @foo %&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">assigns</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="7234467605-2">[</span><span class="ss">foo</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="7234467605-2">]</span><span class="p" data-group-id="7234467605-1">)</span><span class="w">
+</span><span class="s">&quot;1&quot;</span></code></pre><p>In other words, <code class="inline">&lt;%= @foo %&gt;</code> translates to:</p><pre><code class="nohighlight makeup elixir"><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="7585864140-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p" data-group-id="7585864140-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Access</span><span class="o">.</span><span class="n">fetch</span><span class="p" data-group-id="7585864140-2">(</span><span class="n">assigns</span><span class="p">,</span><span class="w"> </span><span class="ss">:foo</span><span class="p" data-group-id="7585864140-2">)</span><span class="p">;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span></code></pre><p>The <code class="inline">assigns</code> extension is useful when the number of variables
+required by the template is not specified at compilation time.</p>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_file/2">compile_file(filename, options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a <code class="inline">filename</code> and generate a quoted expression
+that can be evaluated by Elixir or compiled to a function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_string/2">compile_string(source, options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a string <code class="inline">source</code> and generate a quoted expression
+that can be evaluated by Elixir or compiled to a function.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_file/3">eval_file(filename, bindings \\ [], options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a <code class="inline">filename</code> and evaluate the values using the <code class="inline">bindings</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_string/3">eval_string(source, bindings \\ [], options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a string <code class="inline">source</code> and evaluate the values using the <code class="inline">bindings</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#function_from_file/5">function_from_file(kind, name, file, args \\ [], options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Generates a function definition from the file contents.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#function_from_string/5">function_from_string(kind, name, source, args \\ [], options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Generates a function definition from the string.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="compile_file/2">
+    <span id="compile_file/1"></span>
+  <div class="detail-header">
+    <a href="#compile_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_file(filename, options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L188" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_file(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/Macro.html#t:t/0">Macro.t</a>()</pre>
+      </div>
+
+<p>Gets a <code class="inline">filename</code> and generate a quoted expression
+that can be evaluated by Elixir or compiled to a function.</p>  </section>
+</section>
+<section class="detail" id="compile_string/2">
+    <span id="compile_string/1"></span>
+  <div class="detail-header">
+    <a href="#compile_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_string(source, options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L179" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>compile_string(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/Macro.html#t:t/0">Macro.t</a>()</pre>
+      </div>
+
+<p>Gets a string <code class="inline">source</code> and generate a quoted expression
+that can be evaluated by Elixir or compiled to a function.</p>  </section>
+</section>
+<section class="detail" id="eval_file/3">
+    <span id="eval_file/1"></span>
+    <span id="eval_file/2"></span>
+  <div class="detail-header">
+    <a href="#eval_file/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_file(filename, bindings \\ [], options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L223" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>eval_file(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+
+<p>Gets a <code class="inline">filename</code> and evaluate the values using the <code class="inline">bindings</code>.</p><h2 id="eval_file/3-examples" class="section-heading">
+  <a href="#eval_file/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># sample.eex</span><span class="w">
+</span><span class="n">foo</span><span class="w"> </span><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="c1"># iex</span><span class="w">
+</span><span class="nc">EEx</span><span class="o">.</span><span class="n">eval_file</span><span class="p" data-group-id="1729263975-1">(</span><span class="s">&quot;sample.eex&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">bar</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;baz&quot;</span><span class="p" data-group-id="1729263975-1">)</span><span class="w">
+</span><span class="c1">#=&gt; &quot;foo baz&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="eval_string/3">
+    <span id="eval_string/1"></span>
+    <span id="eval_string/2"></span>
+  <div class="detail-header">
+    <a href="#eval_string/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_string(source, bindings \\ [], options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L203" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>eval_string(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+      </div>
+
+<p>Gets a string <code class="inline">source</code> and evaluate the values using the <code class="inline">bindings</code>.</p><h2 id="eval_string/3-examples" class="section-heading">
+  <a href="#eval_string/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">EEx</span><span class="o">.</span><span class="n">eval_string</span><span class="p" data-group-id="2617035981-1">(</span><span class="s">&quot;foo &lt;%= bar %&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">bar</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;baz&quot;</span><span class="p" data-group-id="2617035981-1">)</span><span class="w">
+</span><span class="s">&quot;foo baz&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="function_from_file/5">
+    <span id="function_from_file/3"></span>
+    <span id="function_from_file/4"></span>
+  <div class="detail-header">
+    <a href="#function_from_file/5" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">function_from_file(kind, name, file, args \\ [], options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L159" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Generates a function definition from the file contents.</p><p>The kind (<code class="inline">:def</code> or <code class="inline">:defp</code>) must be given, the
+function name, its arguments and the compilation options.</p><p>This function is useful in case you have templates but
+you want to precompile inside a module for speed.</p><h2 id="function_from_file/5-examples" class="section-heading">
+  <a href="#function_from_file/5-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># sample.eex</span><span class="w">
+</span><span class="o">&lt;</span><span class="p">%</span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="p">%</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="c1"># sample.ex</span><span class="w">
+</span><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Sample</span><span class="w"> </span><span class="k" data-group-id="7439452318-1">do</span><span class="w">
+  </span><span class="kn">require</span><span class="w"> </span><span class="nc">EEx</span><span class="w">
+  </span><span class="nc">EEx</span><span class="o">.</span><span class="n">function_from_file</span><span class="p" data-group-id="7439452318-2">(</span><span class="ss">:def</span><span class="p">,</span><span class="w"> </span><span class="ss">:sample</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sample.eex&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7439452318-3">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="7439452318-3">]</span><span class="p" data-group-id="7439452318-2">)</span><span class="w">
+</span><span class="k" data-group-id="7439452318-1">end</span><span class="w">
+
+</span><span class="c1"># iex</span><span class="w">
+</span><span class="nc">Sample</span><span class="o">.</span><span class="n">sample</span><span class="p" data-group-id="7439452318-4">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="7439452318-4">)</span><span class="w">
+</span><span class="c1">#=&gt; &quot;3&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="function_from_string/5">
+    <span id="function_from_string/3"></span>
+    <span id="function_from_string/4"></span>
+  <div class="detail-header">
+    <a href="#function_from_string/5" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">function_from_string(kind, name, source, args \\ [], options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/eex/lib/eex.ex#L121" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Generates a function definition from the string.</p><p>The kind (<code class="inline">:def</code> or <code class="inline">:defp</code>) must be given, the
+function name, its arguments and the compilation options.</p><h2 id="function_from_string/5-examples" class="section-heading">
+  <a href="#function_from_string/5-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Sample</span><span class="w"> </span><span class="k" data-group-id="3025520886-1">do</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="kn">require</span><span class="w"> </span><span class="nc">EEx</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="nc">EEx</span><span class="o">.</span><span class="n">function_from_string</span><span class="p" data-group-id="3025520886-2">(</span><span class="ss">:def</span><span class="p">,</span><span class="w"> </span><span class="ss">:sample</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&lt;%= a + b %&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3025520886-3">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p" data-group-id="3025520886-3">]</span><span class="p" data-group-id="3025520886-2">)</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="3025520886-1">end</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Sample</span><span class="o">.</span><span class="n">sample</span><span class="p" data-group-id="3025520886-4">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="3025520886-4">)</span><span class="w">
+</span><span class="s">&quot;3&quot;</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

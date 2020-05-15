@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="ExUnit v1.10.3">
+    <title>ExUnit.Case — ExUnit v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/ex_unit/v1.10/ /ExUnit.Case.html" />
+    <script src="dist/sidebar_items-1dc387aa8c.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+ExUnit      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">ExUnit v1.10.3</small>
+ExUnit.Case          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L9" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Helpers for defining test cases.</p><p>This module must be used in other modules as a way to configure
+and prepare them for testing.</p><p>When used, it accepts the following options:</p><ul><li><code class="inline">:async</code> - configures tests in this module to run concurrently with
+tests in other modules. Tests in the same module never run concurrently.
+It should be enabled only if tests do not change any global state.
+Defaults to <code class="inline">false</code>.</li></ul><p>This module automatically includes all callbacks defined in
+<a href="ExUnit.Callbacks.html"><code class="inline">ExUnit.Callbacks</code></a>. See that module for more information on <code class="inline">setup</code>,
+<code class="inline">start_supervised</code>, <code class="inline">on_exit</code> and the test process lifecycle.</p><p>For grouping tests together, see <a href="#describe/2"><code class="inline">describe/2</code></a> in this module.</p><h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">AssertionTest</span><span class="w"> </span><span class="k" data-group-id="6257553529-1">do</span><span class="w">
+  </span><span class="c1"># Use the module</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="p">,</span><span class="w"> </span><span class="ss">async</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+
+  </span><span class="c1"># The &quot;test&quot; macro is imported by ExUnit.Case</span><span class="w">
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;always pass&quot;</span><span class="w"> </span><span class="k" data-group-id="6257553529-2">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="no">true</span><span class="w">
+  </span><span class="k" data-group-id="6257553529-2">end</span><span class="w">
+</span><span class="k" data-group-id="6257553529-1">end</span></code></pre><h2 id="module-context" class="section-heading">
+  <a href="#module-context" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Context
+</h2>
+<p>All tests receive a context as an argument. The context is particularly
+useful for sharing information between callbacks and tests:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">KVTest</span><span class="w"> </span><span class="k" data-group-id="0891098570-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="n">setup</span><span class="w"> </span><span class="k" data-group-id="0891098570-2">do</span><span class="w">
+    </span><span class="p" data-group-id="0891098570-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p" data-group-id="0891098570-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">KV</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="0891098570-4">(</span><span class="p" data-group-id="0891098570-4">)</span><span class="w">
+    </span><span class="p" data-group-id="0891098570-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">pid</span><span class="p">:</span><span class="w"> </span><span class="n">pid</span><span class="p" data-group-id="0891098570-5">}</span><span class="w">
+  </span><span class="k" data-group-id="0891098570-2">end</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;stores key-value pairs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="0891098570-6">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="nc">KV</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="0891098570-7">(</span><span class="n">context</span><span class="p" data-group-id="0891098570-8">[</span><span class="ss">:pid</span><span class="p" data-group-id="0891098570-8">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p">,</span><span class="w"> </span><span class="ss">:world</span><span class="p" data-group-id="0891098570-7">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="nc">KV</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="0891098570-9">(</span><span class="n">context</span><span class="p" data-group-id="0891098570-10">[</span><span class="ss">:pid</span><span class="p" data-group-id="0891098570-10">]</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p" data-group-id="0891098570-9">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="ss">:world</span><span class="w">
+  </span><span class="k" data-group-id="0891098570-6">end</span><span class="w">
+</span><span class="k" data-group-id="0891098570-1">end</span></code></pre><p>As the context is a map, it can be pattern matched on to extract
+information:</p><pre><code class="nohighlight makeup elixir"><span class="n">test</span><span class="w"> </span><span class="s">&quot;stores key-value pairs&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6018055790-1">%{</span><span class="ss">pid</span><span class="p">:</span><span class="w"> </span><span class="n">pid</span><span class="p" data-group-id="6018055790-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c">_context</span><span class="w"> </span><span class="k" data-group-id="6018055790-2">do</span><span class="w">
+  </span><span class="n">assert</span><span class="w"> </span><span class="nc">KV</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="6018055790-3">(</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p">,</span><span class="w"> </span><span class="ss">:world</span><span class="p" data-group-id="6018055790-3">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+  </span><span class="n">assert</span><span class="w"> </span><span class="nc">KV</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="6018055790-4">(</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p" data-group-id="6018055790-4">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="ss">:world</span><span class="w">
+</span><span class="k" data-group-id="6018055790-2">end</span></code></pre><h2 id="module-tags" class="section-heading">
+  <a href="#module-tags" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Tags
+</h2>
+<p>The context is used to pass information from the callbacks to
+the test. In order to pass information from the test to the
+callback, ExUnit provides tags.</p><p>By tagging a test, the tag value can be accessed in the context,
+allowing the developer to customize the test. Let's see an
+example:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">FileTest</span><span class="w"> </span><span class="k" data-group-id="4421334281-1">do</span><span class="w">
+  </span><span class="c1"># Changing directory cannot be async</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="p">,</span><span class="w"> </span><span class="ss">async</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="w">
+
+  </span><span class="n">setup</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="4421334281-2">do</span><span class="w">
+    </span><span class="c1"># Read the :cd tag value</span><span class="w">
+    </span><span class="k">if</span><span class="w"> </span><span class="n">cd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p" data-group-id="4421334281-3">[</span><span class="ss">:cd</span><span class="p" data-group-id="4421334281-3">]</span><span class="w"> </span><span class="k" data-group-id="4421334281-4">do</span><span class="w">
+      </span><span class="n">prev_cd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">File</span><span class="o">.</span><span class="n">cwd!</span><span class="p" data-group-id="4421334281-5">(</span><span class="p" data-group-id="4421334281-5">)</span><span class="w">
+      </span><span class="nc">File</span><span class="o">.</span><span class="n">cd!</span><span class="p" data-group-id="4421334281-6">(</span><span class="n">cd</span><span class="p" data-group-id="4421334281-6">)</span><span class="w">
+      </span><span class="n">on_exit</span><span class="p" data-group-id="4421334281-7">(</span><span class="k" data-group-id="4421334281-8">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">File</span><span class="o">.</span><span class="n">cd!</span><span class="p" data-group-id="4421334281-9">(</span><span class="n">prev_cd</span><span class="p" data-group-id="4421334281-9">)</span><span class="w"> </span><span class="k" data-group-id="4421334281-8">end</span><span class="p" data-group-id="4421334281-7">)</span><span class="w">
+    </span><span class="k" data-group-id="4421334281-4">end</span><span class="w">
+
+    </span><span class="ss">:ok</span><span class="w">
+  </span><span class="k" data-group-id="4421334281-2">end</span><span class="w">
+
+  </span><span class="na">@tag</span><span class="w"> </span><span class="ss">cd</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fixtures&quot;</span><span class="w">
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;reads UTF-8 fixtures&quot;</span><span class="w"> </span><span class="k" data-group-id="4421334281-10">do</span><span class="w">
+    </span><span class="nc">File</span><span class="o">.</span><span class="n">read</span><span class="p" data-group-id="4421334281-11">(</span><span class="s">&quot;README.md&quot;</span><span class="p" data-group-id="4421334281-11">)</span><span class="w">
+  </span><span class="k" data-group-id="4421334281-10">end</span><span class="w">
+</span><span class="k" data-group-id="4421334281-1">end</span></code></pre><p>In the example above, we have defined a tag called <code class="inline">:cd</code> that is
+read in the setup callback to configure the working directory the
+test is going to run on.</p><p>Tags are also very effective when used with case templates
+(<a href="ExUnit.CaseTemplate.html"><code class="inline">ExUnit.CaseTemplate</code></a>) allowing callbacks in the case template
+to customize the test behaviour.</p><p>Note a tag can be set in two different ways:</p><pre><code class="nohighlight makeup elixir"><span class="na">@tag</span><span class="w"> </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="w">
+</span><span class="na">@tag</span><span class="w"> </span><span class="ss">:key</span><span class="w">       </span><span class="c1"># equivalent to setting @tag key: true</span></code></pre><p>If a tag is given more than once, the last value wins.</p><h3 id="module-module-and-describe-tags" class="section-heading">
+  <a href="#module-module-and-describe-tags" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Module and describe tags
+</h3>
+<p>A tag can be set for all tests in a module or describe block by
+setting <code class="inline">@moduletag</code> or <code class="inline">@describetag</code> inside each context
+respectively:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">ApiTest</span><span class="w"> </span><span class="k" data-group-id="4171085303-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+  </span><span class="na">@moduletag</span><span class="w"> </span><span class="ss">:external</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;makes calls to the right endpoint&quot;</span><span class="w"> </span><span class="k" data-group-id="4171085303-2">do</span><span class="w">
+    </span><span class="na">@describetag</span><span class="w"> </span><span class="ss">:endpoint</span><span class="w">
+
+    </span><span class="c1"># ...</span><span class="w">
+  </span><span class="k" data-group-id="4171085303-2">end</span><span class="w">
+</span><span class="k" data-group-id="4171085303-1">end</span></code></pre><p>If you are setting a <code class="inline">@moduletag</code> or <code class="inline">@describetag</code> attribute, you must
+set them after your call to <code class="inline">use ExUnit.Case</code> otherwise you will see
+compilation errors.</p><p>If the same key is set via <code class="inline">@tag</code>, the <code class="inline">@tag</code> value has higher
+precedence.</p><h3 id="module-known-tags" class="section-heading">
+  <a href="#module-known-tags" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Known tags
+</h3>
+<p>The following tags are set automatically by ExUnit and are
+therefore reserved:</p><ul><li><code class="inline">:module</code>     - the module on which the test was defined</li><li><code class="inline">:file</code>       - the file on which the test was defined</li><li><code class="inline">:line</code>       - the line on which the test was defined</li><li><code class="inline">:test</code>       - the test name</li><li><code class="inline">:async</code>      - if the test case is in async mode</li><li><code class="inline">:registered</code> - used for <a href="#register_attribute/3"><code class="inline">ExUnit.Case.register_attribute/3</code></a> values</li><li><code class="inline">:describe</code>   - the describe block the test belongs to</li></ul><p>The following tags customize how tests behave:</p><ul><li><code class="inline">:capture_log</code> - see the &quot;Log Capture&quot; section below</li><li><code class="inline">:skip</code> - skips the test with the given reason</li><li><code class="inline">:timeout</code> - customizes the test timeout in milliseconds (defaults to 60000).
+Accepts <code class="inline">:infinity</code> as a timeout value.</li></ul><p>The <code class="inline">:test_type</code> tag is automatically set by ExUnit, but is <strong>not</strong> reserved.
+This tag is available for users to customize if they desire.</p><h2 id="module-filters" class="section-heading">
+  <a href="#module-filters" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Filters
+</h2>
+<p>Tags can also be used to identify specific tests, which can then
+be included or excluded using filters. The most common functionality
+is to exclude some particular tests from running, which can be done
+via <a href="ExUnit.html#configure/1"><code class="inline">ExUnit.configure/1</code></a>:</p><pre><code class="nohighlight makeup elixir"><span class="c1"># Exclude all external tests from running</span><span class="w">
+</span><span class="nc">ExUnit</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="8930817730-1">(</span><span class="ss">exclude</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="8930817730-2">[</span><span class="ss">external</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="8930817730-2">]</span><span class="p" data-group-id="8930817730-1">)</span></code></pre><p>From now on, ExUnit will not run any test that has the <code class="inline">:external</code> option
+set to <code class="inline">true</code>. This behaviour can be reversed with the <code class="inline">:include</code> option
+which is usually passed through the command line:</p><pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">--</span><span class="n">include</span><span class="w"> </span><span class="n">external</span><span class="ss">:true</span></code></pre><p>Run <a href="https://hexdocs.pm/mix/Mix.Tasks.Test.html"><code class="inline">mix help test</code></a> for more information on how to run filters via Mix.</p><p>Another use case for tags and filters is to exclude all tests that have
+a particular tag by default, regardless of its value, and include only
+a certain subset:</p><pre><code class="nohighlight makeup elixir"><span class="nc">ExUnit</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="6070115051-1">(</span><span class="ss">exclude</span><span class="p">:</span><span class="w"> </span><span class="ss">:os</span><span class="p">,</span><span class="w"> </span><span class="ss">include</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6070115051-2">[</span><span class="ss">os</span><span class="p">:</span><span class="w"> </span><span class="ss">:unix</span><span class="p" data-group-id="6070115051-2">]</span><span class="p" data-group-id="6070115051-1">)</span></code></pre><p>A given include/exclude filter can be given more than once:</p><pre><code class="nohighlight makeup elixir"><span class="nc">ExUnit</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="8965095669-1">(</span><span class="ss">exclude</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="8965095669-2">[</span><span class="ss">os</span><span class="p">:</span><span class="w"> </span><span class="ss">:unix</span><span class="p">,</span><span class="w"> </span><span class="ss">os</span><span class="p">:</span><span class="w"> </span><span class="ss">:windows</span><span class="p" data-group-id="8965095669-2">]</span><span class="p" data-group-id="8965095669-1">)</span></code></pre><p>Keep in mind that all tests are included by default, so unless they are
+excluded first, the <code class="inline">include</code> option has no effect.</p><h2 id="module-log-capture" class="section-heading">
+  <a href="#module-log-capture" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Log Capture
+</h2>
+<p>ExUnit can optionally suppress printing of log messages that are generated
+during a test. Log messages generated while running a test are captured and
+only if the test fails are they printed to aid with debugging.</p><p>You can opt into this behaviour for individual tests by tagging them with
+<code class="inline">:capture_log</code> or enable log capture for all tests in the ExUnit configuration:</p><pre><code class="nohighlight makeup elixir"><span class="nc">ExUnit</span><span class="o">.</span><span class="n">start</span><span class="p" data-group-id="7287048212-1">(</span><span class="ss">capture_log</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="7287048212-1">)</span></code></pre><p>This default can be overridden by <code class="inline">@tag capture_log: false</code> or
+<code class="inline">@moduletag capture_log: false</code>.</p><p>Since <code class="inline">setup_all</code> blocks don't belong to a specific test, log messages generated
+in them (or between tests) are never captured. If you want to suppress these
+messages as well, remove the console backend globally by setting:</p><pre><code class="nohighlight makeup elixir"><span class="n">config</span><span class="w"> </span><span class="ss">:logger</span><span class="p">,</span><span class="w"> </span><span class="ss">backends</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6559328943-1">[</span><span class="p" data-group-id="6559328943-1">]</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:env/0">env()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#describe/2">describe(message, list)</a>
+  </div>
+    <div class="summary-synopsis"><p>Describes tests together.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_attribute/3">register_attribute(env, name, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers a new attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_describe_attribute/3">register_describe_attribute(env, name, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers a new describe attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_module_attribute/3">register_module_attribute(env, name, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers a new module attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_test/4">register_test(map, test_type, name, tags)</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers a function to run as part of this case.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#test/1">test(message)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a not implemented test with a string.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#test/3">test(message, var \\ quote do
+  _
+end, contents)</a>
+  </div>
+    <div class="summary-synopsis"><p>Defines a test with <code class="inline">message</code>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:env/0">
+  <div class="detail-header">
+    <a href="#t:env/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">env()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L214" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>env() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>() | <a href="https://hexdocs.pm/elixir/Macro.Env.html#t:t/0">Macro.Env.t</a>()</pre>
+      </div>
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="describe/2">
+  <div class="detail-header">
+    <a href="#describe/2" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">describe(message, list)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L388" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Describes tests together.</p><p>Every describe block receives a name which is used as prefix for
+upcoming tests. Inside a block, <a href="ExUnit.Callbacks.html#setup/1"><code class="inline">ExUnit.Callbacks.setup/1</code></a> may be
+invoked and it will define a setup callback to run only for the
+current block. The describe name is also added as a tag, allowing
+developers to run tests for specific blocks.</p><h2 id="describe/2-examples" class="section-heading">
+  <a href="#describe/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">StringTest</span><span class="w"> </span><span class="k" data-group-id="2243871795-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="p">,</span><span class="w"> </span><span class="ss">async</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;String.capitalize/1&quot;</span><span class="w"> </span><span class="k" data-group-id="2243871795-2">do</span><span class="w">
+    </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;first grapheme is in uppercase&quot;</span><span class="w"> </span><span class="k" data-group-id="2243871795-3">do</span><span class="w">
+      </span><span class="n">assert</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">capitalize</span><span class="p" data-group-id="2243871795-4">(</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="2243871795-4">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;Hello&quot;</span><span class="w">
+    </span><span class="k" data-group-id="2243871795-3">end</span><span class="w">
+
+    </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;converts remaining graphemes to lowercase&quot;</span><span class="w"> </span><span class="k" data-group-id="2243871795-5">do</span><span class="w">
+      </span><span class="n">assert</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">capitalize</span><span class="p" data-group-id="2243871795-6">(</span><span class="s">&quot;HELLO&quot;</span><span class="p" data-group-id="2243871795-6">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;Hello&quot;</span><span class="w">
+    </span><span class="k" data-group-id="2243871795-5">end</span><span class="w">
+  </span><span class="k" data-group-id="2243871795-2">end</span><span class="w">
+</span><span class="k" data-group-id="2243871795-1">end</span></code></pre><p>When using Mix, you can run all tests in a describe block by name:</p><pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">describe</span><span class="ss">:&quot;String.capitalize/1&quot;</span></code></pre><p>or by passing the exact line the describe block starts on:</p><pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">file</span><span class="p">:</span><span class="mi">123</span></code></pre><p>Note describe blocks cannot be nested. Instead of relying on hierarchy
+for composition, developers should build on top of named setups. For
+example:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">UserManagementTest</span><span class="w"> </span><span class="k" data-group-id="8153801200-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="p">,</span><span class="w"> </span><span class="ss">async</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;when user is logged in and is an admin&quot;</span><span class="w"> </span><span class="k" data-group-id="8153801200-2">do</span><span class="w">
+    </span><span class="n">setup</span><span class="w"> </span><span class="p" data-group-id="8153801200-3">[</span><span class="ss">:log_user_in</span><span class="p">,</span><span class="w"> </span><span class="ss">:set_type_to_admin</span><span class="p" data-group-id="8153801200-3">]</span><span class="w">
+
+    </span><span class="n">test</span><span class="w"> </span><span class="n">...</span><span class="w">
+  </span><span class="k" data-group-id="8153801200-2">end</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;when user is logged in and is a manager&quot;</span><span class="w"> </span><span class="k" data-group-id="8153801200-4">do</span><span class="w">
+    </span><span class="n">setup</span><span class="w"> </span><span class="p" data-group-id="8153801200-5">[</span><span class="ss">:log_user_in</span><span class="p">,</span><span class="w"> </span><span class="ss">:set_type_to_manager</span><span class="p" data-group-id="8153801200-5">]</span><span class="w">
+
+    </span><span class="n">test</span><span class="w"> </span><span class="n">...</span><span class="w">
+  </span><span class="k" data-group-id="8153801200-4">end</span><span class="w">
+
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">log_user_in</span><span class="p" data-group-id="8153801200-6">(</span><span class="n">context</span><span class="p" data-group-id="8153801200-6">)</span><span class="w"> </span><span class="k" data-group-id="8153801200-7">do</span><span class="w">
+    </span><span class="c1"># ...</span><span class="w">
+  </span><span class="k" data-group-id="8153801200-7">end</span><span class="w">
+</span><span class="k" data-group-id="8153801200-1">end</span></code></pre><p>By forbidding hierarchies in favor of named setups, it is straightforward
+for the developer to glance at each describe block and know exactly the
+setup steps involved.</p>  </section>
+</section>
+<section class="detail" id="register_attribute/3">
+    <span id="register_attribute/2"></span>
+  <div class="detail-header">
+    <a href="#register_attribute/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_attribute(env, name, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L553" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>register_attribute(<a href="#t:env/0">env</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: :ok</pre>
+      </div>
+
+<p>Registers a new attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p><p>The attribute values will be available through <code class="inline">context.registered</code>.
+Registered values are cleared after each <a href="#test/3"><code class="inline">test/3</code></a> similar
+to <code class="inline">@tag</code>.</p><p>This function takes the same options as <a href="https://hexdocs.pm/elixir/Module.html#register_attribute/3"><code class="inline">Module.register_attribute/3</code></a>.</p><h2 id="register_attribute/3-examples" class="section-heading">
+  <a href="#register_attribute/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyTest</span><span class="w"> </span><span class="k" data-group-id="4275700315-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="nc">ExUnit.Case</span><span class="o">.</span><span class="n">register_attribute</span><span class="p" data-group-id="4275700315-2">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:fixtures</span><span class="p">,</span><span class="w"> </span><span class="ss">accumulate</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="4275700315-2">)</span><span class="w">
+
+  </span><span class="na">@fixtures</span><span class="w"> </span><span class="ss">:user</span><span class="w">
+  </span><span class="na">@fixtures</span><span class="w"> </span><span class="p" data-group-id="4275700315-3">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="4275700315-3">}</span><span class="w">
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;using custom attribute&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="4275700315-4">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="4275700315-5">[</span><span class="p" data-group-id="4275700315-6">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="4275700315-6">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:user</span><span class="p" data-group-id="4275700315-5">]</span><span class="w">
+  </span><span class="k" data-group-id="4275700315-4">end</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;custom attributes are cleared per test&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="4275700315-7">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="4275700315-8">[</span><span class="p" data-group-id="4275700315-8">]</span><span class="w">
+  </span><span class="k" data-group-id="4275700315-7">end</span><span class="w">
+</span><span class="k" data-group-id="4275700315-1">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="register_describe_attribute/3">
+    <span id="register_describe_attribute/2"></span>
+  <div class="detail-header">
+    <a href="#register_describe_attribute/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_describe_attribute(env, name, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L595" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>register_describe_attribute(<a href="#t:env/0">env</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: :ok</pre>
+      </div>
+
+<p>Registers a new describe attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p><p>The attribute values will be available through <code class="inline">context.registered</code>.
+Registered values are cleared after each <a href="#describe/2"><code class="inline">describe/2</code></a> similar
+to <code class="inline">@describetag</code>.</p><p>This function takes the same options as <a href="https://hexdocs.pm/elixir/Module.html#register_attribute/3"><code class="inline">Module.register_attribute/3</code></a>.</p><h2 id="register_describe_attribute/3-examples" class="section-heading">
+  <a href="#register_describe_attribute/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyTest</span><span class="w"> </span><span class="k" data-group-id="2925502943-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="nc">ExUnit.Case</span><span class="o">.</span><span class="n">register_describe_attribute</span><span class="p" data-group-id="2925502943-2">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:describe_fixtures</span><span class="p">,</span><span class="w"> </span><span class="ss">accumulate</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="2925502943-2">)</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;using custom attribute&quot;</span><span class="w"> </span><span class="k" data-group-id="2925502943-3">do</span><span class="w">
+    </span><span class="na">@describe_fixtures</span><span class="w"> </span><span class="ss">:user</span><span class="w">
+    </span><span class="na">@describe_fixtures</span><span class="w"> </span><span class="p" data-group-id="2925502943-4">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="2925502943-4">}</span><span class="w">
+
+    </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;has attribute&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="2925502943-5">do</span><span class="w">
+      </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">describe_fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="2925502943-6">[</span><span class="p" data-group-id="2925502943-7">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="2925502943-7">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:user</span><span class="p" data-group-id="2925502943-6">]</span><span class="w">
+    </span><span class="k" data-group-id="2925502943-5">end</span><span class="w">
+  </span><span class="k" data-group-id="2925502943-3">end</span><span class="w">
+
+  </span><span class="n">describe</span><span class="w"> </span><span class="s">&quot;custom attributes are cleared per describe&quot;</span><span class="w"> </span><span class="k" data-group-id="2925502943-8">do</span><span class="w">
+    </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;doesn&#39;t have attributes&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="2925502943-9">do</span><span class="w">
+      </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">describe_fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="2925502943-10">[</span><span class="p" data-group-id="2925502943-10">]</span><span class="w">
+    </span><span class="k" data-group-id="2925502943-9">end</span><span class="w">
+  </span><span class="k" data-group-id="2925502943-8">end</span><span class="w">
+</span><span class="k" data-group-id="2925502943-1">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="register_module_attribute/3">
+    <span id="register_module_attribute/2"></span>
+  <div class="detail-header">
+    <a href="#register_module_attribute/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_module_attribute(env, name, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L635" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.10.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>register_module_attribute(<a href="#t:env/0">env</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: :ok</pre>
+      </div>
+
+<p>Registers a new module attribute to be used during <a href="#content"><code class="inline">ExUnit.Case</code></a> tests.</p><p>The attribute values will be available through <code class="inline">context.registered</code>.</p><p>This function takes the same options as <a href="https://hexdocs.pm/elixir/Module.html#register_attribute/3"><code class="inline">Module.register_attribute/3</code></a>.</p><h2 id="register_module_attribute/3-examples" class="section-heading">
+  <a href="#register_module_attribute/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyTest</span><span class="w"> </span><span class="k" data-group-id="9546267158-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="nc">ExUnit.Case</span><span class="o">.</span><span class="n">register_module_attribute</span><span class="p" data-group-id="9546267158-2">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:module_fixtures</span><span class="p">,</span><span class="w"> </span><span class="ss">accumulate</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="9546267158-2">)</span><span class="w">
+
+  </span><span class="na">@module_fixtures</span><span class="w"> </span><span class="ss">:user</span><span class="w">
+  </span><span class="na">@module_fixtures</span><span class="w"> </span><span class="p" data-group-id="9546267158-3">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="9546267158-3">}</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;using custom attribute&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="9546267158-4">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="9546267158-5">[</span><span class="p" data-group-id="9546267158-6">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="9546267158-6">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:user</span><span class="p" data-group-id="9546267158-5">]</span><span class="w">
+  </span><span class="k" data-group-id="9546267158-4">end</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;still using custom attribute&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="k" data-group-id="9546267158-7">do</span><span class="w">
+    </span><span class="n">assert</span><span class="w"> </span><span class="n">context</span><span class="o">.</span><span class="n">registered</span><span class="o">.</span><span class="n">fixtures</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p" data-group-id="9546267158-8">[</span><span class="p" data-group-id="9546267158-9">{</span><span class="ss">:post</span><span class="p">,</span><span class="w"> </span><span class="ss">insert</span><span class="p">:</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="9546267158-9">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:user</span><span class="p" data-group-id="9546267158-8">]</span><span class="w">
+  </span><span class="k" data-group-id="9546267158-7">end</span><span class="w">
+</span><span class="k" data-group-id="9546267158-1">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="register_test/4">
+  <div class="detail-header">
+    <a href="#register_test/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_test(map, test_type, name, tags)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L463" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Registers a function to run as part of this case.</p><p>This is used by third-party projects, like QuickCheck, to
+implement macros like <code class="inline">property/3</code> that works like <code class="inline">test</code>
+but instead defines a property. See <a href="#test/3"><code class="inline">test/3</code></a> implementation
+for an example of invoking this function.</p><p>The test type will be converted to a string and pluralized for
+display. You can use <a href="ExUnit.html#plural_rule/2"><code class="inline">ExUnit.plural_rule/2</code></a> to set a custom
+pluralization.</p>  </section>
+</section>
+<section class="detail" id="test/1">
+  <div class="detail-header">
+    <a href="#test/1" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">test(message)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L320" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a not implemented test with a string.</p><p>Provides a convenient macro that allows a test to be defined
+with a string, but not yet implemented. The resulting test will
+always fail and print a &quot;Not implemented&quot; error message. The
+resulting test case is also tagged with <code class="inline">:not_implemented</code>.</p><h2 id="test/1-examples" class="section-heading">
+  <a href="#test/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">test</span><span class="w"> </span><span class="s">&quot;this will be a test in future&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="test/3">
+    <span id="test/2"></span>
+  <div class="detail-header">
+    <a href="#test/3" class="detail-link" title="Link to this macro">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this macro</span>
+    </a>
+    <h1 class="signature">test(message, var \\ quote do
+  _
+end, contents)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/ex_unit/lib/ex_unit/case.ex#L282" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(macro)</span>
+  </div>
+
+  <section class="docstring">
+
+<p>Defines a test with <code class="inline">message</code>.</p><p>The test may also define a <code class="inline">var</code>, which will pattern match
+on the test context. For more information on contexts, see
+<a href="ExUnit.Callbacks.html"><code class="inline">ExUnit.Callbacks</code></a>.</p><h2 id="test/3-examples" class="section-heading">
+  <a href="#test/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">test</span><span class="w"> </span><span class="s">&quot;true is equal to true&quot;</span><span class="w"> </span><span class="k" data-group-id="5513743487-1">do</span><span class="w">
+  </span><span class="n">assert</span><span class="w"> </span><span class="no">true</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="no">true</span><span class="w">
+</span><span class="k" data-group-id="5513743487-1">end</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Mix v1.10.3">
+    <title>Mix.Shell.Process — Mix v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/mix/v1.10/ /Mix.Shell.Process.html" />
+    <script src="dist/sidebar_items-7d3a94bb0f.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Mix      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Mix v1.10.3</small>
+Mix.Shell.Process          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Mix shell that uses the current process mailbox for communication.</p><p>This module provides a Mix shell implementation that uses
+the current process mailbox for communication instead of IO.</p><p>As an example, when <code class="inline">Mix.shell().info(&quot;hello&quot;)</code> is called,
+the following message will be sent to the calling process:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="9696131529-1">{</span><span class="ss">:mix_shell</span><span class="p">,</span><span class="w"> </span><span class="ss">:info</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9696131529-2">[</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="9696131529-2">]</span><span class="p" data-group-id="9696131529-1">}</span></code></pre><p>This is mainly useful in tests, allowing us to assert
+if given messages were received or not instead of performing
+checks on some captured IO. Since we need to guarantee a clean
+slate between tests, there is also a <a href="#flush/1"><code class="inline">flush/1</code></a> function
+responsible for flushing all <code class="inline">:mix_shell</code> related messages
+from the process inbox.</p><h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Mix</span><span class="o">.</span><span class="n">shell</span><span class="p" data-group-id="9241203367-1">(</span><span class="p" data-group-id="9241203367-1">)</span><span class="o">.</span><span class="n">info</span><span class="p" data-group-id="9241203367-2">(</span><span class="s">&quot;hello&quot;</span><span class="p" data-group-id="9241203367-2">)</span><span class="w">
+
+</span><span class="k">receive</span><span class="w"> </span><span class="k" data-group-id="9241203367-3">do</span><span class="w">
+  </span><span class="p" data-group-id="9241203367-4">{</span><span class="ss">:mix_shell</span><span class="p">,</span><span class="w"> </span><span class="ss">:info</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9241203367-5">[</span><span class="n">msg</span><span class="p" data-group-id="9241203367-5">]</span><span class="p" data-group-id="9241203367-4">}</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">msg</span><span class="w">
+</span><span class="k" data-group-id="9241203367-3">end</span><span class="w">
+</span><span class="c1">#=&gt; &quot;hello&quot;</span><span class="w">
+
+</span><span class="n">send</span><span class="p" data-group-id="9241203367-6">(</span><span class="n">self</span><span class="p" data-group-id="9241203367-7">(</span><span class="p" data-group-id="9241203367-7">)</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9241203367-8">{</span><span class="ss">:mix_shell_input</span><span class="p">,</span><span class="w"> </span><span class="ss">:prompt</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Pretty cool&quot;</span><span class="p" data-group-id="9241203367-8">}</span><span class="p" data-group-id="9241203367-6">)</span><span class="w">
+</span><span class="nc">Mix</span><span class="o">.</span><span class="n">shell</span><span class="p" data-group-id="9241203367-9">(</span><span class="p" data-group-id="9241203367-9">)</span><span class="o">.</span><span class="n">prompt?</span><span class="p" data-group-id="9241203367-10">(</span><span class="s">&quot;How cool was that?!&quot;</span><span class="p" data-group-id="9241203367-10">)</span><span class="w">
+</span><span class="c1">#=&gt; &quot;Pretty cool&quot;</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmd/2">cmd(command, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Executes the given command and forwards its messages to
+the current process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error/1">error(message)</a>
+  </div>
+    <div class="summary-synopsis"><p>Forwards the error to the current process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flush/1">flush(callback \\ fn x -&gt; x end)</a>
+  </div>
+    <div class="summary-synopsis"><p>Flushes all <code class="inline">:mix_shell</code> and <code class="inline">:mix_shell_input</code> messages from the current process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info(message)</a>
+  </div>
+    <div class="summary-synopsis"><p>Forwards the message to the current process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#print_app/0">print_app()</a>
+  </div>
+    <div class="summary-synopsis"><p>Prints the current application if it
+was not printed yet.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prompt/1">prompt(message)</a>
+  </div>
+    <div class="summary-synopsis"><p>Forwards the message to the current process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#yes?/1">yes?(message)</a>
+  </div>
+    <div class="summary-synopsis"><p>Forwards the message to the current process.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="cmd/2">
+    <span id="cmd/1"></span>
+  <div class="detail-header">
+    <a href="#cmd/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmd(command, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L156" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Executes the given command and forwards its messages to
+the current process.</p>  </section>
+</section>
+<section class="detail" id="error/1">
+  <div class="detail-header">
+    <a href="#error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error(message)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L83" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Forwards the error to the current process.</p>  </section>
+</section>
+<section class="detail" id="flush/1">
+    <span id="flush/0"></span>
+  <div class="detail-header">
+    <a href="#flush/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flush(callback \\ fn x -&gt; x end)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L47" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Flushes all <code class="inline">:mix_shell</code> and <code class="inline">:mix_shell_input</code> messages from the current process.</p><p>If a callback is given, it is invoked for each received message.</p><h2 id="flush/1-examples" class="section-heading">
+  <a href="#flush/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">flush</span><span class="p" data-group-id="7440513816-1">(</span><span class="o">&amp;</span><span class="nc">IO</span><span class="o">.</span><span class="n">inspect</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="7440513816-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="info/1">
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(message)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L74" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Forwards the message to the current process.</p>  </section>
+</section>
+<section class="detail" id="print_app/0">
+  <div class="detail-header">
+    <a href="#print_app/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">print_app()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L65" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Prints the current application if it
+was not printed yet.</p>  </section>
+</section>
+<section class="detail" id="prompt/1">
+  <div class="detail-header">
+    <a href="#prompt/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prompt(message)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L113" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Forwards the message to the current process.</p><p>It also checks the inbox for an input message matching:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="4346373290-1">{</span><span class="ss">:mix_shell_input</span><span class="p">,</span><span class="w"> </span><span class="ss">:prompt</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p" data-group-id="4346373290-1">}</span></code></pre><p>If one does not exist, it will abort since there was no shell
+process inputs given. <code class="inline">value</code> must be a string.</p><h2 id="prompt/1-examples" class="section-heading">
+  <a href="#prompt/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>The following will answer with <code class="inline">&quot;Meg&quot;</code> to the prompt
+<code class="inline">&quot;What's your name?&quot;</code>:</p><pre><code class="nohighlight makeup elixir"><span class="c1"># The response is sent before calling prompt/1 so that prompt/1 can read it</span><span class="w">
+</span><span class="n">send</span><span class="p" data-group-id="5019144088-1">(</span><span class="n">self</span><span class="p" data-group-id="5019144088-2">(</span><span class="p" data-group-id="5019144088-2">)</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5019144088-3">{</span><span class="ss">:mix_shell_input</span><span class="p">,</span><span class="w"> </span><span class="ss">:prompt</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Meg&quot;</span><span class="p" data-group-id="5019144088-3">}</span><span class="p" data-group-id="5019144088-1">)</span><span class="w">
+</span><span class="nc">Mix</span><span class="o">.</span><span class="n">shell</span><span class="p" data-group-id="5019144088-4">(</span><span class="p" data-group-id="5019144088-4">)</span><span class="o">.</span><span class="n">prompt</span><span class="p" data-group-id="5019144088-5">(</span><span class="s">&quot;What&#39;s your name?&quot;</span><span class="p" data-group-id="5019144088-5">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="yes?/1">
+  <div class="detail-header">
+    <a href="#yes?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">yes?(message)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/shell/process.ex#L141" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Forwards the message to the current process.</p><p>It also checks the inbox for an input message matching:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="2801779272-1">{</span><span class="ss">:mix_shell_input</span><span class="p">,</span><span class="w"> </span><span class="ss">:yes</span><span class="sc">?,</span><span class="w"> </span><span class="n">value</span><span class="p" data-group-id="2801779272-1">}</span></code></pre><p>If one does not exist, it will abort since there was no shell
+process inputs given. <code class="inline">value</code> must be <code class="inline">true</code> or <code class="inline">false</code>.</p><h2 id="yes?/1-example" class="section-heading">
+  <a href="#yes?/1-example" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Example
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Send the response to self() first so that yes?/1 will be able to read it</span><span class="w">
+</span><span class="n">send</span><span class="p" data-group-id="7707666097-1">(</span><span class="n">self</span><span class="p" data-group-id="7707666097-2">(</span><span class="p" data-group-id="7707666097-2">)</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7707666097-3">{</span><span class="ss">:mix_shell_input</span><span class="p">,</span><span class="w"> </span><span class="ss">:yes</span><span class="sc">?,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="7707666097-3">}</span><span class="p" data-group-id="7707666097-1">)</span><span class="w">
+</span><span class="nc">Mix</span><span class="o">.</span><span class="n">shell</span><span class="p" data-group-id="7707666097-4">(</span><span class="p" data-group-id="7707666097-4">)</span><span class="o">.</span><span class="n">yes?</span><span class="p" data-group-id="7707666097-5">(</span><span class="s">&quot;Are you sure you want to continue?&quot;</span><span class="p" data-group-id="7707666097-5">)</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Process — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Process.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Process          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Conveniences for working with processes and the process dictionary.</p><p>Besides the functions available in this module, the <a href="Kernel.html"><code class="inline">Kernel</code></a> module
+exposes and auto-imports some basic functionality related to processes
+available through the following functions:</p><ul><li><a href="Kernel.html#spawn/1"><code class="inline">Kernel.spawn/1</code></a> and <a href="Kernel.html#spawn/3"><code class="inline">Kernel.spawn/3</code></a></li><li><a href="Kernel.html#spawn_link/1"><code class="inline">Kernel.spawn_link/1</code></a> and <a href="Kernel.html#spawn_link/3"><code class="inline">Kernel.spawn_link/3</code></a></li><li><a href="Kernel.html#spawn_monitor/1"><code class="inline">Kernel.spawn_monitor/1</code></a> and <a href="Kernel.html#spawn_monitor/3"><code class="inline">Kernel.spawn_monitor/3</code></a></li><li><a href="Kernel.html#self/0"><code class="inline">Kernel.self/0</code></a></li><li><a href="Kernel.html#send/2"><code class="inline">Kernel.send/2</code></a></li></ul><p>While this module provides low-level conveniences to work with processes,
+developers typically use abstractions such as <a href="Agent.html"><code class="inline">Agent</code></a>, <a href="GenServer.html"><code class="inline">GenServer</code></a>,
+<a href="Registry.html"><code class="inline">Registry</code></a>, <a href="Supervisor.html"><code class="inline">Supervisor</code></a> and <a href="Task.html"><code class="inline">Task</code></a> for building their systems and
+resort to this module for gathering information, trapping exits, links
+and monitoring.</p>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dest/0">dest()</a>
+  </div>
+    <div class="summary-synopsis"><p>A process destination.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:spawn_opt/0">spawn_opt()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:spawn_opts/0">spawn_opts()</a>
+  </div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#alive?/1">alive?(pid)</a>
+  </div>
+    <div class="summary-synopsis"><p>Tells whether the given process is alive on the local node.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cancel_timer/2">cancel_timer(timer_ref, options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Cancels a timer returned by <a href="#send_after/3"><code class="inline">send_after/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/1">delete(key)</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes the given <code class="inline">key</code> from the process dictionary.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#demonitor/2">demonitor(monitor_ref, options \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Demonitors the monitor identified by the given <code class="inline">reference</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exit/2">exit(pid, reason)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sends an exit signal with the given <code class="inline">reason</code> to <code class="inline">pid</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flag/2">flag(flag, value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets the given <code class="inline">flag</code> to <code class="inline">value</code> for the calling process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flag/3">flag(pid, flag, value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets the given <code class="inline">flag</code> to <code class="inline">value</code> for the given process <code class="inline">pid</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/0">get()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all key-value pairs in the process dictionary.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/2">get(key, default \\ nil)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the value for the given <code class="inline">key</code> in the process dictionary,
+or <code class="inline">default</code> if <code class="inline">key</code> is not set.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_keys/0">get_keys()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all keys in the process dictionary.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_keys/1">get_keys(value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns all keys in the process dictionary that have the given <code class="inline">value</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#group_leader/0">group_leader()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the PID of the group leader for the calling process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#group_leader/2">group_leader(pid, leader)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sets the group leader of the given <code class="inline">pid</code> to <code class="inline">leader</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hibernate/3">hibernate(mod, fun_name, args)</a>
+  </div>
+    <div class="summary-synopsis"><p>Puts the calling process into a &quot;hibernation&quot; state.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info(pid)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about the process identified by <code class="inline">pid</code>, or returns <code class="inline">nil</code> if the process
+is not alive.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/2">info(pid, spec)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns information about the process identified by <code class="inline">pid</code>,
+or returns <code class="inline">nil</code> if the process is not alive.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#link/1">link(pid_or_port)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a link between the calling process and the given item (process or
+port).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list/0">list()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of PIDs corresponding to all the
+processes currently existing on the local node.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monitor/1">monitor(item)</a>
+  </div>
+    <div class="summary-synopsis"><p>Starts monitoring the given <code class="inline">item</code> from the calling process.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put/2">put(key, value)</a>
+  </div>
+    <div class="summary-synopsis"><p>Stores the given <code class="inline">key</code>-<code class="inline">value</code> pair in the process dictionary.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#read_timer/1">read_timer(timer_ref)</a>
+  </div>
+    <div class="summary-synopsis"><p>Reads a timer created by <a href="#send_after/3"><code class="inline">send_after/3</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register/2">register(pid_or_port, name)</a>
+  </div>
+    <div class="summary-synopsis"><p>Registers the given <code class="inline">pid_or_port</code> under the given <code class="inline">name</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#registered/0">registered()</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns a list of names which have been registered using <a href="#register/2"><code class="inline">register/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/3">send(dest, msg, options)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sends a message to the given <code class="inline">dest</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send_after/4">send_after(dest, msg, time, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Sends <code class="inline">msg</code> to <code class="inline">dest</code> after <code class="inline">time</code> milliseconds.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sleep/1">sleep(timeout)</a>
+  </div>
+    <div class="summary-synopsis"><p>Sleeps the current process for the given <code class="inline">timeout</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/2">spawn(fun, opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Spawns the given function according to the given options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/4">spawn(mod, fun, args, opts)</a>
+  </div>
+    <div class="summary-synopsis"><p>Spawns the given function <code class="inline">fun</code> from module <code class="inline">mod</code>, passing the given <code class="inline">args</code>
+according to the given options.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unlink/1">unlink(pid_or_port)</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes the link between the calling process and the given item (process or
+port).</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unregister/1">unregister(name)</a>
+  </div>
+    <div class="summary-synopsis"><p>Removes the registered <code class="inline">name</code>, associated with a PID
+or a port identifier.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#whereis/1">whereis(name)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns the PID or port identifier registered under <code class="inline">name</code> or <code class="inline">nil</code> if the
+name is not registered.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:dest/0">
+  <div class="detail-header">
+    <a href="#t:dest/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">dest()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L28" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>dest() ::
+  <a href="typespecs.html#basic-types">pid</a>()
+  | <a href="typespecs.html#basic-types">port</a>()
+  | (registered_name :: <a href="typespecs.html#basic-types">atom</a>())
+  | {registered_name :: <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">node</a>()}</pre>
+      </div>
+
+<p>A process destination.</p><p>A remote or local PID, a local port, a locally registered name, or a tuple in
+the form of <code class="inline">{registered_name, node}</code> for a registered name at another node.</p>  </section>
+</section>
+<section class="detail" id="t:spawn_opt/0">
+  <div class="detail-header">
+    <a href="#t:spawn_opt/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">spawn_opt()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L383" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>spawn_opt() ::
+  :link
+  | :monitor
+  | {:priority, :low | :normal | :high}
+  | {:fullsweep_after, <a href="typespecs.html#basic-types">non_neg_integer</a>()}
+  | {:min_heap_size, <a href="typespecs.html#basic-types">non_neg_integer</a>()}
+  | {:min_bin_vheap_size, <a href="typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+      </div>
+
+  </section>
+</section>
+<section class="detail" id="t:spawn_opts/0">
+  <div class="detail-header">
+    <a href="#t:spawn_opts/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">spawn_opts()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L390" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>spawn_opts() :: [<a href="#t:spawn_opt/0">spawn_opt</a>()]</pre>
+      </div>
+
+  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="alive?/1">
+  <div class="detail-header">
+    <a href="#alive?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">alive?(pid)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L42" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>alive?(<a href="typespecs.html#basic-types">pid</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Tells whether the given process is alive on the local node.</p><p>If the process identified by <code class="inline">pid</code> is alive (that is, it's not exiting and has
+not exited yet) than this function returns <code class="inline">true</code>. Otherwise, it returns
+<code class="inline">false</code>.</p><p><code class="inline">pid</code> must refer to a process running on the local node or <a href="ArgumentError.html"><code class="inline">ArgumentError</code></a> is raised.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="cancel_timer/2">
+    <span id="cancel_timer/1"></span>
+  <div class="detail-header">
+    <a href="#cancel_timer/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cancel_timer(timer_ref, options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L363" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>cancel_timer(<a href="typespecs.html#basic-types">reference</a>(), options) :: <a href="typespecs.html#basic-types">non_neg_integer</a>() | false | :ok
+when options: [async: <a href="typespecs.html#built-in-types">boolean</a>(), info: <a href="typespecs.html#built-in-types">boolean</a>()]</pre>
+      </div>
+
+<p>Cancels a timer returned by <a href="#send_after/3"><code class="inline">send_after/3</code></a>.</p><p>When the result is an integer, it represents the time in milliseconds
+left until the timer would have expired.</p><p>When the result is <code class="inline">false</code>, a timer corresponding to <code class="inline">timer_ref</code> could not be
+found. This can happen either because the timer expired, because it has
+already been canceled, or because <code class="inline">timer_ref</code> never corresponded to a timer.</p><p>Even if the timer had expired and the message was sent, this function does not
+tell you if the timeout message has arrived at its destination yet.</p><p>Inlined by the compiler.</p><h2 id="cancel_timer/2-options" class="section-heading">
+  <a href="#cancel_timer/2-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><p><code class="inline">:async</code> - (boolean) when <code class="inline">false</code>, the request for cancellation is
+synchronous. When <code class="inline">true</code>, the request for cancellation is asynchronous,
+meaning that the request to cancel the timer is issued and <code class="inline">:ok</code> is
+returned right away. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:info</code> - (boolean) whether to return information about the timer being
+cancelled. When the <code class="inline">:async</code> option is <code class="inline">false</code> and <code class="inline">:info</code> is <code class="inline">true</code>, then
+either an integer or <code class="inline">false</code> (like described above) is returned. If
+<code class="inline">:async</code> is <code class="inline">false</code> and <code class="inline">:info</code> is <code class="inline">false</code>, <code class="inline">:ok</code> is returned. If <code class="inline">:async</code>
+is <code class="inline">true</code> and <code class="inline">:info</code> is <code class="inline">true</code>, a message in the form <code class="inline">{:cancel_timer, timer_ref, result}</code> (where <code class="inline">result</code> is an integer or <code class="inline">false</code> like
+described above) is sent to the caller of this function when the
+cancellation has been performed. If <code class="inline">:async</code> is <code class="inline">true</code> and <code class="inline">:info</code> is
+<code class="inline">false</code>, no message is sent. Defaults to <code class="inline">true</code>.</p></li></ul>  </section>
+</section>
+<section class="detail" id="delete/1">
+  <div class="detail-header">
+    <a href="#delete/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete(key)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L138" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>delete(<a href="typespecs.html#built-in-types">term</a>()) :: <a href="typespecs.html#built-in-types">term</a>() | nil</pre>
+      </div>
+
+<p>Deletes the given <code class="inline">key</code> from the process dictionary.</p><p>Returns the value that was under <code class="inline">key</code> in the process dictionary,
+or <code class="inline">nil</code> if <code class="inline">key</code> was not stored in the process dictionary.</p><h2 id="delete/1-examples" class="section-heading">
+  <a href="#delete/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="8068889038-1">(</span><span class="ss">:comments</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8068889038-2">[</span><span class="s">&quot;comment&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;other comment&quot;</span><span class="p" data-group-id="8068889038-2">]</span><span class="p" data-group-id="8068889038-1">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">delete</span><span class="p" data-group-id="8068889038-3">(</span><span class="ss">:comments</span><span class="p" data-group-id="8068889038-3">)</span><span class="w">
+</span><span class="p" data-group-id="8068889038-4">[</span><span class="s">&quot;comment&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;other comment&quot;</span><span class="p" data-group-id="8068889038-4">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">delete</span><span class="p" data-group-id="8068889038-5">(</span><span class="ss">:comments</span><span class="p" data-group-id="8068889038-5">)</span><span class="w">
+</span><span class="no">nil</span></code></pre>  </section>
+</section>
+<section class="detail" id="demonitor/2">
+    <span id="demonitor/1"></span>
+  <div class="detail-header">
+    <a href="#demonitor/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">demonitor(monitor_ref, options \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L495" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>demonitor(<a href="typespecs.html#basic-types">reference</a>(), options :: [:flush | :info]) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Demonitors the monitor identified by the given <code class="inline">reference</code>.</p><p>If <code class="inline">monitor_ref</code> is a reference which the calling process
+obtained by calling <a href="#monitor/1"><code class="inline">monitor/1</code></a>, that monitoring is turned off.
+If the monitoring is already turned off, nothing happens.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#demonitor-2"><code class="inline">:erlang.demonitor/2</code></a> for more information.</p><p>Inlined by the compiler.</p><h2 id="demonitor/2-examples" class="section-heading">
+  <a href="#demonitor/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spawn</span><span class="p" data-group-id="9587967368-1">(</span><span class="k" data-group-id="9587967368-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k" data-group-id="9587967368-2">end</span><span class="p" data-group-id="9587967368-1">)</span><span class="w">
+</span><span class="n">ref</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Process</span><span class="o">.</span><span class="n">monitor</span><span class="p" data-group-id="9587967368-3">(</span><span class="n">pid</span><span class="p" data-group-id="9587967368-3">)</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">demonitor</span><span class="p" data-group-id="9587967368-4">(</span><span class="n">ref</span><span class="p" data-group-id="9587967368-4">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span></code></pre>  </section>
+</section>
+<section class="detail" id="exit/2">
+  <div class="detail-header">
+    <a href="#exit/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exit(pid, reason)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L173" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>exit(<a href="typespecs.html#basic-types">pid</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: true</pre>
+      </div>
+
+<p>Sends an exit signal with the given <code class="inline">reason</code> to <code class="inline">pid</code>.</p><p>The following behaviour applies if <code class="inline">reason</code> is any term except <code class="inline">:normal</code>
+or <code class="inline">:kill</code>:</p><ol><li><p>If <code class="inline">pid</code> is not trapping exits, <code class="inline">pid</code> will exit with the given
+<code class="inline">reason</code>.</p></li><li><p>If <code class="inline">pid</code> is trapping exits, the exit signal is transformed into a
+message <code class="inline">{:EXIT, from, reason}</code> and delivered to the message queue
+of <code class="inline">pid</code>.</p></li></ol><p>If <code class="inline">reason</code> is the atom <code class="inline">:normal</code>, <code class="inline">pid</code> will not exit (unless <code class="inline">pid</code> is
+the calling process, in which case it will exit with the reason <code class="inline">:normal</code>).
+If it is trapping exits, the exit signal is transformed into a message
+<code class="inline">{:EXIT, from, :normal}</code> and delivered to its message queue.</p><p>If <code class="inline">reason</code> is the atom <code class="inline">:kill</code>, that is if <code class="inline">Process.exit(pid, :kill)</code> is called,
+an untrappable exit signal is sent to <code class="inline">pid</code> which will unconditionally exit
+with reason <code class="inline">:killed</code>.</p><p>Inlined by the compiler.</p><h2 id="exit/2-examples" class="section-heading">
+  <a href="#exit/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">exit</span><span class="p" data-group-id="5783487275-1">(</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="ss">:kill</span><span class="p" data-group-id="5783487275-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span></code></pre>  </section>
+</section>
+<section class="detail" id="flag/2">
+  <div class="detail-header">
+    <a href="#flag/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flag(flag, value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L715" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>flag(:error_handler, <a href="typespecs.html#built-in-types">module</a>()) :: <a href="typespecs.html#built-in-types">module</a>()</pre>
+          <pre>flag(:max_heap_size, heap_size()) :: heap_size()</pre>
+          <pre>flag(:message_queue_data, <a href="http://www.erlang.org/doc/man/erlang.html#type-message_queue_data">:erlang.message_queue_data</a>()) ::
+  <a href="http://www.erlang.org/doc/man/erlang.html#type-message_queue_data">:erlang.message_queue_data</a>()</pre>
+          <pre>flag(:min_bin_vheap_size, <a href="typespecs.html#basic-types">non_neg_integer</a>()) :: <a href="typespecs.html#basic-types">non_neg_integer</a>()</pre>
+          <pre>flag(:min_heap_size, <a href="typespecs.html#basic-types">non_neg_integer</a>()) :: <a href="typespecs.html#basic-types">non_neg_integer</a>()</pre>
+          <pre>flag(:priority, priority_level()) :: priority_level()</pre>
+          <pre>flag(:save_calls, 0..10000) :: 0..10000</pre>
+          <pre>flag(:sensitive, <a href="typespecs.html#built-in-types">boolean</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+          <pre>flag(:trap_exit, <a href="typespecs.html#built-in-types">boolean</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Sets the given <code class="inline">flag</code> to <code class="inline">value</code> for the calling process.</p><p>Returns the old value of <code class="inline">flag</code>.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#process_flag-2"><code class="inline">:erlang.process_flag/2</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="flag/3">
+  <div class="detail-header">
+    <a href="#flag/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flag(pid, flag, value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L732" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>flag(<a href="typespecs.html#basic-types">pid</a>(), :save_calls, 0..10000) :: 0..10000</pre>
+      </div>
+
+<p>Sets the given <code class="inline">flag</code> to <code class="inline">value</code> for the given process <code class="inline">pid</code>.</p><p>Returns the old value of <code class="inline">flag</code>.</p><p>It raises <a href="ArgumentError.html"><code class="inline">ArgumentError</code></a> if <code class="inline">pid</code> is not a local process.</p><p>The allowed values for <code class="inline">flag</code> are only a subset of those allowed in <a href="#flag/2"><code class="inline">flag/2</code></a>,
+namely <code class="inline">:save_calls</code>.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#process_flag-3"><code class="inline">:erlang.process_flag/3</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="get/0">
+  <div class="detail-header">
+    <a href="#get/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L50" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get() :: [{<a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#built-in-types">term</a>()}]</pre>
+      </div>
+
+<p>Returns all key-value pairs in the process dictionary.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="get/2">
+    <span id="get/1"></span>
+  <div class="detail-header">
+    <a href="#get/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get(key, default \\ nil)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L68" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get(<a href="typespecs.html#built-in-types">term</a>(), default :: <a href="typespecs.html#built-in-types">term</a>()) :: <a href="typespecs.html#built-in-types">term</a>()</pre>
+      </div>
+
+<p>Returns the value for the given <code class="inline">key</code> in the process dictionary,
+or <code class="inline">default</code> if <code class="inline">key</code> is not set.</p><h2 id="get/2-examples" class="section-heading">
+  <a href="#get/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Assuming :locale was not set</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="0096703693-1">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pt&quot;</span><span class="p" data-group-id="0096703693-1">)</span><span class="w">
+</span><span class="s">&quot;pt&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="0096703693-2">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fr&quot;</span><span class="p" data-group-id="0096703693-2">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="0096703693-3">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pt&quot;</span><span class="p" data-group-id="0096703693-3">)</span><span class="w">
+</span><span class="s">&quot;fr&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="get_keys/0">
+  <div class="detail-header">
+    <a href="#get_keys/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_keys()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L92" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_keys() :: [<a href="typespecs.html#built-in-types">term</a>()]</pre>
+      </div>
+
+<p>Returns all keys in the process dictionary.</p><p>Inlined by the compiler.</p><h2 id="get_keys/0-examples" class="section-heading">
+  <a href="#get_keys/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Assuming :locale was not set</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="ss">:locale</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nc">Process</span><span class="o">.</span><span class="n">get_keys</span><span class="p" data-group-id="5729392244-1">(</span><span class="p" data-group-id="5729392244-1">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="5729392244-2">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pt&quot;</span><span class="p" data-group-id="5729392244-2">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="ss">:locale</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nc">Process</span><span class="o">.</span><span class="n">get_keys</span><span class="p" data-group-id="5729392244-3">(</span><span class="p" data-group-id="5729392244-3">)</span><span class="w">
+</span><span class="no">true</span></code></pre>  </section>
+</section>
+<section class="detail" id="get_keys/1">
+  <div class="detail-header">
+    <a href="#get_keys/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_keys(value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L100" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>get_keys(<a href="typespecs.html#built-in-types">term</a>()) :: [<a href="typespecs.html#built-in-types">term</a>()]</pre>
+      </div>
+
+<p>Returns all keys in the process dictionary that have the given <code class="inline">value</code>.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="group_leader/0">
+  <div class="detail-header">
+    <a href="#group_leader/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">group_leader()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L661" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>group_leader() :: <a href="typespecs.html#basic-types">pid</a>()</pre>
+      </div>
+
+<p>Returns the PID of the group leader for the calling process.</p><p>Inlined by the compiler.</p><h2 id="group_leader/0-examples" class="section-heading">
+  <a href="#group_leader/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">group_leader</span><span class="p" data-group-id="2376679882-1">(</span><span class="p" data-group-id="2376679882-1">)</span><span class="w">
+</span><span class="c1">#=&gt; #PID&lt;0.53.0&gt;</span></code></pre>  </section>
+</section>
+<section class="detail" id="group_leader/2">
+  <div class="detail-header">
+    <a href="#group_leader/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">group_leader(pid, leader)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L672" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>group_leader(<a href="typespecs.html#basic-types">pid</a>(), leader :: <a href="typespecs.html#basic-types">pid</a>()) :: true</pre>
+      </div>
+
+<p>Sets the group leader of the given <code class="inline">pid</code> to <code class="inline">leader</code>.</p><p>Typically, this is used when a process started from a certain shell should
+have a group leader other than <code class="inline">:init</code>.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="hibernate/3">
+  <div class="detail-header">
+    <a href="#hibernate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hibernate(mod, fun_name, args)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L781" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>hibernate(<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">list</a>()) :: <a href="typespecs.html#built-in-types">no_return</a>()</pre>
+      </div>
+
+<p>Puts the calling process into a &quot;hibernation&quot; state.</p><p>The calling process is put into a waiting state
+where its memory allocation has been reduced as much as possible,
+which is useful if the process does not expect to receive any messages
+in the near future.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#hibernate-3"><code class="inline">:erlang.hibernate/3</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="info/1">
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(pid)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L743" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>info(<a href="typespecs.html#basic-types">pid</a>()) :: <a href="typespecs.html#built-in-types">keyword</a>() | nil</pre>
+      </div>
+
+<p>Returns information about the process identified by <code class="inline">pid</code>, or returns <code class="inline">nil</code> if the process
+is not alive.</p><p>Use this only for debugging information.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#process_info-1"><code class="inline">:erlang.process_info/1</code></a> for more information.</p>  </section>
+</section>
+<section class="detail" id="info/2">
+  <div class="detail-header">
+    <a href="#info/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(pid, spec)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L754" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>info(<a href="typespecs.html#basic-types">pid</a>(), <a href="typespecs.html#basic-types">atom</a>() | [<a href="typespecs.html#basic-types">atom</a>()]) :: {<a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">term</a>()} | [{<a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">term</a>()}] | nil</pre>
+      </div>
+
+<p>Returns information about the process identified by <code class="inline">pid</code>,
+or returns <code class="inline">nil</code> if the process is not alive.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#process_info-2"><code class="inline">:erlang.process_info/2</code></a> for more information.</p>  </section>
+</section>
+<section class="detail" id="link/1">
+  <div class="detail-header">
+    <a href="#link/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">link(pid_or_port)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L541" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>link(<a href="typespecs.html#basic-types">pid</a>() | <a href="typespecs.html#basic-types">port</a>()) :: true</pre>
+      </div>
+
+<p>Creates a link between the calling process and the given item (process or
+port).</p><p>Links are bidirectional. Linked processes can be unlinked by using <a href="#unlink/1"><code class="inline">unlink/1</code></a>.</p><p>If such a link exists already, this function does nothing since there can only
+be one link between two given processes. If a process tries to create a link
+to itself, nothing will happen.</p><p>When two processes are linked, each one receives exit signals from the other
+(see also <a href="#exit/2"><code class="inline">exit/2</code></a>). Let's assume <code class="inline">pid1</code> and <code class="inline">pid2</code> are linked. If <code class="inline">pid2</code>
+exits with a reason other than <code class="inline">:normal</code> (which is also the exit reason used
+when a process finishes its job) and <code class="inline">pid1</code> is not trapping exits (see
+<a href="#flag/2"><code class="inline">flag/2</code></a>), then <code class="inline">pid1</code> will exit with the same reason as <code class="inline">pid2</code> and in turn
+emit an exit signal to all its other linked processes. The behaviour when
+<code class="inline">pid1</code> is trapping exits is described in <a href="#exit/2"><code class="inline">exit/2</code></a>.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#link-1"><code class="inline">:erlang.link/1</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="list/0">
+  <div class="detail-header">
+    <a href="#list/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L516" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>list() :: [<a href="typespecs.html#basic-types">pid</a>()]</pre>
+      </div>
+
+<p>Returns a list of PIDs corresponding to all the
+processes currently existing on the local node.</p><p>Note that if a process is exiting, it is considered to exist but not be
+alive. This means that for such process, <a href="#alive?/1"><code class="inline">alive?/1</code></a> will return <code class="inline">false</code> but
+its PID will be part of the list of PIDs returned by this function.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#processes-0"><code class="inline">:erlang.processes/0</code></a> for more information.</p><p>Inlined by the compiler.</p><h2 id="list/0-examples" class="section-heading">
+  <a href="#list/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">list</span><span class="p" data-group-id="9709604285-1">(</span><span class="p" data-group-id="9709604285-1">)</span><span class="w">
+</span><span class="c1">#=&gt; [#PID&lt;0.0.0&gt;, #PID&lt;0.1.0&gt;, #PID&lt;0.2.0&gt;, #PID&lt;0.3.0&gt;, ...]</span></code></pre>  </section>
+</section>
+<section class="detail" id="monitor/1">
+  <div class="detail-header">
+    <a href="#monitor/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monitor(item)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L471" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>monitor(<a href="typespecs.html#basic-types">pid</a>() | {name, <a href="typespecs.html#built-in-types">node</a>()} | name) :: <a href="typespecs.html#basic-types">reference</a>() when name: <a href="typespecs.html#basic-types">atom</a>()</pre>
+      </div>
+
+<p>Starts monitoring the given <code class="inline">item</code> from the calling process.</p><p>Once the monitored process dies, a message is delivered to the
+monitoring process in the shape of:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="8969291947-1">{</span><span class="ss">:DOWN</span><span class="p">,</span><span class="w"> </span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="ss">:process</span><span class="p">,</span><span class="w"> </span><span class="n">object</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p" data-group-id="8969291947-1">}</span></code></pre><p>where:</p><ul><li><code class="inline">ref</code> is a monitor reference returned by this function;</li><li><code class="inline">object</code> is either a <code class="inline">pid</code> of the monitored process (if monitoring
+a PID) or <code class="inline">{name, node}</code> (if monitoring a remote or local name);</li><li><code class="inline">reason</code> is the exit reason.</li></ul><p>If the process is already dead when calling <a href="#monitor/1"><code class="inline">Process.monitor/1</code></a>, a
+<code class="inline">:DOWN</code> message is delivered immediately.</p><p>See <a href="https://elixir-lang.org/getting-started/mix-otp/genserver.html#the-need-for-monitoring">the need for monitoring</a>
+for an example. See <a href="http://www.erlang.org/doc/man/erlang.html#monitor-2"><code class="inline">:erlang.monitor/2</code></a> for more information.</p><p>Inlined by the compiler.</p><h2 id="monitor/1-examples" class="section-heading">
+  <a href="#monitor/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spawn</span><span class="p" data-group-id="7843416460-1">(</span><span class="k" data-group-id="7843416460-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k" data-group-id="7843416460-2">end</span><span class="p" data-group-id="7843416460-1">)</span><span class="w">
+</span><span class="c1">#=&gt; #PID&lt;0.118.0&gt;</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">monitor</span><span class="p" data-group-id="7843416460-3">(</span><span class="n">pid</span><span class="p" data-group-id="7843416460-3">)</span><span class="w">
+</span><span class="c1">#=&gt; #Reference&lt;0.906660723.3006791681.40191&gt;</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">exit</span><span class="p" data-group-id="7843416460-4">(</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="ss">:kill</span><span class="p" data-group-id="7843416460-4">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+</span><span class="k">receive</span><span class="w"> </span><span class="k" data-group-id="7843416460-5">do</span><span class="w">
+  </span><span class="n">msg</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">msg</span><span class="w">
+</span><span class="k" data-group-id="7843416460-5">end</span><span class="w">
+</span><span class="c1">#=&gt; {:DOWN, #Reference&lt;0.906660723.3006791681.40191&gt;, :process, #PID&lt;0.118.0&gt;, :noproc}</span></code></pre>  </section>
+</section>
+<section class="detail" id="put/2">
+  <div class="detail-header">
+    <a href="#put/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put(key, value)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L118" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>put(<a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#built-in-types">term</a>()) :: <a href="typespecs.html#built-in-types">term</a>() | nil</pre>
+      </div>
+
+<p>Stores the given <code class="inline">key</code>-<code class="inline">value</code> pair in the process dictionary.</p><p>The return value of this function is the value that was previously stored
+under <code class="inline">key</code>, or <code class="inline">nil</code> in case no value was stored under it.</p><h2 id="put/2-examples" class="section-heading">
+  <a href="#put/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="c1"># Assuming :locale was not set</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="2560093146-1">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;en&quot;</span><span class="p" data-group-id="2560093146-1">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">put</span><span class="p" data-group-id="2560093146-2">(</span><span class="ss">:locale</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fr&quot;</span><span class="p" data-group-id="2560093146-2">)</span><span class="w">
+</span><span class="s">&quot;en&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="read_timer/1">
+  <div class="detail-header">
+    <a href="#read_timer/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">read_timer(timer_ref)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L381" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>read_timer(<a href="typespecs.html#basic-types">reference</a>()) :: <a href="typespecs.html#basic-types">non_neg_integer</a>() | false</pre>
+      </div>
+
+<p>Reads a timer created by <a href="#send_after/3"><code class="inline">send_after/3</code></a>.</p><p>When the result is an integer, it represents the time in milliseconds
+left until the timer will expire.</p><p>When the result is <code class="inline">false</code>, a timer corresponding to <code class="inline">timer_ref</code> could not be
+found. This can be either because the timer expired, because it has already
+been canceled, or because <code class="inline">timer_ref</code> never corresponded to a timer.</p><p>Even if the timer had expired and the message was sent, this function does not
+tell you if the timeout message has arrived at its destination yet.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="register/2">
+  <div class="detail-header">
+    <a href="#register/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register(pid_or_port, name)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L590" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>register(<a href="typespecs.html#basic-types">pid</a>() | <a href="typespecs.html#basic-types">port</a>(), <a href="typespecs.html#basic-types">atom</a>()) :: true</pre>
+      </div>
+
+<p>Registers the given <code class="inline">pid_or_port</code> under the given <code class="inline">name</code>.</p><p><code class="inline">name</code> must be an atom and can then be used instead of the
+PID/port identifier when sending messages with <a href="Kernel.html#send/2"><code class="inline">Kernel.send/2</code></a>.</p><p><a href="#register/2"><code class="inline">register/2</code></a> will fail with <a href="ArgumentError.html"><code class="inline">ArgumentError</code></a> in any of the following cases:</p><ul><li>the PID/Port is not existing locally and alive</li><li>the name is already registered</li><li>the <code class="inline">pid_or_port</code> is already registered under a different <code class="inline">name</code></li></ul><p>The following names are reserved and cannot be assigned to
+processes nor ports:</p><ul><li><code class="inline">nil</code></li><li><code class="inline">false</code></li><li><code class="inline">true</code></li><li><code class="inline">:undefined</code></li></ul><h2 id="register/2-examples" class="section-heading">
+  <a href="#register/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">register</span><span class="p" data-group-id="9027305287-1">(</span><span class="n">self</span><span class="p" data-group-id="9027305287-2">(</span><span class="p" data-group-id="9027305287-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:test</span><span class="p" data-group-id="9027305287-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+</span><span class="n">send</span><span class="p" data-group-id="9027305287-3">(</span><span class="ss">:test</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p" data-group-id="9027305287-3">)</span><span class="w">
+</span><span class="c1">#=&gt; :hello</span><span class="w">
+</span><span class="n">send</span><span class="p" data-group-id="9027305287-4">(</span><span class="ss">:wrong_name</span><span class="p">,</span><span class="w"> </span><span class="ss">:hello</span><span class="p" data-group-id="9027305287-4">)</span><span class="w">
+</span><span class="gt">** (ArgumentError) argument error</span></code></pre>  </section>
+</section>
+<section class="detail" id="registered/0">
+  <div class="detail-header">
+    <a href="#registered/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">registered()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L689" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>registered() :: [<a href="typespecs.html#basic-types">atom</a>()]</pre>
+      </div>
+
+<p>Returns a list of names which have been registered using <a href="#register/2"><code class="inline">register/2</code></a>.</p><p>Inlined by the compiler.</p><h2 id="registered/0-examples" class="section-heading">
+  <a href="#registered/0-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">register</span><span class="p" data-group-id="2669623089-1">(</span><span class="n">self</span><span class="p" data-group-id="2669623089-2">(</span><span class="p" data-group-id="2669623089-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:test</span><span class="p" data-group-id="2669623089-1">)</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">registered</span><span class="p" data-group-id="2669623089-3">(</span><span class="p" data-group-id="2669623089-3">)</span><span class="w">
+</span><span class="c1">#=&gt; [:test, :elixir_config, :inet_db, ...]</span></code></pre>  </section>
+</section>
+<section class="detail" id="send/3">
+  <div class="detail-header">
+    <a href="#send/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send(dest, msg, options)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L286" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>send(dest, msg, [option]) :: :ok | :noconnect | :nosuspend
+when dest: <a href="#t:dest/0">dest</a>(), msg: <a href="typespecs.html#basic-types">any</a>(), option: :noconnect | :nosuspend</pre>
+      </div>
+
+<p>Sends a message to the given <code class="inline">dest</code>.</p><p><code class="inline">dest</code> may be a remote or local PID, a local port, a locally
+registered name, or a tuple in the form of <code class="inline">{registered_name, node}</code> for a
+registered name at another node.</p><p>Inlined by the compiler.</p><h2 id="send/3-options" class="section-heading">
+  <a href="#send/3-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><p><code class="inline">:noconnect</code> - when used, if sending the message would require an
+auto-connection to another node the message is not sent and <code class="inline">:noconnect</code> is
+returned.</p></li><li><p><code class="inline">:nosuspend</code> - when used, if sending the message would cause the sender to
+be suspended the message is not sent and <code class="inline">:nosuspend</code> is returned.</p></li></ul><p>Otherwise the message is sent and <code class="inline">:ok</code> is returned.</p><h2 id="send/3-examples" class="section-heading">
+  <a href="#send/3-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Process</span><span class="o">.</span><span class="n">send</span><span class="p" data-group-id="0964782937-1">(</span><span class="p" data-group-id="0964782937-2">{</span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">:node_that_does_not_exist</span><span class="p" data-group-id="0964782937-2">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:hi</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0964782937-3">[</span><span class="ss">:noconnect</span><span class="p" data-group-id="0964782937-3">]</span><span class="p" data-group-id="0964782937-1">)</span><span class="w">
+</span><span class="ss">:noconnect</span></code></pre>  </section>
+</section>
+<section class="detail" id="send_after/4">
+    <span id="send_after/3"></span>
+  <div class="detail-header">
+    <a href="#send_after/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send_after(dest, msg, time, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L324" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>send_after(<a href="typespecs.html#basic-types">pid</a>() | <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#basic-types">non_neg_integer</a>(), [option]) :: <a href="typespecs.html#basic-types">reference</a>()
+when option: {:abs, <a href="typespecs.html#built-in-types">boolean</a>()}</pre>
+      </div>
+
+<p>Sends <code class="inline">msg</code> to <code class="inline">dest</code> after <code class="inline">time</code> milliseconds.</p><p>If <code class="inline">dest</code> is a PID, it must be the PID of a local process, dead or alive.
+If <code class="inline">dest</code> is an atom, it must be the name of a registered process
+which is looked up at the time of delivery. No error is produced if the name does
+not refer to a process.</p><p>The message is not sent immediately. Therefore, <code class="inline">dest</code> can receive other messages
+in-between even when <code class="inline">time</code> is <code class="inline">0</code>.</p><p>This function returns a timer reference, which can be read with <a href="#read_timer/1"><code class="inline">read_timer/1</code></a>
+or canceled with <a href="#cancel_timer/1"><code class="inline">cancel_timer/1</code></a>.</p><p>The timer will be automatically canceled if the given <code class="inline">dest</code> is a PID
+which is not alive or when the given PID exits. Note that timers will not be
+automatically canceled when <code class="inline">dest</code> is an atom (as the atom resolution is done
+on delivery).</p><p>Inlined by the compiler.</p><h2 id="send_after/4-options" class="section-heading">
+  <a href="#send_after/4-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><code class="inline">:abs</code> - (boolean) when <code class="inline">false</code>, <code class="inline">time</code> is treated as relative to the
+current monotonic time. When <code class="inline">true</code>, <code class="inline">time</code> is the absolute value of the
+Erlang monotonic time at which <code class="inline">msg</code> should be delivered to <code class="inline">dest</code>.
+To read more about Erlang monotonic time and other time-related concepts,
+look at the documentation for the <a href="System.html"><code class="inline">System</code></a> module. Defaults to <code class="inline">false</code>.</li></ul><h2 id="send_after/4-examples" class="section-heading">
+  <a href="#send_after/4-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="n">timer_ref</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Process</span><span class="o">.</span><span class="n">send_after</span><span class="p" data-group-id="5201092439-1">(</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="ss">:hi</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p" data-group-id="5201092439-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="sleep/1">
+  <div class="detail-header">
+    <a href="#sleep/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sleep(timeout)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L250" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>sleep(<a href="typespecs.html#built-in-types">timeout</a>()) :: :ok</pre>
+      </div>
+
+<p>Sleeps the current process for the given <code class="inline">timeout</code>.</p><p><code class="inline">timeout</code> is either the number of milliseconds to sleep as an
+integer or the atom <code class="inline">:infinity</code>. When <code class="inline">:infinity</code> is given,
+the current process will sleep forever, and not
+consume or reply to messages.</p><p><strong>Use this function with extreme care</strong>. For almost all situations
+where you would use <a href="#sleep/1"><code class="inline">sleep/1</code></a> in Elixir, there is likely a
+more correct, faster and precise way of achieving the same with
+message passing.</p><p>For example, if you are waiting for a process to perform some
+action, it is better to communicate the progress of such action
+with messages.</p><p>In other words, <strong>do not</strong>:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="6477962170-1">(</span><span class="k" data-group-id="6477962170-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="n">do_something</span><span class="p" data-group-id="6477962170-3">(</span><span class="p" data-group-id="6477962170-3">)</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="6477962170-2">end</span><span class="p" data-group-id="6477962170-1">)</span><span class="w">
+
+</span><span class="c1"># Wait until work is done</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">sleep</span><span class="p" data-group-id="6477962170-4">(</span><span class="mi">2000</span><span class="p" data-group-id="6477962170-4">)</span></code></pre><p>But <strong>do</strong>:</p><pre><code class="nohighlight makeup elixir"><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p" data-group-id="4466939822-1">(</span><span class="p" data-group-id="4466939822-1">)</span><span class="w">
+
+</span><span class="nc">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="4466939822-2">(</span><span class="k" data-group-id="4466939822-3">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="n">do_something</span><span class="p" data-group-id="4466939822-4">(</span><span class="p" data-group-id="4466939822-4">)</span><span class="w">
+  </span><span class="n">send</span><span class="p" data-group-id="4466939822-5">(</span><span class="n">parent</span><span class="p">,</span><span class="w"> </span><span class="ss">:work_is_done</span><span class="p" data-group-id="4466939822-5">)</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="4466939822-3">end</span><span class="p" data-group-id="4466939822-2">)</span><span class="w">
+
+</span><span class="k">receive</span><span class="w"> </span><span class="k" data-group-id="4466939822-6">do</span><span class="w">
+  </span><span class="ss">:work_is_done</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+</span><span class="k" data-group-id="4466939822-6">after</span><span class="w">
+  </span><span class="c1"># Optional timeout</span><span class="w">
+  </span><span class="mi">30_000</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:timeout</span><span class="w">
+</span><span class="k" data-group-id="4466939822-6">end</span></code></pre><p>For cases like the one above, <a href="Task.html#async/1"><code class="inline">Task.async/1</code></a> and <a href="Task.html#await/2"><code class="inline">Task.await/2</code></a> are
+preferred.</p><p>Similarly, if you are waiting for a process to terminate,
+monitor that process instead of sleeping. <strong>Do not</strong>:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="0804516319-1">(</span><span class="k" data-group-id="0804516319-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="0804516319-2">end</span><span class="p" data-group-id="0804516319-1">)</span><span class="w">
+
+</span><span class="c1"># Wait until task terminates</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">sleep</span><span class="p" data-group-id="0804516319-3">(</span><span class="mi">2000</span><span class="p" data-group-id="0804516319-3">)</span></code></pre><p>Instead <strong>do</strong>:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="7620777667-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p" data-group-id="7620777667-1">}</span><span class="w"> </span><span class="o">=</span><span class="w">
+  </span><span class="nc">Task</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="7620777667-2">(</span><span class="k" data-group-id="7620777667-3">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="n">...</span><span class="w">
+  </span><span class="k" data-group-id="7620777667-3">end</span><span class="p" data-group-id="7620777667-2">)</span><span class="w">
+
+</span><span class="n">ref</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Process</span><span class="o">.</span><span class="n">monitor</span><span class="p" data-group-id="7620777667-4">(</span><span class="n">pid</span><span class="p" data-group-id="7620777667-4">)</span><span class="w">
+
+</span><span class="k">receive</span><span class="w"> </span><span class="k" data-group-id="7620777667-5">do</span><span class="w">
+  </span><span class="p" data-group-id="7620777667-6">{</span><span class="ss">:DOWN</span><span class="p">,</span><span class="w"> </span><span class="o">^</span><span class="n">ref</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="7620777667-6">}</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:task_is_down</span><span class="w">
+</span><span class="k" data-group-id="7620777667-5">after</span><span class="w">
+  </span><span class="c1"># Optional timeout</span><span class="w">
+  </span><span class="mi">30_000</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">:timeout</span><span class="w">
+</span><span class="k" data-group-id="7620777667-5">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="spawn/2">
+  <div class="detail-header">
+    <a href="#spawn/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn(fun, opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L414" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>spawn((() -> <a href="typespecs.html#basic-types">any</a>()), <a href="#t:spawn_opts/0">spawn_opts</a>()) :: <a href="typespecs.html#basic-types">pid</a>() | {<a href="typespecs.html#basic-types">pid</a>(), <a href="typespecs.html#basic-types">reference</a>()}</pre>
+      </div>
+
+<p>Spawns the given function according to the given options.</p><p>The result depends on the given options. In particular,
+if <code class="inline">:monitor</code> is given as an option, it will return a tuple
+containing the PID and the monitoring reference, otherwise
+just the spawned process PID.</p><p>More options are available; for the comprehensive list of available options
+check <a href="http://www.erlang.org/doc/man/erlang.html#spawn_opt-4"><code class="inline">:erlang.spawn_opt/4</code></a>.</p><p>Inlined by the compiler.</p><h2 id="spawn/2-examples" class="section-heading">
+  <a href="#spawn/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">spawn</span><span class="p" data-group-id="8302626953-1">(</span><span class="k" data-group-id="8302626953-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k" data-group-id="8302626953-2">end</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8302626953-3">[</span><span class="ss">:monitor</span><span class="p" data-group-id="8302626953-3">]</span><span class="p" data-group-id="8302626953-1">)</span><span class="w">
+</span><span class="c1">#=&gt; {#PID&lt;0.93.0&gt;, #Reference&lt;0.18808174.1939079169.202418&gt;}</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">spawn</span><span class="p" data-group-id="8302626953-4">(</span><span class="k" data-group-id="8302626953-5">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k" data-group-id="8302626953-5">end</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8302626953-6">[</span><span class="ss">:link</span><span class="p" data-group-id="8302626953-6">]</span><span class="p" data-group-id="8302626953-4">)</span><span class="w">
+</span><span class="c1">#=&gt; #PID&lt;0.95.0&gt;</span></code></pre>  </section>
+</section>
+<section class="detail" id="spawn/4">
+  <div class="detail-header">
+    <a href="#spawn/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn(mod, fun, args, opts)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L431" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>spawn(<a href="typespecs.html#built-in-types">module</a>(), <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">list</a>(), <a href="#t:spawn_opts/0">spawn_opts</a>()) :: <a href="typespecs.html#basic-types">pid</a>() | {<a href="typespecs.html#basic-types">pid</a>(), <a href="typespecs.html#basic-types">reference</a>()}</pre>
+      </div>
+
+<p>Spawns the given function <code class="inline">fun</code> from module <code class="inline">mod</code>, passing the given <code class="inline">args</code>
+according to the given options.</p><p>The result depends on the given options. In particular,
+if <code class="inline">:monitor</code> is given as an option, it will return a tuple
+containing the PID and the monitoring reference, otherwise
+just the spawned process PID.</p><p>It also accepts extra options, for the list of available options
+check <a href="http://www.erlang.org/doc/man/erlang.html#spawn_opt-4"><code class="inline">:erlang.spawn_opt/4</code></a>.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="unlink/1">
+  <div class="detail-header">
+    <a href="#unlink/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unlink(pid_or_port)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L557" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unlink(<a href="typespecs.html#basic-types">pid</a>() | <a href="typespecs.html#basic-types">port</a>()) :: true</pre>
+      </div>
+
+<p>Removes the link between the calling process and the given item (process or
+port).</p><p>If there is no such link, this function does nothing. If <code class="inline">pid_or_port</code> does
+not exist, this function does not produce any errors and simply does nothing.</p><p>The return value of this function is always <code class="inline">true</code>.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#unlink-1"><code class="inline">:erlang.unlink/1</code></a> for more information.</p><p>Inlined by the compiler.</p>  </section>
+</section>
+<section class="detail" id="unregister/1">
+  <div class="detail-header">
+    <a href="#unregister/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unregister(name)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L627" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unregister(<a href="typespecs.html#basic-types">atom</a>()) :: true</pre>
+      </div>
+
+<p>Removes the registered <code class="inline">name</code>, associated with a PID
+or a port identifier.</p><p>Fails with <a href="ArgumentError.html"><code class="inline">ArgumentError</code></a> if the name is not registered
+to any PID or port.</p><p>Inlined by the compiler.</p><h2 id="unregister/1-examples" class="section-heading">
+  <a href="#unregister/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">register</span><span class="p" data-group-id="1924658901-1">(</span><span class="n">self</span><span class="p" data-group-id="1924658901-2">(</span><span class="p" data-group-id="1924658901-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:test</span><span class="p" data-group-id="1924658901-1">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">unregister</span><span class="p" data-group-id="1924658901-3">(</span><span class="ss">:test</span><span class="p" data-group-id="1924658901-3">)</span><span class="w">
+</span><span class="c1">#=&gt; true</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">unregister</span><span class="p" data-group-id="1924658901-4">(</span><span class="ss">:wrong_name</span><span class="p" data-group-id="1924658901-4">)</span><span class="w">
+</span><span class="gt">** (ArgumentError) argument error</span></code></pre>  </section>
+</section>
+<section class="detail" id="whereis/1">
+  <div class="detail-header">
+    <a href="#whereis/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">whereis(name)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/process.ex#L645" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>whereis(<a href="typespecs.html#basic-types">atom</a>()) :: <a href="typespecs.html#basic-types">pid</a>() | <a href="typespecs.html#basic-types">port</a>() | nil</pre>
+      </div>
+
+<p>Returns the PID or port identifier registered under <code class="inline">name</code> or <code class="inline">nil</code> if the
+name is not registered.</p><p>See <a href="http://www.erlang.org/doc/man/erlang.html#whereis-1"><code class="inline">:erlang.whereis/1</code></a> for more information.</p><h2 id="whereis/1-examples" class="section-heading">
+  <a href="#whereis/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="nc">Process</span><span class="o">.</span><span class="n">register</span><span class="p" data-group-id="6310414020-1">(</span><span class="n">self</span><span class="p" data-group-id="6310414020-2">(</span><span class="p" data-group-id="6310414020-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">:test</span><span class="p" data-group-id="6310414020-1">)</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">whereis</span><span class="p" data-group-id="6310414020-3">(</span><span class="ss">:test</span><span class="p" data-group-id="6310414020-3">)</span><span class="w">
+</span><span class="c1">#=&gt; #PID&lt;0.84.0&gt;</span><span class="w">
+</span><span class="nc">Process</span><span class="o">.</span><span class="n">whereis</span><span class="p" data-group-id="6310414020-4">(</span><span class="ss">:wrong_name</span><span class="p" data-group-id="6310414020-4">)</span><span class="w">
+</span><span class="c1">#=&gt; nil</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

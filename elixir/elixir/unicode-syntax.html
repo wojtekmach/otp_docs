@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Unicode Syntax — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /unicode-syntax.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="extras">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>Unicode Syntax</h1><p>Elixir supports Unicode throughout the language.</p><p>Quoted identifiers, such as strings (<code class="inline">&quot;olá&quot;</code>) and charlists (<code class="inline">'olá'</code>), support Unicode since Elixir v1.0. Strings are UTF-8 encoded. Charlists are lists of Unicode code points. In such cases, the contents are kept as written by developers, without any transformation.</p><p>Elixir also supports Unicode in identifiers since Elixir v1.5, as defined in the <a href="https://unicode.org/reports/tr31/">Unicode Annex #31</a>. The focus of this document is to describe how Elixir implements the requirements outlined in the Unicode Annex. These requirements are referred to as R1, R6 and so on.</p><p>To check the Unicode version of your current Elixir installation, run <code class="inline">String.Unicode.version()</code>.</p><h2 id="r1-default-identifiers" class="section-heading">
+  <a href="#r1-default-identifiers" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  R1. Default Identifiers
+</h2>
+<p>The general Elixir identifier rule is specified as:</p><pre><code class="nohighlight makeup elixir"><span class="o">&lt;</span><span class="nc">Identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">:=</span><span class="w"> </span><span class="o">&lt;</span><span class="nc">Start</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="nc">Continue</span><span class="o">&gt;</span><span class="o">*</span><span class="w"> </span><span class="o">&lt;</span><span class="nc">Ending</span><span class="o">&gt;</span><span class="err">?</span></code></pre><p>where <code class="inline">&lt;Start&gt;</code> uses the same categories as the spec but restricts them to the NFC form (see R6):</p><blockquote><p>characters derived from the Unicode General Category of uppercase letters, lowercase letters, titlecase letters, modifier letters, other letters, letter numbers, plus <code class="inline">Other_ID_Start</code>, minus <code class="inline">Pattern_Syntax</code> and <code class="inline">Pattern_White_Space</code> code points</p><p>In set notation: <code class="inline">[\p{L}\p{Nl}\p{Other_ID_Start}-\p{Pattern_Syntax}-\p{Pattern_White_Space}]</code></p></blockquote><p>and <code class="inline">&lt;Continue&gt;</code> uses the same categories as the spec but restricts them to the NFC form (see R6):</p><blockquote><p>ID_Start characters, plus characters having the Unicode General Category of nonspacing marks, spacing combining marks, decimal number, connector punctuation, plus <code class="inline">Other_ID_Continue</code>, minus <code class="inline">Pattern_Syntax</code> and <code class="inline">Pattern_White_Space</code> code points.</p><p>In set notation: <code class="inline">[\p{ID_Start}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Other_ID_Continue}-\p{Pattern_Syntax}-\p{Pattern_White_Space}]</code></p></blockquote><p><code class="inline">&lt;Ending&gt;</code> is an addition specific to Elixir that includes only the code points <code class="inline">?</code> (003F) and <code class="inline">!</code> (0021).</p><p>The spec also provides a <code class="inline">&lt;Medial&gt;</code> set but Elixir does not include any character on this set. Therefore the identifier rule has been simplified to consider this.</p><p>Elixir does not allow the use of ZWJ or ZWNJ in identifiers and therefore does not implement R1a. R1b is guaranteed for backwards compatibility purposes.</p><h3 id="atoms" class="section-heading">
+  <a href="#atoms" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Atoms
+</h3>
+<p>Unicode atoms in Elixir follow the identifier rule above with the following modifications:</p><ul><li><code class="inline">&lt;Start&gt;</code> includes the code point <code class="inline">_</code> (005F)</li><li><code class="inline">&lt;Continue&gt;</code> includes the code point <code class="inline">@</code> (0040)</li></ul><blockquote><p>Note that all Elixir operators are also valid atoms. Therefore <code class="inline">:+</code>, <code class="inline">:@</code>, <code class="inline">:|&gt;</code>, and others are all valid atoms. The full description of valid atoms is available in the Syntax Reference, this document covers only the rules for identifier-based atoms.</p></blockquote><h3 id="variables" class="section-heading">
+  <a href="#variables" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Variables
+</h3>
+<p>Variables in Elixir follow the identifier rule above with the following modifications:</p><ul><li><code class="inline">&lt;Start&gt;</code> includes the code point <code class="inline">_</code> (005F)</li><li><code class="inline">&lt;Start&gt;</code> must not include Lu (letter uppercase) and Lt (letter titlecase) characters</li></ul><h2 id="r3-pattern_white_space-and-pattern_syntax-characters" class="section-heading">
+  <a href="#r3-pattern_white_space-and-pattern_syntax-characters" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  R3. Pattern_White_Space and Pattern_Syntax Characters
+</h2>
+<p>Elixir supports only code points <code class="inline">\t</code> (0009), <code class="inline">\n</code> (000A), <code class="inline">\r</code> (000D) and <code class="inline">\s</code> (0020) as whitespace and therefore does not follow requirement R3. R3 requires a wider variety of whitespace and syntax characters to be supported.</p><h2 id="r6-filtered-normalized-identifiers" class="section-heading">
+  <a href="#r6-filtered-normalized-identifiers" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  R6. Filtered Normalized Identifiers
+</h2>
+<p>Identifiers in Elixir are case sensitive.</p><p>Elixir requires all atoms and variables to be in NFC form. Any other form will fail with a relevant error message. Quoted-atoms and strings can, however, be in any form and are not verified by the parser.</p><p>In other words, the atom <code class="inline">:josé</code> can only be written with the code points <code class="inline">006A 006F 0073 00E9</code>. Using another normalization form will lead to a tokenizer error. On the other hand, <code class="inline">:&quot;josé&quot;</code> may be written as <code class="inline">006A 006F 0073 00E9</code> or <code class="inline">006A 006F 0073 0065 0301</code>, since it is written between quotes.</p><p>Choosing requirement R6 automatically excludes requirements R4, R5 and R7.</p>      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

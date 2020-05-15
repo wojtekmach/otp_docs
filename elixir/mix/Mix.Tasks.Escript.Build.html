@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Mix v1.10.3">
+    <title>mix escript.build — Mix v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/mix/v1.10/ /Mix.Tasks.Escript.Build.html" />
+    <script src="dist/sidebar_items-7d3a94bb0f.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="tasks">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Mix      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Mix v1.10.3</small>
+mix escript.build          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/tasks/escript.build.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Builds an escript for the project.</p><p>An escript is an executable that can be invoked from the
+command line. An escript can run on any machine that has
+Erlang/OTP installed and by default does not require Elixir to
+be installed, as Elixir is embedded as part of the escript.</p><p>This task guarantees the project and its dependencies are
+compiled and packages them inside an escript. Before invoking
+<a href="#content"><code class="inline">mix escript.build</code></a>, it is only necessary to define a <code class="inline">:escript</code>
+key with a <code class="inline">:main_module</code> option in your <code class="inline">mix.exs</code> file:</p><pre><code class="nohighlight makeup elixir"><span class="ss">escript</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2896071813-1">[</span><span class="ss">main_module</span><span class="p">:</span><span class="w"> </span><span class="nc">MyApp.CLI</span><span class="p" data-group-id="2896071813-1">]</span></code></pre><p>Escripts should be used as a mechanism to share scripts between
+developers and not as a deployment mechanism. For running live
+systems, consider using <a href="Mix.Tasks.Run.html"><code class="inline">mix run</code></a> or building releases. See
+the <a href="https://hexdocs.pm/elixir/Application.html"><code class="inline">Application</code></a> module for more information on systems
+life-cycles.</p><p>By default, this task starts the current application. If this
+is not desired, set the <code class="inline">:app</code> configuration to nil.</p><p>This task also removes documentation and debugging chunks from
+the compiled <code class="inline">.beam</code> files to reduce the size of the escript.
+If this is not desired, check the <code class="inline">:strip_beams</code> option.</p><blockquote><p>Note: escripts do not support projects and dependencies
+that need to store or read artifacts from the priv directory.</p></blockquote><h2 id="module-command-line-options" class="section-heading">
+  <a href="#module-command-line-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Command line options
+</h2>
+<p>Expects the same command line options as <a href="Mix.Tasks.Compile.html"><code class="inline">mix compile</code></a>.</p><h2 id="module-configuration" class="section-heading">
+  <a href="#module-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Configuration
+</h2>
+<p>The following option must be specified in your <code class="inline">mix.exs</code> under <code class="inline">:escript</code>
+key:</p><ul><li><code class="inline">:main_module</code> - the module to be invoked once the escript starts.
+The module must contain a function named <code class="inline">main/1</code> that will receive the
+command line arguments. By default the arguments are given as a list of
+binaries, but if project is configured with <code class="inline">language: :erlang</code> it will
+be a list of charlists.</li></ul><p>The remaining options can be specified to further customize the escript:</p><ul><li><p><code class="inline">:name</code> - the name of the generated escript.
+Defaults to app name.</p></li><li><p><code class="inline">:path</code> - the path to write the escript to.
+Defaults to app name.</p></li><li><p><code class="inline">:app</code> - the app that starts with the escript.
+Defaults to app name. Set it to <code class="inline">nil</code> if no application should
+be started.</p></li><li><p><code class="inline">:strip_beams</code> - if <code class="inline">true</code> strips BEAM code in the escript to remove chunks
+unnecessary at runtime, such as debug information and documentation.
+Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:embed_elixir</code> - if <code class="inline">true</code> embeds Elixir and its children apps
+(<code class="inline">ex_unit</code>, <code class="inline">mix</code>, and the like) mentioned in the <code class="inline">:applications</code> list inside the
+<code class="inline">application/0</code> function in <code class="inline">mix.exs</code>.</p><p>Defaults to <code class="inline">true</code> for Elixir projects, <code class="inline">false</code> for Erlang projects.</p><p>Note: if you set this to <code class="inline">false</code> for an Elixir project, you will have to add paths to Elixir's
+<code class="inline">ebin</code> directories to <code class="inline">ERL_LIBS</code> environment variable when running the resulting escript, in
+order for the code loader to be able to find <code class="inline">:elixir</code> application and its children
+applications (if they are used).</p></li><li><p><code class="inline">:shebang</code> - shebang interpreter directive used to execute the escript.
+Defaults to <code class="inline">&quot;#! /usr/bin/env escript\n&quot;</code>.</p></li><li><p><code class="inline">:comment</code> - comment line to follow shebang directive in the escript.
+Defaults to <code class="inline">&quot;&quot;</code>.</p></li><li><p><code class="inline">:emu_args</code> - emulator arguments to embed in the escript file.
+Defaults to <code class="inline">&quot;&quot;</code>.</p></li></ul><p>There is one project-level option that affects how the escript is generated:</p><ul><li><code class="inline">language: :elixir | :erlang</code> - set it to <code class="inline">:erlang</code> for Erlang projects
+managed by Mix. Doing so will ensure Elixir is not embedded by default.
+Your app will still be started as part of escript loading, with the
+config used during build.</li></ul><h2 id="module-example" class="section-heading">
+  <a href="#module-example" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Example
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyApp.MixProject</span><span class="w"> </span><span class="k" data-group-id="5419308947-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">Mix.Project</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">project</span><span class="w"> </span><span class="k" data-group-id="5419308947-2">do</span><span class="w">
+    </span><span class="p" data-group-id="5419308947-3">[</span><span class="w">
+      </span><span class="ss">app</span><span class="p">:</span><span class="w"> </span><span class="ss">:my_app</span><span class="p">,</span><span class="w">
+      </span><span class="ss">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.0.1&quot;</span><span class="p">,</span><span class="w">
+      </span><span class="ss">escript</span><span class="p">:</span><span class="w"> </span><span class="n">escript</span><span class="p" data-group-id="5419308947-4">(</span><span class="p" data-group-id="5419308947-4">)</span><span class="w">
+    </span><span class="p" data-group-id="5419308947-3">]</span><span class="w">
+  </span><span class="k" data-group-id="5419308947-2">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">escript</span><span class="w"> </span><span class="k" data-group-id="5419308947-5">do</span><span class="w">
+    </span><span class="p" data-group-id="5419308947-6">[</span><span class="ss">main_module</span><span class="p">:</span><span class="w"> </span><span class="nc">MyApp.CLI</span><span class="p" data-group-id="5419308947-6">]</span><span class="w">
+  </span><span class="k" data-group-id="5419308947-5">end</span><span class="w">
+</span><span class="k" data-group-id="5419308947-1">end</span><span class="w">
+
+</span><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyApp.CLI</span><span class="w"> </span><span class="k" data-group-id="5419308947-7">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">main</span><span class="p" data-group-id="5419308947-8">(</span><span class="c">_args</span><span class="p" data-group-id="5419308947-8">)</span><span class="w"> </span><span class="k" data-group-id="5419308947-9">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">puts</span><span class="p" data-group-id="5419308947-10">(</span><span class="s">&quot;Hello from MyApp!&quot;</span><span class="p" data-group-id="5419308947-10">)</span><span class="w">
+  </span><span class="k" data-group-id="5419308947-9">end</span><span class="w">
+</span><span class="k" data-group-id="5419308947-7">end</span></code></pre>        </section>
+
+
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

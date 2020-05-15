@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Mix v1.10.3">
+    <title>mix release — Mix v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/mix/v1.10/ /Mix.Tasks.Release.html" />
+    <script src="dist/sidebar_items-7d3a94bb0f.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="tasks">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Mix      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+      <li><a id="tasks-list" href="#full-list">Mix Tasks</a></li>
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Mix v1.10.3</small>
+mix release          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/tasks/release.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Assembles a self-contained release for the current project:</p><pre><code class="nohighlight makeup elixir"><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w">
+</span><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="nc">NAME</span></code></pre><p>Once a release is assembled, it can be packaged and deployed to a
+target, as long as the target runs on the same operating system (OS)
+distribution and version as the machine running the <a href="#content"><code class="inline">mix release</code></a>
+command.</p><p>A release can be configured in your <code class="inline">mix.exs</code> file under the <code class="inline">:releases</code>
+key inside <code class="inline">def project</code>:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">project</span><span class="w"> </span><span class="k" data-group-id="2493957508-1">do</span><span class="w">
+  </span><span class="p" data-group-id="2493957508-2">[</span><span class="w">
+    </span><span class="ss">releases</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2493957508-3">[</span><span class="w">
+      </span><span class="ss">demo</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2493957508-4">[</span><span class="w">
+        </span><span class="ss">include_executables_for</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2493957508-5">[</span><span class="ss">:unix</span><span class="p" data-group-id="2493957508-5">]</span><span class="p">,</span><span class="w">
+        </span><span class="ss">applications</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2493957508-6">[</span><span class="ss">runtime_tools</span><span class="p">:</span><span class="w"> </span><span class="ss">:permanent</span><span class="p" data-group-id="2493957508-6">]</span><span class="w">
+      </span><span class="p" data-group-id="2493957508-4">]</span><span class="p">,</span><span class="w">
+
+      </span><span class="n">...</span><span class="w">
+    </span><span class="p" data-group-id="2493957508-3">]</span><span class="w">
+  </span><span class="p" data-group-id="2493957508-2">]</span><span class="w">
+</span><span class="k" data-group-id="2493957508-1">end</span></code></pre><p>You can specify multiple releases where the key is the release name
+and the value is a keyword list with the release configuration.
+Releasing a certain name is done with:</p><pre><code class="nohighlight makeup elixir"><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">demo</span></code></pre><p>If the given name does not exist, an error is raised.</p><p>If <a href="#content"><code class="inline">mix release</code></a>, without a name, is invoked and there are multiple names,
+an error will be raised unless you set <code class="inline">default_release: NAME</code> at the root
+of your project configuration.</p><p>If <a href="#content"><code class="inline">mix release</code></a> is invoked and there are no names, a release using the
+application name and default values is assembled.</p><h2 id="module-why-releases" class="section-heading">
+  <a href="#module-why-releases" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Why releases?
+</h2>
+<p>Releases allow developers to precompile and package all of their code
+and the runtime into a single unit. The benefits of releases are:</p><ul><li><p>Code preloading. The VM has two mechanisms for loading code:
+interactive and embedded. By default, it runs in the interactive
+mode which dynamically loads modules when they are used for the
+first time. The first time your application calls <a href="https://hexdocs.pm/elixir/Enum.html#map/2"><code class="inline">Enum.map/2</code></a>,
+the VM will find the <a href="https://hexdocs.pm/elixir/Enum.html"><code class="inline">Enum</code></a> module and load it. There’s a downside.
+When you start a new server in production, it may need to load
+many other modules, causing the first requests to have an unusual
+spike in response time. Releases run in embedded mode, which loads
+all available modules upfront, guaranteeing your system is ready
+to handle requests after booting.</p></li><li><p>Configuration and customization. Releases give developers fine
+grained control over system configuration and the VM flags used
+to start the system.</p></li><li><p>Self-contained. A release does not require the source code to be
+included in your production artifacts. All of the code is precompiled
+and packaged. Releases do not even require Erlang or Elixir in your
+servers, as it includes the Erlang VM and its runtime by default.
+Furthermore, both Erlang and Elixir standard libraries are stripped
+to bring only the parts you are actually using.</p></li><li><p>Multiple releases. You can assemble different releases with
+different configuration per application or even with different
+applications altogether.</p></li><li><p>Management scripts. Releases come with scripts to start, restart,
+connect to the running system remotely, execute RPC calls, run as
+daemon, run as a Windows service, and more.</p></li></ul><h2 id="module-running-the-release" class="section-heading">
+  <a href="#module-running-the-release" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Running the release
+</h2>
+<p>Once a release is assembled, you can start it by calling
+<code class="inline">bin/RELEASE_NAME start</code> inside the release. In production, you would do:</p><pre><code class="nohighlight makeup elixir"><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w">
+</span><span class="c">_build</span><span class="o">/</span><span class="n">prod</span><span class="o">/</span><span class="n">rel</span><span class="o">/</span><span class="n">my_app</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">my_app</span><span class="w"> </span><span class="n">start</span></code></pre><p><code class="inline">bin/my_app start</code> will start the system connected to the current standard
+input/output, where logs are also written to by default. This is the
+preferred way to run the system. Many tools, such as <code class="inline">systemd</code>, platforms
+as a service, such as Heroku, and many containers platforms, such as Docker,
+are capable of processing the standard input/output and redirecting
+the log contents elsewhere. Those tools and platforms also take care
+of restarting the system in case it crashes.</p><p>You can also execute one-off commands, run the release as a daemon on
+Unix-like system, or install it as a service on Windows. We will take a
+look at those next. You can also list all available commands by invoking
+<code class="inline">bin/RELEASE_NAME</code>.</p><h3 id="module-one-off-commands-eval-and-rpc" class="section-heading">
+  <a href="#module-one-off-commands-eval-and-rpc" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  One-off commands (eval and rpc)
+</h3>
+<p>If you want to invoke specific modules and functions in your release,
+you can do so in two ways: using <code class="inline">eval</code> or <code class="inline">rpc</code>.</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;IO.puts(:hello)&quot;</span><span class="w">
+</span><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">rpc</span><span class="w"> </span><span class="s">&quot;IO.puts(:hello)&quot;</span></code></pre><p>The <code class="inline">eval</code> command starts its own instance of the VM but without
+starting any of the applications in the release and without starting
+distribution. For example, if you need to do some prep work before
+running the actual system, like migrating your database, <code class="inline">eval</code> can
+be a good fit. Just keep in mind any application you may use during
+eval has to be explicitly loaded and/or started.</p><p>You can start an application by calling <a href="https://hexdocs.pm/elixir/Application.html#ensure_all_started/1"><code class="inline">Application.ensure_all_started/1</code></a>.
+However, if for some reason you cannot start an application, maybe
+because it will run other services you do not want, you must at least
+load the application by calling <a href="https://hexdocs.pm/elixir/Application.html#load/1"><code class="inline">Application.load/1</code></a>. If you don't
+load the application, any attempt at reading its environment or
+configuration may fail. Note that if you start an application,
+it is automatically loaded before started.</p><p>Another way to run commands is with <code class="inline">rpc</code>, which will connect to the
+system currently running and instruct it to execute the given
+expression. This means you need to guarantee the system was already
+started and be careful with the instructions you are executing.
+You can also use <code class="inline">remote</code> to connect a remote IEx session to the
+system.</p><h4>Helper module</h4><p>As you operate your system, you may find yourself running some piece of code
+as a one-off command quite often. You may consider creating a module to group
+these tasks:</p><pre><code class="nohighlight makeup elixir"><span class="c1"># lib/my_app/release_tasks.ex</span><span class="w">
+</span><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyApp.ReleaseTasks</span><span class="w"> </span><span class="k" data-group-id="5607468644-1">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">eval_purge_stale_data</span><span class="p" data-group-id="5607468644-2">(</span><span class="p" data-group-id="5607468644-2">)</span><span class="w"> </span><span class="k" data-group-id="5607468644-3">do</span><span class="w">
+    </span><span class="c1"># Eval commands needs to start the app before</span><span class="w">
+    </span><span class="c1"># Or Application.load(:my_app) if you can&#39;t start it</span><span class="w">
+    </span><span class="nc">Application</span><span class="o">.</span><span class="n">ensure_all_started</span><span class="p" data-group-id="5607468644-4">(</span><span class="ss">:my_app</span><span class="p" data-group-id="5607468644-4">)</span><span class="w">
+
+    </span><span class="c1"># Code that purges stale data</span><span class="w">
+    </span><span class="n">...</span><span class="w">
+  </span><span class="k" data-group-id="5607468644-3">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">rpc_print_connected_users</span><span class="p" data-group-id="5607468644-5">(</span><span class="p" data-group-id="5607468644-5">)</span><span class="w"> </span><span class="k" data-group-id="5607468644-6">do</span><span class="w">
+    </span><span class="c1"># Code that print users connected to the current running system</span><span class="w">
+    </span><span class="n">...</span><span class="w">
+  </span><span class="k" data-group-id="5607468644-6">end</span><span class="w">
+</span><span class="k" data-group-id="5607468644-1">end</span></code></pre><p>In the example above, we prefixed the function names with the command
+name used to execute them, but that is entirely optional.</p><p>And to run them:</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;MyApp.ReleaseTasks.eval_purge_stale_data()&quot;</span><span class="w">
+</span><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">rpc</span><span class="w"> </span><span class="s">&quot;MyApp.ReleaseTasks.rpc_print_connected_users()&quot;</span></code></pre><h3 id="module-daemon-mode-unix-like" class="section-heading">
+  <a href="#module-daemon-mode-unix-like" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Daemon mode (Unix-like)
+</h3>
+<p>You can run the release in daemon mode with the command:</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">daemon_iex</span></code></pre><p>In daemon mode, the system is started on the background via
+<a href="http://erlang.org/doc/man/run_erl.html">run_erl</a>. You may also
+want to enable <a href="http://erlang.org/doc/man/heart.html">heart</a>
+in daemon mode so it automatically restarts the system in case
+of crashes. See the generated <code class="inline">releases/RELEASE_VSN/env.sh</code> file.</p><p>The daemon will write all of its standard output to the &quot;tmp/log/&quot;
+directory in the release root. You can watch the log file by doing 
+<code class="inline">tail -f tmp/log/erlang.log.1</code> or similar. Once files get too large,
+the index suffix will be incremented. A developer can also attach
+to the standard input of the daemon by invoking &quot;to_erl tmp/pipe/&quot;
+from the release root. However, note that attaching to the system
+should be done with extreme care, since the usual commands for
+exiting an Elixir system, such as hitting Ctrl+C twice or Ctrl+\,
+will actually shut down the daemon. Therefore, using
+<code class="inline">bin/RELEASE_NAME remote</code> should be preferred, even in daemon mode.</p><p>You can customize the tmp directory used both for logging and for
+piping in daemon mode by setting the <code class="inline">RELEASE_TMP</code> environment
+variable. See the &quot;Customization&quot; section.</p><h3 id="module-services-mode-windows" class="section-heading">
+  <a href="#module-services-mode-windows" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Services mode (Windows)
+</h3>
+<p>While daemons are not available on Windows, it is possible to install a
+released system as a service on Windows with the help of
+<a href="http://erlang.org/doc/man/erlsrv.html">erlsrv</a>. This can be done by
+running:</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="nc">RELEASE_NAME</span><span class="w"> </span><span class="n">install</span></code></pre><p>Once installed, the service must be explicitly managed via the <code class="inline">erlsrv</code>
+executable, which is included in the <code class="inline">erts-VSN/bin</code> directory.
+The service is not started automatically after installing.</p><p>For example, if you have a release named <code class="inline">demo</code>, you can install
+the service and then start it from the release root as follows:</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="n">demo</span><span class="w"> </span><span class="n">install</span><span class="w">
+</span><span class="n">erts</span><span class="o">-</span><span class="nc">VSN</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">erlsrv</span><span class="o">.</span><span class="n">exs</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">demo_demo</span></code></pre><p>The name of the service is <code class="inline">demo_demo</code> because the name is built
+by concatenating the node name with the release name. Since Elixir
+automatically uses the same name for both, the service will be
+referenced as <code class="inline">demo_demo</code>.</p><p>The <code class="inline">install</code> command must be executed as an administrator.</p><h3 id="module-bin-release_name-commands" class="section-heading">
+  <a href="#module-bin-release_name-commands" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <code class="inline">bin/RELEASE_NAME</code> commands
+</h3>
+<p>The following commands are supported by <code class="inline">bin/RELEASE_NAME</code>:</p><pre><code class="nohighlight makeup elixir"><span class="n">start</span><span class="w">        </span><span class="nc">Starts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">system</span><span class="w">
+</span><span class="n">start_iex</span><span class="w">    </span><span class="nc">Starts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nc">IEx</span><span class="w"> </span><span class="n">attached</span><span class="w">
+</span><span class="n">daemon</span><span class="w">       </span><span class="nc">Starts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="p" data-group-id="7088279585-1">(</span><span class="nc">Unix</span><span class="o">-</span><span class="n">like</span><span class="w"> </span><span class="n">only</span><span class="p" data-group-id="7088279585-1">)</span><span class="w">
+</span><span class="n">daemon_iex</span><span class="w">   </span><span class="nc">Starts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nc">IEx</span><span class="w"> </span><span class="n">attached</span><span class="w"> </span><span class="p" data-group-id="7088279585-2">(</span><span class="nc">Unix</span><span class="o">-</span><span class="n">like</span><span class="w"> </span><span class="n">only</span><span class="p" data-group-id="7088279585-2">)</span><span class="w">
+</span><span class="n">install</span><span class="w">      </span><span class="nc">Installs</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="nc">Windows</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="p" data-group-id="7088279585-3">(</span><span class="nc">Windows</span><span class="w"> </span><span class="n">only</span><span class="p" data-group-id="7088279585-3">)</span><span class="w">
+</span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;EXPR&quot;</span><span class="w">  </span><span class="nc">Executes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">given</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">new</span><span class="p">,</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">booted</span><span class="w"> </span><span class="n">system</span><span class="w">
+</span><span class="n">rpc</span><span class="w"> </span><span class="s">&quot;EXPR&quot;</span><span class="w">   </span><span class="nc">Executes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">given</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="n">remotely</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">system</span><span class="w">
+</span><span class="n">remote</span><span class="w">       </span><span class="nc">Connects</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">remote</span><span class="w"> </span><span class="n">shell</span><span class="w">
+</span><span class="n">restart</span><span class="w">      </span><span class="nc">Restarts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">remote</span><span class="w"> </span><span class="n">command</span><span class="w">
+</span><span class="n">stop</span><span class="w">         </span><span class="nc">Stops</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">remote</span><span class="w"> </span><span class="n">command</span><span class="w">
+</span><span class="n">pid</span><span class="w">          </span><span class="nc">Prints</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">operating</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="nc">PID</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">remote</span><span class="w"> </span><span class="n">command</span><span class="w">
+</span><span class="n">version</span><span class="w">      </span><span class="nc">Prints</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">booted</span></code></pre><h2 id="module-deployments" class="section-heading">
+  <a href="#module-deployments" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Deployments
+</h2>
+<h3 id="module-requirements" class="section-heading">
+  <a href="#module-requirements" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Requirements
+</h3>
+<p>A release is built on a <strong>host</strong>, a machine which contains Erlang, Elixir,
+and any other dependencies needed to compile your application. A release is
+then deployed to a <strong>target</strong>, potentially the same machine as the host,
+but usually separate, and often there are many targets (either multiple
+instances, or the release is deployed to heterogeneous environments).</p><p>To deploy straight from a host to a separate target without cross-compilation,
+the following must be the same between the host and the target:</p><ul><li>Target architecture (for example, x86_64 or ARM)</li><li>Target vendor + operating system  (for example, Windows, Linux, or Darwin/macOS)</li><li>Target ABI (for example, musl or gnu)</li></ul><p>This is often represented in the form of target triples, for example,
+<code class="inline">x86_64-unknown-linux-gnu</code>, <code class="inline">x86_64-unknown-linux-musl</code>, <code class="inline">x86_64-apple-darwin</code>.</p><p>So to be more precise, to deploy straight from a host to a separate target,
+the Erlang Runtime System (ERTS), and any native dependencies (NIFs), must
+be compiled for the same target triple. If you are building on a MacBook
+(<code class="inline">x86_64-apple-darwin</code>) and trying to deploy to a typical Ubuntu machine
+(<code class="inline">x86_64-unknown-linux-gnu</code>), the release will not work. Instead you should
+build the release on a <code class="inline">x86_64-unknown-linux-gnu</code> host. As we will see, this
+can be done in multiple ways, such as releasing on the target itself, or by
+using virtual machines or containers, usually as part of your release pipeline.</p><p>In addition to matching the target triple, it is also important that the
+target has all of the system packages that your application will need at
+runtime. A common one is the need for OpenSSL when building an application
+that uses <code class="inline">:crypto</code> or <code class="inline">:ssl</code>, which is dynamically linked to ERTS. The other
+common source for native dependencies like this comes from dependencies
+containing NIFs (natively-implemented functions) which may expect to
+dynamically link to libraries they use.</p><p>Of course, some operating systems and package managers can differ between
+versions, so if your goal is to have full compatibility between host and
+target, it is best to ensure the operating system and system package manager
+have the same versions on host and target. This may even be a requirement in
+some systems, especially so with package managers that try to create fully
+reproducible environments (Nix, Guix).</p><p>Alternatively, you can also bundle the compiled object files in the release,
+as long as they were compiled for the same target. If doing so, you need to
+update <code class="inline">LD_LIBRARY_PATH</code> with the paths containing the bundled objects.</p><p>Currently, there is no official way to cross-compile a release from one
+target triple to another, due to the complexities involved in the process.</p><h3 id="module-techniques" class="section-heading">
+  <a href="#module-techniques" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Techniques
+</h3>
+<p>There are a couple of ways to guarantee that a release is built on a host with
+the same properties as the target. A simple option is to fetch the source,
+compile the code and assemble the release on the target itself. It would
+be something like this:</p><pre><code class="nohighlight makeup elixir"><span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">remote</span><span class="ss">:/</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my_app</span><span class="o">.</span><span class="n">git</span><span class="w"> </span><span class="n">my_app_source</span><span class="w">
+</span><span class="n">cd</span><span class="w"> </span><span class="n">my_app_source</span><span class="w">
+</span><span class="n">mix</span><span class="w"> </span><span class="n">deps</span><span class="o">.</span><span class="n">get</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">prod</span><span class="w">
+</span><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w">
+</span><span class="c">_build</span><span class="o">/</span><span class="n">prod</span><span class="o">/</span><span class="n">rel</span><span class="o">/</span><span class="n">my_app</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">my_app</span><span class="w"> </span><span class="n">start</span></code></pre><p>If you prefer, you can also compile the release to a separate directory,
+so you can erase all source after the release is assembled:</p><pre><code class="nohighlight makeup elixir"><span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">remote</span><span class="ss">:/</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my_app</span><span class="o">.</span><span class="n">git</span><span class="w"> </span><span class="n">my_app_source</span><span class="w">
+</span><span class="n">cd</span><span class="w"> </span><span class="n">my_app_source</span><span class="w">
+</span><span class="n">mix</span><span class="w"> </span><span class="n">deps</span><span class="o">.</span><span class="n">get</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">prod</span><span class="w">
+</span><span class="nc">MIX_ENV</span><span class="o">=</span><span class="n">prod</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="o">--</span><span class="n">path</span><span class="w"> </span><span class="o">.</span><span class="o">.</span><span class="o">/</span><span class="n">my_app_release</span><span class="w">
+</span><span class="n">cd</span><span class="w"> </span><span class="o">.</span><span class="o">.</span><span class="o">/</span><span class="n">my_app_release</span><span class="w">
+</span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">rf</span><span class="w"> </span><span class="o">.</span><span class="o">.</span><span class="o">/</span><span class="n">my_app_source</span><span class="w">
+</span><span class="n">bin</span><span class="o">/</span><span class="n">my_app</span><span class="w"> </span><span class="n">start</span></code></pre><p>However, this option can be expensive if you have multiple production
+nodes or if the release assembling process is a long one, as each node
+needs to individually assemble the release.</p><p>You can automate this process in a couple different ways. One option
+is to make it part of your Continuous Integration (CI) / Continuous
+Deployment (CD) pipeline. When you have a CI/CD pipeline, it is common
+that the machines in your CI/CD pipeline run on the exact same target
+triple as your production servers (if they don't, they should).
+In this case, you can assemble the release at the end of your CI/CD
+pipeline by calling <code class="inline">MIX_ENV=prod mix release</code> and push the artifact
+to S3 or any other network storage. To perform the deployment, your
+production machines can fetch the deployment from the network storage
+and run <code class="inline">bin/my_app start</code>.</p><p>Another mechanism to automate deployments is to use images, such as
+Amazon Machine Images, or container platforms, such as Docker.
+For instance, you can use Docker to run locally a system with the
+exact same target triple as your production servers. Inside the
+container, you can invoke <code class="inline">MIX_ENV=prod mix release</code> and build
+a complete image and/or container with the operating system, all
+dependencies as well as the releases.</p><p>In other words, there are multiple ways systems can be deployed and
+releases can be automated and incorporated into all of them as long
+as you remember to build the system in the same target triple.</p><p>Once a system is deployed, shutting down the system can be done by
+sending SIGINT/SIGTERM to the system, which is what most containers,
+platforms and tools do, or by explicitly invoking <code class="inline">bin/RELEASE_NAME stop</code>.
+Once the system receives the shutdown request, each application and
+their respective supervision trees will stop, one by one, in the
+opposite order that they were started.</p><h2 id="module-customization" class="section-heading">
+  <a href="#module-customization" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Customization
+</h2>
+<p>There are a couple ways in which developers can customize the generated
+artifacts inside a release.</p><h3 id="module-options" class="section-heading">
+  <a href="#module-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h3>
+<p>The following options can be set inside your <code class="inline">mix.exs</code> on each release definition:</p><ul><li><p><code class="inline">:applications</code> - a keyword list that configures and adds new applications
+to the release. The key is the application name and the value is one of:</p><ul><li><code class="inline">:permanent</code> - the application is started and the node shuts down
+if the application terminates, regardless of reason</li><li><code class="inline">:transient</code> - the application is started and the node shuts down
+if the application terminates abnormally</li><li><code class="inline">:temporary</code> - the application is started and the node does not
+shut down if the application terminates</li><li><code class="inline">:load</code> - the application is only loaded</li><li><code class="inline">:none</code> - the application is part of the release but it is neither
+loaded nor started</li></ul><p>All applications default to <code class="inline">:permanent</code>.</p><p>By default <code class="inline">:applications</code> includes the current application and all
+applications the current application depends on, recursively.
+You can include new applications or change the mode of
+existing ones by listing them here. The order of the applications given
+in <code class="inline">:applications</code> will be preserved as much as possible, with only
+<code class="inline">:kernel</code>, <code class="inline">:stdlib</code>, <code class="inline">:sasl</code>, and <code class="inline">:elixir</code> listed before the given
+application list.</p><p>Releases assembled from an umbrella project require this configuration
+to be explicitly given.</p></li><li><p><code class="inline">:strip_beams</code> - a boolean that controls if BEAM files should have their debug
+information, documentation chunks, and other non-essential metadata removed.
+Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:cookie</code> - a string representing the Erlang Distribution cookie. If this
+option is not set, a random cookie is  written to the <code class="inline">releases/COOKIE</code> file
+when the first release is assembled. At runtime, we will first attempt
+to fetch the cookie from the <code class="inline">RELEASE_COOKIE</code> environment variable and
+then we'll read the <code class="inline">releases/COOKIE</code> file.</p><p>If you are setting this option manually, we recommend the cookie option
+to be a long and randomly generated string, such as:
+<code class="inline">Base.url_encode64(:crypto.strong_rand_bytes(40))</code>. We also recommend to restrict
+the characters in the cookie to the subset returned by <a href="https://hexdocs.pm/elixir/Base.html#url_encode64/1"><code class="inline">Base.url_encode64/1</code></a>.</p></li><li><p><code class="inline">:validate_compile_env</code> - by default a release will match all runtime
+configuration against any configuration that was marked as compile time
+in your application of its dependencies via the <a href="https://hexdocs.pm/elixir/Application.html#compile_env/3"><code class="inline">Application.compile_env/3</code></a>
+function. If there is a mismatch between those, it means your system is
+misconfigured and unable to boot. You can disable this check by setting
+this option to false.</p></li><li><p><code class="inline">:path</code> - the path the release should be installed to.
+Defaults to <code class="inline">&quot;_build/MIX_ENV/rel/RELEASE_NAME&quot;</code>.</p></li><li><p><code class="inline">:version</code> - the release version as a string or <code class="inline">{:from_app, app_name}</code>.
+Defaults to the current application version. The <code class="inline">{:from_app, app_name}</code> format
+can be used to easily reference the application version from another application.
+This is particularly useful in umbrella applications.</p></li><li><p><code class="inline">:quiet</code> - a boolean that controls if releases should write steps to
+the standard output. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:include_erts</code> - a boolean, string, or anonymous function of arity zero.
+If a boolean, it indicates whether the Erlang Runtime System (ERTS), which
+includes the Erlang VM, should be included in the release. The default is
+<code class="inline">true</code>, which is also the recommended value. If a string, it represents
+the path to an existing ERTS installation. If an anonymous function of
+arity zero, it's a function that returns any of the above (boolean or string).</p><p>You may also set this option to <code class="inline">false</code> if you desire to use the ERTS version installed
+on the target. Note, however, that the ERTS version on the target must have <strong>the
+exact version</strong> as the ERTS version used when the release is assembled. Setting it to
+<code class="inline">false</code> also disables hot code upgrades. Therefore, <code class="inline">:include_erts</code> should be
+set to <code class="inline">false</code> with caution and only if you are assembling the release on the
+same server that runs it.</p></li><li><p><code class="inline">:include_executables_for</code> - a list of atoms detailing for which Operating
+Systems executable files should be generated for. By default, it is set to
+<code class="inline">[:unix, :windows]</code>. You can customize those as follows:</p><pre><code class="nohighlight makeup elixir"><span class="ss">releases</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2119489443-1">[</span><span class="w">
+  </span><span class="ss">demo</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2119489443-2">[</span><span class="w">
+    </span><span class="ss">include_executables_for</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2119489443-3">[</span><span class="ss">:unix</span><span class="p" data-group-id="2119489443-3">]</span><span class="w"> </span><span class="c1"># Or [:windows] or []</span><span class="w">
+  </span><span class="p" data-group-id="2119489443-2">]</span><span class="w">
+</span><span class="p" data-group-id="2119489443-1">]</span></code></pre></li><li><p><code class="inline">:overlays</code> - a directory with extra files to be copied as is to the
+release. See the &quot;Overlays&quot; section for more information. Defaults to
+&quot;rel/overlays&quot; if said directory exists.</p></li><li><p><code class="inline">:steps</code> - a list of steps to execute when assembling the release. See
+the &quot;Steps&quot; section for more information.</p></li></ul><p>Note each release definition can be given as an anonymous function. This
+is useful if some release attributes are expensive to compute:</p><pre><code class="nohighlight makeup elixir"><span class="ss">releases</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="5389404995-1">[</span><span class="w">
+  </span><span class="ss">demo</span><span class="p">:</span><span class="w"> </span><span class="k" data-group-id="5389404995-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+    </span><span class="p" data-group-id="5389404995-3">[</span><span class="ss">version</span><span class="p">:</span><span class="w"> </span><span class="na">@version</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="s">&quot;+&quot;</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">git_ref</span><span class="p" data-group-id="5389404995-4">(</span><span class="p" data-group-id="5389404995-4">)</span><span class="p" data-group-id="5389404995-3">]</span><span class="w">
+  </span><span class="k" data-group-id="5389404995-2">end</span><span class="w">
+</span><span class="p" data-group-id="5389404995-1">]</span></code></pre><p>Besides the options above, it is possible to customize the generated
+release with custom files, by tweaking the release steps or by running
+custom options and commands on boot. We will detail both approaches next.</p><h3 id="module-overlays" class="section-heading">
+  <a href="#module-overlays" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Overlays
+</h3>
+<p>Often it is necessary to copy extra files to the release root after
+the release is assembled. This can be easily done by placing such
+files in the <code class="inline">rel/overlays</code> directory. Any file in there is copied
+as is to the release root. For example, if you have place a
+&quot;rel/overlays/Dockerfile&quot; file, the &quot;Dockerfile&quot; will be copied as
+is to the release root. If you need to copy files dynamically, see
+the &quot;Steps&quot; section.</p><h3 id="module-steps" class="section-heading">
+  <a href="#module-steps" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Steps
+</h3>
+<p>It is possible to add one or more steps before and after the release is
+assembled. This can be done with the <code class="inline">:steps</code> option:</p><pre><code class="nohighlight makeup elixir"><span class="ss">releases</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2431692686-1">[</span><span class="w">
+  </span><span class="ss">demo</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2431692686-2">[</span><span class="w">
+    </span><span class="ss">steps</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2431692686-3">[</span><span class="o">&amp;</span><span class="n">set_configs</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">:assemble</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">copy_extra_files</span><span class="o">/</span><span class="mi">1</span><span class="p" data-group-id="2431692686-3">]</span><span class="w">
+  </span><span class="p" data-group-id="2431692686-2">]</span><span class="w">
+</span><span class="p" data-group-id="2431692686-1">]</span></code></pre><p>The <code class="inline">:steps</code> option must be a list and it must always include the
+atom <code class="inline">:assemble</code>, which does most of the release assembling. You
+can pass anonymous functions before and after the <code class="inline">:assemble</code> to
+customize your release assembling pipeline. Those anonymous functions
+will receive a <a href="Mix.Release.html"><code class="inline">Mix.Release</code></a> struct and must return the same or
+an updated <a href="Mix.Release.html"><code class="inline">Mix.Release</code></a> struct. It is also possible to build a tarball
+of the release by passing the <code class="inline">:tar</code> step anywhere after <code class="inline">:assemble</code>.
+If the release <code class="inline">:path</code> is not configured, the tarball is created in
+<code class="inline">_build/MIX_ENV/RELEASE_NAME-RELEASE_VSN.tar.gz</code> Otherwise it is
+created inside the configured <code class="inline">:path</code>.</p><p>See <a href="Mix.Release.html"><code class="inline">Mix.Release</code></a> for more documentation on the struct and which
+fields can be modified. Note that <code class="inline">:steps</code> field itself can be
+modified and it is updated every time a step is called. Therefore,
+if you need to execute a command before and after assembling the
+release, you only need to declare the first steps in your pipeline
+and then inject the last step into the release struct. The steps
+field can also be used to verify if the step was set before or
+after assembling the release.</p><h3 id="module-vm-args-and-env-sh-env-bat" class="section-heading">
+  <a href="#module-vm-args-and-env-sh-env-bat" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  vm.args and env.sh (env.bat)
+</h3>
+<p>Developers may want to customize the VM flags and environment variables
+given when the release starts. This is typically done by customizing
+two files inside your release: <code class="inline">releases/RELEASE_VSN/vm.args</code> and
+<code class="inline">releases/RELEASE_VSN/env.sh</code> (or <code class="inline">env.bat</code> on Windows).</p><p>However, instead of modifying those files after the release is built,
+the simplest way to customize those files is by running <a href="Mix.Tasks.Release.Init.html"><code class="inline">mix release.init</code></a>.
+The Mix task will copy custom <code class="inline">rel/vm.args.eex</code>, <code class="inline">rel/env.sh.eex</code>, and
+<code class="inline">rel/env.bat.eex</code> files to your project root. You can modify those
+files and they will be evaluated every time you perform a new release.
+Those files are regular EEx templates and they have a single assign,
+called <code class="inline">@release</code>, with the <a href="Mix.Release.html"><code class="inline">Mix.Release</code></a> struct.</p><p>The <code class="inline">vm.args</code> file may contain any of the VM flags accepted by the <a href="http://erlang.org/doc/man/erl.html">
+command<code class="inline">erl</code></a>.</p><p>The <code class="inline">env.sh</code> and <code class="inline">env.bat</code> is used to set environment variables.
+In there, you can set vars such as <code class="inline">RELEASE_NODE</code>, <code class="inline">RELEASE_COOKIE</code>,
+and <code class="inline">RELEASE_TMP</code> to customize your node name, cookie and tmp
+directory respectively. Whenever <code class="inline">env.sh</code> or <code class="inline">env.bat</code> is invoked,
+the variables <code class="inline">RELEASE_ROOT</code>, <code class="inline">RELEASE_NAME</code>, <code class="inline">RELEASE_VSN</code>, and
+<code class="inline">RELEASE_COMMAND</code> have already been set, so you can rely on them.
+See the section on environment variables for more information.</p><p>Furthermore, while <code class="inline">vm.args</code> is static, you can use <code class="inline">env.sh</code> and
+<code class="inline">env.bat</code> to dynamically set VM options. For example, if you want
+to make sure the Erlang Distribution listens only on a given port
+known at runtime, you can set the following:</p><pre><code class="nohighlight makeup elixir"><span class="k">case</span><span class="w"> </span><span class="err">$</span><span class="nc">RELEASE_COMMAND</span><span class="w"> </span><span class="ow">in</span><span class="w">
+  </span><span class="n">start</span><span class="o">*</span><span class="o">|</span><span class="n">daemon</span><span class="o">*</span><span class="p">)</span><span class="w">
+    </span><span class="nc">ELIXIR_ERL_OPTIONS</span><span class="o">=</span><span class="s">&quot;-kernel inet_dist_listen_min $BEAM_PORT inet_dist_listen_max $BEAM_PORT&quot;</span><span class="w">
+    </span><span class="n">export</span><span class="w"> </span><span class="nc">ELIXIR_ERL_OPTIONS</span><span class="w">
+    </span><span class="p">;</span><span class="p">;</span><span class="w">
+  </span><span class="o">*</span><span class="p">)</span><span class="w">
+    </span><span class="p">;</span><span class="p">;</span><span class="w">
+</span><span class="n">esac</span></code></pre><p>Note we only set the port on start/daemon commands. If you also limit
+the port on other commands, such as <code class="inline">rpc</code>, then you will be unable
+to establish a remote connection as the port will already be in use
+by the node.</p><p>On Windows, your <code class="inline">env.bat</code> would look like this:</p><pre><code class="nohighlight makeup elixir"><span class="nc">IF</span><span class="w"> </span><span class="nc">NOT</span><span class="w"> </span><span class="p">%</span><span class="nc">RELEASE_COMMAND</span><span class="ss">:start</span><span class="o">=</span><span class="p">%</span><span class="o">==</span><span class="p">%</span><span class="nc">RELEASE_COMMAND</span><span class="p">%</span><span class="w"> </span><span class="p" data-group-id="0381417156-1">(</span><span class="w">
+  </span><span class="n">set</span><span class="w"> </span><span class="nc">ELIXIR_ERL_OPTIONS</span><span class="o">=</span><span class="s">&quot;-kernel inet_dist_listen_min %BEAM_PORT% inet_dist_listen_max %BEAM_PORT%&quot;</span><span class="w">
+</span><span class="p" data-group-id="0381417156-1">)</span></code></pre><h2 id="module-application-configuration" class="section-heading">
+  <a href="#module-application-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Application configuration
+</h2>
+<p>Releases provides two mechanisms for configuring OTP applications:
+build-time and runtime.</p><h3 id="module-build-time-configuration" class="section-heading">
+  <a href="#module-build-time-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Build-time configuration
+</h3>
+<p>Whenever you invoke a <code class="inline">mix</code> command, Mix loads the configuration
+in <code class="inline">config/config.exs</code>, if said file exists. It is common for the
+<code class="inline">config/config.exs</code> file itself to import other configuration based
+on the current <code class="inline">MIX_ENV</code>, such as <code class="inline">config/dev.exs</code>, <code class="inline">config/test.exs</code>,
+and <code class="inline">config/prod.exs</code>. We say that this configuration is a build-time
+configuration as it is evaluated whenever you compile your code or
+whenever you assemble the release.</p><p>In other words, if your configuration does something like:</p><pre><code class="nohighlight makeup elixir"><span class="n">config</span><span class="w"> </span><span class="ss">:my_app</span><span class="p">,</span><span class="w"> </span><span class="ss">:secret_key</span><span class="p">,</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p" data-group-id="0185547563-1">(</span><span class="s">&quot;MY_APP_SECRET_KEY&quot;</span><span class="p" data-group-id="0185547563-1">)</span></code></pre><p>The <code class="inline">:secret_key</code> key under <code class="inline">:my_app</code> will be computed on the
+host machine, whenever the release is built. Setting the
+<code class="inline">MY_APP_SECRET_KEY</code> right before starting your release will have
+no effect.</p><p>Luckily, releases also provide runtime configuration, which we will
+see next.</p><h3 id="module-runtime-configuration" class="section-heading">
+  <a href="#module-runtime-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Runtime configuration
+</h3>
+<p>To enable runtime configuration in your release, all you need to do is
+to create a file named <code class="inline">config/releases.exs</code>:</p><pre><code class="nohighlight makeup elixir"><span class="kn">import</span><span class="w"> </span><span class="nc">Config</span><span class="w">
+</span><span class="n">config</span><span class="w"> </span><span class="ss">:my_app</span><span class="p">,</span><span class="w"> </span><span class="ss">:secret_key</span><span class="p">,</span><span class="w"> </span><span class="nc">System</span><span class="o">.</span><span class="n">fetch_env!</span><span class="p" data-group-id="7363745200-1">(</span><span class="s">&quot;MY_APP_SECRET_KEY&quot;</span><span class="p" data-group-id="7363745200-1">)</span></code></pre><p>Your <code class="inline">config/releases.exs</code> file needs to follow three important rules:</p><ul><li>It MUST <code class="inline">import Config</code> at the top instead of the deprecated <code class="inline">use Mix.Config</code></li><li>It MUST NOT import any other configuration file via <code class="inline">import_config</code></li><li>It MUST NOT access <a href="Mix.html"><code class="inline">Mix</code></a> in any way, as <a href="Mix.html"><code class="inline">Mix</code></a> is a build tool and it not
+available inside releases</li></ul><p>If a <code class="inline">config/releases.exs</code> exists, it will be copied to your release
+and executed early in the boot process, when only Elixir and Erlang's
+main applications have been started. Once the configuration is loaded,
+the Erlang system will be restarted (within the same Operating System
+process) and the new configuration will take place.</p><p>You can change the path to the runtime configuration file by setting
+<code class="inline">:runtime_config_path</code>. This path is resolved at build time as the
+given configuration file is always copied to inside the release.</p><p>Finally, in order for runtime configuration to work properly (as well
+as any other &quot;Config provider&quot; as defined next), it needs to be able
+to persist the newly computed configuration to disk. The computed config
+file will be written to &quot;tmp&quot; directory inside the release every time
+the system boots. You can configure the &quot;tmp&quot; directory by setting the
+<code class="inline">RELEASE_TMP</code> environment variable, either explicitly or inside your
+<code class="inline">releases/RELEASE_VSN/env.sh</code> (or <code class="inline">env.bat</code> on Windows).</p><h3 id="module-config-providers" class="section-heading">
+  <a href="#module-config-providers" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Config providers
+</h3>
+<p>Releases also supports custom mechanisms, called config providers, to load
+any sort of runtime configuration to the system while it boots. For instance,
+if you need to access a vault or load configuration from a JSON file, it
+can be achieved with config providers. The runtime configuration outlined
+in the previous section, which is handled by the <a href="https://hexdocs.pm/elixir/Config.Reader.html"><code class="inline">Config.Reader</code></a> provider.
+See the <a href="https://hexdocs.pm/elixir/Config.Provider.html"><code class="inline">Config.Provider</code></a> module for more information and more examples.</p><p>The following options can be set inside your releases key in your <code class="inline">mix.exs</code>
+to control how config providers work:</p><ul><li><p><code class="inline">:start_distribution_during_config</code> - on Erlang/OTP 22+, releases
+only start the Erlang VM distribution features after the config files
+are evaluated. You can set it to <code class="inline">true</code> if you need distribution during
+configuration. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:reboot_system_after_config</code> - every time your release is configured,
+the system is rebooted to allow the new configuration to take place.
+You can set this option to <code class="inline">false</code> to disable the rebooting for applications
+that are sensitive to boot time but, in doing so, note you won't be able
+to configure system applications, such as <code class="inline">:kernel</code>, <code class="inline">:stdlib</code> and <code class="inline">:elixir</code>
+itself. Defaults to <code class="inline">true</code>.</p></li><li><p><code class="inline">:prune_runtime_sys_config_after_boot</code> - every time your system boots,
+the release will write a config file to your tmp directory. These
+configuration files are generally small. But if you are concerned with
+disk space or if you have other restrictions, you can ask the system to
+remove said config files after boot. The downside is that you will no
+longer be able to restart the system internally (neither via
+<a href="https://hexdocs.pm/elixir/System.html#restart/0"><code class="inline">System.restart/0</code></a> nor <code class="inline">bin/RELEASE_NAME restart</code>). If you need a restart,
+you will have to terminate the Operating System process and start a new
+one. Defaults to <code class="inline">false</code>.</p></li><li><p><code class="inline">:config_providers</code> - a list of tuples with custom config providers.
+See <a href="https://hexdocs.pm/elixir/Config.Provider.html"><code class="inline">Config.Provider</code></a> for more information. Defaults to <code class="inline">[]</code>.</p></li></ul><h3 id="module-customization-and-configuration-summary" class="section-heading">
+  <a href="#module-customization-and-configuration-summary" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Customization and configuration summary
+</h3>
+<p>Generally speaking, the following files are available for customizing
+and configuring the running system:</p><ul><li><p><code class="inline">config/config.exs</code> (and <code class="inline">config/prod.exs</code>) - provides build-time
+application configuration, which are executed when the release is
+assembled</p></li><li><p><code class="inline">config/releases.exs</code> - provides runtime application configuration.
+It is executed every time the release boots and is further extensible
+via config providers</p></li><li><p><code class="inline">rel/vm.args.eex</code> - a template file that is copied into every release
+and provides static configuration of the Erlang Virtual Machine and
+other runtime flags</p></li><li><p><code class="inline">rel/env.sh.eex</code> and <code class="inline">rel/env.bat.eex</code> - template files that are copied
+into every release and are executed on every command to set up environment
+variables, including specific ones to the VM, and the general environment</p></li></ul><h2 id="module-directory-structure" class="section-heading">
+  <a href="#module-directory-structure" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Directory structure
+</h2>
+<p>A release is organized as follows:</p><pre><code class="nohighlight makeup elixir"><span class="n">bin</span><span class="o">/</span><span class="w">
+  </span><span class="nc">RELEASE_NAME</span><span class="w">
+</span><span class="n">erts</span><span class="o">-</span><span class="nc">ERTS_VSN</span><span class="o">/</span><span class="w">
+</span><span class="n">lib</span><span class="o">/</span><span class="w">
+  </span><span class="nc">APP_NAME</span><span class="o">-</span><span class="nc">APP_VSN</span><span class="o">/</span><span class="w">
+    </span><span class="n">ebin</span><span class="o">/</span><span class="w">
+    </span><span class="n">include</span><span class="o">/</span><span class="w">
+    </span><span class="n">priv</span><span class="o">/</span><span class="w">
+</span><span class="n">releases</span><span class="o">/</span><span class="w">
+  </span><span class="nc">RELEASE_VSN</span><span class="o">/</span><span class="w">
+    </span><span class="n">consolidated</span><span class="o">/</span><span class="w">
+    </span><span class="n">elixir</span><span class="w">
+    </span><span class="n">elixir</span><span class="o">.</span><span class="n">bat</span><span class="w">
+    </span><span class="n">env</span><span class="o">.</span><span class="n">bat</span><span class="w">
+    </span><span class="n">env</span><span class="o">.</span><span class="n">sh</span><span class="w">
+    </span><span class="n">iex</span><span class="w">
+    </span><span class="n">iex</span><span class="o">.</span><span class="n">bat</span><span class="w">
+    </span><span class="n">releases</span><span class="o">.</span><span class="n">exs</span><span class="w">
+    </span><span class="n">start</span><span class="o">.</span><span class="n">boot</span><span class="w">
+    </span><span class="n">start</span><span class="o">.</span><span class="n">script</span><span class="w">
+    </span><span class="n">start_clean</span><span class="o">.</span><span class="n">boot</span><span class="w">
+    </span><span class="n">start_clean</span><span class="o">.</span><span class="n">script</span><span class="w">
+    </span><span class="n">sys</span><span class="o">.</span><span class="n">config</span><span class="w">
+    </span><span class="n">vm</span><span class="o">.</span><span class="n">args</span><span class="w">
+  </span><span class="nc">COOKIE</span><span class="w">
+  </span><span class="n">start_erl</span><span class="o">.</span><span class="n">data</span><span class="w">
+</span><span class="n">tmp</span><span class="o">/</span></code></pre><h2 id="module-environment-variables" class="section-heading">
+  <a href="#module-environment-variables" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Environment variables
+</h2>
+<p>The system sets different environment variables. The following variables
+are set early on and can only be read by <code class="inline">env.sh</code> and <code class="inline">env.bat</code>:</p><ul><li><p><code class="inline">RELEASE_ROOT</code> - points to the root of the release. If the system
+includes ERTS, then it is the same as <a href="http://www.erlang.org/doc/man/code.html#root_dir-0"><code class="inline">:code.root_dir/0</code></a>. This
+variable is always computed and it cannot be set to a custom value</p></li><li><p><code class="inline">RELEASE_COMMAND</code> - the command given to the release, such as <code class="inline">&quot;start&quot;</code>,
+<code class="inline">&quot;remote&quot;</code>, <code class="inline">&quot;eval&quot;</code>, and so on. This is typically accessed inside <code class="inline">env.sh</code>
+and <code class="inline">env.bat</code> to set different environment variables under different
+conditions. Note, however, that <code class="inline">RELEASE_COMMAND</code> has not been
+validated by the time <code class="inline">env.sh</code> and <code class="inline">env.bat</code> are called, so it may
+be empty or contain invalid values. This variable is always computed
+and it cannot be set to a custom value</p></li><li><p><code class="inline">RELEASE_NAME</code> - the name of the release. It can be set to a custom
+value when invoking the release</p></li><li><p><code class="inline">RELEASE_VSN</code> - the version of the release, otherwise the latest
+version is used. It can be set to a custom value when invoking the
+release. The custom value must be an existing release version in
+the <code class="inline">releases/</code> directory</p></li></ul><p>The following variables can be set before you invoke the release or
+inside <code class="inline">env.sh</code> and <code class="inline">env.bat</code>:</p><ul><li><p><code class="inline">RELEASE_COOKIE</code> - the release cookie. By default uses the value
+in <code class="inline">releases/COOKIE</code>. It can be set to a custom value</p></li><li><p><code class="inline">RELEASE_NODE</code> - the release node name, in the format <code class="inline">name@host</code>.
+It can be set to a custom value. The name part must be made only
+of letters, digits, underscores, and hyphens</p></li><li><p><code class="inline">RELEASE_VM_ARGS</code> - the location of the vm.args file. It can be set
+to a custom path</p></li><li><p><code class="inline">RELEASE_TMP</code> - the directory in the release to write temporary
+files to. It can be set to a custom directory. It defaults to
+<code class="inline">$RELEASE_ROOT/tmp</code></p></li><li><p><code class="inline">RELEASE_MODE</code> - if the release should start in embedded or
+interactive mode. Defaults to &quot;embedded&quot;. It applies only to
+start/daemon/install commands</p></li><li><p><code class="inline">RELEASE_DISTRIBUTION</code> - how do we want to run the distribution.
+May be <code class="inline">name</code> (long names), <code class="inline">sname</code> (short names) or <code class="inline">none</code>
+(distribution is not started automatically). Defaults to
+<code class="inline">sname</code> which allows access only within the current system.
+<code class="inline">name</code> allows external connections. If <code class="inline">name</code> is used and you are
+not running on Erlang/OTP 22 or later, you must set <code class="inline">RELEASE_NODE</code>
+to <code class="inline">RELEASE_NAME@127.0.0.1</code> with an IP or a known host</p></li><li><p><code class="inline">RELEASE_BOOT_SCRIPT</code> - the name of the boot script to use when starting
+the release. This script is used when running commands such as <code class="inline">start</code> and
+<code class="inline">daemon</code>. The boot script is expected to be located at the
+path <code class="inline">releases/RELEASE_VSN/RELEASE_BOOT_SCRIPT.boot</code>. Defaults to <code class="inline">start</code></p></li><li><p><code class="inline">RELEASE_BOOT_SCRIPT_CLEAN</code> - the name of the boot script used when
+starting the release clean, without your application or its dependencies.
+This script is used by commands such as <code class="inline">eval</code>, <code class="inline">rpc</code>, and <code class="inline">remote</code>.
+The boot script is expected to be located at the path
+<code class="inline">releases/RELEASE_VSN/RELEASE_BOOT_SCRIPT_CLEAN.boot</code>. Defaults
+to <code class="inline">start_clean</code></p></li></ul><h2 id="module-umbrellas" class="section-heading">
+  <a href="#module-umbrellas" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Umbrellas
+</h2>
+<p>Releases are well integrated with umbrella projects, allowing you to
+release one or more subsets of your umbrella children. The only difference
+between performing a release in the umbrella project compared to a
+regular application is that umbrellas require you to explicitly list
+your release and the starting point for each release. For example,
+imagine this umbrella applications:</p><pre><code class="nohighlight makeup elixir"><span class="n">my_app_umbrella</span><span class="o">/</span><span class="w">
+  </span><span class="n">apps</span><span class="o">/</span><span class="w">
+    </span><span class="n">my_app_core</span><span class="o">/</span><span class="w">
+    </span><span class="n">my_app_event_processing</span><span class="o">/</span><span class="w">
+    </span><span class="n">my_app_web</span><span class="o">/</span></code></pre><p>where both <code class="inline">my_app_event_processing</code> and <code class="inline">my_app_web</code> depend on
+<code class="inline">my_app_core</code> but they do not depend on each other.</p><p>Inside your umbrella, you can define multiple releases:</p><pre><code class="nohighlight makeup elixir"><span class="ss">releases</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-1">[</span><span class="w">
+  </span><span class="ss">web_and_event_processing</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-2">[</span><span class="w">
+    </span><span class="ss">applications</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-3">[</span><span class="w">
+      </span><span class="ss">my_app_event_processing</span><span class="p">:</span><span class="w"> </span><span class="ss">:permanent</span><span class="p">,</span><span class="w">
+      </span><span class="ss">my_app_web</span><span class="p">:</span><span class="w"> </span><span class="ss">:permanent</span><span class="w">
+    </span><span class="p" data-group-id="9235621519-3">]</span><span class="w">
+  </span><span class="p" data-group-id="9235621519-2">]</span><span class="p">,</span><span class="w">
+
+  </span><span class="ss">web_only</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-4">[</span><span class="w">
+    </span><span class="ss">applications</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-5">[</span><span class="ss">my_app_web</span><span class="p">:</span><span class="w"> </span><span class="ss">:permanent</span><span class="p" data-group-id="9235621519-5">]</span><span class="w">
+  </span><span class="p" data-group-id="9235621519-4">]</span><span class="p">,</span><span class="w">
+
+  </span><span class="ss">event_processing_only</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-6">[</span><span class="w">
+    </span><span class="ss">applications</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9235621519-7">[</span><span class="ss">my_app_event_processing</span><span class="p">:</span><span class="w"> </span><span class="ss">:permanent</span><span class="p" data-group-id="9235621519-7">]</span><span class="w">
+  </span><span class="p" data-group-id="9235621519-6">]</span><span class="w">
+</span><span class="p" data-group-id="9235621519-1">]</span></code></pre><p>Note you don't need to define all applications in <code class="inline">:applications</code>,
+only the entry points. Also remember that the recommended mode
+for all applications in the system is <code class="inline">:permanent</code>.</p><p>Finally, keep in mind it is not required for you to assemble the
+release from the umbrella root. You can also assemble the release
+from each child application individually. Doing it from the root,
+however, allows you to include two applications that do not depend
+on each other as part of the same release.</p><h2 id="module-hot-code-upgrades" class="section-heading">
+  <a href="#module-hot-code-upgrades" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Hot Code Upgrades
+</h2>
+<p>Erlang and Elixir are sometimes known for the capability of upgrading
+a node that is running in production without shutting down that node.
+However, this feature is not supported out of the box by Elixir releases.</p><p>The reason we don't provide hot code upgrades is because they are very
+complicated to perform in practice, as they require careful coding of
+your processes and applications as well as extensive testing. Given most
+teams can use other techniques that are language agnostic to upgrade
+their systems, such as Blue/Green deployments, Canary deployments,
+Rolling deployments, and others, hot upgrades are rarely a viable
+option. Let's understand why.</p><p>In a hot code upgrade, you want to update a node from version A to
+version B. To do so, the first step is to write recipes for every application
+that changed between those two releases, telling exactly how the application
+changed between versions, those recipes are called <code class="inline">.appup</code> files.
+While some of the steps in building <code class="inline">.appup</code> files can be automated,
+not all of them can. Furthermore, each process in the application needs
+to be explicitly coded with hot code upgrades in mind. Let's see an example.
+Imagine your application has a counter process as a GenServer:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Counter</span><span class="w"> </span><span class="k" data-group-id="7120088262-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">GenServer</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">start_link</span><span class="p" data-group-id="7120088262-2">(</span><span class="bp">_</span><span class="p" data-group-id="7120088262-2">)</span><span class="w"> </span><span class="k" data-group-id="7120088262-3">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="7120088262-4">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="7120088262-4">)</span><span class="w">
+  </span><span class="k" data-group-id="7120088262-3">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">bump</span><span class="w"> </span><span class="k" data-group-id="7120088262-5">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p" data-group-id="7120088262-6">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:bump</span><span class="p" data-group-id="7120088262-6">)</span><span class="w">
+  </span><span class="k" data-group-id="7120088262-5">end</span><span class="w">
+
+  </span><span class="c1">## Callbacks</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">init</span><span class="p" data-group-id="7120088262-7">(</span><span class="ss">:ok</span><span class="p" data-group-id="7120088262-7">)</span><span class="w"> </span><span class="k" data-group-id="7120088262-8">do</span><span class="w">
+    </span><span class="p" data-group-id="7120088262-9">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="7120088262-9">}</span><span class="w">
+  </span><span class="k" data-group-id="7120088262-8">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">handle_call</span><span class="p" data-group-id="7120088262-10">(</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p" data-group-id="7120088262-10">)</span><span class="w"> </span><span class="k" data-group-id="7120088262-11">do</span><span class="w">
+    </span><span class="p" data-group-id="7120088262-12">{</span><span class="ss">:reply</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="7120088262-12">}</span><span class="w">
+  </span><span class="k" data-group-id="7120088262-11">end</span><span class="w">
+</span><span class="k" data-group-id="7120088262-1">end</span></code></pre><p>You add this process as part of your supervision tree and ship version
+0.1.0 of your system. Now let's imagine that on version 0.2.0 you added
+two changes: instead of <code class="inline">bump/0</code>, that always increments the counter by
+one, you introduce <code class="inline">bump/1</code> that passes the exact value to bump the
+counter. You also change the state, because you want to store the maximum
+bump value:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Counter</span><span class="w"> </span><span class="k" data-group-id="3515229091-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">GenServer</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">start_link</span><span class="p" data-group-id="3515229091-2">(</span><span class="bp">_</span><span class="p" data-group-id="3515229091-2">)</span><span class="w"> </span><span class="k" data-group-id="3515229091-3">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="3515229091-4">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="3515229091-4">)</span><span class="w">
+  </span><span class="k" data-group-id="3515229091-3">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">bump</span><span class="p" data-group-id="3515229091-5">(</span><span class="n">by</span><span class="p" data-group-id="3515229091-5">)</span><span class="w"> </span><span class="k" data-group-id="3515229091-6">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p" data-group-id="3515229091-7">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3515229091-8">{</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="3515229091-8">}</span><span class="p" data-group-id="3515229091-7">)</span><span class="w">
+  </span><span class="k" data-group-id="3515229091-6">end</span><span class="w">
+
+  </span><span class="c1">## Callbacks</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">init</span><span class="p" data-group-id="3515229091-9">(</span><span class="ss">:ok</span><span class="p" data-group-id="3515229091-9">)</span><span class="w"> </span><span class="k" data-group-id="3515229091-10">do</span><span class="w">
+    </span><span class="p" data-group-id="3515229091-11">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3515229091-12">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="3515229091-12">}</span><span class="p" data-group-id="3515229091-11">}</span><span class="w">
+  </span><span class="k" data-group-id="3515229091-10">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">handle_call</span><span class="p" data-group-id="3515229091-13">(</span><span class="p" data-group-id="3515229091-14">{</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="3515229091-14">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3515229091-15">{</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="3515229091-15">}</span><span class="p" data-group-id="3515229091-13">)</span><span class="w"> </span><span class="k" data-group-id="3515229091-16">do</span><span class="w">
+    </span><span class="p" data-group-id="3515229091-17">{</span><span class="ss">:reply</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3515229091-18">{</span><span class="n">counter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">by</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="3515229091-19">(</span><span class="n">max</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="3515229091-19">)</span><span class="p" data-group-id="3515229091-18">}</span><span class="p" data-group-id="3515229091-17">}</span><span class="w">
+  </span><span class="k" data-group-id="3515229091-16">end</span><span class="w">
+</span><span class="k" data-group-id="3515229091-1">end</span></code></pre><p>If you to perform a hot code upgrade in such application, it would
+crash, because in the initial version the state was just a counter
+but in the new version the state is a tuple. Furthermore, you changed
+the format of the <code class="inline">call</code> message from <code class="inline">:bump</code> to  <code class="inline">{:bump, by}</code> and
+the process may have both old and new messages temporarily mixed, so
+we need to handle both. The final version would be:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Counter</span><span class="w"> </span><span class="k" data-group-id="6864293690-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">GenServer</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">start_link</span><span class="p" data-group-id="6864293690-2">(</span><span class="bp">_</span><span class="p" data-group-id="6864293690-2">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-3">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">start_link</span><span class="p" data-group-id="6864293690-4">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="6864293690-4">)</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-3">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">bump</span><span class="p" data-group-id="6864293690-5">(</span><span class="n">by</span><span class="p" data-group-id="6864293690-5">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-6">do</span><span class="w">
+    </span><span class="nc">GenServer</span><span class="o">.</span><span class="n">call</span><span class="p" data-group-id="6864293690-7">(</span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-8">{</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="6864293690-8">}</span><span class="p" data-group-id="6864293690-7">)</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-6">end</span><span class="w">
+
+  </span><span class="c1">## Callbacks</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">init</span><span class="p" data-group-id="6864293690-9">(</span><span class="ss">:ok</span><span class="p" data-group-id="6864293690-9">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-10">do</span><span class="w">
+    </span><span class="p" data-group-id="6864293690-11">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-12">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="6864293690-12">}</span><span class="p" data-group-id="6864293690-11">}</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-10">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">handle_call</span><span class="p" data-group-id="6864293690-13">(</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-14">{</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="6864293690-14">}</span><span class="p" data-group-id="6864293690-13">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-15">do</span><span class="w">
+    </span><span class="p" data-group-id="6864293690-16">{</span><span class="ss">:reply</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-17">{</span><span class="n">counter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="6864293690-18">(</span><span class="n">max</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="6864293690-18">)</span><span class="p" data-group-id="6864293690-17">}</span><span class="p" data-group-id="6864293690-16">}</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-15">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">handle_call</span><span class="p" data-group-id="6864293690-19">(</span><span class="p" data-group-id="6864293690-20">{</span><span class="ss">:bump</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="6864293690-20">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-21">{</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="6864293690-21">}</span><span class="p" data-group-id="6864293690-19">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-22">do</span><span class="w">
+    </span><span class="p" data-group-id="6864293690-23">{</span><span class="ss">:reply</span><span class="p">,</span><span class="w"> </span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-24">{</span><span class="n">counter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">by</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="p" data-group-id="6864293690-25">(</span><span class="n">max</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="p" data-group-id="6864293690-25">)</span><span class="p" data-group-id="6864293690-24">}</span><span class="p" data-group-id="6864293690-23">}</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-22">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">code_change</span><span class="p" data-group-id="6864293690-26">(</span><span class="bp">_</span><span class="p">,</span><span class="w"> </span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="6864293690-26">)</span><span class="w"> </span><span class="k" data-group-id="6864293690-27">do</span><span class="w">
+    </span><span class="p" data-group-id="6864293690-28">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6864293690-29">{</span><span class="n">counter</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p" data-group-id="6864293690-29">}</span><span class="p" data-group-id="6864293690-28">}</span><span class="w">
+  </span><span class="k" data-group-id="6864293690-27">end</span><span class="w">
+</span><span class="k" data-group-id="6864293690-1">end</span></code></pre><p>Now you can proceed to list this process in the <code class="inline">.appup</code> file and
+hot code upgrade it. This is one of the many steps necessary
+to perform hot code upgrades and it must be taken into account by
+every process and application being upgraded in the system.
+The <a href="http://erlang.org/doc/design_principles/appup_cookbook.html"> cookbook<code class="inline">.appup</code></a>
+provides a good reference and more examples.</p><p>Once <code class="inline">.appup</code>s are created, the next step is to create a <code class="inline">.relup</code>
+file with all instructions necessary to update the release itself.
+Erlang documentation does provide a chapter on
+<a href="http://erlang.org/doc/system_principles/create_target.html">Creating and Upgrading a Target System</a>.
+<a href="https://learnyousomeerlang.com/relups">Learn You Some Erlang has a chapter on hot code upgrades</a>.</p><p>Overall, there are many steps, complexities and assumptions made
+during hot code upgrades, which is ultimately why they are not
+provided by Elixir out of the box. However, hot code upgrades can
+still be achieved by teams who desire to implement those steps
+on top of <a href="#content"><code class="inline">mix release</code></a> in their projects or as separate libraries.</p><h2 id="module-command-line-options" class="section-heading">
+  <a href="#module-command-line-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Command line options
+</h2>
+<ul><li><code class="inline">--force</code> - forces recompilation</li><li><code class="inline">--no-archives-check</code> - does not check archive</li><li><code class="inline">--no-deps-check</code> - does not check dependencies</li><li><code class="inline">--no-elixir-version-check</code> - does not check Elixir version</li><li><code class="inline">--no-compile</code> - does not compile before assembling the release</li><li><code class="inline">--overwrite</code> - if there is an existing release version, overwrite it</li><li><code class="inline">--path</code> - the path of the release</li><li><code class="inline">--quiet</code> - does not write progress to the standard output</li><li><code class="inline">--version</code> - the version of the release</li></ul>        </section>
+
+
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>

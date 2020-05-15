@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.22.0">
+    <meta name="project" content="Elixir v1.10.3">
+    <title>Macro — Elixir v1.10.3</title>
+    <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
+      <link rel="canonical" href="https://hexdocs.pm/elixir/v1.10/ /Macro.html" />
+    <script src="dist/sidebar_items-0c95911f74.js"></script>
+      <script src="docs_config.js"></script>
+    <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode') === 'true') document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button">
+      <span class="icon-cross" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" id="search-list" class="search-input" placeholder="Search..." aria-label="Search" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
+Elixir      </a>
+      <h2 class="sidebar-projectVersion">
+        v1.10.3
+      </h2>
+    </div>
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+        <small class="app-vsn">Elixir v1.10.3</small>
+Macro          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L3" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Macros are compile-time constructs that are invoked with Elixir's AST
+as input and a superset of Elixir's AST as output.</p><p>Let's see a simple example that shows the difference between functions and macros:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">Example</span><span class="w"> </span><span class="k" data-group-id="6729977928-1">do</span><span class="w">
+  </span><span class="kd">defmacro</span><span class="w"> </span><span class="nf">macro_inspect</span><span class="p" data-group-id="6729977928-2">(</span><span class="n">value</span><span class="p" data-group-id="6729977928-2">)</span><span class="w"> </span><span class="k" data-group-id="6729977928-3">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">inspect</span><span class="p" data-group-id="6729977928-4">(</span><span class="n">value</span><span class="p" data-group-id="6729977928-4">)</span><span class="w">
+    </span><span class="n">value</span><span class="w">
+  </span><span class="k" data-group-id="6729977928-3">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">fun_inspect</span><span class="p" data-group-id="6729977928-5">(</span><span class="n">value</span><span class="p" data-group-id="6729977928-5">)</span><span class="w"> </span><span class="k" data-group-id="6729977928-6">do</span><span class="w">
+    </span><span class="nc">IO</span><span class="o">.</span><span class="n">inpect</span><span class="p" data-group-id="6729977928-7">(</span><span class="n">value</span><span class="p" data-group-id="6729977928-7">)</span><span class="w">
+    </span><span class="n">value</span><span class="w">
+  </span><span class="k" data-group-id="6729977928-6">end</span><span class="w">
+</span><span class="k" data-group-id="6729977928-1">end</span></code></pre><p>Now let's give it a try:</p><pre><code class="nohighlight makeup elixir"><span class="kn">import</span><span class="w"> </span><span class="nc">Example</span><span class="w">
+
+</span><span class="n">macro_inspect</span><span class="p" data-group-id="9265180074-1">(</span><span class="mi">1</span><span class="p" data-group-id="9265180074-1">)</span><span class="w">
+</span><span class="c1">#=&gt; 1</span><span class="w">
+</span><span class="c1">#=&gt; 1</span><span class="w">
+
+</span><span class="n">fun_inspect</span><span class="p" data-group-id="9265180074-2">(</span><span class="mi">1</span><span class="p" data-group-id="9265180074-2">)</span><span class="w">
+</span><span class="c1">#=&gt; 1</span><span class="w">
+</span><span class="c1">#=&gt; 1</span></code></pre><p>So far they behave the same, as we are passing an integer as argument.
+But what happens when we pass an expresion:</p><pre><code class="nohighlight makeup elixir"><span class="n">macro_inspect</span><span class="p" data-group-id="6640520538-1">(</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="6640520538-1">)</span><span class="w">
+</span><span class="c1">#=&gt; {:+, [line: 3], [1, 2]}</span><span class="w">
+</span><span class="c1">#=&gt; 3</span><span class="w">
+
+</span><span class="n">fun_inspect</span><span class="p" data-group-id="6640520538-2">(</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="6640520538-2">)</span><span class="w">
+</span><span class="c1">#=&gt; 3</span><span class="w">
+</span><span class="c1">#=&gt; 3</span></code></pre><p>The macro receives the representation of the code given as argument,
+while a function receives the result of the code given as argument.
+A macro must return a superset of the code representation. See
+<a href="#t:input/0"><code class="inline">input/0</code></a> and <a href="#t:output/0"><code class="inline">output/0</code></a> for more information.</p><p>To learn more about Elixir's AST and how to build them programmatically,
+see <code class="inline">quote/2</code>.</p><h2 id="module-custom-sigils" class="section-heading">
+  <a href="#module-custom-sigils" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Custom Sigils
+</h2>
+<p>Macros are also commonly used to implement custom sigils. To create a custom
+sigil, define a function with the name <code class="inline">sigil_{identifier}</code> that takes two
+arguments. The first argument will be the string, the second will be a charlist
+containing any modifiers. If the sigil is lower case (such as <code class="inline">sigil_x</code>) then
+the string argument will allow interpolation. If the sigil is upper case
+(such as <code class="inline">sigil_X</code>) then the string will not be interpolated.</p><p>Valid modifiers include only lower and upper case letters. Other characters
+will cause a syntax error.</p><p>The module containing the custom sigil must be imported before the sigil
+syntax can be used.</p><h3 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h3>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MySigils</span><span class="w"> </span><span class="k" data-group-id="0826102350-1">do</span><span class="w">
+  </span><span class="kd">defmacro</span><span class="w"> </span><span class="nf">sigil_x</span><span class="p" data-group-id="0826102350-2">(</span><span class="n">term</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0826102350-3">[</span><span class="sc">?r</span><span class="p" data-group-id="0826102350-3">]</span><span class="p" data-group-id="0826102350-2">)</span><span class="w"> </span><span class="k" data-group-id="0826102350-4">do</span><span class="w">
+    </span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="0826102350-5">do</span><span class="w">
+      </span><span class="k">unquote</span><span class="p" data-group-id="0826102350-6">(</span><span class="n">term</span><span class="p" data-group-id="0826102350-6">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">reverse</span><span class="p" data-group-id="0826102350-7">(</span><span class="p" data-group-id="0826102350-7">)</span><span class="w">
+    </span><span class="k" data-group-id="0826102350-5">end</span><span class="w">
+  </span><span class="k" data-group-id="0826102350-4">end</span><span class="w">
+  </span><span class="kd">defmacro</span><span class="w"> </span><span class="nf">sigil_x</span><span class="p" data-group-id="0826102350-8">(</span><span class="n">term</span><span class="p">,</span><span class="w"> </span><span class="c">_modifiers</span><span class="p" data-group-id="0826102350-8">)</span><span class="w"> </span><span class="k" data-group-id="0826102350-9">do</span><span class="w">
+    </span><span class="n">term</span><span class="w">
+  </span><span class="k" data-group-id="0826102350-9">end</span><span class="w">
+  </span><span class="kd">defmacro</span><span class="w"> </span><span class="nf">sigil_X</span><span class="p" data-group-id="0826102350-10">(</span><span class="n">term</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0826102350-11">[</span><span class="sc">?r</span><span class="p" data-group-id="0826102350-11">]</span><span class="p" data-group-id="0826102350-10">)</span><span class="w"> </span><span class="k" data-group-id="0826102350-12">do</span><span class="w">
+    </span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="0826102350-13">do</span><span class="w">
+      </span><span class="k">unquote</span><span class="p" data-group-id="0826102350-14">(</span><span class="n">term</span><span class="p" data-group-id="0826102350-14">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">String</span><span class="o">.</span><span class="n">reverse</span><span class="p" data-group-id="0826102350-15">(</span><span class="p" data-group-id="0826102350-15">)</span><span class="w">
+    </span><span class="k" data-group-id="0826102350-13">end</span><span class="w">
+  </span><span class="k" data-group-id="0826102350-12">end</span><span class="w">
+  </span><span class="kd">defmacro</span><span class="w"> </span><span class="nf">sigil_X</span><span class="p" data-group-id="0826102350-16">(</span><span class="n">term</span><span class="p">,</span><span class="w"> </span><span class="c">_modifiers</span><span class="p" data-group-id="0826102350-16">)</span><span class="w"> </span><span class="k" data-group-id="0826102350-17">do</span><span class="w">
+    </span><span class="n">term</span><span class="w">
+  </span><span class="k" data-group-id="0826102350-17">end</span><span class="w">
+</span><span class="k" data-group-id="0826102350-1">end</span><span class="w">
+
+</span><span class="kn">import</span><span class="w"> </span><span class="nc">MySigils</span><span class="w">
+
+</span><span class="sx">~x(with </span><span class="si" data-group-id="0826102350-18">#{</span><span class="s">&quot;inter&quot;</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="s">&quot;polation&quot;</span><span class="si" data-group-id="0826102350-18">}</span><span class="sx">)</span><span class="w">
+</span><span class="c1">#=&gt;&quot;with interpolation&quot;</span><span class="w">
+
+</span><span class="sx">~x(with </span><span class="si" data-group-id="0826102350-19">#{</span><span class="s">&quot;inter&quot;</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="s">&quot;polation&quot;</span><span class="si" data-group-id="0826102350-19">}</span><span class="sx">)r</span><span class="w">
+</span><span class="c1">#=&gt;&quot;noitalopretni htiw&quot;</span><span class="w">
+
+</span><span class="sx">~X(without #{&quot;interpolation&quot;})</span><span class="w">
+</span><span class="c1">#=&gt;&quot;without \#{&quot;interpolation&quot;}&quot;</span><span class="w">
+
+</span><span class="sx">~X(without #{&quot;interpolation&quot;})r</span><span class="w">
+</span><span class="c1">#=&gt;&quot;}\&quot;noitalopretni\&quot;{# tuohtiw&quot;</span></code></pre>        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:captured_remote_function/0">captured_remote_function()</a>
+  </div>
+    <div class="summary-synopsis"><p>A captured remote function in the format of &amp;Mod.fun/arity</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:input/0">input()</a>
+  </div>
+    <div class="summary-synopsis"><p>The inputs of a macro</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:metadata/0">metadata()</a>
+  </div>
+    <div class="summary-synopsis"><p>A keyword list of AST metadata.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:output/0">output()</a>
+  </div>
+    <div class="summary-synopsis"><p>The output of a macro</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+    <div class="summary-synopsis"><p>Abstract Syntax Tree (AST)</p></div>
+</div>
+  </div>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#camelize/1">camelize(string)</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts the given string to CamelCase format.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#decompose_call/1">decompose_call(ast)</a>
+  </div>
+    <div class="summary-synopsis"><p>Decomposes a local or remote call into its remote part (when provided),
+function name and argument list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#escape/2">escape(expr, opts \\ [])</a>
+  </div>
+    <div class="summary-synopsis"><p>Recursively escapes a value so it can be inserted into a syntax tree.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expand/2">expand(ast, env)</a>
+  </div>
+    <div class="summary-synopsis"><p>Receives an AST node and expands it until it can no longer
+be expanded.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expand_once/2">expand_once(ast, env)</a>
+  </div>
+    <div class="summary-synopsis"><p>Receives an AST node and expands it once.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#generate_arguments/2">generate_arguments(amount, context)</a>
+  </div>
+    <div class="summary-synopsis"><p>Generates AST nodes for a given number of required argument variables using
+<a href="#var/2"><code class="inline">Macro.var/2</code></a>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#operator?/2">operator?(name, arity)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if the given name and arity is an operator.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pipe/3">pipe(expr, call_args, position)</a>
+  </div>
+    <div class="summary-synopsis"><p>Pipes <code class="inline">expr</code> into the <code class="inline">call_args</code> at the given <code class="inline">position</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#postwalk/2">postwalk(ast, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Performs a depth-first, post-order traversal of quoted expressions.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#postwalk/3">postwalk(ast, acc, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Performs a depth-first, post-order traversal of quoted expressions
+using an accumulator.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prewalk/2">prewalk(ast, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Performs a depth-first, pre-order traversal of quoted expressions.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prewalk/3">prewalk(ast, acc, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Performs a depth-first, pre-order traversal of quoted expressions
+using an accumulator.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#quoted_literal?/1">quoted_literal?(term)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if the given quoted expression represents a quoted literal.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#special_form?/2">special_form?(name, arity)</a>
+  </div>
+    <div class="summary-synopsis"><p>Returns <code class="inline">true</code> if the given name and arity is a special form.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#struct!/2">struct!(module, env)</a>
+  </div>
+    <div class="summary-synopsis"><p>Expands the struct given by <code class="inline">module</code> in the given <code class="inline">env</code>.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_string/2">to_string(tree, fun \\ fn _ast, string -&gt; string end)</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts the given expression AST to a string.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#traverse/4">traverse(ast, acc, pre, post)</a>
+  </div>
+    <div class="summary-synopsis"><p>Performs a depth-first traversal of quoted expressions
+using an accumulator.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#underscore/1">underscore(atom)</a>
+  </div>
+    <div class="summary-synopsis"><p>Converts the given atom or binary to underscore format.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unescape_string/1">unescape_string(chars)</a>
+  </div>
+    <div class="summary-synopsis"><p>Unescapes the given chars.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unescape_string/2">unescape_string(chars, map)</a>
+  </div>
+    <div class="summary-synopsis"><p>Unescapes the given chars according to the map given.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unpipe/1">unpipe(expr)</a>
+  </div>
+    <div class="summary-synopsis"><p>Breaks a pipeline expression into a list.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_meta/2">update_meta(quoted, fun)</a>
+  </div>
+    <div class="summary-synopsis"><p>Applies the given function to the node metadata if it contains one.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#validate/1">validate(expr)</a>
+  </div>
+    <div class="summary-synopsis"><p>Validates the given expressions are valid quoted expressions.</p></div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#var/2">var(var, context)</a>
+  </div>
+    <div class="summary-synopsis"><p>Generates an AST node representing the variable given
+by the atoms <code class="inline">var</code> and <code class="inline">context</code>.</p></div>
+</div>
+  </div>
+        </section>
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types          </h1>
+          <div class="types-list">
+<section class="detail" id="t:captured_remote_function/0">
+  <div class="detail-header">
+    <a href="#t:captured_remote_function/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">captured_remote_function()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L195" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>captured_remote_function() :: (... -> <a href="typespecs.html#basic-types">any</a>())</pre>
+      </div>
+
+<p>A captured remote function in the format of &amp;Mod.fun/arity</p>  </section>
+</section>
+<section class="detail" id="t:input/0">
+  <div class="detail-header">
+    <a href="#t:input/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">input()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L111" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>input() ::
+  input_expr() | {<a href="#t:input/0">input</a>(), <a href="#t:input/0">input</a>()} | [<a href="#t:input/0">input</a>()] | <a href="typespecs.html#basic-types">atom</a>() | <a href="typespecs.html#built-in-types">number</a>() | <a href="typespecs.html#built-in-types">binary</a>()</pre>
+      </div>
+
+<p>The inputs of a macro</p>  </section>
+</section>
+<section class="detail" id="t:metadata/0">
+  <div class="detail-header">
+    <a href="#t:metadata/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">metadata()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L192" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>metadata() :: <a href="typespecs.html#built-in-types">keyword</a>()</pre>
+      </div>
+
+<p>A keyword list of AST metadata.</p><p>The metadata in Elixir AST is a keyword list of values. Any key can be used
+and different parts of the compiler may use different keys. For example,
+the AST received by a macro will always include the <code class="inline">:line</code> annotation,
+while the AST emitted by <code class="inline">quote/2</code> will only have the <code class="inline">:line</code> annotation if
+the <code class="inline">:line</code> option is provided.</p><p>The following metadata keys are public:</p><ul><li><code class="inline">:context</code> - Defines the context in which the AST was generated.
+For example, <code class="inline">quote/2</code> will include the module calling <code class="inline">quote/2</code>
+as the context. This is often used to distinguish regular code from code
+generated by a macro or by <code class="inline">quote/2</code>.</li><li><code class="inline">:counter</code> - The variable counter used for variable hygiene. In terms of
+the compiler, each variable is identified by the combination of either
+<code class="inline">name</code> and <code class="inline">metadata[:counter]</code>, or <code class="inline">name</code> and <code class="inline">context</code>.</li><li><code class="inline">:generated</code> - Whether the code should be considered as generated by
+the compiler or not. This means the compiler and tools like Dialyzer may not
+emit certain warnings.</li><li><code class="inline">:keep</code> - Used by <code class="inline">quote/2</code> with the option <code class="inline">location: :keep</code> to annotate
+the file and the line number of the quoted source.</li><li><code class="inline">:line</code> - The line number of the AST node.</li></ul><p>The following metadata keys are enabled by <a href="Code.html#string_to_quoted/2"><code class="inline">Code.string_to_quoted/2</code></a>:</p><ul><li><code class="inline">:closing</code> - contains metadata about the closing pair, such as a <code class="inline">}</code>
+in a tuple or in a map, or such as the closing <code class="inline">)</code> in a function call
+with parens. The <code class="inline">:closing</code> does not delimit the end of expression if
+there are <code class="inline">:do</code> and <code class="inline">:end</code> metadata  (when <code class="inline">:token_metadata</code> is true)</li><li><code class="inline">:column</code> - the column number of the AST node (when <code class="inline">:columns</code> is true)</li><li><code class="inline">:delimiter</code> - contains the opening delimiter for sigils, strings,
+and charlists as a string (such as <code class="inline">&quot;{&quot;</code>, <code class="inline">&quot;/&quot;</code>, <code class="inline">&quot;'&quot;</code>, and the like)</li><li><code class="inline">:format</code> - set to <code class="inline">:keyword</code> when an atom is defined as a keyword</li><li><code class="inline">:do</code> - contains metadata about the <code class="inline">do</code> location in a function call with
+<code class="inline">do/end</code> blocks (when <code class="inline">:token_metadata</code> is true)</li><li><code class="inline">:end</code> - contains metadata about the <code class="inline">end</code> location in a function call with
+<code class="inline">do/end</code> blocks (when <code class="inline">:token_metadata</code> is true)</li><li><code class="inline">:end_of_expression</code> - denotes when the end of expression effectively
+happens. Available for all expressions except the last one inside a
+<code class="inline">__block__</code> (when <code class="inline">:token_metadata</code> is true)</li></ul><p>The following metadata keys are private:</p><ul><li><code class="inline">:alias</code> - Used for alias hygiene.</li><li><code class="inline">:ambiguous_op</code> - Used for improved error messages in the compiler.</li><li><code class="inline">:import</code> - Used for import hygiene.</li><li><code class="inline">:var</code> - Used for improved error messages on undefined variables.</li></ul><p>Do not rely on them as they may change or be fully removed in future versions
+of the language. They are often used by <code class="inline">quote/2</code> and the compiler to provide
+features like hygiene, better error messages, and so forth.</p><p>If you introduce custom keys into the AST metadata, please make sure to prefix
+them with the name of your library or application, so that they will not conflict
+with keys that could potentially be introduced by the compiler in the future.</p>  </section>
+</section>
+<section class="detail" id="t:output/0">
+  <div class="detail-header">
+    <a href="#t:output/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">output()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L122" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>output() ::
+  output_expr()
+  | {<a href="#t:output/0">output</a>(), <a href="#t:output/0">output</a>()}
+  | [<a href="#t:output/0">output</a>()]
+  | <a href="typespecs.html#basic-types">atom</a>()
+  | <a href="typespecs.html#built-in-types">number</a>()
+  | <a href="typespecs.html#built-in-types">binary</a>()
+  | <a href="#t:captured_remote_function/0">captured_remote_function</a>()
+  | <a href="typespecs.html#basic-types">pid</a>()</pre>
+      </div>
+
+<p>The output of a macro</p>  </section>
+</section>
+<section class="detail" id="t:t/0">
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">t()</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L108" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>t() :: <a href="#t:input/0">input</a>()</pre>
+      </div>
+
+<p>Abstract Syntax Tree (AST)</p>  </section>
+</section>
+          </div>
+        </section>
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="camelize/1">
+  <div class="detail-header">
+    <a href="#camelize/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">camelize(string)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1655" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>camelize(<a href="String.html#t:t/0">String.t</a>()) :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Converts the given string to CamelCase format.</p><p>This function was designed to camelize language identifiers/tokens,
+that's why it belongs to the <a href="#content"><code class="inline">Macro</code></a> module. Do not use it as a general
+mechanism for camelizing strings as it does not support Unicode or
+characters that are not valid in Elixir identifiers.</p><h2 id="camelize/1-examples" class="section-heading">
+  <a href="#camelize/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">camelize</span><span class="p" data-group-id="9564676538-1">(</span><span class="s">&quot;foo_bar&quot;</span><span class="p" data-group-id="9564676538-1">)</span><span class="w">
+</span><span class="s">&quot;FooBar&quot;</span></code></pre><p>If uppercase characters are present, they are not modified in any way
+as a mechanism to preserve acronyms:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">camelize</span><span class="p" data-group-id="1865386843-1">(</span><span class="s">&quot;API.V1&quot;</span><span class="p" data-group-id="1865386843-1">)</span><span class="w">
+</span><span class="s">&quot;API.V1&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">camelize</span><span class="p" data-group-id="1865386843-2">(</span><span class="s">&quot;API_SPEC&quot;</span><span class="p" data-group-id="1865386843-2">)</span><span class="w">
+</span><span class="s">&quot;API_SPEC&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="decompose_call/1">
+  <div class="detail-header">
+    <a href="#decompose_call/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">decompose_call(ast)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L494" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>decompose_call(<a href="#t:t/0">t</a>()) :: {<a href="typespecs.html#basic-types">atom</a>(), [<a href="#t:t/0">t</a>()]} | {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">atom</a>(), [<a href="#t:t/0">t</a>()]} | :error</pre>
+      </div>
+
+<p>Decomposes a local or remote call into its remote part (when provided),
+function name and argument list.</p><p>Returns <code class="inline">:error</code> when an invalid call syntax is provided.</p><h2 id="decompose_call/1-examples" class="section-heading">
+  <a href="#decompose_call/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">decompose_call</span><span class="p" data-group-id="6826423354-1">(</span><span class="k">quote</span><span class="p" data-group-id="6826423354-2">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">foo</span><span class="p" data-group-id="6826423354-2">)</span><span class="p" data-group-id="6826423354-1">)</span><span class="w">
+</span><span class="p" data-group-id="6826423354-3">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-4">[</span><span class="p" data-group-id="6826423354-4">]</span><span class="p" data-group-id="6826423354-3">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">decompose_call</span><span class="p" data-group-id="6826423354-5">(</span><span class="k">quote</span><span class="p" data-group-id="6826423354-6">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">foo</span><span class="p" data-group-id="6826423354-7">(</span><span class="p" data-group-id="6826423354-7">)</span><span class="p" data-group-id="6826423354-6">)</span><span class="p" data-group-id="6826423354-5">)</span><span class="w">
+</span><span class="p" data-group-id="6826423354-8">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-9">[</span><span class="p" data-group-id="6826423354-9">]</span><span class="p" data-group-id="6826423354-8">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">decompose_call</span><span class="p" data-group-id="6826423354-10">(</span><span class="k">quote</span><span class="p" data-group-id="6826423354-11">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">foo</span><span class="p" data-group-id="6826423354-12">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6826423354-12">)</span><span class="p" data-group-id="6826423354-11">)</span><span class="p" data-group-id="6826423354-10">)</span><span class="w">
+</span><span class="p" data-group-id="6826423354-13">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-14">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6826423354-14">]</span><span class="p" data-group-id="6826423354-13">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">decompose_call</span><span class="p" data-group-id="6826423354-15">(</span><span class="k">quote</span><span class="p" data-group-id="6826423354-16">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="nc">Elixir.M</span><span class="o">.</span><span class="n">foo</span><span class="p" data-group-id="6826423354-17">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6826423354-17">)</span><span class="p" data-group-id="6826423354-16">)</span><span class="p" data-group-id="6826423354-15">)</span><span class="w">
+</span><span class="p" data-group-id="6826423354-18">{</span><span class="p" data-group-id="6826423354-19">{</span><span class="ss">:__aliases__</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-20">[</span><span class="p" data-group-id="6826423354-20">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-21">[</span><span class="ss">:Elixir</span><span class="p">,</span><span class="w"> </span><span class="ss">:M</span><span class="p" data-group-id="6826423354-21">]</span><span class="p" data-group-id="6826423354-19">}</span><span class="p">,</span><span class="w"> </span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6826423354-22">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="6826423354-22">]</span><span class="p" data-group-id="6826423354-18">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">decompose_call</span><span class="p" data-group-id="6826423354-23">(</span><span class="k">quote</span><span class="p" data-group-id="6826423354-24">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p" data-group-id="6826423354-24">)</span><span class="p" data-group-id="6826423354-23">)</span><span class="w">
+</span><span class="ss">:error</span></code></pre>  </section>
+</section>
+<section class="detail" id="escape/2">
+    <span id="escape/1"></span>
+  <div class="detail-header">
+    <a href="#escape/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">escape(expr, opts \\ [])</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L567" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>escape(<a href="typespecs.html#built-in-types">term</a>(), <a href="typespecs.html#built-in-types">keyword</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Recursively escapes a value so it can be inserted into a syntax tree.</p><h2 id="escape/2-examples" class="section-heading">
+  <a href="#escape/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p" data-group-id="5987979214-1">(</span><span class="ss">:foo</span><span class="p" data-group-id="5987979214-1">)</span><span class="w">
+</span><span class="ss">:foo</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p" data-group-id="5987979214-2">(</span><span class="p" data-group-id="5987979214-3">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="5987979214-3">}</span><span class="p" data-group-id="5987979214-2">)</span><span class="w">
+</span><span class="p" data-group-id="5987979214-4">{</span><span class="ss">:{}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5987979214-5">[</span><span class="p" data-group-id="5987979214-5">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5987979214-6">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="5987979214-6">]</span><span class="p" data-group-id="5987979214-4">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p" data-group-id="5987979214-7">(</span><span class="p" data-group-id="5987979214-8">{</span><span class="ss">:unquote</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5987979214-9">[</span><span class="p" data-group-id="5987979214-9">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5987979214-10">[</span><span class="mi">1</span><span class="p" data-group-id="5987979214-10">]</span><span class="p" data-group-id="5987979214-8">}</span><span class="p">,</span><span class="w"> </span><span class="ss">unquote</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="5987979214-7">)</span><span class="w">
+</span><span class="mi">1</span></code></pre><h2 id="escape/2-options" class="section-heading">
+  <a href="#escape/2-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Options
+</h2>
+<ul><li><p><code class="inline">:unquote</code> - when true, this function leaves <code class="inline">unquote/1</code> and
+<code class="inline">unquote_splicing/1</code> statements unescaped, effectively unquoting
+the contents on escape. This option is useful only when escaping
+ASTs which may have quoted fragments in them. Defaults to false.</p></li><li><p><code class="inline">:prune_metadata</code> - when true, removes metadata from escaped AST
+nodes. Note this option changes the semantics of escaped code and
+it should only be used when escaping ASTs, never values. Defaults
+to false.</p><p>As an example, <a href="https://hexdocs.pm/ex_unit/ExUnit.html"><code class="inline">ExUnit</code></a> stores the AST of every assertion, so when
+an assertion fails we can show code snippets to users. Without this
+option, each time the test module is compiled, we get a different
+MD5 of the module byte code, because the AST contains metadata,
+such as counters, specific to the compilation environment. By pruning
+the metadata, we ensure that the module is deterministic and reduce
+the amount of data <a href="https://hexdocs.pm/ex_unit/ExUnit.html"><code class="inline">ExUnit</code></a> needs to keep around.</p></li></ul><h2 id="escape/2-comparison-to-kernel-specialforms-quote-2" class="section-heading">
+  <a href="#escape/2-comparison-to-kernel-specialforms-quote-2" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Comparison to <a href="Kernel.SpecialForms.html#quote/2"><code class="inline">Kernel.SpecialForms.quote/2</code></a>
+</h2>
+<p>The <a href="#escape/2"><code class="inline">escape/2</code></a> function is sometimes confused with <a href="Kernel.SpecialForms.html#quote/2"><code class="inline">Kernel.SpecialForms.quote/2</code></a>,
+because the above examples behave the same with both. The key difference is
+best illustrated when the value to escape is stored in a variable.</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p" data-group-id="1588789384-1">(</span><span class="p" data-group-id="1588789384-2">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-2">}</span><span class="p" data-group-id="1588789384-1">)</span><span class="w">
+</span><span class="p" data-group-id="1588789384-3">{</span><span class="ss">:{}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-4">[</span><span class="p" data-group-id="1588789384-4">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-5">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-5">]</span><span class="p" data-group-id="1588789384-3">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="k">quote</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1588789384-6">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-6">}</span><span class="w">
+</span><span class="p" data-group-id="1588789384-7">{</span><span class="ss">:{}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-8">[</span><span class="p" data-group-id="1588789384-8">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-9">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-9">]</span><span class="p" data-group-id="1588789384-7">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1588789384-10">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-10">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">escape</span><span class="p" data-group-id="1588789384-11">(</span><span class="n">value</span><span class="p" data-group-id="1588789384-11">)</span><span class="w">
+</span><span class="p" data-group-id="1588789384-12">{</span><span class="ss">:{}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-13">[</span><span class="p" data-group-id="1588789384-13">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-14">[</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-14">]</span><span class="p" data-group-id="1588789384-12">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="k">quote</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">value</span><span class="w">
+</span><span class="p" data-group-id="1588789384-15">{</span><span class="ss">:value</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1588789384-16">[</span><span class="p" data-group-id="1588789384-16">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="1588789384-15">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1588789384-17">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-17">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="k">quote</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="1588789384-18">(</span><span class="n">value</span><span class="p" data-group-id="1588789384-18">)</span><span class="w">
+</span><span class="p" data-group-id="1588789384-19">{</span><span class="ss">:a</span><span class="p">,</span><span class="w"> </span><span class="ss">:b</span><span class="p">,</span><span class="w"> </span><span class="ss">:c</span><span class="p" data-group-id="1588789384-19">}</span></code></pre><p><a href="#escape/2"><code class="inline">escape/2</code></a> is used to escape <em>values</em> (either directly passed or variable
+bound), while <a href="Kernel.SpecialForms.html#quote/2"><code class="inline">Kernel.SpecialForms.quote/2</code></a> produces syntax trees for
+expressions.</p>  </section>
+</section>
+<section class="detail" id="expand/2">
+  <div class="detail-header">
+    <a href="#expand/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expand(ast, env)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1549" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Receives an AST node and expands it until it can no longer
+be expanded.</p><p>Note this function does not traverse the AST, only the root
+node is expanded.</p><p>This function uses <a href="#expand_once/2"><code class="inline">expand_once/2</code></a> under the hood. Check
+it out for more information and examples.</p>  </section>
+</section>
+<section class="detail" id="expand_once/2">
+  <div class="detail-header">
+    <a href="#expand_once/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expand_once(ast, env)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1368" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+
+<p>Receives an AST node and expands it once.</p><p>The following contents are expanded:</p><ul><li>Macros (local or remote)</li><li>Aliases are expanded (if possible) and return atoms</li><li>Compilation environment macros (<code class="inline">__CALLER__/0</code>, <code class="inline">__DIR__/0</code>, <code class="inline">__ENV__/0</code> and <code class="inline">__MODULE__/0</code>)</li><li>Module attributes reader (<code class="inline">@foo</code>)</li></ul><p>If the expression cannot be expanded, it returns the expression
+itself. This function does not traverse the AST, only the root
+node is expanded.</p><p><a href="#expand_once/2"><code class="inline">expand_once/2</code></a> performs the expansion just once. Check <a href="#expand/2"><code class="inline">expand/2</code></a>
+to perform expansion until the node can no longer be expanded.</p><h2 id="expand_once/2-examples" class="section-heading">
+  <a href="#expand_once/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>In the example below, we have a macro that generates a module
+with a function named <code class="inline">name_length</code> that returns the length
+of the module name. The value of this function will be calculated
+at compilation time and not at runtime.</p><p>Consider the implementation below:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmacro</span><span class="w"> </span><span class="nf">defmodule_with_length</span><span class="p" data-group-id="0131204976-1">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">block</span><span class="p" data-group-id="0131204976-1">)</span><span class="w"> </span><span class="k" data-group-id="0131204976-2">do</span><span class="w">
+  </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p" data-group-id="0131204976-3">(</span><span class="nc">Atom</span><span class="o">.</span><span class="n">to_charlist</span><span class="p" data-group-id="0131204976-4">(</span><span class="n">name</span><span class="p" data-group-id="0131204976-4">)</span><span class="p" data-group-id="0131204976-3">)</span><span class="w">
+
+  </span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="0131204976-5">do</span><span class="w">
+    </span><span class="kd">defmodule</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="0131204976-6">(</span><span class="n">name</span><span class="p" data-group-id="0131204976-6">)</span><span class="w"> </span><span class="k" data-group-id="0131204976-7">do</span><span class="w">
+      </span><span class="kd">def</span><span class="w"> </span><span class="nf">name_length</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="0131204976-8">(</span><span class="n">length</span><span class="p" data-group-id="0131204976-8">)</span><span class="w">
+      </span><span class="k">unquote</span><span class="p" data-group-id="0131204976-9">(</span><span class="n">block</span><span class="p" data-group-id="0131204976-9">)</span><span class="w">
+    </span><span class="k" data-group-id="0131204976-7">end</span><span class="w">
+  </span><span class="k" data-group-id="0131204976-5">end</span><span class="w">
+</span><span class="k" data-group-id="0131204976-2">end</span></code></pre><p>When invoked like this:</p><pre><code class="nohighlight makeup elixir"><span class="n">defmodule_with_length</span><span class="w"> </span><span class="nc">My.Module</span><span class="w"> </span><span class="k" data-group-id="1297450867-1">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">other_function</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="1297450867-1">end</span></code></pre><p>The compilation will fail because <code class="inline">My.Module</code> when quoted
+is not an atom, but a syntax tree as follows:</p><pre><code class="nohighlight makeup elixir"><span class="p" data-group-id="8113887406-1">{</span><span class="ss">:__aliases__</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8113887406-2">[</span><span class="p" data-group-id="8113887406-2">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8113887406-3">[</span><span class="ss">:My</span><span class="p">,</span><span class="w"> </span><span class="ss">:Module</span><span class="p" data-group-id="8113887406-3">]</span><span class="p" data-group-id="8113887406-1">}</span></code></pre><p>That said, we need to expand the aliases node above to an
+atom, so we can retrieve its length. Expanding the node is
+not straightforward because we also need to expand the
+caller aliases. For example:</p><pre><code class="nohighlight makeup elixir"><span class="kn">alias</span><span class="w"> </span><span class="nc">MyHelpers</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="nc">My</span><span class="w">
+
+</span><span class="n">defmodule_with_length</span><span class="w"> </span><span class="nc">My.Module</span><span class="w"> </span><span class="k" data-group-id="9382353588-1">do</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">other_function</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="w">
+</span><span class="k" data-group-id="9382353588-1">end</span></code></pre><p>The final module name will be <code class="inline">MyHelpers.Module</code> and not
+<code class="inline">My.Module</code>. With <a href="#expand/2"><code class="inline">Macro.expand/2</code></a>, such aliases are taken
+into consideration. Local and remote macros are also
+expanded. We could rewrite our macro above to use this
+function as:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmacro</span><span class="w"> </span><span class="nf">defmodule_with_length</span><span class="p" data-group-id="0388398657-1">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">block</span><span class="p" data-group-id="0388398657-1">)</span><span class="w"> </span><span class="k" data-group-id="0388398657-2">do</span><span class="w">
+  </span><span class="n">expanded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Macro</span><span class="o">.</span><span class="n">expand</span><span class="p" data-group-id="0388398657-3">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="bp">__CALLER__</span><span class="p" data-group-id="0388398657-3">)</span><span class="w">
+  </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p" data-group-id="0388398657-4">(</span><span class="nc">Atom</span><span class="o">.</span><span class="n">to_charlist</span><span class="p" data-group-id="0388398657-5">(</span><span class="n">expanded</span><span class="p" data-group-id="0388398657-5">)</span><span class="p" data-group-id="0388398657-4">)</span><span class="w">
+
+  </span><span class="k">quote</span><span class="w"> </span><span class="k" data-group-id="0388398657-6">do</span><span class="w">
+    </span><span class="kd">defmodule</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="0388398657-7">(</span><span class="n">name</span><span class="p" data-group-id="0388398657-7">)</span><span class="w"> </span><span class="k" data-group-id="0388398657-8">do</span><span class="w">
+      </span><span class="kd">def</span><span class="w"> </span><span class="nf">name_length</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="0388398657-9">(</span><span class="n">length</span><span class="p" data-group-id="0388398657-9">)</span><span class="w">
+      </span><span class="k">unquote</span><span class="p" data-group-id="0388398657-10">(</span><span class="n">block</span><span class="p" data-group-id="0388398657-10">)</span><span class="w">
+    </span><span class="k" data-group-id="0388398657-8">end</span><span class="w">
+  </span><span class="k" data-group-id="0388398657-6">end</span><span class="w">
+</span><span class="k" data-group-id="0388398657-2">end</span></code></pre>  </section>
+</section>
+<section class="detail" id="generate_arguments/2">
+  <div class="detail-header">
+    <a href="#generate_arguments/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">generate_arguments(amount, context)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L351" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.5.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>generate_arguments(0, context :: <a href="typespecs.html#basic-types">atom</a>()) :: []</pre>
+          <pre>generate_arguments(<a href="typespecs.html#basic-types">pos_integer</a>(), context) :: [{<a href="typespecs.html#basic-types">atom</a>(), [], context}, ...]
+when context: <a href="typespecs.html#basic-types">atom</a>()</pre>
+      </div>
+
+<p>Generates AST nodes for a given number of required argument variables using
+<a href="#var/2"><code class="inline">Macro.var/2</code></a>.</p><h2 id="generate_arguments/2-examples" class="section-heading">
+  <a href="#generate_arguments/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">generate_arguments</span><span class="p" data-group-id="0234094415-1">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="0234094415-1">)</span><span class="w">
+</span><span class="p" data-group-id="0234094415-2">[</span><span class="p" data-group-id="0234094415-3">{</span><span class="ss">:arg1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0234094415-4">[</span><span class="p" data-group-id="0234094415-4">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="0234094415-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0234094415-5">{</span><span class="ss">:arg2</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0234094415-6">[</span><span class="p" data-group-id="0234094415-6">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="0234094415-5">}</span><span class="p" data-group-id="0234094415-2">]</span></code></pre>  </section>
+</section>
+<section class="detail" id="operator?/2">
+  <div class="detail-header">
+    <a href="#operator?/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">operator?(name, arity)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1493" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>operator?(name :: <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">arity</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Returns <code class="inline">true</code> if the given name and arity is an operator.</p>  </section>
+</section>
+<section class="detail" id="pipe/3">
+  <div class="detail-header">
+    <a href="#pipe/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pipe(expr, call_args, position)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L242" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>pipe(<a href="#t:t/0">t</a>(), <a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">integer</a>()) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Pipes <code class="inline">expr</code> into the <code class="inline">call_args</code> at the given <code class="inline">position</code>.</p>  </section>
+</section>
+<section class="detail" id="postwalk/2">
+  <div class="detail-header">
+    <a href="#postwalk/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">postwalk(ast, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L456" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>postwalk(<a href="#t:t/0">t</a>(), (<a href="#t:t/0">t</a>() -> <a href="#t:t/0">t</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Performs a depth-first, post-order traversal of quoted expressions.</p>  </section>
+</section>
+<section class="detail" id="postwalk/3">
+  <div class="detail-header">
+    <a href="#postwalk/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">postwalk(ast, acc, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L465" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>postwalk(<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>(), (<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>() -> {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()})) :: {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+
+<p>Performs a depth-first, post-order traversal of quoted expressions
+using an accumulator.</p>  </section>
+</section>
+<section class="detail" id="prewalk/2">
+  <div class="detail-header">
+    <a href="#prewalk/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prewalk(ast, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L439" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>prewalk(<a href="#t:t/0">t</a>(), (<a href="#t:t/0">t</a>() -> <a href="#t:t/0">t</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Performs a depth-first, pre-order traversal of quoted expressions.</p>  </section>
+</section>
+<section class="detail" id="prewalk/3">
+  <div class="detail-header">
+    <a href="#prewalk/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prewalk(ast, acc, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L448" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>prewalk(<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>(), (<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>() -> {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()})) :: {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+
+<p>Performs a depth-first, pre-order traversal of quoted expressions
+using an accumulator.</p>  </section>
+</section>
+<section class="detail" id="quoted_literal?/1">
+  <div class="detail-header">
+    <a href="#quoted_literal?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">quoted_literal?(term)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1523" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>quoted_literal?(<a href="#t:t/0">t</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Returns <code class="inline">true</code> if the given quoted expression represents a quoted literal.</p><p>Atoms, numbers, and functions are always literals. Binaries, lists, tuples,
+maps, and structs are only literals if all of their terms are also literals.</p><h2 id="quoted_literal?/1-examples" class="section-heading">
+  <a href="#quoted_literal?/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-1">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-2">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="1958191066-2">)</span><span class="p" data-group-id="1958191066-1">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-3">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-4">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1958191066-5">{</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="1958191066-5">}</span><span class="p" data-group-id="1958191066-4">)</span><span class="p" data-group-id="1958191066-3">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-6">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-7">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1958191066-8">{</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">:baz</span><span class="p" data-group-id="1958191066-8">}</span><span class="p" data-group-id="1958191066-7">)</span><span class="p" data-group-id="1958191066-6">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-9">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-10">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1958191066-11">%{</span><span class="ss">foo</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bar&quot;</span><span class="p" data-group-id="1958191066-11">}</span><span class="p" data-group-id="1958191066-10">)</span><span class="p" data-group-id="1958191066-9">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-12">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-13">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1958191066-14">%</span><span class="nc" data-group-id="1958191066-14">URI</span><span class="p" data-group-id="1958191066-14">{</span><span class="ss">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="1958191066-14">}</span><span class="p" data-group-id="1958191066-13">)</span><span class="p" data-group-id="1958191066-12">)</span><span class="w">
+</span><span class="no">true</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-15">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-16">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="nc">URI</span><span class="o">.</span><span class="n">parse</span><span class="p" data-group-id="1958191066-17">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="1958191066-17">)</span><span class="p" data-group-id="1958191066-16">)</span><span class="p" data-group-id="1958191066-15">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">quoted_literal?</span><span class="p" data-group-id="1958191066-18">(</span><span class="k">quote</span><span class="p" data-group-id="1958191066-19">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1958191066-20">{</span><span class="n">foo</span><span class="p">,</span><span class="w"> </span><span class="n">var</span><span class="p" data-group-id="1958191066-20">}</span><span class="p" data-group-id="1958191066-19">)</span><span class="p" data-group-id="1958191066-18">)</span><span class="w">
+</span><span class="no">false</span></code></pre>  </section>
+</section>
+<section class="detail" id="special_form?/2">
+  <div class="detail-header">
+    <a href="#special_form?/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">special_form?(name, arity)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1484" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.7.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>special_form?(name :: <a href="typespecs.html#basic-types">atom</a>(), <a href="typespecs.html#built-in-types">arity</a>()) :: <a href="typespecs.html#built-in-types">boolean</a>()</pre>
+      </div>
+
+<p>Returns <code class="inline">true</code> if the given name and arity is a special form.</p>  </section>
+</section>
+<section class="detail" id="struct!/2">
+  <div class="detail-header">
+    <a href="#struct!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">struct!(module, env)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L585" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+      <span class="note">(since 1.8.0)</span>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>struct!(module, <a href="Macro.Env.html#t:t/0">Macro.Env.t</a>()) :: %module{} when module: <a href="typespecs.html#built-in-types">module</a>()</pre>
+      </div>
+
+<p>Expands the struct given by <code class="inline">module</code> in the given <code class="inline">env</code>.</p><p>This is useful when a struct needs to be expanded at
+compilation time and the struct being expanded may or may
+not have been compiled. This function is even capable of
+expanding structs defined under the module being compiled.</p><p>It will raise <a href="CompileError.html"><code class="inline">CompileError</code></a> if the struct is not available.</p>  </section>
+</section>
+<section class="detail" id="to_string/2">
+    <span id="to_string/1"></span>
+  <div class="detail-header">
+    <a href="#to_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_string(tree, fun \\ fn _ast, string -&gt; string end)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L757" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>to_string(<a href="#t:t/0">t</a>(), (<a href="#t:t/0">t</a>(), <a href="String.html#t:t/0">String.t</a>() -> <a href="String.html#t:t/0">String.t</a>())) :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Converts the given expression AST to a string.</p><p>The given <code class="inline">fun</code> is called for every node in the AST with two arguments: the
+AST of the node being printed and the string representation of that same
+node. The return value of this function is used as the final string
+representation for that AST node.</p><p>This function discards all formatting of the original code.</p><h2 id="to_string/2-examples" class="section-heading">
+  <a href="#to_string/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p" data-group-id="5363794449-1">(</span><span class="k">quote</span><span class="p" data-group-id="5363794449-2">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">foo</span><span class="o">.</span><span class="n">bar</span><span class="p" data-group-id="5363794449-3">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="5363794449-3">)</span><span class="p" data-group-id="5363794449-2">)</span><span class="p" data-group-id="5363794449-1">)</span><span class="w">
+</span><span class="s">&quot;foo.bar(1, 2, 3)&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">to_string</span><span class="p" data-group-id="5363794449-4">(</span><span class="k">quote</span><span class="p" data-group-id="5363794449-5">(</span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="5363794449-5">)</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="5363794449-6">fn</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="c">_string</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;one&quot;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="c">_string</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;two&quot;</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="w">  </span><span class="c">_ast</span><span class="p">,</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">string</span><span class="w">
+</span><span class="gp unselectable">...&gt; </span><span class="k" data-group-id="5363794449-6">end</span><span class="p" data-group-id="5363794449-4">)</span><span class="w">
+</span><span class="s">&quot;one + two&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="traverse/4">
+  <div class="detail-header">
+    <a href="#traverse/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">traverse(ast, acc, pre, post)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L390" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>traverse(<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>(), (<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>() -> {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()}), (<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>() -> {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()})) ::
+  {<a href="#t:t/0">t</a>(), <a href="typespecs.html#basic-types">any</a>()}</pre>
+      </div>
+
+<p>Performs a depth-first traversal of quoted expressions
+using an accumulator.</p>  </section>
+</section>
+<section class="detail" id="underscore/1">
+  <div class="detail-header">
+    <a href="#underscore/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">underscore(atom)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L1597" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>underscore(<a href="typespecs.html#basic-types">atom</a>() | <a href="String.html#t:t/0">String.t</a>()) :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Converts the given atom or binary to underscore format.</p><p>If an atom is given, it is assumed to be an Elixir module,
+so it is converted to a binary and then processed.</p><p>This function was designed to underscore language identifiers/tokens,
+that's why it belongs to the <a href="#content"><code class="inline">Macro</code></a> module. Do not use it as a general
+mechanism for underscoring strings as it does not support Unicode or
+characters that are not valid in Elixir identifiers.</p><h2 id="underscore/1-examples" class="section-heading">
+  <a href="#underscore/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">underscore</span><span class="p" data-group-id="6053800850-1">(</span><span class="s">&quot;FooBar&quot;</span><span class="p" data-group-id="6053800850-1">)</span><span class="w">
+</span><span class="s">&quot;foo_bar&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">underscore</span><span class="p" data-group-id="6053800850-2">(</span><span class="s">&quot;Foo.Bar&quot;</span><span class="p" data-group-id="6053800850-2">)</span><span class="w">
+</span><span class="s">&quot;foo/bar&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">underscore</span><span class="p" data-group-id="6053800850-3">(</span><span class="nc">Foo.Bar</span><span class="p" data-group-id="6053800850-3">)</span><span class="w">
+</span><span class="s">&quot;foo/bar&quot;</span></code></pre><p>In general, <code class="inline">underscore</code> can be thought of as the reverse of
+<code class="inline">camelize</code>, however, in some cases formatting may be lost:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">underscore</span><span class="p" data-group-id="4494456238-1">(</span><span class="s">&quot;SAPExample&quot;</span><span class="p" data-group-id="4494456238-1">)</span><span class="w">
+</span><span class="s">&quot;sap_example&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">camelize</span><span class="p" data-group-id="4494456238-2">(</span><span class="s">&quot;sap_example&quot;</span><span class="p" data-group-id="4494456238-2">)</span><span class="w">
+</span><span class="s">&quot;SapExample&quot;</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">camelize</span><span class="p" data-group-id="4494456238-3">(</span><span class="s">&quot;hello_10&quot;</span><span class="p" data-group-id="4494456238-3">)</span><span class="w">
+</span><span class="s">&quot;Hello10&quot;</span></code></pre>  </section>
+</section>
+<section class="detail" id="unescape_string/1">
+  <div class="detail-header">
+    <a href="#unescape_string/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unescape_string(chars)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L665" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unescape_string(<a href="String.html#t:t/0">String.t</a>()) :: <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Unescapes the given chars.</p><p>This is the unescaping behaviour used by default in Elixir
+single- and double-quoted strings. Check <a href="#unescape_string/2"><code class="inline">unescape_string/2</code></a>
+for information on how to customize the escaping map.</p><p>In this setup, Elixir will escape the following: <code class="inline">\0</code>, <code class="inline">\a</code>, <code class="inline">\b</code>,
+<code class="inline">\d</code>, <code class="inline">\e</code>, <code class="inline">\f</code>, <code class="inline">\n</code>, <code class="inline">\r</code>, <code class="inline">\s</code>, <code class="inline">\t</code> and <code class="inline">\v</code>. Bytes can be
+given as hexadecimals via <code class="inline">\xNN</code> and Unicode code points as
+<code class="inline">\uNNNN</code> escapes.</p><p>This function is commonly used on sigil implementations
+(like <code class="inline">~r</code>, <code class="inline">~s</code> and others) which receive a raw, unescaped
+string.</p><h2 id="unescape_string/1-examples" class="section-heading">
+  <a href="#unescape_string/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">unescape_string</span><span class="p" data-group-id="7981491076-1">(</span><span class="s">&quot;example</span><span class="se">\\</span><span class="s">n&quot;</span><span class="p" data-group-id="7981491076-1">)</span><span class="w">
+</span><span class="s">&quot;example</span><span class="se">\n</span><span class="s">&quot;</span></code></pre><p>In the example above, we pass a string with <code class="inline">\n</code> escaped
+and return a version with it unescaped.</p>  </section>
+</section>
+<section class="detail" id="unescape_string/2">
+  <div class="detail-header">
+    <a href="#unescape_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unescape_string(chars, map)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L711" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unescape_string(<a href="String.html#t:t/0">String.t</a>(), (<a href="typespecs.html#basic-types">non_neg_integer</a>() -> <a href="typespecs.html#basic-types">non_neg_integer</a>() | false)) ::
+  <a href="String.html#t:t/0">String.t</a>()</pre>
+      </div>
+
+<p>Unescapes the given chars according to the map given.</p><p>Check <a href="#unescape_string/1"><code class="inline">unescape_string/1</code></a> if you want to use the same map
+as Elixir single- and double-quoted strings.</p><h2 id="unescape_string/2-map" class="section-heading">
+  <a href="#unescape_string/2-map" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Map
+</h2>
+<p>The map must be a function. The function receives an integer
+representing the code point of the character it wants to unescape.
+Here is the default mapping function implemented by Elixir:</p><pre><code class="nohighlight makeup elixir"><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-1">(</span><span class="n">unicode</span><span class="p" data-group-id="7551806708-1">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-2">(</span><span class="n">hex</span><span class="p" data-group-id="7551806708-2">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-3">(</span><span class="sc">?0</span><span class="p" data-group-id="7551806708-3">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?0</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-4">(</span><span class="sc">?a</span><span class="p" data-group-id="7551806708-4">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\a</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-5">(</span><span class="sc">?b</span><span class="p" data-group-id="7551806708-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\b</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-6">(</span><span class="sc">?d</span><span class="p" data-group-id="7551806708-6">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\d</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-7">(</span><span class="sc">?e</span><span class="p" data-group-id="7551806708-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\e</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-8">(</span><span class="sc">?f</span><span class="p" data-group-id="7551806708-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\f</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-9">(</span><span class="sc">?n</span><span class="p" data-group-id="7551806708-9">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\n</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-10">(</span><span class="sc">?r</span><span class="p" data-group-id="7551806708-10">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\r</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-11">(</span><span class="sc">?s</span><span class="p" data-group-id="7551806708-11">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\s</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-12">(</span><span class="sc">?t</span><span class="p" data-group-id="7551806708-12">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\t</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-13">(</span><span class="sc">?v</span><span class="p" data-group-id="7551806708-13">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="sc">?\v</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">unescape_map</span><span class="p" data-group-id="7551806708-14">(</span><span class="n">e</span><span class="p" data-group-id="7551806708-14">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">e</span></code></pre><p>If the <code class="inline">unescape_map/1</code> function returns <code class="inline">false</code>, the char is
+not escaped and the backslash is kept in the string.</p><p>Hexadecimals and Unicode code points will be escaped if the map
+function returns <code class="inline">true</code> for <code class="inline">?x</code>. Unicode code points if the map
+function returns <code class="inline">true</code> for <code class="inline">?u</code>.</p><h2 id="unescape_string/2-examples" class="section-heading">
+  <a href="#unescape_string/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>Using the <code class="inline">unescape_map/1</code> function defined above is easy:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Macro</span><span class="o">.</span><span class="n">unescape_string</span><span class="p" data-group-id="8070923304-1">(</span><span class="s">&quot;example</span><span class="se">\\</span><span class="s">n&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">unescape_map</span><span class="p" data-group-id="8070923304-2">(</span><span class="ni">&amp;1</span><span class="p" data-group-id="8070923304-2">)</span><span class="p" data-group-id="8070923304-1">)</span></code></pre>  </section>
+</section>
+<section class="detail" id="unpipe/1">
+  <div class="detail-header">
+    <a href="#unpipe/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unpipe(expr)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L226" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>unpipe(<a href="#t:t/0">t</a>()) :: [<a href="#t:t/0">t</a>()]</pre>
+      </div>
+
+<p>Breaks a pipeline expression into a list.</p><p>The AST for a pipeline (a sequence of applications of <code class="inline">|&gt;</code>) is similar to the
+AST of a sequence of binary operators or function applications: the top-level
+expression is the right-most <code class="inline">:|&gt;</code> (which is the last one to be executed), and
+its left-hand and right-hand sides are its arguments:</p><pre><code class="nohighlight makeup elixir"><span class="k">quote</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">div</span><span class="p" data-group-id="1611214192-1">(</span><span class="mi">5</span><span class="p" data-group-id="1611214192-1">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">div</span><span class="p" data-group-id="1611214192-2">(</span><span class="mi">2</span><span class="p" data-group-id="1611214192-2">)</span><span class="w">
+</span><span class="c1">#=&gt; {:|&gt;, _, [arg1, arg2]}</span></code></pre><p>In the example above, the <code class="inline">|&gt;</code> pipe is the right-most pipe; <code class="inline">arg1</code> is the AST
+for <code class="inline">100 |&gt; div(5)</code>, and <code class="inline">arg2</code> is the AST for <code class="inline">div(2)</code>.</p><p>It's often useful to have the AST for such a pipeline as a list of function
+applications. This function does exactly that:</p><pre><code class="nohighlight makeup elixir"><span class="nc">Macro</span><span class="o">.</span><span class="n">unpipe</span><span class="p" data-group-id="5387590904-1">(</span><span class="k">quote</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">div</span><span class="p" data-group-id="5387590904-2">(</span><span class="mi">5</span><span class="p" data-group-id="5387590904-2">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">div</span><span class="p" data-group-id="5387590904-3">(</span><span class="mi">2</span><span class="p" data-group-id="5387590904-3">)</span><span class="p" data-group-id="5387590904-1">)</span><span class="w">
+</span><span class="c1">#=&gt; [{100, 0}, {{:div, [], [5]}, 0}, {{:div, [], [2]}, 0}]</span></code></pre><p>We get a list that follows the pipeline directly: first the <code class="inline">100</code>, then the
+<code class="inline">div(5)</code> (more precisely, its AST), then <code class="inline">div(2)</code>. The <code class="inline">0</code> as the second
+element of the tuples is the position of the previous element in the pipeline
+inside the current function application: <code class="inline">{{:div, [], [5]}, 0}</code> means that the
+previous element (<code class="inline">100</code>) will be inserted as the 0th (first) argument to the
+<code class="inline">div/2</code> function, so that the AST for that function will become <code class="inline">{:div, [], [100, 5]}</code> (<code class="inline">div(100, 5)</code>).</p>  </section>
+</section>
+<section class="detail" id="update_meta/2">
+  <div class="detail-header">
+    <a href="#update_meta/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_meta(quoted, fun)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L328" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>update_meta(<a href="#t:t/0">t</a>(), (<a href="typespecs.html#built-in-types">keyword</a>() -> <a href="typespecs.html#built-in-types">keyword</a>())) :: <a href="#t:t/0">t</a>()</pre>
+      </div>
+
+<p>Applies the given function to the node metadata if it contains one.</p><p>This is often useful when used with <a href="#prewalk/2"><code class="inline">Macro.prewalk/2</code></a> to remove
+information like lines and hygienic counters from the expression
+for either storage or comparison.</p><h2 id="update_meta/2-examples" class="section-heading">
+  <a href="#update_meta/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="n">quoted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">quote</span><span class="w"> </span><span class="ss">line</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">sample</span><span class="p" data-group-id="5351460745-1">(</span><span class="p" data-group-id="5351460745-1">)</span><span class="w">
+</span><span class="p" data-group-id="5351460745-2">{</span><span class="ss">:sample</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5351460745-3">[</span><span class="ss">line</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="5351460745-3">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5351460745-4">[</span><span class="p" data-group-id="5351460745-4">]</span><span class="p" data-group-id="5351460745-2">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">update_meta</span><span class="p" data-group-id="5351460745-5">(</span><span class="n">quoted</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">Keyword</span><span class="o">.</span><span class="n">delete</span><span class="p" data-group-id="5351460745-6">(</span><span class="ni">&amp;1</span><span class="p">,</span><span class="w"> </span><span class="ss">:line</span><span class="p" data-group-id="5351460745-6">)</span><span class="p" data-group-id="5351460745-5">)</span><span class="w">
+</span><span class="p" data-group-id="5351460745-7">{</span><span class="ss">:sample</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5351460745-8">[</span><span class="p" data-group-id="5351460745-8">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5351460745-9">[</span><span class="p" data-group-id="5351460745-9">]</span><span class="p" data-group-id="5351460745-7">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="validate/1">
+  <div class="detail-header">
+    <a href="#validate/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">validate(expr)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L614" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>validate(<a href="typespecs.html#built-in-types">term</a>()) :: :ok | {:error, <a href="typespecs.html#built-in-types">term</a>()}</pre>
+      </div>
+
+<p>Validates the given expressions are valid quoted expressions.</p><p>Checks the <a href="#t:t/0"><code class="inline">Macro.t/0</code></a> for the specification of a valid
+quoted expression.</p><p>It returns <code class="inline">:ok</code> if the expression is valid. Otherwise it returns a tuple in the form of
+<code class="inline">{:error, remainder}</code> where <code class="inline">remainder</code> is the invalid part of the quoted expression.</p><h2 id="validate/1-examples" class="section-heading">
+  <a href="#validate/1-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">validate</span><span class="p" data-group-id="0221332699-1">(</span><span class="p" data-group-id="0221332699-2">{</span><span class="ss">:two_element</span><span class="p">,</span><span class="w"> </span><span class="ss">:tuple</span><span class="p" data-group-id="0221332699-2">}</span><span class="p" data-group-id="0221332699-1">)</span><span class="w">
+</span><span class="ss">:ok</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">validate</span><span class="p" data-group-id="0221332699-3">(</span><span class="p" data-group-id="0221332699-4">{</span><span class="ss">:three</span><span class="p">,</span><span class="w"> </span><span class="ss">:element</span><span class="p">,</span><span class="w"> </span><span class="ss">:tuple</span><span class="p" data-group-id="0221332699-4">}</span><span class="p" data-group-id="0221332699-3">)</span><span class="w">
+</span><span class="p" data-group-id="0221332699-5">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0221332699-6">{</span><span class="ss">:three</span><span class="p">,</span><span class="w"> </span><span class="ss">:element</span><span class="p">,</span><span class="w"> </span><span class="ss">:tuple</span><span class="p" data-group-id="0221332699-6">}</span><span class="p" data-group-id="0221332699-5">}</span><span class="w">
+
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">validate</span><span class="p" data-group-id="0221332699-7">(</span><span class="p" data-group-id="0221332699-8">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p" data-group-id="0221332699-8">]</span><span class="p" data-group-id="0221332699-7">)</span><span class="w">
+</span><span class="ss">:ok</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">validate</span><span class="p" data-group-id="0221332699-9">(</span><span class="p" data-group-id="0221332699-10">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0221332699-11">{</span><span class="mi">4</span><span class="p" data-group-id="0221332699-11">}</span><span class="p" data-group-id="0221332699-10">]</span><span class="p" data-group-id="0221332699-9">)</span><span class="w">
+</span><span class="p" data-group-id="0221332699-12">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0221332699-13">{</span><span class="mi">4</span><span class="p" data-group-id="0221332699-13">}</span><span class="p" data-group-id="0221332699-12">}</span></code></pre>  </section>
+</section>
+<section class="detail" id="var/2">
+  <div class="detail-header">
+    <a href="#var/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">var(var, context)</h1>
+      <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/elixir/lib/macro.ex#L381" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+  </div>
+
+  <section class="docstring">
+      <h2>Specs</h2>
+      <div class="specs">
+          <pre>var(var, context) :: {var, [], context} when var: <a href="typespecs.html#basic-types">atom</a>(), context: <a href="typespecs.html#basic-types">atom</a>()</pre>
+      </div>
+
+<p>Generates an AST node representing the variable given
+by the atoms <code class="inline">var</code> and <code class="inline">context</code>.</p><h2 id="var/2-examples" class="section-heading">
+  <a href="#var/2-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<p>In order to build a variable, a context is expected.
+Most of the times, in order to preserve hygiene, the
+context must be <code class="inline">__MODULE__/0</code>:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">var</span><span class="p" data-group-id="4859614914-1">(</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="4859614914-1">)</span><span class="w">
+</span><span class="p" data-group-id="4859614914-2">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4859614914-3">[</span><span class="p" data-group-id="4859614914-3">]</span><span class="p">,</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p" data-group-id="4859614914-2">}</span></code></pre><p>However, if there is a need to access the user variable,
+nil can be given:</p><pre><code class="nohighlight makeup elixir"><span class="gp unselectable">iex&gt; </span><span class="nc">Macro</span><span class="o">.</span><span class="n">var</span><span class="p" data-group-id="2302280407-1">(</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="no">nil</span><span class="p" data-group-id="2302280407-1">)</span><span class="w">
+</span><span class="p" data-group-id="2302280407-2">{</span><span class="ss">:foo</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2302280407-3">[</span><span class="p" data-group-id="2302280407-3">]</span><span class="p">,</span><span class="w"> </span><span class="no">nil</span><span class="p" data-group-id="2302280407-2">}</span></code></pre>  </section>
+</section>
+          </div>
+        </section>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.22.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  </body>
+</html>
