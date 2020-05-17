@@ -5,11 +5,11 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.22.0">
-    <meta name="project" content="Mix v1.10.3">
-    <title>mix compile.elixir — Mix v1.10.3</title>
+    <meta name="project" content="Mix v1.11.0-dev">
+    <title>mix compile.elixir — Mix v1.11.0-dev</title>
     <link rel="stylesheet" href="dist/elixir-e589b8fad3dab6230c65.css" />
-      <link rel="canonical" href="https://hexdocs.pm/mix/v1.10/ /Mix.Tasks.Compile.Elixir.html" />
-    <script src="dist/sidebar_items-7d3a94bb0f.js"></script>
+      <link rel="canonical" href="https://hexdocs.pm/mix/master/ /Mix.Tasks.Compile.Elixir.html" />
+    <script src="dist/sidebar_items-8dee6f3778.js"></script>
       <script src="docs_config.js"></script>
     <script async src="dist/app-5c0c23dfec2d63ae33a2.js"></script>
   </head>
@@ -44,7 +44,7 @@
       <a href="https://elixir-lang.org/docs.html" class="sidebar-projectName">
 Mix      </a>
       <h2 class="sidebar-projectVersion">
-        v1.10.3
+        v1.11.0-dev
       </h2>
     </div>
   </div>
@@ -65,8 +65,8 @@ Mix      </a>
     <div id="content" class="content-inner">
 
       <h1>
-        <small class="app-vsn">Mix v1.10.3</small>
-mix compile.elixir          <a href="https://github.com/elixir-lang/elixir/blob/a9ad1f1b2a51c44b17a47e3cd9bafa1f7fc61197/lib/mix/lib/mix/tasks/compile.elixir.ex#L1" title="View Source" class="view-source" rel="help">
+        <small class="app-vsn">Mix v1.11.0-dev</small>
+mix compile.elixir          <a href="https://github.com/elixir-lang/elixir/blob/479b2890ce95fdc46bc4a34a8a7246547e2fa9e1/lib/mix/lib/mix/tasks/compile.elixir.ex#L1" title="View Source" class="view-source" rel="help">
             <span class="icon-code" aria-hidden="true"></span>
             <span class="sr-only">View Source</span>
           </a>
@@ -78,7 +78,30 @@ mix compile.elixir          <a href="https://github.com/elixir-lang/elixir/blob/
 and their dependencies. This means if <code class="inline">lib/a.ex</code> is invoking
 a function defined over <code class="inline">lib/b.ex</code>, whenever <code class="inline">lib/b.ex</code> changes,
 <code class="inline">lib/a.ex</code> is also recompiled.</p><p>Note it is important to recompile a file's dependencies as
-there are often compile time dependencies between them.</p><h2 id="module-command-line-options" class="section-heading">
+there are often compile time dependencies between them.</p><h2 id="module-__mix_recompile__-0" class="section-heading">
+  <a href="#module-__mix_recompile__-0" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  <code class="inline">__mix_recompile__?/0</code>
+</h2>
+<p>A module may export a <code class="inline">__mix_recompile__?/0</code> function that can
+cause the module to be recompiled using custom rules. For example,
+<code class="inline">@external_resource</code> already adds a compile-time dependency on an
+external file, however to depend on a <em>dynamic</em> list of files we
+can do:</p><pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyModule</span><span class="w"> </span><span class="k" data-group-id="3986947169-1">do</span><span class="w">
+  </span><span class="n">paths</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Path</span><span class="o">.</span><span class="n">wildcard</span><span class="p" data-group-id="3986947169-2">(</span><span class="s">&quot;*.txt&quot;</span><span class="p" data-group-id="3986947169-2">)</span><span class="w">
+  </span><span class="n">paths_hash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:erlang</span><span class="o">.</span><span class="n">md5</span><span class="p" data-group-id="3986947169-3">(</span><span class="n">paths</span><span class="p" data-group-id="3986947169-3">)</span><span class="w">
+
+  </span><span class="k">for</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">paths</span><span class="w"> </span><span class="k" data-group-id="3986947169-4">do</span><span class="w">
+    </span><span class="na">@external_resource</span><span class="w"> </span><span class="n">path</span><span class="w">
+  </span><span class="k" data-group-id="3986947169-4">end</span><span class="w">
+
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">__mix_recompile__?</span><span class="p" data-group-id="3986947169-5">(</span><span class="p" data-group-id="3986947169-5">)</span><span class="w"> </span><span class="k" data-group-id="3986947169-6">do</span><span class="w">
+    </span><span class="nc">Path</span><span class="o">.</span><span class="n">wildcard</span><span class="p" data-group-id="3986947169-7">(</span><span class="s">&quot;*.txt&quot;</span><span class="p" data-group-id="3986947169-7">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="ss">:erlang</span><span class="o">.</span><span class="n">md5</span><span class="p" data-group-id="3986947169-8">(</span><span class="p" data-group-id="3986947169-8">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">unquote</span><span class="p" data-group-id="3986947169-9">(</span><span class="n">paths_hash</span><span class="p" data-group-id="3986947169-9">)</span><span class="w">
+  </span><span class="k" data-group-id="3986947169-6">end</span><span class="w">
+</span><span class="k" data-group-id="3986947169-1">end</span></code></pre><p>Compiler calls <code class="inline">__mix_recompile__?/0</code> for every module being
+compiled (or previously compiled) and thus it is very important
+to do there as little work as possible to not slow down the
+compilation.</p><p>If module has <code class="inline">@compile {:autoload, false}</code>, <code class="inline">__mix_recompile__?/0</code> will
+not be used.</p><h2 id="module-command-line-options" class="section-heading">
   <a href="#module-command-line-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   Command line options
 </h2>
@@ -92,7 +115,9 @@ return a non-zero exit code</li><li><code class="inline">--long-compilation-thre
 Defaults to <code class="inline">[&quot;lib&quot;]</code>.</p></li><li><p><code class="inline">:elixirc_options</code> - compilation options that apply to Elixir's compiler.
 See <a href="https://hexdocs.pm/elixir/Code.html#put_compiler_option/2"><code class="inline">Code.put_compiler_option/2</code></a> for a complete list of options. These
 options are often overridable from the command line using the switches
-above.</p></li></ul>        </section>
+above.</p></li><li><p><code class="inline">[xref: [exclude: ...]]</code> - a list of <code class="inline">module</code> or <code class="inline">{module, function, arity}</code>
+that should not be warned on in case on undefined modules or undefined
+application warnings.</p></li></ul>        </section>
 
 
       <footer class="footer">
