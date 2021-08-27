@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>sys — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+sys <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module contains functions for sending system messages used by programs, and messages used for debugging purposes.</p><p>Functions used for implementation of processes are also expected to understand system messages, such as debug messages and code change. These functions must be used to implement the use of system messages for a process; either directly, or through standard behaviors, such as <a href="gen_server.html"><code>gen_server</code></a>.</p><p>The default time-out is 5000 ms, unless otherwise specified. <code>timeout</code> defines the time to wait for the process to respond to a request. If the process does not respond, the function evaluates <code>exit({timeout, {M, F, A}})</code>.</p><a id="dbg_opt"></a><p>The functions make references to a debug structure. The debug structure is a list of <code>dbg_opt()</code>, which is an internal data type used by function <a href="sys.html#handle_system_msg/6"><code>handle_system_msg/6</code></a>. No debugging is performed if it is an empty list.</p><h2 id="module-system-messages" class="section-heading">
+  <a href="#module-system-messages" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  System Messages
+</h2>
+<p>Processes that are not implemented as one of the standard behaviors must still understand system messages. The following three messages must be understood:</p><ul><li><p>Plain system messages. These are received as <code>{system, From, Msg}</code>. The content and meaning of this message are not interpreted by the receiving process module. When a system message is received, function <a href="sys.html#handle_system_msg/6"><code>handle_system_msg/6</code></a> is called to handle the request.</p></li><li><p>Shutdown messages. If the process traps exits, it must be able to handle a shutdown request from its parent, the supervisor. The message <code>{'EXIT', Parent, Reason}</code> from the parent is an order to terminate. The process must terminate when this message is received, normally with the same <code>Reason</code> as <code>Parent</code>.</p></li><li><p>If the modules used to implement the process change dynamically during runtime, the process must understand one more message. An example is the <a href="gen_event.html"><code>gen_event</code></a> processes. The message is <code>{_Label, {From, Ref}, get_modules}</code>. The reply to this message is <code>From ! {Ref, Modules}</code>, where <code>Modules</code> is a list of the currently active modules in the process.</p><p>This message is used by the release handler to find which processes that execute a certain module. The process can later be suspended and ordered to perform a code change for one of its modules.</p></li></ul><h2 id="module-system-events" class="section-heading">
+  <a href="#module-system-events" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  System Events
+</h2>
+<p>When debugging a process with the functions of this module, the process generates <em>system_events</em>, which are then treated in the debug function. For example, <code>trace</code> formats the system events to the terminal.</p><p>Four predefined system events are used when a process receives or sends a message. The process can also define its own system events. It is always up to the process itself to format these events.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dbg_fun/0">-type dbg_fun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dbg_opt/0">-type dbg_opt() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>See the introduction of this manual page.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:debug_option/0">-type debug_option() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:format_fun/0">-type format_fun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:name/0">-type name() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:system_event/0">-type system_event() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><dl><dt><code>{in,Msg}</code></dt><dd><p>Is produced by <code>gen_server</code> and <code>gen_event</code> when the message <code>Msg</code> arrives.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_code/4">change_code/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Tells the process to change code. The process must be suspended to handle this message. Argument <code>Extra</code> is reserved for each process to use as its own. Function <code>Module:system_code_change/4</code> is called. <code>OldVsn</code> is the old version of the <code>Module</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_code/5">change_code/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#debug_options/1">debug_options/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used by a process that initiates a debug structure from a list of options. The values of argument <code>Opt</code> are the same as for the corresponding functions.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_debug/3">get_debug/3</a>
+
+      <span class="deprecated" title="sys:get_debug/3 is deprecated; incorrectly documented and only for internal use. Can often be replaced with sys:get_log/1">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><div class="warning"><p><code>get_debug/3</code> is deprecated since it returns data of an internal type only useful for debugging.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_log/1">get_log/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the logged system events in the debug structure, that is the last argument to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_state/1">get_state/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the state of the process.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_state/2">get_state/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_status/1">get_status/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the status of the process.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_status/2">get_status/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_debug/4">handle_debug/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function is called by a process when it generates a system event. <code>FormFunc</code> is a formatting function, called as <code>FormFunc(Device, Event, Extra)</code> to print the events, which is necessary if tracing is activated. <code>Extra</code> is any extra information that the process needs in the format function, for example, the process name.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#handle_system_msg/6">handle_system_msg/6</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function is used by a process module to take care of system messages. The process receives a <code>{system, From, Msg}</code> message and passes <code>Msg</code> and <code>From</code> to this function.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#install/2">install/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enables installation of alternative debug functions. An example of such a function is a trigger, a function that waits for some special event and performs some action when the event is generated. For example, turning on low-level tracing.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#install/3">install/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log/2">log/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Turns the logging of system events on or off. If on, a maximum of <code>N</code> events are kept in the debug structure (default is 10).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log/3">log/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log_to_file/2">log_to_file/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enables or disables the logging of all system events in text format to the file. The events are formatted with a function that is defined by the process that generated the event (with a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>). The file is opened with encoding UTF-8.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log_to_file/3">log_to_file/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#no_debug/1">no_debug/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Turns off all debugging for the process. This includes functions that are installed explicitly with function <a href="sys.html#install/2"><code>install/2,3</code></a>, for example, triggers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#no_debug/2">no_debug/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#print_log/1">print_log/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Prints the logged system events in the debug structure, using <code>FormFunc</code> as defined when the event was generated by a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove/2">remove/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes an installed debug function from the process. <code>Func</code> or <code>FuncId</code> must be the same as previously installed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove/3">remove/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace_state/2">replace_state/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Replaces the state of the process, and returns the new state.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace_state/3">replace_state/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resume/1">resume/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Resumes a suspended process.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resume/2">resume/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#statistics/2">statistics/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enables or disables the collection of statistics. If <code>Flag</code> is <code>get</code>, the statistical collection is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#statistics/3">statistics/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#suspend/1">suspend/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Suspends the process. When the process is suspended, it only responds to other system messages, but not other messages.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#suspend/2">suspend/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#terminate/2">terminate/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Orders the process to terminate with the specified <code>Reason</code>. The termination is done asynchronously, so it is not guaranteed that the process is terminated when the function returns.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#terminate/3">terminate/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/2">trace/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Prints all system events on <code>standard_io</code>. The events are formatted with a function that is defined by the process that generated the event (with a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/3">trace/3</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:dbg_fun/0">
+
+  <div class="detail-header">
+    <a href="#t:dbg_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dbg_fun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dbg_fun() ::
+    fun((FuncState :: _, Event :: <a href="#t:system_event/0">system_event</a>(), ProcState :: _) -> done | (NewFuncState :: _)).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:dbg_opt/0">
+
+  <div class="detail-header">
+    <a href="#t:dbg_opt/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type dbg_opt() :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dbg_opt()</pre>
+
+      </div>
+
+<p>See the introduction of this manual page.</p>
+  </section>
+</section>
+<section class="detail" id="t:debug_option/0">
+
+  <div class="detail-header">
+    <a href="#t:debug_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type debug_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>debug_option() ::
+    trace | log |
+    {log, N :: pos_integer()} |
+    statistics |
+    {log_to_file, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()} |
+    {install,
+     {Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(), FuncState :: term()} |
+     {FuncId :: term(), Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(), FuncState :: term()}}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:format_fun/0">
+
+  <div class="detail-header">
+    <a href="#t:format_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type format_fun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_fun() ::
+    fun((Device :: <a href="io.html#t:device/0">io:device</a>() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:io_device/0">file:io_device</a>(), Event :: <a href="#t:system_event/0">system_event</a>(), Extra :: term()) ->
+            any()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:name/0">
+
+  <div class="detail-header">
+    <a href="#t:name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>name() :: pid() | atom() | {global, term()} | {via, module(), term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:system_event/0">
+
+  <div class="detail-header">
+    <a href="#t:system_event/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type system_event() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>system_event() ::
+    {in, Msg :: _} |
+    {in, Msg :: _, State :: _} |
+    {out, Msg :: _, To :: _} |
+    {out, Msg :: _, To :: _, State :: _} |
+    {noreply, State :: _} |
+    {continue, Continuation :: _} |
+    {code_change, Event :: _, State :: _} |
+    {postpone, Event :: _, State :: _, NextState :: _} |
+    {consume, Event :: _, State :: _, NextState :: _} |
+    {start_timer, Action :: _, State :: _} |
+    {insert_timeout, Event :: _, State :: _} |
+    {enter, State :: _} |
+    {terminate, Reason :: _, State :: _} |
+    term().</pre>
+
+      </div>
+
+<dl><dt><code>{in,Msg}</code></dt><dd><p>Is produced by <code>gen_server</code> and <code>gen_event</code> when the message <code>Msg</code> arrives.</p></dd><dt><code>{in,Msg,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the message <code>Msg</code> arrives in state <code>State</code>.</p><p>For <code>gen_statem</code> the <code>Msg</code> term is an <code>{EventType,EventContent}</code> tuple.</p></dd><dt><code>{out,Msg,To}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the reply <code>Msg</code> is sent back to <code>To</code> by returning a <code>{reply,To,Msg}</code> action from the callback module.</p><p><code>To</code> is of the same type as the first argument to <code>gen_statem:reply/2</code>.</p></dd><dt><code>{out,Msg,To,State}</code></dt><dd><p>Is produced by <code>gen_server</code> when the reply <code>Msg</code> is sent back to <code>To</code> by returning a <code>{reply,...}</code> tuple from the callback module.</p><p><code>To</code> is of the same type as the first argument to <code>gen_server:reply/2</code>.</p><p><code>State</code> is the new server state.</p></dd><dt><code>{noreply,State}</code></dt><dd><p>Is produced by <code>gen_server</code> when a <code>{noreply,...}</code> tuple is returned from the callback module.</p><p><code>State</code> is the new server state.</p></dd><dt><code>{continue,Continuation}</code></dt><dd><p>Is produced by <code>gen_server</code> when a <code>{continue,Continuation}</code> tuple is returned from the callback module.</p></dd><dt><code>{code_change,Event,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the message <code>Event</code> arrives in state <code>State</code> as the first event after a code change.</p><p><code>Event</code> is an <code>{EventType,EventContent}</code> tuple.</p></dd><dt><code>{postpone,Event,State,NextState}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the message <code>Event</code> is postponed in state <code>State</code>. <code>NextState</code> is the new state.</p><p><code>Event</code> is an <code>{EventType,EventContent}</code> tuple.</p></dd><dt><code>{consume,Event,State,NextState}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the message <code>Event</code> is consumed in state <code>State</code>. <code>NextState</code> is the new state.</p><p><code>Event</code> is an <code>{EventType,EventContent}</code> tuple.</p></dd><dt><code>{start_timer,Action,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the action <code>Action</code> starts a timer in state <code>State</code>.</p></dd><dt><code>{insert_timeout,Event,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when a timeout zero action inserts event <code>Event</code> in state <code>State</code>.</p><p><code>Event</code> is an <code>{EventType,EventContent}</code> tuple.</p></dd><dt><code>{enter,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when the first state <code>State</code> is entered.</p></dd><dt><code>{terminate,Reason,State}</code></dt><dd><p>Is produced by <code>gen_statem</code> when it terminates with reason <code>Reason</code> in state <code>State</code>.</p></dd></dl>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="change_code/4">
+
+  <div class="detail-header">
+    <a href="#change_code/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_code/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>change_code(Name, Module, OldVsn, Extra) -> ok | {error, Reason}
+               when
+                   Name :: <a href="#t:name/0">name</a>(),
+                   Module :: module(),
+                   OldVsn :: undefined | term(),
+                   Extra :: term(),
+                   Reason :: term().</pre>
+
+      </div>
+
+<p>Tells the process to change code. The process must be suspended to handle this message. Argument <code>Extra</code> is reserved for each process to use as its own. Function <code>Module:system_code_change/4</code> is called. <code>OldVsn</code> is the old version of the <code>Module</code>.</p>
+  </section>
+</section>
+<section class="detail" id="change_code/5">
+
+  <div class="detail-header">
+    <a href="#change_code/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_code/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>change_code(Name, Module, OldVsn, Extra, Timeout) -> ok | {error, Reason}
+               when
+                   Name :: <a href="#t:name/0">name</a>(),
+                   Module :: module(),
+                   OldVsn :: undefined | term(),
+                   Extra :: term(),
+                   Timeout :: timeout(),
+                   Reason :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="debug_options/1">
+
+  <div class="detail-header">
+    <a href="#debug_options/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">debug_options/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>debug_options([Opt :: <a href="#t:debug_option/0">debug_option</a>()]) -> [<a href="#t:dbg_opt/0">dbg_opt</a>()].</pre>
+
+      </div>
+
+<p>Can be used by a process that initiates a debug structure from a list of options. The values of argument <code>Opt</code> are the same as for the corresponding functions.</p>
+  </section>
+</section>
+<section class="detail" id="get_debug/3">
+
+  <div class="detail-header">
+    <a href="#get_debug/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_debug/3</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. sys:get_debug/3 is deprecated; incorrectly documented and only for internal use. Can often be replaced with sys:get_log/1.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_debug(Item, Debug, Default) -> term()
+             when Item :: log | statistics, Debug :: [<a href="#t:dbg_opt/0">dbg_opt</a>()], Default :: term().</pre>
+
+      </div>
+
+<div class="warning"><p><code>get_debug/3</code> is deprecated since it returns data of an internal type only useful for debugging.</p></div><p>Gets the data associated with a debug option. <code>Default</code> is returned if <code>Item</code> is not found. Can be used by the process to retrieve debug data for printing before it terminates.</p>
+  </section>
+</section>
+<section class="detail" id="get_log/1">
+
+  <div class="detail-header">
+    <a href="#get_log/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_log/1</h1>
+
+
+      <span class="note">(since OTP-22.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_log(Debug) -> [<a href="#t:system_event/0">system_event</a>()] when Debug :: [<a href="#t:dbg_opt/0">dbg_opt</a>()].</pre>
+
+      </div>
+
+<p>Returns the logged system events in the debug structure, that is the last argument to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_state/1">
+
+  <div class="detail-header">
+    <a href="#get_state/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_state/1</h1>
+
+
+      <span class="note">(since OTP R16B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_state(Name) -> State when Name :: <a href="#t:name/0">name</a>(), State :: term().</pre>
+
+      </div>
+
+<p>Gets the state of the process.</p><div class="note"><p>These functions are intended only to help with debugging. They are provided for convenience, allowing developers to avoid having to create their own state extraction functions and also avoid having to interactively extract the state from the return values of <a href="sys.html#get_status/1"><code>get_status/1</code></a> or <a href="sys.html#get_status/2"><code>get_status/2</code></a> while debugging.</p></div><p>The value of <code>State</code> varies for different types of processes, as follows:</p><ul><li><p>For a <a href="gen_server.html"><code>gen_server</code></a> process, the returned <code>State</code> is the state of the callback module.</p></li><li><p>For a <a href="gen_statem.html"><code>gen_statem</code></a> process, <code>State</code> is the tuple <code>{CurrentState,CurrentData}</code>.</p></li><li><p>For a <a href="gen_event.html"><code>gen_event</code></a> process, <code>State</code> is a list of tuples, where each tuple corresponds to an event handler registered in the process and contains <code>{Module, Id, HandlerState}</code>, as follows:</p><dl><dt><code>Module</code></dt><dd><p>The module name of the event handler.</p></dd><dt><code>Id</code></dt><dd><p>The ID of the handler (which is <code>false</code> if it was registered without an ID).</p></dd><dt><code>HandlerState</code></dt><dd><p>The state of the handler.</p></dd></dl></li></ul><p>If the callback module exports a function <code>system_get_state/1</code>, it is called in the target process to get its state. Its argument is the same as the <code>Misc</code> value returned by <a href="sys.html#get_status/1"><code>get_status/1,2</code></a>, and function <a href="sys.html#c:system_get_state/1"><code>Module:system_get_state/1</code></a> is expected to extract the state of the callback module from it. Function <code>system_get_state/1</code> must return <code>{ok, State}</code>, where <code>State</code> is the state of the callback module.</p><p>If the callback module does not export a <code>system_get_state/1</code> function, <code>get_state/1,2</code> assumes that the <code>Misc</code> value is the state of the callback module and returns it directly instead.</p><p>If the callback module's <code>system_get_state/1</code> function crashes or throws an exception, the caller exits with error <code>{callback_failed, {Module, system_get_state}, {Class, Reason}}</code>, where <code>Module</code> is the name of the callback module and <code>Class</code> and <code>Reason</code> indicate details of the exception.</p><p>Function <code>system_get_state/1</code> is primarily useful for user-defined behaviors and modules that implement OTP <a href="sys.html#content#special_process">special processes</a>. The <code>gen_server</code>, <code>gen_statem</code>, and <code>gen_event</code> OTP behavior modules export this function, so callback modules for those behaviors need not to supply their own.</p><p>For more information about a process, including its state, see <a href="sys.html#get_status/1"><code>get_status/1</code></a> and <a href="sys.html#get_status/2"><code>get_status/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_state/2">
+
+  <div class="detail-header">
+    <a href="#get_state/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_state/2</h1>
+
+
+      <span class="note">(since OTP R16B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_state(Name, Timeout) -> State when Name :: <a href="#t:name/0">name</a>(), Timeout :: timeout(), State :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="get_status/1">
+
+  <div class="detail-header">
+    <a href="#get_status/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_status/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_status(Name) -> Status
+              when
+                  Name :: <a href="#t:name/0">name</a>(),
+                  Status :: {status, Pid :: pid(), {module, Module :: module()}, [SItem]},
+                  SItem ::
+                      (PDict :: [{Key :: term(), Value :: term()}]) |
+                      (SysState :: running | suspended) |
+                      (Parent :: pid()) |
+                      (Dbg :: [<a href="#t:dbg_opt/0">dbg_opt</a>()]) |
+                      (Misc :: term()).</pre>
+
+      </div>
+
+<p>Gets the status of the process.</p><p>The value of <code>Misc</code> varies for different types of processes, for example:</p><ul><li><p>A <a href="gen_server.html"><code>gen_server</code></a> process returns the state of the callback module.</p></li><li><p>A <a href="gen_statem.html"><code>gen_statem</code></a> process returns information, such as its current state name and state data.</p></li><li><p>A <a href="gen_event.html"><code>gen_event</code></a> process returns information about each of its registered handlers.</p></li></ul><p>Callback modules for <code>gen_server</code>, <code>gen_statem</code>, and <code>gen_event</code> can also change the value of <code>Misc</code> by exporting a function <code>format_status/2</code>, which contributes module-specific information. For details, see <a href="gen_server.html#c:format_status/2"><code>gen_server:format_status/2</code></a>, <a href="gen_statem.html#c:format_status/2"><code>gen_statem:format_status/2</code></a>, and <a href="gen_event.html#c:format_status/2"><code>gen_event:format_status/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_status/2">
+
+  <div class="detail-header">
+    <a href="#get_status/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_status/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_status(Name, Timeout) -> Status
+              when
+                  Name :: <a href="#t:name/0">name</a>(),
+                  Timeout :: timeout(),
+                  Status :: {status, Pid :: pid(), {module, Module :: module()}, [SItem]},
+                  SItem ::
+                      (PDict :: [{Key :: term(), Value :: term()}]) |
+                      (SysState :: running | suspended) |
+                      (Parent :: pid()) |
+                      (Dbg :: [<a href="#t:dbg_opt/0">dbg_opt</a>()]) |
+                      (Misc :: term()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="handle_debug/4">
+
+  <div class="detail-header">
+    <a href="#handle_debug/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_debug/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_debug(Debug, FormFunc, Extra, Event) -> [<a href="#t:dbg_opt/0">dbg_opt</a>()]
+                when
+                    Debug :: [<a href="#t:dbg_opt/0">dbg_opt</a>()],
+                    FormFunc :: <a href="#t:format_fun/0">format_fun</a>(),
+                    Extra :: term(),
+                    Event :: <a href="#t:system_event/0">system_event</a>().</pre>
+
+      </div>
+
+<p>This function is called by a process when it generates a system event. <code>FormFunc</code> is a formatting function, called as <code>FormFunc(Device, Event, Extra)</code> to print the events, which is necessary if tracing is activated. <code>Extra</code> is any extra information that the process needs in the format function, for example, the process name.</p>
+  </section>
+</section>
+<section class="detail" id="handle_system_msg/6">
+
+  <div class="detail-header">
+    <a href="#handle_system_msg/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">handle_system_msg/6</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_system_msg(Msg, From, Parent, Module, Debug, Misc) -> no_return()
+                     when
+                         Msg :: term(),
+                         From :: {pid(), Tag :: _},
+                         Parent :: pid(),
+                         Module :: module(),
+                         Debug :: [<a href="#t:dbg_opt/0">dbg_opt</a>()],
+                         Misc :: term().</pre>
+
+      </div>
+
+<p>This function is used by a process module to take care of system messages. The process receives a <code>{system, From, Msg}</code> message and passes <code>Msg</code> and <code>From</code> to this function.</p><p>This function <em>never</em> returns. It calls either of the following functions:</p><ul><li><p><code>Module:system_continue(Parent, NDebug, Misc)</code>, where the process continues the execution.</p></li><li><p><code>Module:system_terminate(Reason, Parent, Debug, Misc)</code>, if the process is to terminate.</p></li></ul><p><code>Module</code> must export the following:</p><ul><li><code>system_continue/3</code></li><li><code>system_terminate/4</code></li><li><code>system_code_change/4</code></li><li><code>system_get_state/1</code></li><li><code>system_replace_state/2</code></li></ul><p>Argument <code>Misc</code> can be used to save internal data in a process, for example, its state. It is sent to <code>Module:system_continue/3</code> or <code>Module:system_terminate/4</code>.</p>
+  </section>
+</section>
+<section class="detail" id="install/2">
+
+  <div class="detail-header">
+    <a href="#install/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">install/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>install(Name, FuncSpec) -> ok
+           when
+               Name :: <a href="#t:name/0">name</a>(),
+               FuncSpec :: {Func, FuncState} | {FuncId, Func, FuncState},
+               FuncId :: term(),
+               Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(),
+               FuncState :: term().</pre>
+
+      </div>
+
+<p>Enables installation of alternative debug functions. An example of such a function is a trigger, a function that waits for some special event and performs some action when the event is generated. For example, turning on low-level tracing.</p><p><code>Func</code> is called whenever a system event is generated. This function is to return <code>done</code>, or a new <code>Func</code> state. In the first case, the function is removed. It is also removed if the function fails. If one debug function should be installed more times, a unique <code>FuncId</code> must be specified for each installation.</p>
+  </section>
+</section>
+<section class="detail" id="install/3">
+
+  <div class="detail-header">
+    <a href="#install/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">install/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>install(Name, FuncSpec, Timeout) -> ok
+           when
+               Name :: <a href="#t:name/0">name</a>(),
+               FuncSpec :: {Func, FuncState} | {FuncId, Func, FuncState},
+               FuncId :: term(),
+               Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(),
+               FuncState :: term(),
+               Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="log/2">
+
+  <div class="detail-header">
+    <a href="#log/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log(Name, Flag) -> ok | {ok, [<a href="#t:system_event/0">system_event</a>()]}
+       when Name :: <a href="#t:name/0">name</a>(), Flag :: true | {true, N :: pos_integer()} | false | get | print.</pre>
+
+      </div>
+
+<p>Turns the logging of system events on or off. If on, a maximum of <code>N</code> events are kept in the debug structure (default is 10).</p><p>If <code>Flag</code> is <code>get</code>, a list of all logged events is returned.</p><p>If <code>Flag</code> is <code>print</code>, the logged events are printed to <code>standard_io</code>.</p><p>The events are formatted with a function that is defined by the process that generated the event (with a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code>)</a>.</p>
+  </section>
+</section>
+<section class="detail" id="log/3">
+
+  <div class="detail-header">
+    <a href="#log/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log(Name, Flag, Timeout) -> ok | {ok, [<a href="#t:system_event/0">system_event</a>()]}
+       when
+           Name :: <a href="#t:name/0">name</a>(),
+           Flag :: true | {true, N :: pos_integer()} | false | get | print,
+           Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="log_to_file/2">
+
+  <div class="detail-header">
+    <a href="#log_to_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log_to_file/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log_to_file(Name, Flag) -> ok | {error, open_file}
+               when Name :: <a href="#t:name/0">name</a>(), Flag :: (FileName :: string()) | false.</pre>
+
+      </div>
+
+<p>Enables or disables the logging of all system events in text format to the file. The events are formatted with a function that is defined by the process that generated the event (with a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>). The file is opened with encoding UTF-8.</p>
+  </section>
+</section>
+<section class="detail" id="log_to_file/3">
+
+  <div class="detail-header">
+    <a href="#log_to_file/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log_to_file/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log_to_file(Name, Flag, Timeout) -> ok | {error, open_file}
+               when Name :: <a href="#t:name/0">name</a>(), Flag :: (FileName :: string()) | false, Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="no_debug/1">
+
+  <div class="detail-header">
+    <a href="#no_debug/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">no_debug/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>no_debug(Name) -> ok when Name :: <a href="#t:name/0">name</a>().</pre>
+
+      </div>
+
+<p>Turns off all debugging for the process. This includes functions that are installed explicitly with function <a href="sys.html#install/2"><code>install/2,3</code></a>, for example, triggers.</p>
+  </section>
+</section>
+<section class="detail" id="no_debug/2">
+
+  <div class="detail-header">
+    <a href="#no_debug/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">no_debug/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>no_debug(Name, Timeout) -> ok when Name :: <a href="#t:name/0">name</a>(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="print_log/1">
+
+  <div class="detail-header">
+    <a href="#print_log/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">print_log/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>print_log(Debug) -> ok when Debug :: [<a href="#t:dbg_opt/0">dbg_opt</a>()].</pre>
+
+      </div>
+
+<p>Prints the logged system events in the debug structure, using <code>FormFunc</code> as defined when the event was generated by a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="remove/2">
+
+  <div class="detail-header">
+    <a href="#remove/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove(Name, Func | FuncId) -> ok when Name :: <a href="#t:name/0">name</a>(), Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(), FuncId :: term().</pre>
+
+      </div>
+
+<p>Removes an installed debug function from the process. <code>Func</code> or <code>FuncId</code> must be the same as previously installed.</p>
+  </section>
+</section>
+<section class="detail" id="remove/3">
+
+  <div class="detail-header">
+    <a href="#remove/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove(Name, Func | FuncId, Timeout) -> ok
+          when Name :: <a href="#t:name/0">name</a>(), Func :: <a href="#t:dbg_fun/0">dbg_fun</a>(), FuncId :: term(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="replace_state/2">
+
+  <div class="detail-header">
+    <a href="#replace_state/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace_state/2</h1>
+
+
+      <span class="note">(since OTP R16B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>replace_state(Name, StateFun) -> NewState
+                 when
+                     Name :: <a href="#t:name/0">name</a>(),
+                     StateFun :: fun((State :: term()) -> NewState :: term()),
+                     NewState :: term().</pre>
+
+      </div>
+
+<p>Replaces the state of the process, and returns the new state.</p><div class="note"><p>These functions are intended only to help with debugging, and are not to be called from normal code. They are provided for convenience, allowing developers to avoid having to create their own custom state replacement functions.</p></div><p>Function <code>StateFun</code> provides a new state for the process. Argument <code>State</code> and the <code>NewState</code> return value of <code>StateFun</code> vary for different types of processes as follows:</p><ul><li><p>For a <a href="gen_server.html"><code>gen_server</code></a> process, <code>State</code> is the state of the callback module and <code>NewState</code> is a new instance of that state.</p></li><li><p>For a <a href="gen_statem.html"><code>gen_statem</code></a> process, <code>State</code> is the tuple <code>{CurrentState,CurrentData}</code>, and <code>NewState</code> is a similar tuple, which can contain a new current state, new state data, or both.</p></li><li><p>For a <a href="gen_event.html"><code>gen_event</code></a> process, <code>State</code> is the tuple <code>{Module, Id, HandlerState}</code> as follows:</p><dl><dt><code>Module</code></dt><dd><p>The module name of the event handler.</p></dd><dt><code>Id</code></dt><dd><p>The ID of the handler (which is <code>false</code> if it was registered without an ID).</p></dd><dt><code>HandlerState</code></dt><dd><p>The state of the handler.</p></dd></dl><p><code>NewState</code> is a similar tuple where <code>Module</code> and <code>Id</code> are to have the same values as in <code>State</code>, but the value of <code>HandlerState</code> can be different. Returning a <code>NewState</code>, whose <code>Module</code> or <code>Id</code> values differ from those of <code>State</code>, leaves the state of the event handler unchanged. For a <code>gen_event</code> process, <code>StateFun</code> is called once for each event handler registered in the <code>gen_event</code> process.</p></li></ul><p>If a <code>StateFun</code> function decides not to effect any change in process state, then regardless of process type, it can return its <code>State</code> argument.</p><p>If a <code>StateFun</code> function crashes or throws an exception, the original state of the process is unchanged for <code>gen_server</code>, and <code>gen_statem</code> processes. For <code>gen_event</code> processes, a crashing or failing <code>StateFun</code> function means that only the state of the particular event handler it was working on when it failed or crashed is unchanged; it can still succeed in changing the states of other event handlers registered in the same <code>gen_event</code> process.</p><p>If the callback module exports a <a href="sys.html#c:system_replace_state/2"><code>system_replace_state/2</code></a> function, it is called in the target process to replace its state using <code>StateFun</code>. Its two arguments are <code>StateFun</code> and <code>Misc</code>, where <code>Misc</code> is the same as the <code>Misc</code> value returned by <a href="sys.html#get_status/1"><code>get_status/1,2</code></a>. A <code>system_replace_state/2</code> function is expected to return <code>{ok, NewState, NewMisc}</code>, where <code>NewState</code> is the new state of the callback module, obtained by calling <code>StateFun</code>, and <code>NewMisc</code> is a possibly new value used to replace the original <code>Misc</code> (required as <code>Misc</code> often contains the state of the callback module within it).</p><p>If the callback module does not export a <code>system_replace_state/2</code> function, <a href="sys.html#replace_state/2"><code>replace_state/2,3</code></a> assumes that <code>Misc</code> is the state of the callback module, passes it to <code>StateFun</code> and uses the return value as both the new state and as the new value of <code>Misc</code>.</p><p>If the callback module's function <code>system_replace_state/2</code> crashes or throws an exception, the caller exits with error <code>{callback_failed, {Module, system_replace_state}, {Class, Reason}}</code>, where <code>Module</code> is the name of the callback module and <code>Class</code> and <code>Reason</code> indicate details of the exception. If the callback module does not provide a <code>system_replace_state/2</code> function and <code>StateFun</code> crashes or throws an exception, the caller exits with error <code>{callback_failed, StateFun, {Class, Reason}}</code>.</p><p>Function <code>system_replace_state/2</code> is primarily useful for user-defined behaviors and modules that implement OTP <a href="sys.html#content#special_process">special processes</a>. The OTP behavior modules <code>gen_server</code>, <code>gen_statem</code>, and <code>gen_event</code> export this function, so callback modules for those behaviors need not to supply their own.</p>
+  </section>
+</section>
+<section class="detail" id="replace_state/3">
+
+  <div class="detail-header">
+    <a href="#replace_state/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace_state/3</h1>
+
+
+      <span class="note">(since OTP R16B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>replace_state(Name, StateFun, Timeout) -> NewState
+                 when
+                     Name :: <a href="#t:name/0">name</a>(),
+                     StateFun :: fun((State :: term()) -> NewState :: term()),
+                     Timeout :: timeout(),
+                     NewState :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="resume/1">
+
+  <div class="detail-header">
+    <a href="#resume/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resume/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resume(Name) -> ok when Name :: <a href="#t:name/0">name</a>().</pre>
+
+      </div>
+
+<p>Resumes a suspended process.</p>
+  </section>
+</section>
+<section class="detail" id="resume/2">
+
+  <div class="detail-header">
+    <a href="#resume/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resume/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resume(Name, Timeout) -> ok when Name :: <a href="#t:name/0">name</a>(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="statistics/2">
+
+  <div class="detail-header">
+    <a href="#statistics/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">statistics/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>statistics(Name, Flag) -> ok | {ok, Statistics}
+              when
+                  Name :: <a href="#t:name/0">name</a>(),
+                  Flag :: true | false | get,
+                  Statistics :: [StatisticsTuple] | no_statistics,
+                  StatisticsTuple ::
+                      {start_time, DateTime1} |
+                      {current_time, DateTime2} |
+                      {reductions, non_neg_integer()} |
+                      {messages_in, non_neg_integer()} |
+                      {messages_out, non_neg_integer()},
+                  DateTime1 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:date_time/0">file:date_time</a>(),
+                  DateTime2 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:date_time/0">file:date_time</a>().</pre>
+
+      </div>
+
+<p>Enables or disables the collection of statistics. If <code>Flag</code> is <code>get</code>, the statistical collection is returned.</p>
+  </section>
+</section>
+<section class="detail" id="statistics/3">
+
+  <div class="detail-header">
+    <a href="#statistics/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">statistics/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>statistics(Name, Flag, Timeout) -> ok | {ok, Statistics}
+              when
+                  Name :: <a href="#t:name/0">name</a>(),
+                  Flag :: true | false | get,
+                  Statistics :: [StatisticsTuple] | no_statistics,
+                  StatisticsTuple ::
+                      {start_time, DateTime1} |
+                      {current_time, DateTime2} |
+                      {reductions, non_neg_integer()} |
+                      {messages_in, non_neg_integer()} |
+                      {messages_out, non_neg_integer()},
+                  DateTime1 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:date_time/0">file:date_time</a>(),
+                  DateTime2 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:date_time/0">file:date_time</a>(),
+                  Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="suspend/1">
+
+  <div class="detail-header">
+    <a href="#suspend/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">suspend/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>suspend(Name) -> ok when Name :: <a href="#t:name/0">name</a>().</pre>
+
+      </div>
+
+<p>Suspends the process. When the process is suspended, it only responds to other system messages, but not other messages.</p>
+  </section>
+</section>
+<section class="detail" id="suspend/2">
+
+  <div class="detail-header">
+    <a href="#suspend/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">suspend/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>suspend(Name, Timeout) -> ok when Name :: <a href="#t:name/0">name</a>(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="terminate/2">
+
+  <div class="detail-header">
+    <a href="#terminate/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">terminate/2</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>terminate(Name, Reason) -> ok when Name :: <a href="#t:name/0">name</a>(), Reason :: term().</pre>
+
+      </div>
+
+<p>Orders the process to terminate with the specified <code>Reason</code>. The termination is done asynchronously, so it is not guaranteed that the process is terminated when the function returns.</p>
+  </section>
+</section>
+<section class="detail" id="terminate/3">
+
+  <div class="detail-header">
+    <a href="#terminate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">terminate/3</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>terminate(Name, Reason, Timeout) -> ok when Name :: <a href="#t:name/0">name</a>(), Reason :: term(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="trace/2">
+
+  <div class="detail-header">
+    <a href="#trace/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(Name, Flag) -> ok when Name :: <a href="#t:name/0">name</a>(), Flag :: boolean().</pre>
+
+      </div>
+
+<p>Prints all system events on <code>standard_io</code>. The events are formatted with a function that is defined by the process that generated the event (with a call to <a href="sys.html#handle_debug/4"><code>handle_debug/4</code></a>).</p>
+  </section>
+</section>
+<section class="detail" id="trace/3">
+
+  <div class="detail-header">
+    <a href="#trace/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(Name, Flag, Timeout) -> ok when Name :: <a href="#t:name/0">name</a>(), Flag :: boolean(), Timeout :: timeout().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

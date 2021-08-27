@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="os_mon v2.7">
+
+    <title>os_sup — os_mon v2.7</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-4f08799fed.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+os_mon
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.7
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+os_sup <small class="app-vsn">(os_mon v2.7)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p><code>os_sup</code> is a process providing a message passing service from the operating system to the error logger in the Erlang runtime system. It is part of the OS_Mon application, see os_mon(6). Available for Solaris and Windows.</p><p>Messages received from the operating system results in an user defined callback function being called. This function can do whatever filtering and formatting is necessary and then deploy any type of logging suitable for the user's application.</p><h2 id="module-solaris-operation" class="section-heading">
+  <a href="#module-solaris-operation" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Solaris Operation
+</h2>
+<p>The Solaris (SunOS 5.x) messages are retrieved from the syslog daemon, <code>syslogd</code>.</p><p>Enabling the service includes actions which require root privileges, such as change of ownership and file privileges of an executable binary file, and creating a modified copy of the configuration file for <code>syslogd</code>. When <code>os_sup</code> is terminated, the service must be disabled, meaning the original configuration must be restored. Enabling/disabling can be done either outside or inside <code>os_sup</code>. See <a href="os_sup.html#content#config">Configuration</a> below.</p><div class="warning"><p>This process cannot run in multiple instances on the same hardware. OS_Mon must be configured to start <code>os_sup</code> on one node only if two or more Erlang nodes execute on the same machine.</p></div><p>The format of received events is not defined.</p><h2 id="module-windows-operation" class="section-heading">
+  <a href="#module-windows-operation" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Windows Operation
+</h2>
+<p>The Windows messages are retrieved from the eventlog file.</p><p>The <code>nteventlog</code> module is used to implement <code>os_sup</code>. See <a href="nteventlog.html">nteventlog(3)</a>. Note that the start functions of <code>nteventlog</code> does not need to be used, as in this case the process is started automatically as part of the OS_Mon supervision tree.</p><p>OS messages are formatted as a tuple <code>{Time, Category, Facility, Severity, Message}</code>:</p><dl><dt><code>Time = {MegaSecs, Secs, MicroSecs}</code></dt><dd><p>A time stamp as returned by the BIF <code>now()</code>.</p></dd><dt><code>Category = string()</code></dt><dd><p>Usually one of <code>&quot;System&quot;</code>, <code>&quot;Application&quot;</code> or <code>&quot;Security&quot;</code>. Note that the NT eventlog viewer has another notion of category, which in most cases is totally meaningless and therefore not imported into Erlang. What is called a category here is one of the main three types of events occurring in a normal NT system.</p></dd><dt><code>Facility = string()</code></dt><dd><p>The source of the message, usually the name of the application that generated it. This could be almost any string. When matching messages from certain applications, the version number of the application may have to be accounted for. This is what the NT event viewer calls &quot;source&quot;.</p></dd><dt><code>Severity = string()</code></dt><dd><p>One of <code>&quot;Error&quot;</code>, <code>&quot;Warning&quot;</code>, <code>&quot;Informational&quot;</code>, <code>&quot;Audit_Success&quot;</code>, <code>&quot;Audit_Faulure&quot;</code> or, in case of a currently unknown Windows NT version <code>&quot;Severity_Unknown&quot;</code>.</p></dd><dt><code>Message = string()</code></dt><dd><p>Formatted exactly as it would be in the NT eventlog viewer. Binary data is not imported into Erlang.</p></dd></dl><a id="config"></a><h2 id="module-configuration" class="section-heading">
+  <a href="#module-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Configuration
+</h2>
+<dl><dt><code>os_sup_mfa = {Module, Function, Args}</code></dt><dd><p>The callback function to use. <code>Module</code> and <code>Function</code> are atoms and <code>Args</code> is a list of terms. When an OS message <code>Msg</code> is received, this function is called as <code>apply(Module, Function, [Msg | Args])</code>.</p><p>Default is <code>{os_sup, error_report, [Tag]}</code> which will send the event to the error logger using <a href="https://wojtekmach.pl/otp_docs/kernel/error_logger.html#error_report/2">error_logger:error_report(Tag, Msg)</a>. <code>Tag</code> is the value of <code>os_sup_errortag</code>, see below.</p></dd><dt><code>os_sup_errortag = atom()</code></dt><dd><p>This parameter defines the error report type used when messages are sent to error logger using the default callback function. Default is <code>std_error</code>, which means the events are handled by the standard event handler.</p></dd><dt><code>os_sup_enable = bool()</code></dt><dd><p>Solaris only. Defines if the service should be enabled (and disabled) inside (<code>true</code>) or outside (<code>false</code>) <code>os_sup</code>. For backwards compatibility reasons, the default is <code>true</code>. The recommended value is <code>false</code>, as the Erlang emulator should normally not be run with <code>root</code> privileges, as is required for enabling the service.</p></dd><dt><code>os_sup_own = string()</code></dt><dd><p>Solaris only. Defines the directory which contains the backup copy and the Erlang specific configuration files for <code>syslogd</code>, and a named pipe to receive the messages from <code>syslogd</code>. Default is <code>&quot;/etc&quot;</code>.</p></dd><dt><code>os_sup_syslogconf = string()</code></dt><dd><p>Solaris only. Defines the full name of the configuration file for <code>syslogd</code>. Default is <code>&quot;/etc/syslog.conf&quot;</code>.</p></dd></dl><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See also
+</h2>
+<p><a href="https://wojtekmach.pl/otp_docs/kernel/error_logger.html">error_logger(3)</a>, os_mon(3)</p><p><code>syslogd(1M)</code>, <code>syslog.conf(4)</code> in the Solaris documentation.</p><p></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#disable/0">disable() -&gt; ok | {error, Res}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Dir = Conf = Res = string()</li></ul><p>Disables the <code>os_sup</code> service. Needed on Solaris only.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#disable/2">disable(Dir, Conf) -&gt; ok | {error, Error}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enable/0">enable() -&gt; ok | {error, Res}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Dir = Conf = Res = string()</li></ul><p>Enables the <code>os_sup</code> service. Needed on Solaris only.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enable/2">enable(Dir, Conf) -&gt; ok | {error, Error}</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="disable/0">
+
+  <div class="detail-header">
+    <a href="#disable/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">disable() -&gt; ok | {error, Res}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Dir = Conf = Res = string()</li></ul><p>Disables the <code>os_sup</code> service. Needed on Solaris only.</p><p>If the configuration parameter <code>os_sup_enable</code> is <code>false</code>, this function is called automatically by <code>os_sup</code>, using the same arguments as when <code>enable/2</code> was called.</p><p>If <code>os_sup_enable</code> is <code>true</code>, this function must be called <em>after</em> OS_Mon/<code>os_sup</code> is stopped. <code>Dir</code> defines the directory which contains the backup copy and the Erlang specific configuration files for <code>syslogd</code>, and a named pipe to receive the messages from <code>syslogd</code>. Defaults to <code>&quot;/etc&quot;</code>. <code>Conf</code> defines the full name of the configuration file for <code>syslogd</code>. Default is <code>&quot;/etc/syslog.conf&quot;</code>.</p><p>Results in a OS call to:</p><pre><code type="none">&lt;PRIVDIR&gt;/bin/mod_syslog nootp Dir Conf
+        </code></pre><p>where <code>&lt;PRIVDIR&gt;</code> is the <code>priv</code> directory of OS_Mon, <code>code:priv_dir(os_mon)</code>.</p><p>Returns <code>ok</code> if this yields the expected result <code>&quot;0&quot;</code>, and <code>{error, Res}</code> if it yields anything else.</p><div class="note"><p>This function requires root privileges to succeed.</p></div>
+  </section>
+</section>
+<section class="detail" id="disable/2">
+
+  <div class="detail-header">
+    <a href="#disable/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">disable(Dir, Conf) -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="enable/0">
+
+  <div class="detail-header">
+    <a href="#enable/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enable() -&gt; ok | {error, Res}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Dir = Conf = Res = string()</li></ul><p>Enables the <code>os_sup</code> service. Needed on Solaris only.</p><p>If the configuration parameter <code>os_sup_enable</code> is <code>false</code>, this function is called automatically by <code>os_sup</code>, using the values of <code>os_sup_own</code> and <code>os_sup_syslogconf</code> as arguments.</p><p>If <code>os_sup_enable</code> is <code>true</code>, this function must be called <em>before</em> OS_Mon/<code>os_sup</code> is started. <code>Dir</code> defines the directory which contains the backup copy and the Erlang specific configuration files for <code>syslogd</code>, and a named pipe to receive the messages from <code>syslogd</code>. Defaults to <code>&quot;/etc&quot;</code>. <code>Conf</code> defines the full name of the configuration file for <code>syslogd</code>. Default is <code>&quot;/etc/syslog.conf&quot;</code>.</p><p>Results in a OS call to:</p><pre><code type="none">&lt;PRIVDIR&gt;/bin/mod_syslog otp Dir Conf
+        </code></pre><p>where <code>&lt;PRIVDIR&gt;</code> is the <code>priv</code> directory of OS_Mon, <code>code:priv_dir(os_mon)</code>.</p><p>Returns <code>ok</code> if this yields the expected result <code>&quot;0&quot;</code>, and <code>{error, Res}</code> if it yields anything else.</p><div class="note"><p>This function requires root privileges to succeed.</p></div>
+  </section>
+</section>
+<section class="detail" id="enable/2">
+
+  <div class="detail-header">
+    <a href="#enable/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enable(Dir, Conf) -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

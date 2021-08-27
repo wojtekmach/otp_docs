@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="common_test v1.20.5">
+
+    <title>ct_telnet — common_test v1.20.5</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-f00e575fa8.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+common_test
+      </a>
+      <strong class="sidebar-projectVersion">
+        v1.20.5
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+ct_telnet <small class="app-vsn">(common_test v1.20.5)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p><code>Common Test</code> specific layer on top of Telnet client <code>ct_telnet_client.erl</code>.</p><p>Use this module to set up Telnet connections, send commands, and perform string matching on the result. For information about how to use <code>ct_telnet</code> and configure connections, specifically for UNIX hosts, see the <a href="unix_telnet.html"><code>unix_telnet</code></a> manual page.</p><p>Default values defined in <code>ct_telnet</code>:</p><a id="Default_values"></a><ul><li><p>Connection timeout (time to wait for connection) = 10 seconds</p></li><li><p>Command timeout (time to wait for a command to return) = 10 seconds</p></li><li><p>Max number of reconnection attempts = 3</p></li><li><p>Reconnection interval (time to wait in between reconnection attempts) = 5 seconds</p></li><li><p>Keep alive (sends NOP to the server every 8 sec if connection is idle) = <code>true</code></p></li><li><p>Polling limit (max number of times to poll to get a remaining string terminated) = 0</p></li><li><p>Polling interval (sleep time between polls) = 1 second</p></li><li><p>The TCP_NODELAY option for the telnet socket is disabled (set to <code>false</code>) per default</p></li></ul><p>These parameters can be modified by the user with the following configuration term:</p><pre><code class="makeup erlang"><span class="w"> </span><span class="p" data-group-id="9575856269-1">{</span><span class="ss">telnet_settings</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9575856269-2">[</span><span class="p" data-group-id="9575856269-3">{</span><span class="ss">connect_timeout</span><span class="p">,</span><span class="n">Millisec</span><span class="p" data-group-id="9575856269-3">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-4">{</span><span class="ss">command_timeout</span><span class="p">,</span><span class="n">Millisec</span><span class="p" data-group-id="9575856269-4">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-5">{</span><span class="ss">reconnection_attempts</span><span class="p">,</span><span class="n">N</span><span class="p" data-group-id="9575856269-5">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-6">{</span><span class="ss">reconnection_interval</span><span class="p">,</span><span class="n">Millisec</span><span class="p" data-group-id="9575856269-6">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-7">{</span><span class="ss">keep_alive</span><span class="p">,</span><span class="n">Bool</span><span class="p" data-group-id="9575856269-7">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-8">{</span><span class="ss">poll_limit</span><span class="p">,</span><span class="n">N</span><span class="p" data-group-id="9575856269-8">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-9">{</span><span class="ss">poll_interval</span><span class="p">,</span><span class="n">Millisec</span><span class="p" data-group-id="9575856269-9">}</span><span class="p">,</span><span class="w">
+                    </span><span class="p" data-group-id="9575856269-10">{</span><span class="ss">tcp_nodelay</span><span class="p">,</span><span class="n">Bool</span><span class="p" data-group-id="9575856269-10">}</span><span class="p" data-group-id="9575856269-2">]</span><span class="p" data-group-id="9575856269-1">}</span><span class="p">.</span></code></pre><p><code>Millisec = integer(), N = integer()</code></p><p>Enter the <code>telnet_settings</code> term in a configuration file included in the test and <code>ct_telnet</code> retrieves the information automatically.</p><p><code>keep_alive</code> can be specified per connection, if necessary. For details, see <a href="unix_telnet.html"><code>unix_telnet</code></a>.</p><h2 id="module-logging" class="section-heading">
+  <a href="#module-logging" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Logging
+</h2>
+<a id="Logging"></a><p>The default logging behavior of <code>ct_telnet</code> is to print information about performed operations, commands, and their corresponding results to the test case HTML log. The following is not printed to the HTML log: text strings sent from the Telnet server that are not explicitly received by a <code>ct_telnet</code> function, such as <code>expect/3</code>. However, <code>ct_telnet</code> can be configured to use a special purpose event handler, implemented in <code>ct_conn_log_h</code>, for logging <em>all</em> Telnet traffic. To use this handler, install a <code>Common Test</code> hook named <code>cth_conn_log</code>. Example (using the test suite information function):</p><pre><code class="makeup erlang"><span class="w"> </span><span class="nf">suite</span><span class="p" data-group-id="7014123264-1">(</span><span class="p" data-group-id="7014123264-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+     </span><span class="p" data-group-id="7014123264-2">[</span><span class="p" data-group-id="7014123264-3">{</span><span class="ss">ct_hooks</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7014123264-4">[</span><span class="p" data-group-id="7014123264-5">{</span><span class="ss">cth_conn_log</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7014123264-6">[</span><span class="p" data-group-id="7014123264-7">{</span><span class="nf">conn_mod</span><span class="p" data-group-id="7014123264-8">(</span><span class="p" data-group-id="7014123264-8">)</span><span class="p">,</span><span class="nf">hook_options</span><span class="p" data-group-id="7014123264-9">(</span><span class="p" data-group-id="7014123264-9">)</span><span class="p" data-group-id="7014123264-7">}</span><span class="p" data-group-id="7014123264-6">]</span><span class="p" data-group-id="7014123264-5">}</span><span class="p" data-group-id="7014123264-4">]</span><span class="p" data-group-id="7014123264-3">}</span><span class="p" data-group-id="7014123264-2">]</span><span class="p">.</span></code></pre><p><code>conn_mod()</code> is the name of the <code>Common Test</code> module implementing the connection protocol, that is, <code>ct_telnet</code>.</p><p>The <code>cth_conn_log</code> hook performs unformatted logging of Telnet data to a separate text file. All Telnet communication is captured and printed, including any data sent from the server. The link to this text file is located at the top of the test case HTML log.</p><p>By default, data for all Telnet connections is logged in one common file (named <code>default</code>), which can get messy, for example, if multiple Telnet sessions are running in parallel. Therefore a separate log file can be created for each connection. To configure this, use hook option <code>hosts</code> and list the names of the servers/connections to be used in the suite. The connections must be named for this to work (see <a href="ct_telnet.html#open/1"><code>ct_telnet:open/1,2,3,4</code></a>).</p><p>Hook option <code>log_type</code> can be used to change the <code>cth_conn_log</code> behavior. The default value of this option is <code>raw</code>, which results in the behavior described above. If the value is set to <code>html</code>, all Telnet communication is printed to the test case HTML log instead.</p><p>All <code>cth_conn_log</code> hook options described can also be specified in a configuration file with configuration variable <code>ct_conn_log</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="w"> </span><span class="p" data-group-id="8574680133-1">{</span><span class="ss">ct_conn_log</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8574680133-2">[</span><span class="p" data-group-id="8574680133-3">{</span><span class="ss">ct_telnet</span><span class="p">,</span><span class="p" data-group-id="8574680133-4">[</span><span class="p" data-group-id="8574680133-5">{</span><span class="ss">log_type</span><span class="p">,</span><span class="ss">raw</span><span class="p" data-group-id="8574680133-5">}</span><span class="p">,</span><span class="w">
+                            </span><span class="p" data-group-id="8574680133-6">{</span><span class="ss">hosts</span><span class="p">,</span><span class="p" data-group-id="8574680133-7">[</span><span class="nf">key_or_name</span><span class="p" data-group-id="8574680133-8">(</span><span class="p" data-group-id="8574680133-8">)</span><span class="p" data-group-id="8574680133-7">]</span><span class="p" data-group-id="8574680133-6">}</span><span class="p" data-group-id="8574680133-4">]</span><span class="p" data-group-id="8574680133-3">}</span><span class="p" data-group-id="8574680133-2">]</span><span class="p" data-group-id="8574680133-1">}</span></code></pre><div class="note"><p>Hook options specified in a configuration file overwrite any hard-coded hook options in the test suite.</p></div><a id="Logging_example"></a><p><em>Logging Example:</em></p><p>The following <code>ct_hooks</code> statement causes printing of Telnet traffic to separate logs for the connections <code>server1</code> and <code>server2</code>. Traffic for any other connections is logged in the default Telnet log.</p><pre><code class="makeup erlang"><span class="w"> </span><span class="nf">suite</span><span class="p" data-group-id="9094135736-1">(</span><span class="p" data-group-id="9094135736-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+     </span><span class="p" data-group-id="9094135736-2">[</span><span class="p" data-group-id="9094135736-3">{</span><span class="ss">ct_hooks</span><span class="p">,</span><span class="w">
+       </span><span class="p" data-group-id="9094135736-4">[</span><span class="p" data-group-id="9094135736-5">{</span><span class="ss">cth_conn_log</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9094135736-6">[</span><span class="p" data-group-id="9094135736-7">{</span><span class="ss">ct_telnet</span><span class="p">,</span><span class="p" data-group-id="9094135736-8">[</span><span class="p" data-group-id="9094135736-9">{</span><span class="ss">hosts</span><span class="p">,</span><span class="p" data-group-id="9094135736-10">[</span><span class="ss">server1</span><span class="p">,</span><span class="ss">server2</span><span class="p" data-group-id="9094135736-10">]</span><span class="p" data-group-id="9094135736-9">}</span><span class="p" data-group-id="9094135736-8">]</span><span class="p" data-group-id="9094135736-7">}</span><span class="p" data-group-id="9094135736-6">]</span><span class="p" data-group-id="9094135736-5">}</span><span class="p" data-group-id="9094135736-4">]</span><span class="p" data-group-id="9094135736-3">}</span><span class="p" data-group-id="9094135736-2">]</span><span class="p">.</span></code></pre><p>As previously explained, this specification can also be provided by an entry like the following in a configuration file:</p><pre><code class="makeup erlang"><span class="w"> </span><span class="p" data-group-id="6338450059-1">{</span><span class="ss">ct_conn_log</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6338450059-2">[</span><span class="p" data-group-id="6338450059-3">{</span><span class="ss">ct_telnet</span><span class="p">,</span><span class="p" data-group-id="6338450059-4">[</span><span class="p" data-group-id="6338450059-5">{</span><span class="ss">hosts</span><span class="p">,</span><span class="p" data-group-id="6338450059-6">[</span><span class="ss">server1</span><span class="p">,</span><span class="ss">server2</span><span class="p" data-group-id="6338450059-6">]</span><span class="p" data-group-id="6338450059-5">}</span><span class="p" data-group-id="6338450059-4">]</span><span class="p" data-group-id="6338450059-3">}</span><span class="p" data-group-id="6338450059-2">]</span><span class="p" data-group-id="6338450059-1">}</span><span class="p">.</span></code></pre><p>In this case the <code>ct_hooks</code> statement in the test suite can look as follows:</p><pre><code class="makeup erlang"><span class="w"> </span><span class="nf">suite</span><span class="p" data-group-id="4273254058-1">(</span><span class="p" data-group-id="4273254058-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+     </span><span class="p" data-group-id="4273254058-2">[</span><span class="p" data-group-id="4273254058-3">{</span><span class="ss">ct_hooks</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4273254058-4">[</span><span class="p" data-group-id="4273254058-5">{</span><span class="ss">cth_conn_log</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4273254058-6">[</span><span class="p" data-group-id="4273254058-6">]</span><span class="p" data-group-id="4273254058-5">}</span><span class="p" data-group-id="4273254058-4">]</span><span class="p" data-group-id="4273254058-3">}</span><span class="p" data-group-id="4273254058-2">]</span><span class="p">.</span></code></pre><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="unix_telnet.html"><code>unix_telnet</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:connection/0">connection() = handle() | {target_name(), connection_type()} | target_name()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>For <code>target_name()</code>, see module <a href="ct.html"><code>ct</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:connection_type/0">connection_type() = telnet | ts1 | ts2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handle/0">handle() = handle()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Handle for a specific Telnet connection, see module <a href="ct.html"><code>ct</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:prompt_regexp/0">prompt_regexp() = string()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Regular expression matching all possible prompts for a specific target type. <code>regexp</code> must not have any groups, that is, when matching, <code>re:run/3</code> (in STDLIB) must return a list with one single element.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#close/1">close(Connection) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">Reason = term()</li></ul><a id="close-1"></a><p>Closes the Telnet connection and stops the process managing it.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmd/2">cmd(Connection, Cmd) -&gt; {ok, Data} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="cmd-2"></a><p>Equivalent to <a href="ct_telnet.html#cmd/3"><code>ct_telnet:cmd(Connection, Cmd, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmd/3">cmd(Connection, Cmd, Opts) -&gt; {ok, Data} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">Cmd = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {timeout, timeout()} | {newline, boolean() | string()}</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="cmd-3"></a><p>Sends a command through Telnet and waits for prompt.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmdf/3">cmdf(Connection, CmdFormat, Args) -&gt; {ok, Data} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="cmdf-3"></a><p>Equivalent to <a href="ct_telnet.html#cmdf/4"><code>ct_telnet:cmdf(Connection, CmdFormat, Args, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmdf/4">cmdf(Connection, CmdFormat, Args, Opts) -&gt; {ok, Data} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">CmdFormat = string()</li><li class="type">Args = list()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {timeout, timeout()} | {newline, boolean() | string()}</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="cmdf-4"></a><p>Sends a Telnet command and waits for prompt (uses a format string and a list of arguments to build the command).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expect/2">expect(Connection, Patterns) -&gt; term()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="expect-2"></a><p>Equivalent to <a href="ct_telnet.html#expect/3"><code>ct_telnet:expect(Connections, Patterns, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expect/3">expect(Connection, Patterns, Opts) -&gt; {ok, Match} | {ok, MatchList, HaltReason} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">Patterns = Pattern | [Pattern]</li><li class="type">Pattern = string() | {Tag, string()} | prompt | {prompt, Prompt}</li><li class="type">Prompt = string()</li><li class="type">Tag = term()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {idle_timeout, IdleTimeout} | {total_timeout, TotalTimeout} | repeat | {repeat, N} | sequence | {halt, HaltPatterns} | ignore_prompt | no_prompt_check | wait_for_prompt | {wait_for_prompt, Prompt}</li><li class="type">IdleTimeout = infinity | integer()</li><li class="type">TotalTimeout = infinity | integer()</li><li class="type">N = integer()</li><li class="type">HaltPatterns = Patterns</li><li class="type">MatchList = [Match]</li><li class="type">Match = RxMatch | {Tag, RxMatch} | {prompt, Prompt}</li><li class="type">RxMatch = [string()]</li><li class="type">HaltReason = done | Match</li><li class="type">Reason = timeout | {prompt, Prompt}</li></ul><a id="expect-3"></a><p>Gets data from Telnet and waits for the expected pattern.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_data/1">get_data(Connection) -&gt; {ok, Data} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="get_data-1"></a><p>Gets all data received by the Telnet client since the last command was sent. Only newline-terminated strings are returned. If the last received string has not yet been terminated, the connection can be polled automatically until the string is complete.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/1">open(Name) -&gt; {ok, Handle} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="open-1"></a><p>Equivalent to <a href="ct_telnet.html#open/2"><code>ct_telnet:open(Name, telnet)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/2">open(Name, ConnType) -&gt; {ok, Handle} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Name = target_name()</li><li class="type">ConnType = connection_type()</li><li class="type">Handle = handle()</li><li class="type">Reason = term()</li></ul><a id="open-2"></a><p>Opens a Telnet connection to the specified target host.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/3">open(KeyOrName, ConnType, TargetMod) -&gt; {ok, Handle} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="open-3"></a><p>Equivalent to <a href="ct_telnet.html#open/4"><code>ct_telnet:ct_telnet:open(KeyOrName, ConnType, TargetMod, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/4">open(KeyOrName, ConnType, TargetMod, Extra) -&gt; {ok, Handle} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">KeyOrName = Key | Name</li><li class="type">Key = atom()</li><li class="type">Name = target_name()</li><li class="type">ConnType = connection_type()</li><li class="type">TargetMod = atom()</li><li class="type">Extra = term()</li><li class="type">Handle = handle()</li><li class="type">Reason = term()</li></ul><a id="open-4"></a><p>Opens a Telnet connection to the specified target host.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/2">send(Connection, Cmd) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="send-2"></a><p>Equivalent to <a href="ct_telnet.html#send/3"><code>ct_telnet:send(Connection, Cmd, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/3">send(Connection, Cmd, Opts) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">Cmd = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {newline, boolean() | string()}</li><li class="type">Reason = term()</li></ul><a id="send-3"></a><p>Sends a Telnet command and returns immediately.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sendf/3">sendf(Connection, CmdFormat, Args) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><a id="sendf-3"></a><p>Equivalent to <a href="ct_telnet.html#sendf/4"><code>ct_telnet:sendf(Connection, CmdFormat, Args, [])</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sendf/4">sendf(Connection, CmdFormat, Args, Opts) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Connection = connection()</li><li class="type">CmdFormat = string()</li><li class="type">Args = list()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {newline, boolean() | string()}</li><li class="type">Reason = term()</li></ul><a id="sendf-4"></a><p>Sends a Telnet command and returns immediately (uses a format string and a list of arguments to build the command).</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:connection/0">
+
+  <div class="detail-header">
+    <a href="#t:connection/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">connection() = handle() | {target_name(), connection_type()} | target_name()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre></pre>
+
+      </div>
+
+<p>For <code>target_name()</code>, see module <a href="ct.html"><code>ct</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:connection_type/0">
+
+  <div class="detail-header">
+    <a href="#t:connection_type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">connection_type() = telnet | ts1 | ts2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre></pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:handle/0">
+
+  <div class="detail-header">
+    <a href="#t:handle/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">handle() = handle()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre></pre>
+
+      </div>
+
+<p>Handle for a specific Telnet connection, see module <a href="ct.html"><code>ct</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:prompt_regexp/0">
+
+  <div class="detail-header">
+    <a href="#t:prompt_regexp/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">prompt_regexp() = string()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre></pre>
+
+      </div>
+
+<p>Regular expression matching all possible prompts for a specific target type. <code>regexp</code> must not have any groups, that is, when matching, <code>re:run/3</code> (in STDLIB) must return a list with one single element.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="close/1">
+
+  <div class="detail-header">
+    <a href="#close/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">close(Connection) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">Reason = term()</li></ul><a id="close-1"></a><p>Closes the Telnet connection and stops the process managing it.</p><p>A connection can be associated with a target name and/or a handle. If <code>Connection</code> has no associated target name, it can only be closed with the handle value (see <a href="ct_telnet.html#open/4"><code>ct_telnet:open/4</code></a>).</p>
+  </section>
+</section>
+<section class="detail" id="cmd/2">
+
+  <div class="detail-header">
+    <a href="#cmd/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmd(Connection, Cmd) -&gt; {ok, Data} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="cmd-2"></a><p>Equivalent to <a href="ct_telnet.html#cmd/3"><code>ct_telnet:cmd(Connection, Cmd, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="cmd/3">
+
+  <div class="detail-header">
+    <a href="#cmd/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmd(Connection, Cmd, Opts) -&gt; {ok, Data} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">Cmd = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {timeout, timeout()} | {newline, boolean() | string()}</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="cmd-3"></a><p>Sends a command through Telnet and waits for prompt.</p><p>By default, this function adds &quot;\n&quot; to the end of the specified command. If this is not desired, use option <code>{newline,false}</code>. This is necessary, for example, when sending Telnet command sequences prefixed with character Interpret As Command (IAC). Option <code>{newline,string()}</code> can also be used if a different line end than &quot;\n&quot; is required, for instance <code>{newline,&quot;\r\n&quot;}</code>, to add both carriage return and newline characters.</p><p>Option <code>timeout</code> specifies how long the client must wait for prompt. If the time expires, the function returns <code>{error,timeout}</code>. For information about the default value for the command timeout, see the <a href="ct_telnet.html#content#Default_values">list of default values</a> in the beginning of this module.</p>
+  </section>
+</section>
+<section class="detail" id="cmdf/3">
+
+  <div class="detail-header">
+    <a href="#cmdf/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmdf(Connection, CmdFormat, Args) -&gt; {ok, Data} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="cmdf-3"></a><p>Equivalent to <a href="ct_telnet.html#cmdf/4"><code>ct_telnet:cmdf(Connection, CmdFormat, Args, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="cmdf/4">
+
+  <div class="detail-header">
+    <a href="#cmdf/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmdf(Connection, CmdFormat, Args, Opts) -&gt; {ok, Data} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">CmdFormat = string()</li><li class="type">Args = list()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {timeout, timeout()} | {newline, boolean() | string()}</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="cmdf-4"></a><p>Sends a Telnet command and waits for prompt (uses a format string and a list of arguments to build the command).</p><p>For details, see <a href="ct_telnet.html#cmd/3"><code>ct_telnet:cmd/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="expect/2">
+
+  <div class="detail-header">
+    <a href="#expect/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expect(Connection, Patterns) -&gt; term()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="expect-2"></a><p>Equivalent to <a href="ct_telnet.html#expect/3"><code>ct_telnet:expect(Connections, Patterns, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="expect/3">
+
+  <div class="detail-header">
+    <a href="#expect/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expect(Connection, Patterns, Opts) -&gt; {ok, Match} | {ok, MatchList, HaltReason} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">Patterns = Pattern | [Pattern]</li><li class="type">Pattern = string() | {Tag, string()} | prompt | {prompt, Prompt}</li><li class="type">Prompt = string()</li><li class="type">Tag = term()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {idle_timeout, IdleTimeout} | {total_timeout, TotalTimeout} | repeat | {repeat, N} | sequence | {halt, HaltPatterns} | ignore_prompt | no_prompt_check | wait_for_prompt | {wait_for_prompt, Prompt}</li><li class="type">IdleTimeout = infinity | integer()</li><li class="type">TotalTimeout = infinity | integer()</li><li class="type">N = integer()</li><li class="type">HaltPatterns = Patterns</li><li class="type">MatchList = [Match]</li><li class="type">Match = RxMatch | {Tag, RxMatch} | {prompt, Prompt}</li><li class="type">RxMatch = [string()]</li><li class="type">HaltReason = done | Match</li><li class="type">Reason = timeout | {prompt, Prompt}</li></ul><a id="expect-3"></a><p>Gets data from Telnet and waits for the expected pattern.</p><p><code>Pattern</code> can be a POSIX regular expression. The function returns when a pattern is successfully matched (at least one, in the case of multiple patterns).</p><p><code>RxMatch</code> is a list of matched strings. It looks as follows <code>[FullMatch, SubMatch1, SubMatch2, ...]</code>, where <code>FullMatch</code> is the string matched by the whole regular expression, and <code>SubMatchN</code> is the string that matched subexpression number <code>N</code>. Subexpressions are denoted with <code>'(' ')'</code> in the regular expression.</p><p>If a <code>Tag</code> is specified, the returned <code>Match</code> also includes the matched <code>Tag</code>. Otherwise, only <code>RxMatch</code> is returned.</p><p><em>Options:</em></p><dl><dt><code>idle_timeout</code></dt><dd><p>Indicates that the function must return if the Telnet client is idle (that is, if no data is received) for more than <code>IdleTimeout</code> milliseconds. Default time-out is 10 seconds.</p></dd><dt><code>total_timeout</code></dt><dd><p>Sets a time limit for the complete <code>expect</code> operation. After <code>TotalTimeout</code> milliseconds, <code>{error,timeout}</code> is returned. Default is <code>infinity</code> (that is, no time limit).</p></dd><dt><code>ignore_prompt | no_prompt_check</code></dt><dd><p>&gt;The function returns when a prompt is received, even if no pattern has yet been matched, and <code>{error,{prompt,Prompt}}</code> is returned. However, this behavior can be modified with option <code>ignore_prompt</code> or option <code>no_prompt_check</code>, which tells <code>expect</code> to return only when a match is found or after a time-out.</p></dd><dt><code>ignore_prompt</code></dt><dd><p><code>ct_telnet</code> ignores any prompt found. This option is useful if data sent by the server can include a pattern matching prompt <code>regexp</code> (as returned by <code>TargedMod:get_prompt_regexp/0</code>), but is not to not cause the function to return.</p></dd><dt><code>no_prompt_check</code></dt><dd><p><code>ct_telnet</code> does not search for a prompt at all. This is useful if, for example, <code>Pattern</code> itself matches the prompt.</p></dd><dt><code>wait_for_prompt</code></dt><dd><p>Forces <code>ct_telnet</code> to wait until the prompt string is received before returning (even if a pattern has already been matched). This is equal to calling <code>expect(Conn, Patterns++[{prompt,Prompt}], [sequence|Opts])</code>. Notice that option <code>idle_timeout</code> and <code>total_timeout</code> can abort the operation of waiting for prompt.</p></dd><dt><code>repeat | repeat, N</code></dt><dd><p>The pattern(s) must be matched multiple times. If <code>N</code> is specified, the pattern(s) are matched <code>N</code> times, and the function returns <code>HaltReason = done</code>. This option can be interrupted by one or more <code>HaltPatterns</code>. <code>MatchList</code> is always returned, that is, a list of <code>Match</code> instead of only one <code>Match</code>. Also <code>HaltReason</code> is returned.</p></dd><dt><code>sequence</code></dt><dd><p>All patterns must be matched in a sequence. A match is not concluded until all patterns are matched. This option can be interrupted by one or more <code>HaltPatterns</code>. <code>MatchList</code> is always returned, that is, a list of <code>Match</code> instead of only one <code>Match</code>. Also <code>HaltReason</code> is returned.</p></dd></dl><p><em>Example 1:</em></p><pre><code class="makeup erlang"><span class="w"> </span><span class="nf">expect</span><span class="p" data-group-id="8385344192-1">(</span><span class="n">Connection</span><span class="p">,</span><span class="p" data-group-id="8385344192-2">[</span><span class="p" data-group-id="8385344192-3">{</span><span class="ss">abc</span><span class="p">,</span><span class="s">&quot;ABC&quot;</span><span class="p" data-group-id="8385344192-3">}</span><span class="p">,</span><span class="p" data-group-id="8385344192-4">{</span><span class="ss">xyz</span><span class="p">,</span><span class="s">&quot;XYZ&quot;</span><span class="p" data-group-id="8385344192-4">}</span><span class="p" data-group-id="8385344192-2">]</span><span class="p">,</span><span class="p" data-group-id="8385344192-5">[</span><span class="ss">sequence</span><span class="p">,</span><span class="p" data-group-id="8385344192-6">{</span><span class="ss">halt</span><span class="p">,</span><span class="p" data-group-id="8385344192-7">[</span><span class="p" data-group-id="8385344192-8">{</span><span class="ss">nnn</span><span class="p">,</span><span class="s">&quot;NNN&quot;</span><span class="p" data-group-id="8385344192-8">}</span><span class="p" data-group-id="8385344192-7">]</span><span class="p" data-group-id="8385344192-6">}</span><span class="p" data-group-id="8385344192-5">]</span><span class="p" data-group-id="8385344192-1">)</span></code></pre><p>First this tries to match <code>&quot;ABC&quot;</code>, and then <code>&quot;XYZ&quot;</code>, but if <code>&quot;NNN&quot;</code> appears, the function returns <code>{error,{nnn,[&quot;NNN&quot;]}}</code>. If both <code>&quot;ABC&quot;</code> and <code>&quot;XYZ&quot;</code> are matched, the function returns <code>{ok,[AbcMatch,XyzMatch]}</code>.</p><p><em>Example 2:</em></p><pre><code class="makeup erlang"><span class="w"> </span><span class="nf">expect</span><span class="p" data-group-id="8142490719-1">(</span><span class="n">Connection</span><span class="p">,</span><span class="p" data-group-id="8142490719-2">[</span><span class="p" data-group-id="8142490719-3">{</span><span class="ss">abc</span><span class="p">,</span><span class="s">&quot;ABC&quot;</span><span class="p" data-group-id="8142490719-3">}</span><span class="p">,</span><span class="p" data-group-id="8142490719-4">{</span><span class="ss">xyz</span><span class="p">,</span><span class="s">&quot;XYZ&quot;</span><span class="p" data-group-id="8142490719-4">}</span><span class="p" data-group-id="8142490719-2">]</span><span class="p">,</span><span class="p" data-group-id="8142490719-5">[</span><span class="p" data-group-id="8142490719-6">{</span><span class="ss">repeat</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8142490719-6">}</span><span class="p">,</span><span class="p" data-group-id="8142490719-7">{</span><span class="ss">halt</span><span class="p">,</span><span class="p" data-group-id="8142490719-8">[</span><span class="p" data-group-id="8142490719-9">{</span><span class="ss">nnn</span><span class="p">,</span><span class="s">&quot;NNN&quot;</span><span class="p" data-group-id="8142490719-9">}</span><span class="p" data-group-id="8142490719-8">]</span><span class="p" data-group-id="8142490719-7">}</span><span class="p" data-group-id="8142490719-5">]</span><span class="p" data-group-id="8142490719-1">)</span></code></pre><p>This tries to match <code>&quot;ABC&quot;</code> or <code>&quot;XYZ&quot;</code> twice. If <code>&quot;NNN&quot;</code> appears, the function returns <code>HaltReason = {nnn,[&quot;NNN&quot;]}</code>.</p><p>Options <code>repeat</code> and <code>sequence</code> can be combined to match a sequence multiple times.</p>
+  </section>
+</section>
+<section class="detail" id="get_data/1">
+
+  <div class="detail-header">
+    <a href="#get_data/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_data(Connection) -&gt; {ok, Data} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">Data = [string()]</li><li class="type">Reason = term()</li></ul><a id="get_data-1"></a><p>Gets all data received by the Telnet client since the last command was sent. Only newline-terminated strings are returned. If the last received string has not yet been terminated, the connection can be polled automatically until the string is complete.</p><p>The polling feature is controlled by the configuration values <code>poll_limit</code> and <code>poll_interval</code> and is by default disabled. This means that the function immediately returns all complete strings received and saves a remaining non-terminated string for a later <code>get_data</code> call.</p>
+  </section>
+</section>
+<section class="detail" id="open/1">
+
+  <div class="detail-header">
+    <a href="#open/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open(Name) -&gt; {ok, Handle} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="open-1"></a><p>Equivalent to <a href="ct_telnet.html#open/2"><code>ct_telnet:open(Name, telnet)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="open/2">
+
+  <div class="detail-header">
+    <a href="#open/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open(Name, ConnType) -&gt; {ok, Handle} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Name = target_name()</li><li class="type">ConnType = connection_type()</li><li class="type">Handle = handle()</li><li class="type">Reason = term()</li></ul><a id="open-2"></a><p>Opens a Telnet connection to the specified target host.</p>
+  </section>
+</section>
+<section class="detail" id="open/3">
+
+  <div class="detail-header">
+    <a href="#open/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open(KeyOrName, ConnType, TargetMod) -&gt; {ok, Handle} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="open-3"></a><p>Equivalent to <a href="ct_telnet.html#open/4"><code>ct_telnet:ct_telnet:open(KeyOrName, ConnType, TargetMod, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="open/4">
+
+  <div class="detail-header">
+    <a href="#open/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open(KeyOrName, ConnType, TargetMod, Extra) -&gt; {ok, Handle} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">KeyOrName = Key | Name</li><li class="type">Key = atom()</li><li class="type">Name = target_name()</li><li class="type">ConnType = connection_type()</li><li class="type">TargetMod = atom()</li><li class="type">Extra = term()</li><li class="type">Handle = handle()</li><li class="type">Reason = term()</li></ul><a id="open-4"></a><p>Opens a Telnet connection to the specified target host.</p><p>The target data must exist in a configuration file. The connection can be associated with <code>Name</code> and/or the returned <code>Handle</code>. To allocate a name for the target, use one of the following alternatives:</p><ul><li><p><a href="ct.html#require/2"><code>ct:require/2</code></a> in a test case</p></li><li><p>A <code>require</code> statement in the suite information function (<code>suite/0</code>)</p></li><li><p>A <code>require</code> statement in a test case information function</p></li></ul><p>If you want the connection to be associated with <code>Handle</code> only (if you, for example, need to open multiple connections to a host), use <code>Key</code>, the configuration variable name, to specify the target. Notice that a connection without an associated target name can only be closed with the <code>Handle</code> value.</p><p><code>TargetMod</code> is a module that exports the functions <code>connect(Ip, Port, KeepAlive, Extra)</code> and <code>get_prompt_regexp()</code> for the specified <code>TargetType</code> (for example, <code>unix_telnet</code>).</p><p>For <code>target_name()</code>, see module <a href="ct.html"><code>ct</code></a>.</p><p>See also <a href="ct.html#require/2"><code>ct:require/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="send/2">
+
+  <div class="detail-header">
+    <a href="#send/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send(Connection, Cmd) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="send-2"></a><p>Equivalent to <a href="ct_telnet.html#send/3"><code>ct_telnet:send(Connection, Cmd, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="send/3">
+
+  <div class="detail-header">
+    <a href="#send/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send(Connection, Cmd, Opts) -&gt; ok | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP 17.4)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">Cmd = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {newline, boolean() | string()}</li><li class="type">Reason = term()</li></ul><a id="send-3"></a><p>Sends a Telnet command and returns immediately.</p><p>By default, this function adds &quot;\n&quot; to the end of the specified command. If this is not desired, option <code>{newline,false}</code> can be used. This is necessary, for example, when sending Telnet command sequences prefixed with character Interpret As Command (IAC). Option <code>{newline,string()}</code> can also be used if a different line end than &quot;\n&quot; is required, for instance <code>{newline,&quot;\r\n&quot;}</code>, to add both carriage return and newline characters.</p><p>The resulting output from the command can be read with <a href="ct_telnet.html#get_data/1"><code>ct_telnet:get_data/2</code></a> or <a href="ct_telnet.html#expect/2"><code>ct_telnet:expect/2,3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="sendf/3">
+
+  <div class="detail-header">
+    <a href="#sendf/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sendf(Connection, CmdFormat, Args) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<a id="sendf-3"></a><p>Equivalent to <a href="ct_telnet.html#sendf/4"><code>ct_telnet:sendf(Connection, CmdFormat, Args, [])</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="sendf/4">
+
+  <div class="detail-header">
+    <a href="#sendf/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sendf(Connection, CmdFormat, Args, Opts) -&gt; ok | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP 17.4)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Connection = connection()</li><li class="type">CmdFormat = string()</li><li class="type">Args = list()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = {newline, boolean() | string()}</li><li class="type">Reason = term()</li></ul><a id="sendf-4"></a><p>Sends a Telnet command and returns immediately (uses a format string and a list of arguments to build the command).</p><p>For details, see <a href="ct_telnet.html#send/3"><code>ct_telnet:send/3</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="erts v12.0.3">
+
+    <title>atomics — erts v12.0.3</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-7dbc3c54d4.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+erts
+      </a>
+      <strong class="sidebar-projectVersion">
+        v12.0.3
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+atomics <small class="app-vsn">(erts v12.0.3)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides a set of functions to do atomic operations towards mutable atomic variables. The implementation utilizes only atomic hardware instructions without any software level locking, which makes it very efficient for concurrent access. The atomics are organized into arrays with the following semantics:</p><ul><li><p>Atomics are 64 bit integers.</p></li><li><p>Atomics can be represented as either signed or unsigned.</p></li><li><p>Atomics wrap around at overflow and underflow operations.</p></li><li><p>All operations guarantee atomicity. No intermediate results can be seen. The result of one mutation can only be the input to one following mutation.</p></li><li><p>All atomic operations are mutually ordered. If atomic B is updated <em>after</em> atomic A, then that is how it will appear to any concurrent readers. No one can read the new value of B and then read the old value of A.</p></li><li><p>Indexes into atomic arrays are one-based. An atomic array of arity N contains N atomics with index from 1 to N.</p></li></ul>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:atomics_ref/0">-type atomics_ref() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Identifies an atomic array returned from <a href="atomics.html#new/2"><code>new/2</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add/3">add/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add <code>Incr</code> to atomic.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_get/3">add_get/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Atomic addition and return of the result.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compare_exchange/4">compare_exchange/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Atomically compares the atomic with <code>Expected</code>, and if those are equal, set atomic to <code>Desired</code>. Returns <code>ok</code> if <code>Desired</code> was written. Returns the actual atomic value if not equal to <code>Expected</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exchange/3">exchange/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Atomically replaces the value of the atomic with <code>Desired</code> and returns the value it held previously.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/2">get/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Read atomic value.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Return information about an atomic array in a map. The map has the following keys</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/2">new/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Create a new array of <code>Arity</code> number of atomics. All atomics in the array are initially set to zero.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put/3">put/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set atomic to <code>Value</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub/3">sub/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Subtract <code>Decr</code> from atomic.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_get/3">sub_get/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Atomic subtraction and return of the result.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:atomics_ref/0">
+
+  <div class="detail-header">
+    <a href="#t:atomics_ref/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type atomics_ref() :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>atomics_ref()</pre>
+
+      </div>
+
+<p>Identifies an atomic array returned from <a href="atomics.html#new/2"><code>new/2</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="add/3">
+
+  <div class="detail-header">
+    <a href="#add/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add(Ref, Ix, Incr) -> ok when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Incr :: integer().</pre>
+
+      </div>
+
+<p>Add <code>Incr</code> to atomic.</p>
+  </section>
+</section>
+<section class="detail" id="add_get/3">
+
+  <div class="detail-header">
+    <a href="#add_get/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_get/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_get(Ref, Ix, Incr) -> integer() when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Incr :: integer().</pre>
+
+      </div>
+
+<p>Atomic addition and return of the result.</p>
+  </section>
+</section>
+<section class="detail" id="compare_exchange/4">
+
+  <div class="detail-header">
+    <a href="#compare_exchange/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compare_exchange/4</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compare_exchange(Ref, Ix, Expected, Desired) -> ok | integer()
+                    when
+                        Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(),
+                        Ix :: integer(),
+                        Expected :: integer(),
+                        Desired :: integer().</pre>
+
+      </div>
+
+<p>Atomically compares the atomic with <code>Expected</code>, and if those are equal, set atomic to <code>Desired</code>. Returns <code>ok</code> if <code>Desired</code> was written. Returns the actual atomic value if not equal to <code>Expected</code>.</p>
+  </section>
+</section>
+<section class="detail" id="exchange/3">
+
+  <div class="detail-header">
+    <a href="#exchange/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exchange/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>exchange(Ref, Ix, Desired) -> integer()
+            when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Desired :: integer().</pre>
+
+      </div>
+
+<p>Atomically replaces the value of the atomic with <code>Desired</code> and returns the value it held previously.</p>
+  </section>
+</section>
+<section class="detail" id="get/2">
+
+  <div class="detail-header">
+    <a href="#get/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get/2</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get(Ref, Ix) -> integer() when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer().</pre>
+
+      </div>
+
+<p>Read atomic value.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info(Ref) -> Info
+        when
+            Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(),
+            Info :: #{size := Size, max := Max, min := Min, memory := Memory},
+            Size :: non_neg_integer(),
+            Max :: integer(),
+            Min :: integer(),
+            Memory :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Return information about an atomic array in a map. The map has the following keys:</p><dl><dt><code>size</code></dt><dd><p>The number of atomics in the array.</p></dd><dt><code>max</code></dt><dd><p>The highest possible value an atomic in this array can hold.</p></dd><dt><code>min</code></dt><dd><p>The lowest possible value an atomic in this array can hold.</p></dd><dt><code>memory</code></dt><dd><p>Approximate memory consumption for the array in bytes.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="new/2">
+
+  <div class="detail-header">
+    <a href="#new/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/2</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Arity, Opts) -> <a href="#t:atomics_ref/0">atomics_ref</a>()
+       when Arity :: pos_integer(), Opts :: [Opt], Opt :: {signed, boolean()}.</pre>
+
+      </div>
+
+<p>Create a new array of <code>Arity</code> number of atomics. All atomics in the array are initially set to zero.</p><p>Argument <code>Opts</code> is a list of the following possible options:</p><dl><dt><code>{signed, boolean()}</code></dt><dd><p>Indicate if the elements of the array will be treated as signed or unsigned integers. Default is <code>true</code> (signed).</p><p>The integer interval for signed atomics are from <code>-(1 bsl 63)</code> to <code>(1 bsl 63)-1</code> and for unsigned atomics from <code>0</code> to <code>(1 bsl 64)-1</code>.</p></dd></dl><p>Atomics are not tied to the current process and are automatically garbage collected when they are no longer referenced.</p>
+  </section>
+</section>
+<section class="detail" id="put/3">
+
+  <div class="detail-header">
+    <a href="#put/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>put(Ref, Ix, Value) -> ok when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Value :: integer().</pre>
+
+      </div>
+
+<p>Set atomic to <code>Value</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sub/3">
+
+  <div class="detail-header">
+    <a href="#sub/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub(Ref, Ix, Decr) -> ok when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Decr :: integer().</pre>
+
+      </div>
+
+<p>Subtract <code>Decr</code> from atomic.</p>
+  </section>
+</section>
+<section class="detail" id="sub_get/3">
+
+  <div class="detail-header">
+    <a href="#sub_get/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_get/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub_get(Ref, Ix, Decr) -> integer() when Ref :: <a href="#t:atomics_ref/0">atomics_ref</a>(), Ix :: integer(), Decr :: integer().</pre>
+
+      </div>
+
+<p>Atomic subtraction and return of the result.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

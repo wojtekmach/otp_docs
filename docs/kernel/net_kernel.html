@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>net_kernel — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+net_kernel <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The net kernel is a system process, registered as <code>net_kernel</code>, which must be operational for distributed Erlang to work. The purpose of this process is to implement parts of the BIFs <code>spawn/4</code> and <code>spawn_link/4</code>, and to provide monitoring of the network.</p><p>An Erlang node is started using command-line flag <code>-name</code> or <code>-sname</code>:</p><pre><code class="makeup shell"><span class="gp unselectable">$ </span><span class="">erl -sname foobar
+</span></code></pre><p>It is also possible to call <code>net_kernel:start([foobar])</code> directly from the normal Erlang shell prompt:</p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">net_kernel</span><span class="p">:</span><span class="nf">start</span><span class="p" data-group-id="4829565295-1">(</span><span class="p" data-group-id="4829565295-2">[</span><span class="ss">foobar</span><span class="p">,</span><span class="w"> </span><span class="ss">shortnames</span><span class="p" data-group-id="4829565295-2">]</span><span class="p" data-group-id="4829565295-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4829565295-3">{</span><span class="ss">ok</span><span class="p">,</span><span class="o">&lt;</span><span class="mf">0.64</span><span class="p">.</span><span class="mi">0</span><span class="o">&gt;</span><span class="p" data-group-id="4829565295-3">}</span><span class="w">
+</span><span class="p" data-group-id="4829565295-4">(</span><span class="ss">foobar</span><span class="p">@</span><span class="ss">gringotts</span><span class="p" data-group-id="4829565295-4">)</span><span class="mi">2</span><span class="o">&gt;</span></code></pre><p>If the node is started with command-line flag <code>-sname</code>, the node name is <code>foobar@Host</code>, where <code>Host</code> is the short name of the host (not the fully qualified domain name). If started with flag <code>-name</code>, the node name is <code>foobar@Host</code>, where <code>Host</code> is the fully qualified domain name. For more information, see <code>erl</code>.</p><p>Normally, connections are established automatically when another node is referenced. This functionality can be disabled by setting Kernel configuration parameter <code>dist_auto_connect</code> to <code>never</code>, see <code>kernel(6)</code>. In this case, connections must be established explicitly by calling <a href="net_kernel.html#connect_node/1"><code>connect_node/1</code></a>.</p><p>Which nodes that are allowed to communicate with each other is handled by the magic cookie system, see section Distributed Erlang in the Erlang Reference Manual.</p><div class="warning"><p>Starting a distributed node without also specifying <code>-proto_dist inet_tls</code> will expose the node to attacks that may give the attacker complete access to the node and in extension the cluster. When using un-secure distributed nodes, make sure that the network is configured to keep potential attackers out. See the Using SSL for Erlang Distribution User's Guide for details on how to setup a secure distributed node.</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#allow/1">allow/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Permits access to the specified set of nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#connect_node/1">connect_node/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Establishes a connection to <code>Node</code>. Returns <code>true</code> if a connection was established or was already established or if <code>Node</code> is the local node itself. Returns <code>false</code> if the connection attempt failed, and <code>ignored</code> if the local node is not alive.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_net_ticktime/0">get_net_ticktime/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets <code>net_ticktime</code> (see <code>kernel(6)</code>).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getopts/2">getopts/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Get one or more options for the distribution socket connected to <code>Node</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monitor_nodes/1">monitor_nodes/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The calling process subscribes or unsubscribes to node status change messages. A <code>nodeup</code> message is delivered to all subscribing processes when a new node is connected, and a <code>nodedown</code> message is delivered when a node is disconnected.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monitor_nodes/2">monitor_nodes/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_net_ticktime/1">set_net_ticktime/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets <code>net_ticktime</code> (see <code>kernel(6)</code>) to <code>NetTicktime</code> seconds. <code>TransitionPeriod</code> defaults to <code>60</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_net_ticktime/2">set_net_ticktime/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setopts/2">setopts/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set one or more options for distribution sockets. Argument <code>Node</code> can be either one node name or the atom <code>new</code> to affect the distribution sockets of all future connected nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/1">start([Name, NameType, Ticktime]) -&gt; {ok, pid()} | {error, Reason} start([Name, NameType]) -&gt; {ok, pid()} | {error, Reason} start([Name]) -&gt; {ok, pid()} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Name = atom()</li><li class="type">NameType = shortnames | longnames</li><li class="type">Reason = {already_started, pid()} | term()</li></ul><p>Turns a non-distributed node into a distributed node by starting <code>net_kernel</code> and other necessary processes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Turns a distributed node into a non-distributed node. For other nodes in the network, this is the same as the node going down. Only possible when the net kernel was started using <a href="net_kernel.html#start/1"><code>start/1</code></a>, otherwise <code>{error, not_allowed}</code> is returned. Returns <code>{error, not_found}</code> if the local node is not alive.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="allow/1">
+
+  <div class="detail-header">
+    <a href="#allow/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">allow/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>allow(Nodes) -> ok | error when Nodes :: [node()].</pre>
+
+      </div>
+
+<p>Permits access to the specified set of nodes.</p><p>Before the first call to <code>allow/1</code>, any node with the correct cookie can be connected. When <code>allow/1</code> is called, a list of allowed nodes is established. Any access attempts made from (or to) nodes not in that list will be rejected.</p><p>Subsequent calls to <code>allow/1</code> will add the specified nodes to the list of allowed nodes. It is not possible to remove nodes from the list.</p><p>Returns <code>error</code> if any element in <code>Nodes</code> is not an atom.</p>
+  </section>
+</section>
+<section class="detail" id="connect_node/1">
+
+  <div class="detail-header">
+    <a href="#connect_node/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">connect_node/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>connect_node(Node) -> boolean() | ignored when Node :: node().</pre>
+
+      </div>
+
+<p>Establishes a connection to <code>Node</code>. Returns <code>true</code> if a connection was established or was already established or if <code>Node</code> is the local node itself. Returns <code>false</code> if the connection attempt failed, and <code>ignored</code> if the local node is not alive.</p>
+  </section>
+</section>
+<section class="detail" id="get_net_ticktime/0">
+
+  <div class="detail-header">
+    <a href="#get_net_ticktime/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_net_ticktime/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_net_ticktime() -> Res
+                    when
+                        Res :: NetTicktime | {ongoing_change_to, NetTicktime} | ignored,
+                        NetTicktime :: pos_integer().</pre>
+
+      </div>
+
+<p>Gets <code>net_ticktime</code> (see <code>kernel(6)</code>).</p><p>Defined return values (<code>Res</code>):</p><dl><dt><code>NetTicktime</code></dt><dd><p><code>net_ticktime</code> is <code>NetTicktime</code> seconds.</p></dd><dt><code>{ongoing_change_to, NetTicktime}</code></dt><dd><p><code>net_kernel</code> is currently changing <code>net_ticktime</code> to <code>NetTicktime</code> seconds.</p></dd><dt><code>ignored</code></dt><dd><p>The local node is not alive.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="getopts/2">
+
+  <div class="detail-header">
+    <a href="#getopts/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getopts/2</h1>
+
+
+      <span class="note">(since OTP 19.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getopts(Node, Options) -> {ok, OptionValues} | {error, Reason} | ignored
+           when
+               Node :: node(),
+               Options :: [<a href="inet.html#t:socket_getopt/0">inet:socket_getopt</a>()],
+               OptionValues :: [<a href="inet.html#t:socket_setopt/0">inet:socket_setopt</a>()],
+               Reason :: <a href="inet.html#t:posix/0">inet:posix</a>() | noconnection.</pre>
+
+      </div>
+
+<p>Get one or more options for the distribution socket connected to <code>Node</code>.</p><p>If <code>Node</code> is a connected node the return value is the same as from <a href="inet.html#getopts/2"><code>inet:getopts(Sock, Options)</code></a> where <code>Sock</code> is the distribution socket for <code>Node</code>.</p><p>Returns <code>ignored</code> if the local node is not alive or <code>{error, noconnection}</code> if <code>Node</code> is not connected.</p>
+  </section>
+</section>
+<section class="detail" id="monitor_nodes/1">
+
+  <div class="detail-header">
+    <a href="#monitor_nodes/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monitor_nodes/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>monitor_nodes(Flag) -> ok | Error when Flag :: boolean(), Error :: error | {error, term()}.</pre>
+
+      </div>
+
+<p>The calling process subscribes or unsubscribes to node status change messages. A <code>nodeup</code> message is delivered to all subscribing processes when a new node is connected, and a <code>nodedown</code> message is delivered when a node is disconnected.</p><p>If <code>Flag</code> is <code>true</code>, a new subscription is started. If <code>Flag</code> is <code>false</code>, all previous subscriptions started with the same <code>Options</code> are stopped. Two option lists are considered the same if they contain the same set of options.</p><p>As from Kernel version 2.11.4, and ERTS version 5.5.4, the following is guaranteed:</p><ul><li><p><code>nodeup</code> messages are delivered before delivery of any message from the remote node passed through the newly established connection.</p></li><li><p><code>nodedown</code> messages are not delivered until all messages from the remote node that have been passed through the connection have been delivered.</p></li></ul><p>Notice that this is <em>not</em> guaranteed for Kernel versions before 2.11.4.</p><p>As from Kernel version 2.11.4, subscriptions can also be made before the <code>net_kernel</code> server is started, that is, <code>net_kernel:monitor_nodes/[1,2]</code> does not return <code>ignored</code>.</p><p>As from Kernel version 2.13, and ERTS version 5.7, the following is guaranteed:</p><ul><li><p><code>nodeup</code> messages are delivered after the corresponding node appears in results from <code>erlang:nodes/X</code>.</p></li><li><p><code>nodedown</code> messages are delivered after the corresponding node has disappeared in results from <code>erlang:nodes/X</code>.</p></li></ul><p>Notice that this is <em>not</em> guaranteed for Kernel versions before 2.13.</p><p>The format of the node status change messages depends on <code>Options</code>. If <code>Options</code> is <code>[]</code>, which is the default, the format is as follows:</p><pre><code type="none">{nodeup, Node} | {nodedown, Node}
+  Node = node()</code></pre><p>If <code>Options</code> is not <code>[]</code>, the format is as follows:</p><pre><code type="none">{nodeup, Node, InfoList} | {nodedown, Node, InfoList}
+  Node = node()
+  InfoList = [{Tag, Val}]</code></pre><p><code>InfoList</code> is a list of tuples. Its contents depends on <code>Options</code>, see below.</p><p>Also, when <code>OptionList == []</code>, only visible nodes, that is, nodes that appear in the result of <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#nodes/0"><code>erlang:nodes/0</code></a>, are monitored.</p><p><code>Option</code> can be any of the following:</p><dl><dt><code>{node_type, NodeType}</code></dt><dd><p>Valid values for <code>NodeType</code>:</p><dl><dt><code>visible</code></dt><dd><p>Subscribe to node status change messages for visible nodes only. The tuple <code>{node_type, visible}</code> is included in <code>InfoList</code>.</p></dd><dt><code>hidden</code></dt><dd><p>Subscribe to node status change messages for hidden nodes only. The tuple <code>{node_type, hidden}</code> is included in <code>InfoList</code>.</p></dd><dt><code>all</code></dt><dd><p>Subscribe to node status change messages for both visible and hidden nodes. The tuple <code>{node_type, visible | hidden}</code> is included in <code>InfoList</code>.</p></dd></dl></dd><dt><code>nodedown_reason</code></dt><dd><p>The tuple <code>{nodedown_reason, Reason}</code> is included in <code>InfoList</code> in <code>nodedown</code> messages.</p><p><code>Reason</code> can, depending on which distribution module or process that is used be any term, but for the standard TCP distribution module it is any of the following:</p><dl><dt><code>connection_setup_failed</code></dt><dd><p>The connection setup failed (after <code>nodeup</code> messages were sent).</p></dd><dt><code>no_network</code></dt><dd><p>No network is available.</p></dd><dt><code>net_kernel_terminated</code></dt><dd><p>The <code>net_kernel</code> process terminated.</p></dd><dt><code>shutdown</code></dt><dd><p>Unspecified connection shutdown.</p></dd><dt><code>connection_closed</code></dt><dd><p>The connection was closed.</p></dd><dt><code>disconnect</code></dt><dd><p>The connection was disconnected (forced from the current node).</p></dd><dt><code>net_tick_timeout</code></dt><dd><p>Net tick time-out.</p></dd><dt><code>send_net_tick_failed</code></dt><dd><p>Failed to send net tick over the connection.</p></dd><dt><code>get_status_failed</code></dt><dd><p>Status information retrieval from the <code>Port</code> holding the connection failed.</p></dd></dl></dd></dl>
+  </section>
+</section>
+<section class="detail" id="monitor_nodes/2">
+
+  <div class="detail-header">
+    <a href="#monitor_nodes/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monitor_nodes/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>monitor_nodes(Flag, Options) -> ok | Error
+                 when
+                     Flag :: boolean(),
+                     Options :: [Option],
+                     Option :: {node_type, NodeType} | nodedown_reason,
+                     NodeType :: visible | hidden | all,
+                     Error :: error | {error, term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="set_net_ticktime/1">
+
+  <div class="detail-header">
+    <a href="#set_net_ticktime/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_net_ticktime/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_net_ticktime(NetTicktime) -> Res
+                    when
+                        NetTicktime :: pos_integer(),
+                        Res :: unchanged | change_initiated | {ongoing_change_to, NewNetTicktime},
+                        NewNetTicktime :: pos_integer().</pre>
+
+      </div>
+
+<p>Sets <code>net_ticktime</code> (see <code>kernel(6)</code>) to <code>NetTicktime</code> seconds. <code>TransitionPeriod</code> defaults to <code>60</code>.</p><p>Some definitions:</p><dl><dt>Minimum transition traffic interval (<code>MTTI</code>)</dt><dd><p><code>minimum(NetTicktime, PreviousNetTicktime)*1000 div 4</code> milliseconds.</p></dd><dt>Transition period</dt><dd><p>The time of the least number of consecutive <code>MTTI</code>s to cover <code>TransitionPeriod</code> seconds following the call to <code>set_net_ticktime/2</code> (that is, ((<code>TransitionPeriod*1000 - 1) div MTTI + 1)*MTTI</code> milliseconds).</p></dd></dl><p>If <code>NetTicktime &lt; PreviousNetTicktime</code>, the <code>net_ticktime</code> change is done at the end of the transition period; otherwise at the beginning. During the transition period, <code>net_kernel</code> ensures that there is outgoing traffic on all connections at least every <code>MTTI</code> millisecond.</p><div class="note"><p>The <code>net_ticktime</code> changes must be initiated on all nodes in the network (with the same <code>NetTicktime</code>) before the end of any transition period on any node; otherwise connections can erroneously be disconnected.</p></div><p>Returns one of the following:</p><dl><dt><code>unchanged</code></dt><dd><p><code>net_ticktime</code> already has the value of <code>NetTicktime</code> and is left unchanged.</p></dd><dt><code>change_initiated</code></dt><dd><p><code>net_kernel</code> initiated the change of <code>net_ticktime</code> to <code>NetTicktime</code> seconds.</p></dd><dt><code>{ongoing_change_to, NewNetTicktime}</code></dt><dd><p>The request is <em>ignored</em> because <code>net_kernel</code> is busy changing <code>net_ticktime</code> to <code>NewNetTicktime</code> seconds.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="set_net_ticktime/2">
+
+  <div class="detail-header">
+    <a href="#set_net_ticktime/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_net_ticktime/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_net_ticktime(NetTicktime, TransitionPeriod) -> Res
+                    when
+                        NetTicktime :: pos_integer(),
+                        TransitionPeriod :: non_neg_integer(),
+                        Res :: unchanged | change_initiated | {ongoing_change_to, NewNetTicktime},
+                        NewNetTicktime :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="setopts/2">
+
+  <div class="detail-header">
+    <a href="#setopts/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setopts/2</h1>
+
+
+      <span class="note">(since OTP 19.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setopts(Node, Options) -> ok | {error, Reason} | ignored
+           when
+               Node :: node() | new,
+               Options :: [<a href="inet.html#t:socket_setopt/0">inet:socket_setopt</a>()],
+               Reason :: <a href="inet.html#t:posix/0">inet:posix</a>() | noconnection.</pre>
+
+      </div>
+
+<p>Set one or more options for distribution sockets. Argument <code>Node</code> can be either one node name or the atom <code>new</code> to affect the distribution sockets of all future connected nodes.</p><p>The return value is the same as from <a href="inet.html#setopts/2"><code>inet:setopts/2</code></a> or <code>{error, noconnection}</code> if <code>Node</code> is not a connected node or <code>new</code>.</p><p>If <code>Node</code> is <code>new</code> the <code>Options</code> will then also be added to kernel configration parameters inet_dist_listen_options and inet_dist_connect_options.</p><p>Returns <code>ignored</code> if the local node is not alive.</p>
+  </section>
+</section>
+<section class="detail" id="start/1">
+
+  <div class="detail-header">
+    <a href="#start/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start([Name, NameType, Ticktime]) -&gt; {ok, pid()} | {error, Reason} start([Name, NameType]) -&gt; {ok, pid()} | {error, Reason} start([Name]) -&gt; {ok, pid()} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Name = atom()</li><li class="type">NameType = shortnames | longnames</li><li class="type">Reason = {already_started, pid()} | term()</li></ul><p>Turns a non-distributed node into a distributed node by starting <code>net_kernel</code> and other necessary processes.</p><p>Notice that the argument is a list with exactly one, two, or three arguments. <code>NameType</code> defaults to <code>longnames</code> and <code>Ticktime</code> to <code>15000</code>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop() -> ok | {error, Reason} when Reason :: not_allowed | not_found.</pre>
+
+      </div>
+
+<p>Turns a distributed node into a non-distributed node. For other nodes in the network, this is the same as the node going down. Only possible when the net kernel was started using <a href="net_kernel.html#start/1"><code>start/1</code></a>, otherwise <code>{error, not_allowed}</code> is returned. Returns <code>{error, not_found}</code> if the local node is not alive.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

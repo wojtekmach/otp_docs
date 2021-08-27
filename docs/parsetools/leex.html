@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="parsetools v2.3">
+
+    <title>leex — parsetools v2.3</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-db7ed87b4b.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+parsetools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.3
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+leex <small class="app-vsn">(parsetools v2.3)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>A regular expression based lexical analyzer generator for Erlang, similar to lex or flex.</p><div class="note"><p>The Leex module should be considered experimental as it will be subject to changes in future releases.</p></div><h2 id="module-default-leex-options" class="section-heading">
+  <a href="#module-default-leex-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Default Leex Options
+</h2>
+<p>The (host operating system) environment variable <code>ERL_COMPILER_OPTIONS</code> can be used to give default Leex options. Its value must be a valid Erlang term. If the value is a list, it is used as is. If it is not a list, it is put into a list.</p><p>The list is appended to any options given to <a href="leex.html#file/2">file/2</a>.</p><p>The list can be retrieved with <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#env_compiler_options/0">compile:env_compiler_options/0</a>.</p><h2 id="module-input-file-format" class="section-heading">
+  <a href="#module-input-file-format" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Input File Format
+</h2>
+<p>Erlang style comments starting with a <code>%</code> are allowed in scanner files. A definition file has the following format:</p><pre><code class="makeup erlang"><span class="o">&lt;</span><span class="n">Header</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="n">Definitions</span><span class="p">.</span><span class="w">
+
+</span><span class="o">&lt;</span><span class="n">Macro</span><span class="w"> </span><span class="n">Definitions</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="n">Rules</span><span class="p">.</span><span class="w">
+
+</span><span class="o">&lt;</span><span class="n">Token</span><span class="w"> </span><span class="n">Rules</span><span class="o">&gt;</span><span class="w">
+
+</span><span class="n">Erlang</span><span class="w"> </span><span class="ss">code</span><span class="p">.</span><span class="w">
+
+</span><span class="o">&lt;</span><span class="n">Erlang</span><span class="w"> </span><span class="ss">code</span><span class="o">&gt;</span></code></pre><p>The &quot;Definitions.&quot;, &quot;Rules.&quot; and &quot;Erlang code.&quot; headings are mandatory and must occur at the beginning of a source line. The &lt;Header&gt;, &lt;Macro Definitions&gt; and &lt;Erlang code&gt; sections may be empty but there must be at least one rule.</p><p>Macro definitions have the following format:</p><pre><code class="makeup erlang"><span class="n">NAME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VALUE</span></code></pre><p>and there must be spaces around <code>=</code>. Macros can be used in the regular expressions of rules by writing <code>{NAME}</code>.</p><div class="note"><p>When macros are expanded in expressions the macro calls are replaced by the macro value without any form of quoting or enclosing in parentheses.</p></div><p>Rules have the following format:</p><pre><code class="makeup erlang"><span class="o">&lt;</span><span class="n">Regexp</span><span class="o">&gt;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">Erlang</span><span class="w"> </span><span class="ss">code</span><span class="o">&gt;</span><span class="p">.</span></code></pre><p>The &lt;Regexp&gt; must occur at the start of a line and not include any blanks; use <code>\t</code> and <code>\s</code> to include TAB and SPACE characters in the regular expression. If &lt;Regexp&gt; matches then the corresponding &lt;Erlang code&gt; is evaluated to generate a token. With the Erlang code the following predefined variables are available:</p><dl><dt><code>TokenChars</code></dt><dd><p>A list of the characters in the matched token.</p></dd><dt><code>TokenLen</code></dt><dd><p>The number of characters in the matched token.</p></dd><dt><code>TokenLine</code></dt><dd><p>The line number where the token occurred.</p></dd></dl><p>The code must return:</p><dl><dt><code>{token,Token}</code></dt><dd><p>Return <code>Token</code> to the caller.</p></dd><dt><code>{end_token,Token}</code></dt><dd><p>Return <code>Token</code> and is last token in a tokens call.</p></dd><dt><code>skip_token</code></dt><dd><p>Skip this token completely.</p></dd><dt><code>{error,ErrString}</code></dt><dd><p>An error in the token, <code>ErrString</code> is a string describing the error.</p></dd></dl><p>It is also possible to push back characters into the input characters with the following returns:</p><ul><li><code>{token,Token,PushBackList}</code></li><li><code>{end_token,Token,PushBackList}</code></li><li><code>{skip_token,PushBackList}</code></li></ul><p>These have the same meanings as the normal returns but the characters in <code>PushBackList</code> will be prepended to the input characters and scanned for the next token. Note that pushing back a newline will mean the line numbering will no longer be correct.</p><div class="note"><p>Pushing back characters gives you unexpected possibilities to cause the scanner to loop!</p></div><p>The following example would match a simple Erlang integer or float and return a token which could be sent to the Erlang parser:</p><pre><code class="makeup erlang"><span class="n">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="7714872347-1">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p" data-group-id="7714872347-1">]</span><span class="w">
+
+</span><span class="p" data-group-id="7714872347-2">{</span><span class="n">D</span><span class="p" data-group-id="7714872347-2">}</span><span class="o">+</span><span class="w"> </span><span class="p">:</span><span class="w">
+  </span><span class="p" data-group-id="7714872347-3">{</span><span class="ss">token</span><span class="p">,</span><span class="p" data-group-id="7714872347-4">{</span><span class="ss">integer</span><span class="p">,</span><span class="n">TokenLine</span><span class="p">,</span><span class="nf">list_to_integer</span><span class="p" data-group-id="7714872347-5">(</span><span class="n">TokenChars</span><span class="p" data-group-id="7714872347-5">)</span><span class="p" data-group-id="7714872347-4">}</span><span class="p" data-group-id="7714872347-3">}</span><span class="p">.</span><span class="w">
+
+</span><span class="p" data-group-id="7714872347-6">{</span><span class="n">D</span><span class="p" data-group-id="7714872347-6">}</span><span class="o">+</span><span class="err">\</span><span class="p">.</span><span class="p" data-group-id="7714872347-7">{</span><span class="n">D</span><span class="p" data-group-id="7714872347-7">}</span><span class="o">+</span><span class="p" data-group-id="7714872347-8">(</span><span class="p" data-group-id="7714872347-9">(</span><span class="n">E</span><span class="p">|</span><span class="ss">e</span><span class="p" data-group-id="7714872347-9">)</span><span class="p" data-group-id="7714872347-10">(</span><span class="err">\</span><span class="o">+</span><span class="p">|</span><span class="err">\</span><span class="o">-</span><span class="p" data-group-id="7714872347-10">)</span><span class="o">?</span><span class="p" data-group-id="7714872347-11">{</span><span class="n">D</span><span class="p" data-group-id="7714872347-11">}</span><span class="o">+</span><span class="p" data-group-id="7714872347-8">)</span><span class="o">?</span><span class="w"> </span><span class="p">:</span><span class="w">
+  </span><span class="p" data-group-id="7714872347-12">{</span><span class="ss">token</span><span class="p">,</span><span class="p" data-group-id="7714872347-13">{</span><span class="nb">float</span><span class="p">,</span><span class="n">TokenLine</span><span class="p">,</span><span class="nf">list_to_float</span><span class="p" data-group-id="7714872347-14">(</span><span class="n">TokenChars</span><span class="p" data-group-id="7714872347-14">)</span><span class="p" data-group-id="7714872347-13">}</span><span class="p" data-group-id="7714872347-12">}</span><span class="p">.</span></code></pre><p>The Erlang code in the &quot;Erlang code.&quot; section is written into the output file directly after the module declaration and predefined exports declaration so it is possible to add extra exports, define imports and other attributes which are then visible in the whole file.</p><h2 id="module-regular-expressions" class="section-heading">
+  <a href="#module-regular-expressions" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Regular Expressions
+</h2>
+<p>The regular expressions allowed here is a subset of the set found in <code>egrep</code> and in the AWK programming language, as defined in the book, The AWK Programming Language, by A. V. Aho, B. W. Kernighan, P. J. Weinberger. They are composed of the following characters:</p><dl><dt><code>c</code></dt><dd><p>Matches the non-metacharacter c.</p></dd><dt><code>\c</code></dt><dd><p>Matches the escape sequence or literal character c.</p></dd><dt><code>.</code></dt><dd><p>Matches any character.</p></dd><dt><code>^</code></dt><dd><p>Matches the beginning of a string.</p></dd><dt><code>$</code></dt><dd><p>Matches the end of a string.</p></dd><dt><code>[abc...]</code></dt><dd><p>Character class, which matches any of the characters <code>abc...</code>. Character ranges are specified by a pair of characters separated by a <code>-</code>.</p></dd><dt><code>[^abc...]</code></dt><dd><p>Negated character class, which matches any character except <code>abc...</code>.</p></dd><dt><code>r1 | r2</code></dt><dd><p>Alternation. It matches either <code>r1</code> or <code>r2</code>.</p></dd><dt><code>r1r2</code></dt><dd><p>Concatenation. It matches <code>r1</code> and then <code>r2</code>.</p></dd><dt><code>r+</code></dt><dd><p>Matches one or more <code>rs</code>.</p></dd><dt><code>r*</code></dt><dd><p>Matches zero or more <code>rs</code>.</p></dd><dt><code>r?</code></dt><dd><p>Matches zero or one <code>rs</code>.</p></dd><dt><code>(r)</code></dt><dd><p>Grouping. It matches <code>r</code>.</p></dd></dl><p>The escape sequences allowed are the same as for Erlang strings:</p><dl><dt><code>\b</code></dt><dd><p>Backspace.</p></dd><dt><code>\f</code></dt><dd><p>Form feed.</p></dd><dt><code>\n</code></dt><dd><p>Newline (line feed).</p></dd><dt><code>\r</code></dt><dd><p>Carriage return.</p></dd><dt><code>\t</code></dt><dd><p>Tab.</p></dd><dt><code>\e</code></dt><dd><p>Escape.</p></dd><dt><code>\v</code></dt><dd><p>Vertical tab.</p></dd><dt><code>\s</code></dt><dd><p>Space.</p></dd><dt><code>\d</code></dt><dd><p>Delete.</p></dd><dt><code>\ddd</code></dt><dd><p>The octal value <code>ddd</code>.</p></dd><dt><code>\xhh</code></dt><dd><p>The hexadecimal value <code>hh</code>.</p></dd><dt><code>\x{h...}</code></dt><dd><p>The hexadecimal value <code>h...</code>.</p></dd><dt><code>\c</code></dt><dd><p>Any other character literally, for example <code>\\</code> for backslash, <code>\&quot;</code> for <code>&quot;</code>.</p></dd></dl><p>The following examples define simplified versions of a few Erlang data types:</p><pre><code class="makeup erlang"><span class="w"> 
+</span><span class="n">Atoms</span><span class="w"> </span><span class="p" data-group-id="3491825800-1">[</span><span class="ss">a</span><span class="o">-</span><span class="ss">z</span><span class="p" data-group-id="3491825800-1">]</span><span class="p" data-group-id="3491825800-2">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="ss">a</span><span class="o">-</span><span class="ss">zA</span><span class="o">-</span><span class="n">Z_</span><span class="p" data-group-id="3491825800-2">]</span><span class="o">*</span><span class="w">
+
+</span><span class="n">Variables</span><span class="w"> </span><span class="p" data-group-id="3491825800-3">[</span><span class="n">A</span><span class="o">-</span><span class="n">Z_</span><span class="p" data-group-id="3491825800-3">]</span><span class="p" data-group-id="3491825800-4">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="ss">a</span><span class="o">-</span><span class="ss">zA</span><span class="o">-</span><span class="n">Z_</span><span class="p" data-group-id="3491825800-4">]</span><span class="o">*</span><span class="w">
+
+</span><span class="n">Floats</span><span class="w"> </span><span class="p" data-group-id="3491825800-5">(</span><span class="err">\</span><span class="o">+</span><span class="p">|</span><span class="o">-</span><span class="p" data-group-id="3491825800-5">)</span><span class="o">?</span><span class="p" data-group-id="3491825800-6">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p" data-group-id="3491825800-6">]</span><span class="o">+</span><span class="err">\</span><span class="p">.</span><span class="p" data-group-id="3491825800-7">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p" data-group-id="3491825800-7">]</span><span class="o">+</span><span class="p" data-group-id="3491825800-8">(</span><span class="p" data-group-id="3491825800-9">(</span><span class="n">E</span><span class="p">|</span><span class="ss">e</span><span class="p" data-group-id="3491825800-9">)</span><span class="p" data-group-id="3491825800-10">(</span><span class="err">\</span><span class="o">+</span><span class="p">|</span><span class="o">-</span><span class="p" data-group-id="3491825800-10">)</span><span class="o">?</span><span class="p" data-group-id="3491825800-11">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="p" data-group-id="3491825800-11">]</span><span class="o">+</span><span class="p" data-group-id="3491825800-8">)</span><span class="o">?</span></code></pre><div class="note"><p>Anchoring a regular expression with <code>^</code> and <code>$</code> is not implemented in the current version of Leex and just generates a parse error.</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error_info/0">-type error_info() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The standard <code>error_info()</code> structure that is returned from all I/O modules. <code>ErrorDescriptor</code> is formattable by <a href="leex.html#format_error/1"><code>format_error/1</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#file/1">file/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="error_ret"></li><li name="errors"></li><li name="leex_ret"></li><li name="ok_ret"></li><li name="warnings"></li></ul><p>Generates a lexical analyzer from the definition in the input file. The input file has the extension <code>.xrl</code>. This is added to the filename if it is not given. The resulting module is the Xrl filename without the <code>.xrl</code> extension.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#file/2">file/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_error/1">format_error/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a descriptive string in English of an error reason <code>ErrorDescriptor</code> returned by <a href="leex.html#file/1"><code>leex:file/1,2</code></a> when there is an error in a regular expression.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:error_info/0">
+
+  <div class="detail-header">
+    <a href="#t:error_info/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type error_info() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_info() :: {<a href="https://wojtekmach.pl/otp_docs/stdlib/erl_anno.html#t:line/0">erl_anno:line</a>() | none, module(), ErrorDescriptor :: term()}.</pre>
+
+      </div>
+
+<p>The standard <code>error_info()</code> structure that is returned from all I/O modules. <code>ErrorDescriptor</code> is formattable by <a href="leex.html#format_error/1"><code>format_error/1</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="file/1">
+
+  <div class="detail-header">
+    <a href="#file/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">file/1</h1>
+
+
+      <span class="note">(since OTP R16B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>file(FileName) -> <a href="#t:leex_ret/0">leex_ret</a>() when FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="error_ret"></li><li name="errors"></li><li name="leex_ret"></li><li name="ok_ret"></li><li name="warnings"></li></ul><p>Generates a lexical analyzer from the definition in the input file. The input file has the extension <code>.xrl</code>. This is added to the filename if it is not given. The resulting module is the Xrl filename without the <code>.xrl</code> extension.</p><p>The current options are:</p><dl><dt><code>dfa_graph</code></dt><dd><p>Generates a <code>.dot</code> file which contains a description of the DFA in a format which can be viewed with Graphviz, <code>www.graphviz.com</code>.</p></dd><dt><code>{includefile,Includefile}</code></dt><dd><p>Uses a specific or customised prologue file instead of default <code>lib/parsetools/include/leexinc.hrl</code> which is otherwise included.</p></dd><dt><code>{report_errors, boolean()}</code></dt><dd><p>Causes errors to be printed as they occur. Default is <code>true</code>.</p></dd><dt><code>{report_warnings, boolean()}</code></dt><dd><p>Causes warnings to be printed as they occur. Default is <code>true</code>.</p></dd><dt><code>{report, boolean()}</code></dt><dd><p>This is a short form for both <code>report_errors</code> and <code>report_warnings</code>.</p></dd><dt><code>{return_errors, boolean()}</code></dt><dd><p>If this flag is set, <code>{error, Errors, Warnings}</code> is returned when there are errors. Default is <code>false</code>.</p></dd><dt><code>{return_warnings, boolean()}</code></dt><dd><p>If this flag is set, an extra field containing <code>Warnings</code> is added to the tuple returned upon success. Default is <code>false</code>.</p></dd><dt><code>{return, boolean()}</code></dt><dd><p>This is a short form for both <code>return_errors</code> and <code>return_warnings</code>.</p></dd><dt><code>{scannerfile, Scannerfile}</code></dt><dd><p><code>Scannerfile</code> is the name of the file that will contain the Erlang scanner code that is generated. The default (<code>&quot;&quot;</code>) is to add the extension <code>.erl</code> to <code>FileName</code> stripped of the <code>.xrl</code> extension.</p></dd><dt><code>{verbose, boolean()}</code></dt><dd><p>Outputs information from parsing the input file and generating the internal tables.</p></dd><dt><code>{warnings_as_errors, boolean()}</code></dt><dd><p>Causes warnings to be treated as errors.</p></dd></dl><p>Any of the Boolean options can be set to <code>true</code> by stating the name of the option. For example, <code>verbose</code> is equivalent to <code>{verbose, true}</code>.</p><p>Leex will add the extension <code>.hrl</code> to the <code>Includefile</code> name and the extension <code>.erl</code> to the <code>Scannerfile</code> name, unless the extension is already there.</p>
+  </section>
+</section>
+<section class="detail" id="file/2">
+
+  <div class="detail-header">
+    <a href="#file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">file/2</h1>
+
+
+      <span class="note">(since OTP R16B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>file(FileName, Options) -> <a href="#t:leex_ret/0">leex_ret</a>()
+        when
+            FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+            Options :: Option | [Option],
+            Option ::
+                {dfa_graph, boolean()} |
+                {includefile, Includefile :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+                {report_errors, boolean()} |
+                {report_warnings, boolean()} |
+                {report, boolean()} |
+                {return_errors, boolean()} |
+                {return_warnings, boolean()} |
+                {return, boolean()} |
+                {scannerfile, Scannerfile :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+                {verbose, boolean()} |
+                {warnings_as_errors, boolean()} |
+                dfa_graph | report_errors | report_warnings | report | return_errors |
+                return_warnings | return | verbose | warnings_as_errors.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="format_error/1">
+
+  <div class="detail-header">
+    <a href="#format_error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_error/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_error(ErrorDescriptor) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/io_lib.html#t:chars/0">io_lib:chars</a>() when ErrorDescriptor :: term().</pre>
+
+      </div>
+
+<p>Returns a descriptive string in English of an error reason <code>ErrorDescriptor</code> returned by <a href="leex.html#file/1"><code>leex:file/1,2</code></a> when there is an error in a regular expression.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

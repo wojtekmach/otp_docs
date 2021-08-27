@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>uri_string — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+uri_string <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module contains functions for parsing and handling URIs (<a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>) and form-urlencoded query strings (<a href="https://www.w3.org/TR/html52/">HTML 5.2</a>).</p><p>Parsing and serializing non-UTF-8 form-urlencoded query strings are also supported (<a href="https://www.w3.org/TR/html50/">HTML 5.0</a>).</p><p>A URI is an identifier consisting of a sequence of characters matching the syntax rule named <em>URI</em> in <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>.</p><p>The generic URI syntax consists of a hierarchical sequence of components referred to as the scheme, authority, path, query, and fragment:</p><pre><code class="makeup erlang"><span class="w">    </span><span class="n">URI</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="ss">scheme</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="ss">hier</span><span class="o">-</span><span class="ss">part</span><span class="w"> </span><span class="p" data-group-id="4405330916-1">[</span><span class="w"> </span><span class="s">&quot;?&quot;</span><span class="w"> </span><span class="k">query</span><span class="w"> </span><span class="p" data-group-id="4405330916-1">]</span><span class="w"> </span><span class="p" data-group-id="4405330916-2">[</span><span class="w"> </span><span class="s">&quot;#&quot;</span><span class="w"> </span><span class="ss">fragment</span><span class="w"> </span><span class="p" data-group-id="4405330916-2">]</span><span class="w">
+    </span><span class="ss">hier</span><span class="o">-</span><span class="ss">part</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;//&quot;</span><span class="w"> </span><span class="ss">authority</span><span class="w"> </span><span class="ss">path</span><span class="o">-</span><span class="ss">abempty</span><span class="w">
+                   </span><span class="o">/</span><span class="w"> </span><span class="ss">path</span><span class="o">-</span><span class="ss">absolute</span><span class="w">
+                   </span><span class="o">/</span><span class="w"> </span><span class="ss">path</span><span class="o">-</span><span class="ss">rootless</span><span class="w">
+                   </span><span class="o">/</span><span class="w"> </span><span class="ss">path</span><span class="o">-</span><span class="ss">empty</span><span class="w">
+    </span><span class="ss">scheme</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">ALPHA</span><span class="w"> </span><span class="o">*</span><span class="p" data-group-id="4405330916-3">(</span><span class="w"> </span><span class="n">ALPHA</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">DIGIT</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;+&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;-&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="w"> </span><span class="p" data-group-id="4405330916-3">)</span><span class="w">
+    </span><span class="ss">authority</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="4405330916-4">[</span><span class="w"> </span><span class="ss">userinfo</span><span class="w"> </span><span class="s">&quot;@&quot;</span><span class="w"> </span><span class="p" data-group-id="4405330916-4">]</span><span class="w"> </span><span class="ss">host</span><span class="w"> </span><span class="p" data-group-id="4405330916-5">[</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="ss">port</span><span class="w"> </span><span class="p" data-group-id="4405330916-5">]</span><span class="w">
+    </span><span class="ss">userinfo</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="p" data-group-id="4405330916-6">(</span><span class="w"> </span><span class="ss">unreserved</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="ss">pct</span><span class="o">-</span><span class="ss">encoded</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="ss">sub</span><span class="o">-</span><span class="ss">delims</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="p" data-group-id="4405330916-6">)</span><span class="w">
+
+    </span><span class="ss">reserved</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="ss">gen</span><span class="o">-</span><span class="ss">delims</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="ss">sub</span><span class="o">-</span><span class="ss">delims</span><span class="w">
+    </span><span class="ss">gen</span><span class="o">-</span><span class="ss">delims</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;?&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;#&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;[&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;@&quot;</span><span class="w">
+    </span><span class="ss">sub</span><span class="o">-</span><span class="ss">delims</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;!&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;$&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;&amp;&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;(&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;)&quot;</span><span class="w">
+                </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;+&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;,&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;;&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;=&quot;</span><span class="w">
+
+    </span><span class="ss">unreserved</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">ALPHA</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">DIGIT</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;-&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;_&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;~&quot;</span><span class="w">
+    </span></code></pre><br/><p>The interpretation of a URI depends only on the characters used and not on how those characters are represented in a network protocol.</p><p>The functions implemented by this module cover the following use cases:</p><ul><li>Parsing URIs into its components and returing a map<br/><a href="uri_string.html#parse/1"><code>parse/1</code></a></li><li>Recomposing a map of URI components into a URI string<br/><a href="uri_string.html#recompose/1"><code>recompose/1</code></a></li><li>Changing inbound binary and percent-encoding of URIs<br/><a href="uri_string.html#transcode/2"><code>transcode/2</code></a></li><li>Transforming URIs into a normalized form<br/><a href="uri_string.html#normalize/1"><code>normalize/1</code></a><br/><a href="uri_string.html#normalize/2"><code>normalize/2</code></a></li><li>Composing form-urlencoded query strings from a list of key-value pairs<br/><a href="uri_string.html#compose_query/1"><code>compose_query/1</code></a><br/><a href="uri_string.html#compose_query/2"><code>compose_query/2</code></a></li><li>Dissecting form-urlencoded query strings into a list of key-value pairs<br/><a href="uri_string.html#dissect_query/1"><code>dissect_query/1</code></a></li><li>Decoding percent-encoded triplets<br/><a href="uri_string.html#percent_decode/1"><code>percent_decode/1</code></a></li></ul><p>There are four different encodings present during the handling of URIs:</p><ul><li>Inbound binary encoding in binaries</li><li>Inbound percent-encoding in lists and binaries</li><li>Outbound binary encoding in binaries</li><li>Outbound percent-encoding in lists and binaries</li></ul><p>Functions with <code>uri_string()</code> argument accept lists, binaries and mixed lists (lists with binary elements) as input type. All of the functions but <code>transcode/2</code> expects input as lists of unicode codepoints, UTF-8 encoded binaries and UTF-8 percent-encoded URI parts (&quot;%C3%B6&quot; corresponds to the unicode character &quot;ö&quot;).</p><p>Unless otherwise specified the return value type and encoding are the same as the input type and encoding. That is, binary input returns binary output, list input returns a list output but mixed input returns list output.</p><p>In case of lists there is only percent-encoding. In binaries, however, both binary encoding and percent-encoding shall be considered. <code>transcode/2</code> provides the means to convert between the supported encodings, it takes a <code>uri_string()</code> and a list of options specifying inbound and outbound encodings.</p><p><a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> does not mandate any specific character encoding and it is usually defined by the protocol or surrounding text. This library takes the same assumption, binary and percent-encoding are handled as one configuration unit, they cannot be set to different values.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error/0">-type error() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Error tuple indicating the type of error. Possible values of the second component</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:uri_map/0">-type uri_map() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Map holding the main components of a URI.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:uri_string/0">-type uri_string() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>List of unicode codepoints, a UTF-8 encoded binary, or a mix of the two, representing an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant URI (<em>percent-encoded form</em>). A URI is a sequence of characters from a very limited set: the letters of the basic Latin alphabet, digits, and a few special characters.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#allowed_characters/0">allowed_characters/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is a utility function meant to be used in the shell for printing the allowed characters in each major URI component, and also in the most important characters sets. Please note that this function does not replace the ABNF rules defined by the standards, these character sets are derived directly from those aformentioned rules. For more information see the Uniform Resource Identifiers chapter in stdlib's Users Guide.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compose_query/1">compose_query/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Composes a form-urlencoded <code>QueryString</code> based on a <code>QueryList</code>, a list of non-percent-encoded key-value pairs. Form-urlencoding is defined in section 4.10.21.6 of the <a href="https://www.w3.org/TR/html52/">HTML 5.2</a> specification and in section 4.10.22.6 of the <a href="https://www.w3.org/TR/html50/">HTML 5.0</a> specification for non-UTF-8 encodings.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compose_query/2">compose_query/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>compose_query/1</code> but with an additional <code>Options</code> parameter, that controls the encoding (&quot;charset&quot;) used by the encoding algorithm. There are two supported encodings: <code>utf8</code> (or <code>unicode</code>) and <code>latin1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#dissect_query/1">dissect_query/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Dissects an urlencoded <code>QueryString</code> and returns a <code>QueryList</code>, a list of non-percent-encoded key-value pairs. Form-urlencoding is defined in section 4.10.21.6 of the <a href="https://www.w3.org/TR/html52/">HTML 5.2</a> specification and in section 4.10.22.6 of the <a href="https://www.w3.org/TR/html50/">HTML 5.0</a> specification for non-UTF-8 encodings.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#normalize/1">normalize/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Transforms an <code>URI</code> into a normalized form using Syntax-Based Normalization as defined by <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#normalize/2">normalize/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>normalize/1</code> but with an additional <code>Options</code> parameter, that controls whether the normalized URI shall be returned as an uri_map(). There is one supported option: <code>return_map</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parse/1">parse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Parses an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>uri_string()</code> into a <code>uri_map()</code>, that holds the parsed components of the <code>URI</code>. If parsing fails, an error tuple is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#percent_decode/1">percent_decode/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Decodes all percent-encoded triplets in the input that can be both a <code>uri_string()</code> and a <code>uri_map()</code>. Note, that this function performs raw decoding and it shall be used on already parsed URI components. Applying this function directly on a standard URI can effectively change it.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#recompose/1">recompose/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>URIString</code> (percent-encoded), based on the components of <code>URIMap</code>. If the <code>URIMap</code> is invalid, an error tuple is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resolve/2">resolve/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Convert a <code>RefURI</code> reference that might be relative to a given base URI into the parsed components of the reference's target, which can then be recomposed to form the target URI.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resolve/3">resolve/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>resolve/2</code> but with an additional <code>Options</code> parameter, that controls whether the target URI shall be returned as an uri_map(). There is one supported option: <code>return_map</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#transcode/2">transcode/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Transcodes an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>URIString</code>, where <code>Options</code> is a list of tagged tuples, specifying the inbound (<code>in_encoding</code>) and outbound (<code>out_encoding</code>) encodings. <code>in_encoding</code> and <code>out_encoding</code> specifies both binary encoding and percent-encoding for the input and output data. Mixed encoding, where binary encoding is not the same as percent-encoding, is not supported. If an argument is invalid, an error tuple is returned.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:error/0">
+
+  <div class="detail-header">
+    <a href="#t:error/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type error() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error() :: {error, atom(), term()}.</pre>
+
+      </div>
+
+<p>Error tuple indicating the type of error. Possible values of the second component:</p><ul><li><code>invalid_character</code></li><li><code>invalid_encoding</code></li><li><code>invalid_input</code></li><li><code>invalid_map</code></li><li><code>invalid_percent_encoding</code></li><li><code>invalid_scheme</code></li><li><code>invalid_uri</code></li><li><code>invalid_utf8</code></li><li><code>missing_value</code></li></ul><p>The third component is a term providing additional information about the cause of the error.</p>
+  </section>
+</section>
+<section class="detail" id="t:uri_map/0">
+
+  <div class="detail-header">
+    <a href="#t:uri_map/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type uri_map() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uri_map() ::
+    #{fragment => <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+      host => <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+      path => <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+      port => non_neg_integer() | undefined,
+      query => <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+      scheme => <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+      userinfo => <a href="unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Map holding the main components of a URI.</p>
+  </section>
+</section>
+<section class="detail" id="t:uri_string/0">
+
+  <div class="detail-header">
+    <a href="#t:uri_string/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type uri_string() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uri_string() :: iodata().</pre>
+
+      </div>
+
+<p>List of unicode codepoints, a UTF-8 encoded binary, or a mix of the two, representing an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant URI (<em>percent-encoded form</em>). A URI is a sequence of characters from a very limited set: the letters of the basic Latin alphabet, digits, and a few special characters.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="allowed_characters/0">
+
+  <div class="detail-header">
+    <a href="#allowed_characters/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">allowed_characters/0</h1>
+
+
+      <span class="note">(since OTP 23.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>allowed_characters() -> [{atom(), list()}].</pre>
+
+      </div>
+
+<p>This is a utility function meant to be used in the shell for printing the allowed characters in each major URI component, and also in the most important characters sets. Please note that this function does not replace the ABNF rules defined by the standards, these character sets are derived directly from those aformentioned rules. For more information see the Uniform Resource Identifiers chapter in stdlib's Users Guide.</p>
+  </section>
+</section>
+<section class="detail" id="compose_query/1">
+
+  <div class="detail-header">
+    <a href="#compose_query/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compose_query/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compose_query(QueryList) -> QueryString
+                 when
+                     QueryList :: [{<a href="unicode.html#t:chardata/0">unicode:chardata</a>(), <a href="unicode.html#t:chardata/0">unicode:chardata</a>() | true}],
+                     QueryString :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Composes a form-urlencoded <code>QueryString</code> based on a <code>QueryList</code>, a list of non-percent-encoded key-value pairs. Form-urlencoding is defined in section 4.10.21.6 of the <a href="https://www.w3.org/TR/html52/">HTML 5.2</a> specification and in section 4.10.22.6 of the <a href="https://www.w3.org/TR/html50/">HTML 5.0</a> specification for non-UTF-8 encodings.</p><p>See also the opposite operation <a href="uri_string.html#dissect_query/1"><code>dissect_query/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">compose_query</span><span class="p" data-group-id="5933942615-1">(</span><span class="p" data-group-id="5933942615-2">[</span><span class="p" data-group-id="5933942615-3">{</span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span><span class="s">&quot;1&quot;</span><span class="p" data-group-id="5933942615-3">}</span><span class="p">,</span><span class="p" data-group-id="5933942615-4">{</span><span class="s">&quot;city&quot;</span><span class="p">,</span><span class="s">&quot;örebro&quot;</span><span class="p" data-group-id="5933942615-4">}</span><span class="p" data-group-id="5933942615-2">]</span><span class="p" data-group-id="5933942615-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo+bar=1&amp;city=%C3%B6rebro&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">compose_query</span><span class="p" data-group-id="5933942615-5">(</span><span class="p" data-group-id="5933942615-6">[</span><span class="p" data-group-id="5933942615-7">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo bar&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;1&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="5933942615-7">}</span><span class="p">,</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="5933942615-8">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;city&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;örebro&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="5933942615-8">}</span><span class="p" data-group-id="5933942615-6">]</span><span class="p" data-group-id="5933942615-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo+bar=1&amp;city=%C3%B6rebro&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="compose_query/2">
+
+  <div class="detail-header">
+    <a href="#compose_query/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compose_query/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compose_query(QueryList, Options) -> QueryString
+                 when
+                     QueryList :: [{<a href="unicode.html#t:chardata/0">unicode:chardata</a>(), <a href="unicode.html#t:chardata/0">unicode:chardata</a>() | true}],
+                     Options :: [{encoding, atom()}],
+                     QueryString :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Same as <code>compose_query/1</code> but with an additional <code>Options</code> parameter, that controls the encoding (&quot;charset&quot;) used by the encoding algorithm. There are two supported encodings: <code>utf8</code> (or <code>unicode</code>) and <code>latin1</code>.</p><p>Each character in the entry's name and value that cannot be expressed using the selected character encoding, is replaced by a string consisting of a U+0026 AMPERSAND character (&amp;), a &quot;#&quot; (U+0023) character, one or more ASCII digits representing the Unicode code point of the character in base ten, and finally a &quot;;&quot; (U+003B) character.</p><p>Bytes that are out of the range 0x2A, 0x2D, 0x2E, 0x30 to 0x39, 0x41 to 0x5A, 0x5F, 0x61 to 0x7A, are percent-encoded (U+0025 PERCENT SIGN character (%) followed by uppercase ASCII hex digits representing the hexadecimal value of the byte).</p><p>See also the opposite operation <a href="uri_string.html#dissect_query/1"><code>dissect_query/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">compose_query</span><span class="p" data-group-id="1163132917-1">(</span><span class="p" data-group-id="1163132917-2">[</span><span class="p" data-group-id="1163132917-3">{</span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span><span class="s">&quot;1&quot;</span><span class="p" data-group-id="1163132917-3">}</span><span class="p">,</span><span class="p" data-group-id="1163132917-4">{</span><span class="s">&quot;city&quot;</span><span class="p">,</span><span class="s">&quot;örebro&quot;</span><span class="p" data-group-id="1163132917-4">}</span><span class="p" data-group-id="1163132917-2">]</span><span class="p">,</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1163132917-5">[</span><span class="p" data-group-id="1163132917-6">{</span><span class="ss">encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">latin1</span><span class="p" data-group-id="1163132917-6">}</span><span class="p" data-group-id="1163132917-5">]</span><span class="p" data-group-id="1163132917-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo+bar=1&amp;city=%F6rebro&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">compose_query</span><span class="p" data-group-id="1163132917-7">(</span><span class="p" data-group-id="1163132917-8">[</span><span class="p" data-group-id="1163132917-9">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo bar&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;1&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="1163132917-9">}</span><span class="p">,</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="1163132917-10">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;city&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;東京&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="1163132917-10">}</span><span class="p" data-group-id="1163132917-8">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1163132917-11">[</span><span class="p" data-group-id="1163132917-12">{</span><span class="ss">encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">latin1</span><span class="p" data-group-id="1163132917-12">}</span><span class="p" data-group-id="1163132917-11">]</span><span class="p" data-group-id="1163132917-7">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo+bar=1&amp;city=%26%2326481%3B%26%2320140%3B&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="dissect_query/1">
+
+  <div class="detail-header">
+    <a href="#dissect_query/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">dissect_query/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dissect_query(QueryString) -> QueryList
+                 when
+                     QueryString :: <a href="#t:uri_string/0">uri_string</a>(),
+                     QueryList :: [{<a href="unicode.html#t:chardata/0">unicode:chardata</a>(), <a href="unicode.html#t:chardata/0">unicode:chardata</a>() | true}] | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Dissects an urlencoded <code>QueryString</code> and returns a <code>QueryList</code>, a list of non-percent-encoded key-value pairs. Form-urlencoding is defined in section 4.10.21.6 of the <a href="https://www.w3.org/TR/html52/">HTML 5.2</a> specification and in section 4.10.22.6 of the <a href="https://www.w3.org/TR/html50/">HTML 5.0</a> specification for non-UTF-8 encodings.</p><p>See also the opposite operation <a href="uri_string.html#compose_query/1"><code>compose_query/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">dissect_query</span><span class="p" data-group-id="3576645211-1">(</span><span class="s">&quot;foo+bar=1&amp;city=%C3%B6rebro&quot;</span><span class="p" data-group-id="3576645211-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3576645211-2">[</span><span class="p" data-group-id="3576645211-3">{</span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span><span class="s">&quot;1&quot;</span><span class="p" data-group-id="3576645211-3">}</span><span class="p">,</span><span class="p" data-group-id="3576645211-4">{</span><span class="s">&quot;city&quot;</span><span class="p">,</span><span class="s">&quot;örebro&quot;</span><span class="p" data-group-id="3576645211-4">}</span><span class="p" data-group-id="3576645211-2">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">dissect_query</span><span class="p" data-group-id="3576645211-5">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo+bar=1&amp;city=%26%2326481%3B%26%2320140%3B&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3576645211-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3576645211-6">[</span><span class="p" data-group-id="3576645211-7">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo bar&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;1&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3576645211-7">}</span><span class="p">,</span><span class="w">
+ </span><span class="p" data-group-id="3576645211-8">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;city&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="mi">230</span><span class="p">,</span><span class="mi">157</span><span class="p">,</span><span class="mi">177</span><span class="p">,</span><span class="mi">228</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mi">172</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3576645211-8">}</span><span class="p" data-group-id="3576645211-6">]</span><span class="w"> 
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="normalize/1">
+
+  <div class="detail-header">
+    <a href="#normalize/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">normalize/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>normalize(URI) -> NormalizedURI
+             when URI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(), NormalizedURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Transforms an <code>URI</code> into a normalized form using Syntax-Based Normalization as defined by <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>.</p><p>This function implements case normalization, percent-encoding normalization, path segment normalization and scheme based normalization for HTTP(S) with basic support for FTP, SSH, SFTP and TFTP.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3376977568-1">(</span><span class="s">&quot;/a/b/c/./../../g&quot;</span><span class="p" data-group-id="3376977568-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/a/g&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3376977568-2">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;mid/content=5/../6&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3376977568-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;mid/6&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3376977568-3">(</span><span class="s">&quot;http://localhost:80&quot;</span><span class="p" data-group-id="3376977568-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost/&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3376977568-4">(</span><span class="p" data-group-id="3376977568-5">#{</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p">,</span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/a/b/c/./../../g&quot;</span><span class="p">,</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost-örebro&quot;</span><span class="p" data-group-id="3376977568-5">}</span><span class="p" data-group-id="3376977568-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost-%C3%B6rebro/a/g&quot;</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="normalize/2">
+
+  <div class="detail-header">
+    <a href="#normalize/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">normalize/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>normalize(URI, Options) -> NormalizedURI
+             when
+                 URI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+                 Options :: [return_map],
+                 NormalizedURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Same as <code>normalize/1</code> but with an additional <code>Options</code> parameter, that controls whether the normalized URI shall be returned as an uri_map(). There is one supported option: <code>return_map</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3295077102-1">(</span><span class="s">&quot;/a/b/c/./../../g&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3295077102-2">[</span><span class="ss">return_map</span><span class="p" data-group-id="3295077102-2">]</span><span class="p" data-group-id="3295077102-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3295077102-3">#{</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/a/g&quot;</span><span class="p" data-group-id="3295077102-3">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3295077102-4">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;mid/content=5/../6&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3295077102-5">[</span><span class="ss">return_map</span><span class="p" data-group-id="3295077102-5">]</span><span class="p" data-group-id="3295077102-4">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3295077102-6">#{</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;mid/6&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3295077102-6">}</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3295077102-7">(</span><span class="s">&quot;http://localhost:80&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3295077102-8">[</span><span class="ss">return_map</span><span class="p" data-group-id="3295077102-8">]</span><span class="p" data-group-id="3295077102-7">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3295077102-9">#{</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span><span class="p" data-group-id="3295077102-9">}</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">normalize</span><span class="p" data-group-id="3295077102-10">(</span><span class="p" data-group-id="3295077102-11">#{</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p">,</span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/a/b/c/./../../g&quot;</span><span class="p">,</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost-örebro&quot;</span><span class="p" data-group-id="3295077102-11">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3295077102-12">[</span><span class="ss">return_map</span><span class="p" data-group-id="3295077102-12">]</span><span class="p" data-group-id="3295077102-10">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3295077102-13">#{</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/a/g&quot;</span><span class="p">,</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost-örebro&quot;</span><span class="p" data-group-id="3295077102-13">}</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="parse/1">
+
+  <div class="detail-header">
+    <a href="#parse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parse/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>parse(URIString) -> URIMap when URIString :: <a href="#t:uri_string/0">uri_string</a>(), URIMap :: <a href="#t:uri_map/0">uri_map</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Parses an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>uri_string()</code> into a <code>uri_map()</code>, that holds the parsed components of the <code>URI</code>. If parsing fails, an error tuple is returned.</p><p>See also the opposite operation <a href="uri_string.html#recompose/1"><code>recompose/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">parse</span><span class="p" data-group-id="6461204774-1">(</span><span class="s">&quot;foo://user@example.com:8042/over/there?name=ferret#nose&quot;</span><span class="p" data-group-id="6461204774-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6461204774-2">#{</span><span class="ss">fragment</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;nose&quot;</span><span class="p">,</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/over/there&quot;</span><span class="p">,</span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">8042</span><span class="p">,</span><span class="k">query</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;name=ferret&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">foo</span><span class="p">,</span><span class="ss">userinfo</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;user&quot;</span><span class="p" data-group-id="6461204774-2">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">parse</span><span class="p" data-group-id="6461204774-3">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo://user@example.com:8042/over/there?name=ferret&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="6461204774-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6461204774-4">#{</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;example.com&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;/over/there&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">8042</span><span class="p">,</span><span class="k">query</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;name=ferret&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;foo&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">userinfo</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;user&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="6461204774-4">}</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="percent_decode/1">
+
+  <div class="detail-header">
+    <a href="#percent_decode/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">percent_decode/1</h1>
+
+
+      <span class="note">(since OTP 23.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>percent_decode(URI) -> Result
+                  when
+                      URI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+                      Result ::
+                          <a href="#t:uri_string/0">uri_string</a>() |
+                          <a href="#t:uri_map/0">uri_map</a>() |
+                          {error, {invalid, {atom(), {term(), term()}}}}.</pre>
+
+      </div>
+
+<p>Decodes all percent-encoded triplets in the input that can be both a <code>uri_string()</code> and a <code>uri_map()</code>. Note, that this function performs raw decoding and it shall be used on already parsed URI components. Applying this function directly on a standard URI can effectively change it.</p><p>If the input encoding is not UTF-8, an error tuple is returned.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">percent_decode</span><span class="p" data-group-id="2473986001-1">(</span><span class="p" data-group-id="2473986001-2">#{</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost-%C3%B6rebro&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="2473986001-3">[</span><span class="p" data-group-id="2473986001-3">]</span><span class="p">,</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p" data-group-id="2473986001-2">}</span><span class="p" data-group-id="2473986001-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2473986001-4">#{</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost-örebro&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="2473986001-5">[</span><span class="p" data-group-id="2473986001-5">]</span><span class="p">,</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p" data-group-id="2473986001-4">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">percent_decode</span><span class="p" data-group-id="2473986001-6">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;%C3%B6rebro&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2473986001-6">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;örebro&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="err">	</span></code></pre><div class="warning"><p>Using <code>uri_string:percent_decode/1</code> directly on a URI is not safe. This example shows, that after each consecutive application of the function the resulting URI will be changed. None of these URIs refer to the same resource.</p><pre><code class="makeup erlang"><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">percent_decode</span><span class="p" data-group-id="1766858101-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;http://local%252Fhost/path&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="1766858101-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;http://local%2Fhost/path&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">percent_decode</span><span class="p" data-group-id="1766858101-2">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;http://local%2Fhost/path&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="1766858101-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;http://local/host/path&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+        </span></code></pre></div>
+  </section>
+</section>
+<section class="detail" id="recompose/1">
+
+  <div class="detail-header">
+    <a href="#recompose/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">recompose/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>recompose(URIMap) -> URIString when URIMap :: <a href="#t:uri_map/0">uri_map</a>(), URIString :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Creates an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>URIString</code> (percent-encoded), based on the components of <code>URIMap</code>. If the <code>URIMap</code> is invalid, an error tuple is returned.</p><p>See also the opposite operation <a href="uri_string.html#parse/1"><code>parse/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">URIMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1687858171-1">#{</span><span class="ss">fragment</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;nose&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/over/there&quot;</span><span class="p">,</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">8042</span><span class="p">,</span><span class="w"> </span><span class="k">query</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;name=ferret&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">userinfo</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;user&quot;</span><span class="p" data-group-id="1687858171-1">}</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="1687858171-2">#{</span><span class="ss">fragment</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;nose&quot;</span><span class="p">,</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;example.com&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/over/there&quot;</span><span class="p">,</span><span class="ss">port</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">8042</span><span class="p">,</span><span class="k">query</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;name=ferret&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="ss">userinfo</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;user&quot;</span><span class="p" data-group-id="1687858171-2">}</span><span class="w">
+
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">recompose</span><span class="p" data-group-id="1687858171-3">(</span><span class="n">URIMap</span><span class="p" data-group-id="1687858171-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo://example.com:8042/over/there?name=ferret#nose&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="resolve/2">
+
+  <div class="detail-header">
+    <a href="#resolve/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resolve/2</h1>
+
+
+      <span class="note">(since OTP 22.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resolve(RefURI, BaseURI) -> TargetURI
+           when
+               RefURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+               BaseURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+               TargetURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Convert a <code>RefURI</code> reference that might be relative to a given base URI into the parsed components of the reference's target, which can then be recomposed to form the target URI.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="7607396183-1">(</span><span class="s">&quot;/abs/ol/ute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://localhost/a/b/c?q&quot;</span><span class="p" data-group-id="7607396183-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost/abs/ol/ute&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="7607396183-2">(</span><span class="s">&quot;../relative&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://localhost/a/b/c?q&quot;</span><span class="p" data-group-id="7607396183-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost/a/relative&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="7607396183-3">(</span><span class="s">&quot;http://localhost/full&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://localhost/a/b/c?q&quot;</span><span class="p" data-group-id="7607396183-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost/full&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="7607396183-4">(</span><span class="p" data-group-id="7607396183-5">#{</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;path&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">query</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;xyz&quot;</span><span class="p" data-group-id="7607396183-5">}</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://localhost/a/b/c?q&quot;</span><span class="p" data-group-id="7607396183-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;http://localhost/a/b/path?xyz&quot;</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="resolve/3">
+
+  <div class="detail-header">
+    <a href="#resolve/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resolve/3</h1>
+
+
+      <span class="note">(since OTP 22.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resolve(RefURI, BaseURI, Options) -> TargetURI
+           when
+               RefURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+               BaseURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>(),
+               Options :: [return_map],
+               TargetURI :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:uri_map/0">uri_map</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Same as <code>resolve/2</code> but with an additional <code>Options</code> parameter, that controls whether the target URI shall be returned as an uri_map(). There is one supported option: <code>return_map</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="2945791737-1">(</span><span class="s">&quot;/abs/ol/ute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://localhost/a/b/c?q&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2945791737-2">[</span><span class="ss">return_map</span><span class="p" data-group-id="2945791737-2">]</span><span class="p" data-group-id="2945791737-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2945791737-3">#{</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/abs/ol/ute&quot;</span><span class="p">,</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p" data-group-id="2945791737-3">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">resolve</span><span class="p" data-group-id="2945791737-4">(</span><span class="p" data-group-id="2945791737-5">#{</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/abs/ol/ute&quot;</span><span class="p" data-group-id="2945791737-5">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2945791737-6">#{</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p">,</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/a/b/c?q&quot;</span><span class="p" data-group-id="2945791737-6">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2945791737-7">[</span><span class="ss">return_map</span><span class="p" data-group-id="2945791737-7">]</span><span class="p" data-group-id="2945791737-4">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2945791737-8">#{</span><span class="ss">host</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span><span class="p">,</span><span class="ss">path</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;/abs/ol/ute&quot;</span><span class="p">,</span><span class="ss">scheme</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;http&quot;</span><span class="p" data-group-id="2945791737-8">}</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="transcode/2">
+
+  <div class="detail-header">
+    <a href="#transcode/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">transcode/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>transcode(URIString, Options) -> Result
+             when
+                 URIString :: <a href="#t:uri_string/0">uri_string</a>(),
+                 Options ::
+                     [{in_encoding, <a href="unicode.html#t:encoding/0">unicode:encoding</a>()} | {out_encoding, <a href="unicode.html#t:encoding/0">unicode:encoding</a>()}],
+                 Result :: <a href="#t:uri_string/0">uri_string</a>() | <a href="#t:error/0">error</a>().</pre>
+
+      </div>
+
+<p>Transcodes an <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> compliant <code>URIString</code>, where <code>Options</code> is a list of tagged tuples, specifying the inbound (<code>in_encoding</code>) and outbound (<code>out_encoding</code>) encodings. <code>in_encoding</code> and <code>out_encoding</code> specifies both binary encoding and percent-encoding for the input and output data. Mixed encoding, where binary encoding is not the same as percent-encoding, is not supported. If an argument is invalid, an error tuple is returned.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">transcode</span><span class="p" data-group-id="7070013433-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo%00%00%00%F6bar&quot;</span><span class="o">/</span><span class="ss">utf32</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="7070013433-2">[</span><span class="p" data-group-id="7070013433-3">{</span><span class="ss">in_encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">utf32</span><span class="p" data-group-id="7070013433-3">}</span><span class="p">,</span><span class="p" data-group-id="7070013433-4">{</span><span class="ss">out_encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">utf8</span><span class="p" data-group-id="7070013433-4">}</span><span class="p" data-group-id="7070013433-2">]</span><span class="p" data-group-id="7070013433-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo%C3%B6bar&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">uri_string</span><span class="p">:</span><span class="nf">transcode</span><span class="p" data-group-id="7070013433-5">(</span><span class="s">&quot;foo%F6bar&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7070013433-6">[</span><span class="p" data-group-id="7070013433-7">{</span><span class="ss">in_encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">latin1</span><span class="p" data-group-id="7070013433-7">}</span><span class="p">,</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="7070013433-8">{</span><span class="ss">out_encoding</span><span class="p">,</span><span class="w"> </span><span class="ss">utf8</span><span class="p" data-group-id="7070013433-8">}</span><span class="p" data-group-id="7070013433-6">]</span><span class="p" data-group-id="7070013433-5">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo%C3%B6bar&quot;</span><span class="w">
+</span><span class="err">	</span></code></pre>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

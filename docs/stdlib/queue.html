@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>queue — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+queue <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides (double-ended) FIFO queues in an efficient manner.</p><p>All functions fail with reason <code>badarg</code> if arguments are of wrong type, for example, queue arguments are not queues, indexes are not integers, and list arguments are not lists. Improper lists cause internal crashes. An index out of range for a queue also causes a failure with reason <code>badarg</code>.</p><p>Some functions, where noted, fail with reason <code>empty</code> for an empty queue.</p><p>The data representing a queue as used by this module is to be regarded as opaque by other modules. Any code assuming knowledge of the format is running on thin ice.</p><p>All operations have an amortized O(1) running time, except <a href="queue.html#all/2"><code>all/2</code></a>, <a href="queue.html#any/2"><code>any/2</code></a>, <a href="queue.html#delete/2"><code>delete/2</code></a>, <a href="queue.html#delete_r/2"><code>delete_r/2</code></a>, <a href="queue.html#delete_with/2"><code>delete_with/2</code></a>, <a href="queue.html#delete_with_r/2"><code>delete_with_r/2</code></a>, <a href="queue.html#filter/2"><code>filter/2</code></a>, <a href="queue.html#filtermap/2"><code>filtermap/2</code></a>, <a href="queue.html#fold/3"><code>fold/3</code></a>, <a href="queue.html#join/2"><code>join/2</code></a>, <a href="queue.html#len/1"><code>len/1</code></a>, <a href="queue.html#member/2"><code>member/2</code></a>, <a href="queue.html#split/2"><code>split/2</code></a> that have O(n). To minimize the size of a queue minimizing the amount of garbage built by queue operations, the queues do not contain explicit length information, and that is why <code>len/1</code> is O(n). If better performance for this particular operation is essential, it is easy for the caller to keep track of the length.</p><p>Queues are double-ended. The mental picture of a queue is a line of people (items) waiting for their turn. The queue front is the end with the item that has waited the longest. The queue rear is the end an item enters when it starts to wait. If instead using the mental picture of a list, the front is called head and the rear is called tail.</p><p>Entering at the front and exiting at the rear are reverse operations on the queue.</p><p>This module has three sets of interface functions: the &quot;Original API&quot;, the &quot;Extended API&quot;, and the &quot;Okasaki API&quot;.</p><p>The &quot;Original API&quot; and the &quot;Extended API&quot; both use the mental picture of a waiting line of items. Both have reverse operations suffixed &quot;_r&quot;.</p><p>The &quot;Original API&quot; item removal functions return compound terms with both the removed item and the resulting queue. The &quot;Extended API&quot; contains alternative functions that build less garbage and functions for just inspecting the queue ends. Also the &quot;Okasaki API&quot; functions build less garbage.</p><p>The &quot;Okasaki API&quot; is inspired by &quot;Purely Functional Data Structures&quot; by Chris Okasaki. It regards queues as lists. This API is by many regarded as strange and avoidable. For example, many reverse operations have lexically reversed names, some with more readable but perhaps less understandable aliases.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:queue/0">-type queue() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:queue/1">-type queue(Arg1) :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>As returned by <a href="queue.html#new/0"><code>new/0</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all/2">all/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>Pred(Item)</code> returns <code>true</code> for all items <code>Item</code> in <code>Q</code>, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#any/2">any/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>Pred(Item)</code> returns <code>true</code> for at least one item <code>Item</code> in <code>Q</code>, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cons/2">cons/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Item</code> at the head of queue <code>Q1</code>. Returns the new queue <code>Q2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#daeh/1">daeh/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the tail item of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/2">delete/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a copy of <code>Q1</code> where the first item matching <code>Item</code> is deleted, if there is such an item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_r/2">delete_r/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a copy of <code>Q1</code> where the last item matching <code>Item</code> is deleted, if there is such an item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_with/2">delete_with/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a copy of <code>Q1</code> where the first item for which <code>Pred</code> returns <code>true</code> is deleted, if there is such an item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_with_r/2">delete_with_r/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a copy of <code>Q1</code> where the last item for which <code>Pred</code> returns <code>true</code> is deleted, if there is such an item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#drop/1">drop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the front item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#drop_r/1">drop_r/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the rear item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filter/2">filter/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of calling <code>Fun(Item)</code> on all items in <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filtermap/2">filtermap/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of calling <code>Fun(Item)</code> on all items in <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#fold/3">fold/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calls <code>Fun(Item, AccIn)</code> on successive items <code>Item</code> of <code>Queue</code>, starting with <code>AccIn == Acc0</code>. The queue is traversed in queue order, that is, from front to rear. <code>Fun/2</code> must return a new accumulator, which is passed to the next call. The function returns the final value of the accumulator. <code>Acc0</code> is returned if the queue is empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#from_list/1">from_list/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue containing the items in <code>L</code> in the same order; the head item of the list becomes the front item of the queue.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/1">get/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>Item</code> at the front of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_r/1">get_r/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>Item</code> at the rear of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#head/1">head/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>Item</code> from the head of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#in/2">in/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Item</code> at the rear of queue <code>Q1</code>. Returns the resulting queue <code>Q2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#in_r/2">in_r/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Item</code> at the front of queue <code>Q1</code>. Returns the resulting queue <code>Q2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init/1">init/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_empty/1">is_empty/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Tests if <code>Q</code> is empty and returns <code>true</code> if so, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_queue/1">is_queue/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Tests if <code>Term</code> is a queue and returns <code>true</code> if so, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/2">join/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q3</code> that is the result of joining <code>Q1</code> and <code>Q2</code> with <code>Q1</code> in front of <code>Q2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lait/1">lait/1</a>
+
+      <span class="deprecated" title="queue:lait/1 is deprecated; use queue:liat/1 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#last/1">last/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the tail item of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#len/1">len/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calculates and returns the length of queue <code>Q</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#liat/1">liat/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#member/2">member/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>Item</code> matches some element in <code>Q</code>, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/0">new/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns an empty queue.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#out/1">out/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the item at the front of queue <code>Q1</code>. Returns tuple <code>{{value, Item}, Q2}</code>, where <code>Item</code> is the item removed and <code>Q2</code> is the resulting queue. If <code>Q1</code> is empty, tuple <code>{empty, Q1}</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#out_r/1">out_r/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the item at the rear of queue <code>Q1</code>. Returns tuple <code>{{value, Item}, Q2}</code>, where <code>Item</code> is the item removed and <code>Q2</code> is the new queue. If <code>Q1</code> is empty, tuple <code>{empty, Q1}</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#peek/1">peek/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns tuple <code>{value, Item}</code>, where <code>Item</code> is the front item of <code>Q</code>, or <code>empty</code> if <code>Q</code> is empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#peek_r/1">peek_r/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns tuple <code>{value, Item}</code>, where <code>Item</code> is the rear item of <code>Q</code>, or <code>empty</code> if <code>Q</code> is empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reverse/1">reverse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> containing the items of <code>Q1</code> in the reverse order.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#snoc/2">snoc/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Item</code> as the tail item of queue <code>Q1</code>. Returns the new queue <code>Q2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/2">split/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Splits <code>Q1</code> in two. The <code>N</code> front items are put in <code>Q2</code> and the rest in <code>Q3</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tail/1">tail/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a queue <code>Q2</code> that is the result of removing the head item from <code>Q1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_list/1">to_list/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list of the items in the queue in the same order; the front item of the queue becomes the head of the list.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:queue/0">
+
+  <div class="detail-header">
+    <a href="#t:queue/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type queue() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>queue() :: <a href="#t:queue/1">queue</a>(_).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:queue/1">
+
+  <div class="detail-header">
+    <a href="#t:queue/1" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type queue(Arg1) :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>queue(Item)</pre>
+
+      </div>
+
+<p>As returned by <a href="queue.html#new/0"><code>new/0</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="all/2">
+
+  <div class="detail-header">
+    <a href="#all/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>all(Pred, Q :: <a href="#t:queue/1">queue</a>(Item)) -> boolean() when Pred :: fun((Item) -> boolean()).</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>Pred(Item)</code> returns <code>true</code> for all items <code>Item</code> in <code>Q</code>, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="any/2">
+
+  <div class="detail-header">
+    <a href="#any/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">any/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>any(Pred, Q :: <a href="#t:queue/1">queue</a>(Item)) -> boolean() when Pred :: fun((Item) -> boolean()).</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>Pred(Item)</code> returns <code>true</code> for at least one item <code>Item</code> in <code>Q</code>, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cons/2">
+
+  <div class="detail-header">
+    <a href="#cons/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cons/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>cons(Item, Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Inserts <code>Item</code> at the head of queue <code>Q1</code>. Returns the new queue <code>Q2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="daeh/1">
+
+  <div class="detail-header">
+    <a href="#daeh/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">daeh/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>daeh(Q :: <a href="#t:queue/1">queue</a>(Item)) -> Item.</pre>
+
+      </div>
+
+<p>Returns the tail item of queue <code>Q</code>.</p><p>Fails with reason <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="delete/2">
+
+  <div class="detail-header">
+    <a href="#delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete(Item, Q1) -> Q2 when Item :: T, Q1 :: <a href="#t:queue/1">queue</a>(T), Q2 :: <a href="#t:queue/1">queue</a>(T), T :: term().</pre>
+
+      </div>
+
+<p>Returns a copy of <code>Q1</code> where the first item matching <code>Item</code> is deleted, if there is such an item.</p>
+  </section>
+</section>
+<section class="detail" id="delete_r/2">
+
+  <div class="detail-header">
+    <a href="#delete_r/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_r/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete_r(Item, Q1) -> Q2 when Item :: T, Q1 :: <a href="#t:queue/1">queue</a>(T), Q2 :: <a href="#t:queue/1">queue</a>(T), T :: term().</pre>
+
+      </div>
+
+<p>Returns a copy of <code>Q1</code> where the last item matching <code>Item</code> is deleted, if there is such an item.</p>
+  </section>
+</section>
+<section class="detail" id="delete_with/2">
+
+  <div class="detail-header">
+    <a href="#delete_with/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_with/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete_with(Pred, Q1) -> Q2
+               when
+                   Pred :: fun((Item) -> boolean()),
+                   Q1 :: <a href="#t:queue/1">queue</a>(Item),
+                   Q2 :: <a href="#t:queue/1">queue</a>(Item),
+                   Item :: term().</pre>
+
+      </div>
+
+<p>Returns a copy of <code>Q1</code> where the first item for which <code>Pred</code> returns <code>true</code> is deleted, if there is such an item.</p>
+  </section>
+</section>
+<section class="detail" id="delete_with_r/2">
+
+  <div class="detail-header">
+    <a href="#delete_with_r/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_with_r/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete_with_r(Pred, Q1) -> Q2
+                 when
+                     Pred :: fun((Item) -> boolean()),
+                     Q1 :: <a href="#t:queue/1">queue</a>(Item),
+                     Q2 :: <a href="#t:queue/1">queue</a>(Item),
+                     Item :: term().</pre>
+
+      </div>
+
+<p>Returns a copy of <code>Q1</code> where the last item for which <code>Pred</code> returns <code>true</code> is deleted, if there is such an item.</p>
+  </section>
+</section>
+<section class="detail" id="drop/1">
+
+  <div class="detail-header">
+    <a href="#drop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">drop/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>drop(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the front item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="drop_r/1">
+
+  <div class="detail-header">
+    <a href="#drop_r/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">drop_r/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>drop_r(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the rear item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="filter/2">
+
+  <div class="detail-header">
+    <a href="#filter/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filter/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filter(Fun, Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item) when Fun :: fun((Item) -> boolean() | [Item]).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of calling <code>Fun(Item)</code> on all items in <code>Q1</code>.</p><p>If <code>Fun(Item)</code> returns <code>true</code>, <code>Item</code> is copied to the result queue. If it returns <code>false</code>, <code>Item</code> is not copied. If it returns a list, the list elements are inserted instead of <code>Item</code> in the result queue.</p><p>So, <code>Fun(Item)</code> returning <code>[Item]</code> is thereby semantically equivalent to returning <code>true</code>, just as returning <code>[]</code> is semantically equivalent to returning <code>false</code>. But returning a list builds more garbage than returning an atom.</p>
+  </section>
+</section>
+<section class="detail" id="filtermap/2">
+
+  <div class="detail-header">
+    <a href="#filtermap/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filtermap/2</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filtermap(Fun, Q1) -> Q2
+             when
+                 Fun :: fun((Item) -> boolean() | {true, Value}),
+                 Q1 :: <a href="#t:queue/1">queue</a>(Item),
+                 Q2 :: <a href="#t:queue/1">queue</a>(Item | Value),
+                 Item :: term(),
+                 Value :: term().</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of calling <code>Fun(Item)</code> on all items in <code>Q1</code>.</p><p>If <code>Fun(Item)</code> returns <code>true</code>, <code>Item</code> is copied to the result queue. If it returns <code>false</code>, <code>Item</code> is not copied. If it returns <code>{true, NewItem}</code>, the queue element at this position is replaced with <code>NewItem</code> in the result queue.</p>
+  </section>
+</section>
+<section class="detail" id="fold/3">
+
+  <div class="detail-header">
+    <a href="#fold/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">fold/3</h1>
+
+
+      <span class="note">(since OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>fold(Fun, Acc0, Q :: <a href="#t:queue/1">queue</a>(Item)) -> Acc1
+        when
+            Fun :: fun((Item, AccIn) -> AccOut),
+            Acc0 :: term(),
+            Acc1 :: term(),
+            AccIn :: term(),
+            AccOut :: term().</pre>
+
+      </div>
+
+<p>Calls <code>Fun(Item, AccIn)</code> on successive items <code>Item</code> of <code>Queue</code>, starting with <code>AccIn == Acc0</code>. The queue is traversed in queue order, that is, from front to rear. <code>Fun/2</code> must return a new accumulator, which is passed to the next call. The function returns the final value of the accumulator. <code>Acc0</code> is returned if the queue is empty.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="o">&gt;</span><span class="w"> </span><span class="nc">queue</span><span class="p">:</span><span class="nf">fold</span><span class="p" data-group-id="9011831443-1">(</span><span class="nf">fun</span><span class="p" data-group-id="9011831443-2">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Sum</span><span class="p" data-group-id="9011831443-2">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Sum</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">queue</span><span class="p">:</span><span class="nf">from_list</span><span class="p" data-group-id="9011831443-3">(</span><span class="p" data-group-id="9011831443-4">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p" data-group-id="9011831443-4">]</span><span class="p" data-group-id="9011831443-3">)</span><span class="p" data-group-id="9011831443-1">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">15</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">queue</span><span class="p">:</span><span class="nf">fold</span><span class="p" data-group-id="9011831443-5">(</span><span class="nf">fun</span><span class="p" data-group-id="9011831443-6">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Prod</span><span class="p" data-group-id="9011831443-6">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Prod</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nc">queue</span><span class="p">:</span><span class="nf">from_list</span><span class="p" data-group-id="9011831443-7">(</span><span class="p" data-group-id="9011831443-8">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p" data-group-id="9011831443-8">]</span><span class="p" data-group-id="9011831443-7">)</span><span class="p" data-group-id="9011831443-5">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">120</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="from_list/1">
+
+  <div class="detail-header">
+    <a href="#from_list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">from_list/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>from_list(L :: [Item]) -> <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue containing the items in <code>L</code> in the same order; the head item of the list becomes the front item of the queue.</p>
+  </section>
+</section>
+<section class="detail" id="get/1">
+
+  <div class="detail-header">
+    <a href="#get/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get(Q :: <a href="#t:queue/1">queue</a>(Item)) -> Item.</pre>
+
+      </div>
+
+<p>Returns <code>Item</code> at the front of queue <code>Q</code>.</p><p>Fails with reason <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="get_r/1">
+
+  <div class="detail-header">
+    <a href="#get_r/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_r/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_r(Q :: <a href="#t:queue/1">queue</a>(Item)) -> Item.</pre>
+
+      </div>
+
+<p>Returns <code>Item</code> at the rear of queue <code>Q</code>.</p><p>Fails with reason <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="head/1">
+
+  <div class="detail-header">
+    <a href="#head/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">head/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>head(Q :: <a href="#t:queue/1">queue</a>(Item)) -> Item.</pre>
+
+      </div>
+
+<p>Returns <code>Item</code> from the head of queue <code>Q</code>.</p><p>Fails with reason <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="in/2">
+
+  <div class="detail-header">
+    <a href="#in/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">in/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>in(Item, Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Inserts <code>Item</code> at the rear of queue <code>Q1</code>. Returns the resulting queue <code>Q2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="in_r/2">
+
+  <div class="detail-header">
+    <a href="#in_r/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">in_r/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>in_r(Item, Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Inserts <code>Item</code> at the front of queue <code>Q1</code>. Returns the resulting queue <code>Q2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="init/1">
+
+  <div class="detail-header">
+    <a href="#init/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>init(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="is_empty/1">
+
+  <div class="detail-header">
+    <a href="#is_empty/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_empty/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_empty(Q :: <a href="#t:queue/0">queue</a>()) -> boolean().</pre>
+
+      </div>
+
+<p>Tests if <code>Q</code> is empty and returns <code>true</code> if so, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="is_queue/1">
+
+  <div class="detail-header">
+    <a href="#is_queue/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_queue/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_queue(Term :: term()) -> boolean().</pre>
+
+      </div>
+
+<p>Tests if <code>Term</code> is a queue and returns <code>true</code> if so, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="join/2">
+
+  <div class="detail-header">
+    <a href="#join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>join(Q1 :: <a href="#t:queue/1">queue</a>(Item), Q2 :: <a href="#t:queue/1">queue</a>(Item)) -> Q3 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q3</code> that is the result of joining <code>Q1</code> and <code>Q2</code> with <code>Q1</code> in front of <code>Q2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="lait/1">
+
+  <div class="detail-header">
+    <a href="#lait/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lait/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. queue:lait/1 is deprecated; use queue:liat/1 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lait(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p><p>The name <code>lait/1</code> is a misspelling - do not use it anymore.</p>
+  </section>
+</section>
+<section class="detail" id="last/1">
+
+  <div class="detail-header">
+    <a href="#last/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">last/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>last(Q :: <a href="#t:queue/1">queue</a>(Item)) -> Item.</pre>
+
+      </div>
+
+<p>Returns the tail item of queue <code>Q</code>.</p><p>Fails with reason <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="len/1">
+
+  <div class="detail-header">
+    <a href="#len/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">len/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>len(Q :: <a href="#t:queue/0">queue</a>()) -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Calculates and returns the length of queue <code>Q</code>.</p>
+  </section>
+</section>
+<section class="detail" id="liat/1">
+
+  <div class="detail-header">
+    <a href="#liat/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">liat/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>liat(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the tail item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="member/2">
+
+  <div class="detail-header">
+    <a href="#member/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">member/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>member(Item, Q :: <a href="#t:queue/1">queue</a>(Item)) -> boolean().</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>Item</code> matches some element in <code>Q</code>, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="new/0">
+
+  <div class="detail-header">
+    <a href="#new/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new() -> <a href="#t:queue/0">queue</a>().</pre>
+
+      </div>
+
+<p>Returns an empty queue.</p>
+  </section>
+</section>
+<section class="detail" id="out/1">
+
+  <div class="detail-header">
+    <a href="#out/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">out/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>out(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> {{value, Item}, Q2 :: <a href="#t:queue/1">queue</a>(Item)} | {empty, Q1 :: <a href="#t:queue/1">queue</a>(Item)}.</pre>
+
+      </div>
+
+<p>Removes the item at the front of queue <code>Q1</code>. Returns tuple <code>{{value, Item}, Q2}</code>, where <code>Item</code> is the item removed and <code>Q2</code> is the resulting queue. If <code>Q1</code> is empty, tuple <code>{empty, Q1}</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="out_r/1">
+
+  <div class="detail-header">
+    <a href="#out_r/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">out_r/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>out_r(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> {{value, Item}, Q2 :: <a href="#t:queue/1">queue</a>(Item)} | {empty, Q1 :: <a href="#t:queue/1">queue</a>(Item)}.</pre>
+
+      </div>
+
+<p>Removes the item at the rear of queue <code>Q1</code>. Returns tuple <code>{{value, Item}, Q2}</code>, where <code>Item</code> is the item removed and <code>Q2</code> is the new queue. If <code>Q1</code> is empty, tuple <code>{empty, Q1}</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="peek/1">
+
+  <div class="detail-header">
+    <a href="#peek/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">peek/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>peek(Q :: <a href="#t:queue/1">queue</a>(Item)) -> empty | {value, Item}.</pre>
+
+      </div>
+
+<p>Returns tuple <code>{value, Item}</code>, where <code>Item</code> is the front item of <code>Q</code>, or <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="peek_r/1">
+
+  <div class="detail-header">
+    <a href="#peek_r/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">peek_r/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>peek_r(Q :: <a href="#t:queue/1">queue</a>(Item)) -> empty | {value, Item}.</pre>
+
+      </div>
+
+<p>Returns tuple <code>{value, Item}</code>, where <code>Item</code> is the rear item of <code>Q</code>, or <code>empty</code> if <code>Q</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="reverse/1">
+
+  <div class="detail-header">
+    <a href="#reverse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reverse/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>reverse(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> containing the items of <code>Q1</code> in the reverse order.</p>
+  </section>
+</section>
+<section class="detail" id="snoc/2">
+
+  <div class="detail-header">
+    <a href="#snoc/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">snoc/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>snoc(Q1 :: <a href="#t:queue/1">queue</a>(Item), Item) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Inserts <code>Item</code> as the tail item of queue <code>Q1</code>. Returns the new queue <code>Q2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="split/2">
+
+  <div class="detail-header">
+    <a href="#split/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>split(N :: non_neg_integer(), Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> {Q2 :: <a href="#t:queue/1">queue</a>(Item), Q3 :: <a href="#t:queue/1">queue</a>(Item)}.</pre>
+
+      </div>
+
+<p>Splits <code>Q1</code> in two. The <code>N</code> front items are put in <code>Q2</code> and the rest in <code>Q3</code>.</p>
+  </section>
+</section>
+<section class="detail" id="tail/1">
+
+  <div class="detail-header">
+    <a href="#tail/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tail/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tail(Q1 :: <a href="#t:queue/1">queue</a>(Item)) -> Q2 :: <a href="#t:queue/1">queue</a>(Item).</pre>
+
+      </div>
+
+<p>Returns a queue <code>Q2</code> that is the result of removing the head item from <code>Q1</code>.</p><p>Fails with reason <code>empty</code> if <code>Q1</code> is empty.</p>
+  </section>
+</section>
+<section class="detail" id="to_list/1">
+
+  <div class="detail-header">
+    <a href="#to_list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_list/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_list(Q :: <a href="#t:queue/1">queue</a>(Item)) -> [Item].</pre>
+
+      </div>
+
+<p>Returns a list of the items in the queue in the same order; the front item of the queue becomes the head of the list.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

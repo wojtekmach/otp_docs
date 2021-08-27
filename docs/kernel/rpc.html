@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>rpc — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+rpc <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module contains services similar to Remote Procedure Calls. It also contains broadcast facilities and parallel evaluators. A remote procedure call is a method to call a function on a remote node and collect the answer. It is used for collecting information on a remote node, or for running a function with some specific side effects on the remote node.</p><div class="note"><p><code>rpc:call()</code> and friends makes it quite hard to distinguish between successful results, raised exceptions, and other errors. This cannot be changed due to compatibility reasons. As of OTP 23, a new module <a href="erpc.html"><code>erpc</code></a> was introduced in order to provide an API that makes it possible to distingush between the different results. The <code>erpc</code> module provides a subset (however, the central subset) of the functionality available in the <code>rpc</code> module. The <code>erpc</code> implementation also provides a more scalable implementation with better performance than the original <code>rpc</code> implementation. However, since the introduction of <code>erpc</code>, the <code>rpc</code> module implements large parts of its central functionality using <code>erpc</code>, so the <code>rpc</code> module wont not suffer scalability wise and performance wise compared to <code>erpc</code>.</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:key/0">-type key() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Opaque value returned by <a href="rpc.html#async_call/4"><code>async_call/4</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#abcast/2">abcast/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>abcast([node()|nodes()], Name, Msg)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#abcast/3">abcast/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Broadcasts the message <code>Msg</code> asynchronously to the registered process <code>Name</code> on the specified nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#async_call/4">async_call/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Implements <em>call streams with promises</em>, a type of RPC that does not suspend the caller until the result is finished. Instead, a key is returned, which can be used later to collect the value. The key can be viewed as a promise to deliver the answer.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#block_call/4">block_call/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The same as calling <a href="rpc.html#block_call/5"><code>rpc:block_call(Node, Module, Function, Args, infinity)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#block_call/5">block_call/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The same as calling <a href="rpc.html#call/5"><code>rpc:call(Node, Module, Function, Args, Timeout)</code></a> with the exception that it also blocks other <code>rpc:block_call()</code> operations from executing concurrently on the node <code>Node</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/4">call/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code> and returns the corresponding value <code>Res</code>, or <code>{badrpc, Reason}</code> if the call fails. The same as calling <a href="rpc.html#call/5"><code>rpc:call(Node, Module, Function, Args, infinity)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/5">call/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code> and returns the corresponding value <code>Res</code>, or <code>{badrpc, Reason}</code> if the call fails. <code>Timeout</code> is a time-out value in milliseconds. If the call times out, <code>Reason</code> is <code>timeout</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cast/4">cast/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code>. No response is delivered and the calling process is not suspended until the evaluation is complete, as is the case with <a href="rpc.html#call/4"><code>call/4,5</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_everywhere/3">eval_everywhere/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>eval_everywhere([node()|nodes()], Module, Function, Args)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_everywhere/4">eval_everywhere/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>apply(Module, Function, Args)</code> on the specified nodes. No answers are collected.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multi_server_call/2">multi_server_call/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>multi_server_call([node()|nodes()], Name, Msg)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multi_server_call/3">multi_server_call/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used when interacting with servers called <code>Name</code> on the specified nodes. It is assumed that the servers receive messages in the format <code>{From, Msg}</code> and reply using <code>From ! {Name, Node, Reply}</code>, where <code>Node</code> is the name of the node where the server is located. The function returns <code>{Replies, BadNodes}</code>, where <code>Replies</code> is a list of all <code>Reply</code> values, and <code>BadNodes</code> is one of the following</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multicall/3">multicall/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>multicall([node()|nodes()], Module, Function, Args, infinity)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multicall/4">multicall/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>multicall(Nodes, Module, Function, Args, infinity)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multicall/4">multicall/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>multicall([node()|nodes()], Module, Function, Args, Timeout)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#multicall/5">multicall/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>In contrast to an RPC, a multicall is an RPC that is sent concurrently from one client to multiple servers. This is useful for collecting information from a set of nodes, or for calling a function on a set of nodes to achieve some side effects. It is semantically the same as iteratively making a series of RPCs on all the nodes, but the multicall is faster, as all the requests are sent at the same time and are collected one by one as they come back.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nb_yield/1">nb_yield/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>nb_yield(Key, 0)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nb_yield/2">nb_yield/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Non-blocking version of <a href="rpc.html#yield/1"><code>yield/1</code></a>. It returns the tuple <code>{value, Val}</code> when the computation is finished, or <code>timeout</code> when <code>Timeout</code> milliseconds has elapsed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#parallel_eval/1">parallel_eval/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates, for every tuple in <code>FuncCalls</code>, <code>apply(Module, Function, Args)</code> on some node in the network. Returns the list of return values, in the same order as in <code>FuncCalls</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pinfo/1">pinfo/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Location transparent version of the BIF <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#process_info/1"><code>erlang:process_info/1</code></a> in ERTS.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pinfo/2">pinfo/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Location transparent version of the BIF <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#process_info/2"><code>erlang:process_info/2</code></a> in ERTS.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pmap/3">pmap/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>apply(Module, Function, [Elem|ExtraArgs])</code> for every element <code>Elem</code> in <code>List1</code>, in parallel. Returns the list of return values, in the same order as in <code>List1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sbcast/2">sbcast/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <code>sbcast([node()|nodes()], Name, Msg)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sbcast/3">sbcast/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Broadcasts the message <code>Msg</code> synchronously to the registered process <code>Name</code> on the specified nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#server_call/4">server_call/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used when interacting with a server called <code>Name</code> on node <code>Node</code>. It is assumed that the server receives messages in the format <code>{From, Msg}</code> and replies using <code>From ! {ReplyWrapper, Node, Reply}</code>. This function makes such a server call and ensures that the entire call is packed into an atomic transaction, which either succeeds or fails. It never hangs, unless the server itself hangs.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#yield/1">yield/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the promised answer from a previous <a href="rpc.html#async_call/4"><code>async_call/4</code></a>. If the answer is available, it is returned immediately. Otherwise, the calling process is suspended until the answer arrives from <code>Node</code>.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:key/0">
+
+  <div class="detail-header">
+    <a href="#t:key/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type key() :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>key()</pre>
+
+      </div>
+
+<p>Opaque value returned by <a href="rpc.html#async_call/4"><code>async_call/4</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="abcast/2">
+
+  <div class="detail-header">
+    <a href="#abcast/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">abcast/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>abcast(Name, Msg) -> abcast when Name :: atom(), Msg :: term().</pre>
+
+      </div>
+
+<p>Equivalent to <code>abcast([node()|nodes()], Name, Msg)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="abcast/3">
+
+  <div class="detail-header">
+    <a href="#abcast/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">abcast/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>abcast(Nodes, Name, Msg) -> abcast when Nodes :: [node()], Name :: atom(), Msg :: term().</pre>
+
+      </div>
+
+<p>Broadcasts the message <code>Msg</code> asynchronously to the registered process <code>Name</code> on the specified nodes.</p>
+  </section>
+</section>
+<section class="detail" id="async_call/4">
+
+  <div class="detail-header">
+    <a href="#async_call/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">async_call/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>async_call(Node, Module, Function, Args) -> Key
+              when
+                  Node :: node(),
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Key :: <a href="#t:key/0">key</a>().</pre>
+
+      </div>
+
+<p>Implements <em>call streams with promises</em>, a type of RPC that does not suspend the caller until the result is finished. Instead, a key is returned, which can be used later to collect the value. The key can be viewed as a promise to deliver the answer.</p><p>In this case, the key <code>Key</code> is returned, which can be used in a subsequent call to <a href="rpc.html#yield/1"><code>yield/1</code></a> or <a href="rpc.html#nb_yield/1"><code>nb_yield/1,2</code></a> to retrieve the value of evaluating <code>apply(Module, Function, Args)</code> on node <code>Node</code>.</p><div class="note"><p>If you want the ability to distinguish between results, you may want to consider using the <a href="erpc.html#send_request/4"><code>erpc:send_request()</code></a> function from the <code>erpc</code> module instead. This also gives you the ability retrieve the results in other useful ways.</p></div><div class="note"><p><a href="rpc.html#yield/1"><code>yield/1</code></a> and <a href="rpc.html#nb_yield/1"><code>nb_yield/1,2</code></a> must be called by the same process from which this function was made otherwise they will never yield correctly.</p></div><div class="note"><p>You cannot make <em>any</em> assumptions about the process that will perform the <code>apply()</code>. It may be an <code>rpc</code> server, another server, or a freshly spawned process.</p></div>
+  </section>
+</section>
+<section class="detail" id="block_call/4">
+
+  <div class="detail-header">
+    <a href="#block_call/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">block_call/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>block_call(Node, Module, Function, Args) -> Res | {badrpc, Reason}
+              when
+                  Node :: node(),
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Res :: term(),
+                  Reason :: term().</pre>
+
+      </div>
+
+<p>The same as calling <a href="rpc.html#block_call/5"><code>rpc:block_call(Node, Module, Function, Args, infinity)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="block_call/5">
+
+  <div class="detail-header">
+    <a href="#block_call/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">block_call/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>block_call(Node, Module, Function, Args, Timeout) -> Res | {badrpc, Reason}
+              when
+                  Node :: node(),
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Res :: term(),
+                  Reason :: term(),
+                  Timeout :: 0..4294967295 | infinity.</pre>
+
+      </div>
+
+<p>The same as calling <a href="rpc.html#call/5"><code>rpc:call(Node, Module, Function, Args, Timeout)</code></a> with the exception that it also blocks other <code>rpc:block_call()</code> operations from executing concurrently on the node <code>Node</code>.</p><div class="warning"><p>Note that it also blocks other operations than just <code>rpc:block_call()</code> operations, so use it with care.</p></div>
+  </section>
+</section>
+<section class="detail" id="call/4">
+
+  <div class="detail-header">
+    <a href="#call/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>call(Node, Module, Function, Args) -> Res | {badrpc, Reason}
+        when
+            Node :: node(),
+            Module :: module(),
+            Function :: atom(),
+            Args :: [term()],
+            Res :: term(),
+            Reason :: term().</pre>
+
+      </div>
+
+<p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code> and returns the corresponding value <code>Res</code>, or <code>{badrpc, Reason}</code> if the call fails. The same as calling <a href="rpc.html#call/5"><code>rpc:call(Node, Module, Function, Args, infinity)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="call/5">
+
+  <div class="detail-header">
+    <a href="#call/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>call(Node, Module, Function, Args, Timeout) -> Res | {badrpc, Reason}
+        when
+            Node :: node(),
+            Module :: module(),
+            Function :: atom(),
+            Args :: [term()],
+            Res :: term(),
+            Reason :: term(),
+            Timeout :: 0..4294967295 | infinity.</pre>
+
+      </div>
+
+<p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code> and returns the corresponding value <code>Res</code>, or <code>{badrpc, Reason}</code> if the call fails. <code>Timeout</code> is a time-out value in milliseconds. If the call times out, <code>Reason</code> is <code>timeout</code>.</p><p>If the reply arrives after the call times out, no message contaminates the caller's message queue.</p><div class="note"><p>If you want the ability to distinguish between results, you may want to consider using the <a href="erpc.html#call/4"><code>erpc:call()</code></a> function from the <code>erpc</code> module instead.</p></div><div class="note"><p>Here follows the details of what exactly is returned.</p><p><code>{badrpc, Reason}</code> will be returned in the following circumstances:</p><ul><li>The called function fails with an <code>exit</code> exception.</li><li>The called function fails with an <code>error</code> exception.</li><li>The called function returns a term that matches <code>{'EXIT', _}</code>.</li><li>The called function <code>throws</code> a term that matches <code>{'EXIT', _}</code>.</li></ul><p><code>Res</code> is returned in the following circumstances:</p><ul><li>The called function returns normally with a term that does <strong>not</strong> match <code>{'EXIT',_}</code>.</li><li>The called function <code>throw</code>s a term that does <strong>not</strong> match <code>{'EXIT',_}</code>.</li></ul></div><div class="note"><p>You cannot make <em>any</em> assumptions about the process that will perform the <code>apply()</code>. It may be the calling process itself, an <code>rpc</code> server, another server, or a freshly spawned process.</p></div>
+  </section>
+</section>
+<section class="detail" id="cast/4">
+
+  <div class="detail-header">
+    <a href="#cast/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cast/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>cast(Node, Module, Function, Args) -> true
+        when Node :: node(), Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+<p>Evaluates <code>apply(Module, Function, Args)</code> on node <code>Node</code>. No response is delivered and the calling process is not suspended until the evaluation is complete, as is the case with <a href="rpc.html#call/4"><code>call/4,5</code></a>.</p><div class="note"><p>You cannot make <em>any</em> assumptions about the process that will perform the <code>apply()</code>. It may be an <code>rpc</code> server, another server, or a freshly spawned process.</p></div>
+  </section>
+</section>
+<section class="detail" id="eval_everywhere/3">
+
+  <div class="detail-header">
+    <a href="#eval_everywhere/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_everywhere/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>eval_everywhere(Module, Function, Args) -> abcast
+                   when Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>eval_everywhere([node()|nodes()], Module, Function, Args)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="eval_everywhere/4">
+
+  <div class="detail-header">
+    <a href="#eval_everywhere/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_everywhere/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>eval_everywhere(Nodes, Module, Function, Args) -> abcast
+                   when
+                       Nodes :: [node()], Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+<p>Evaluates <code>apply(Module, Function, Args)</code> on the specified nodes. No answers are collected.</p>
+  </section>
+</section>
+<section class="detail" id="multi_server_call/2">
+
+  <div class="detail-header">
+    <a href="#multi_server_call/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multi_server_call/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multi_server_call(Name, Msg) -> {Replies, BadNodes}
+                     when
+                         Name :: atom(),
+                         Msg :: term(),
+                         Replies :: [Reply :: term()],
+                         BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>multi_server_call([node()|nodes()], Name, Msg)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="multi_server_call/3">
+
+  <div class="detail-header">
+    <a href="#multi_server_call/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multi_server_call/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multi_server_call(Nodes, Name, Msg) -> {Replies, BadNodes}
+                     when
+                         Nodes :: [node()],
+                         Name :: atom(),
+                         Msg :: term(),
+                         Replies :: [Reply :: term()],
+                         BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Can be used when interacting with servers called <code>Name</code> on the specified nodes. It is assumed that the servers receive messages in the format <code>{From, Msg}</code> and reply using <code>From ! {Name, Node, Reply}</code>, where <code>Node</code> is the name of the node where the server is located. The function returns <code>{Replies, BadNodes}</code>, where <code>Replies</code> is a list of all <code>Reply</code> values, and <code>BadNodes</code> is one of the following:</p><ul><li>A list of the nodes that do not exist</li><li>A list of the nodes where the server does not exist</li><li>A list of the nodes where the server terminated before sending any reply.</li></ul>
+  </section>
+</section>
+<section class="detail" id="multicall/3">
+
+  <div class="detail-header">
+    <a href="#multicall/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multicall/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multicall(Module, Function, Args) -> {ResL, BadNodes}
+             when
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>multicall([node()|nodes()], Module, Function, Args, infinity)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="multicall/4">
+
+  <div class="detail-header">
+    <a href="#multicall/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multicall/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multicall(Nodes, Module, Function, Args) -> {ResL, BadNodes}
+             when
+                 Nodes :: [node()],
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()];
+         (Module, Function, Args, Timeout) -> {ResL, BadNodes}
+             when
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 Timeout :: 0..4294967295 | infinity,
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>multicall(Nodes, Module, Function, Args, infinity)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="multicall/4">
+
+  <div class="detail-header">
+    <a href="#multicall/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multicall/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multicall(Nodes, Module, Function, Args) -> {ResL, BadNodes}
+             when
+                 Nodes :: [node()],
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()];
+         (Module, Function, Args, Timeout) -> {ResL, BadNodes}
+             when
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 Timeout :: 0..4294967295 | infinity,
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>multicall([node()|nodes()], Module, Function, Args, Timeout)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="multicall/5">
+
+  <div class="detail-header">
+    <a href="#multicall/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">multicall/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>multicall(Nodes, Module, Function, Args, Timeout) -> {ResL, BadNodes}
+             when
+                 Nodes :: [node()],
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 Timeout :: 0..4294967295 | infinity,
+                 ResL :: [Res :: term() | {badrpc, Reason :: term()}],
+                 BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>In contrast to an RPC, a multicall is an RPC that is sent concurrently from one client to multiple servers. This is useful for collecting information from a set of nodes, or for calling a function on a set of nodes to achieve some side effects. It is semantically the same as iteratively making a series of RPCs on all the nodes, but the multicall is faster, as all the requests are sent at the same time and are collected one by one as they come back.</p><p>The function evaluates <code>apply(Module, Function, Args)</code> on the specified nodes and collects the answers. It returns <code>{ResL, BadNodes}</code>, where <code>BadNodes</code> is a list of the nodes that do not exist, and <code>ResL</code> is a list of the return values, or <code>{badrpc, Reason}</code> for failing calls. <code>Timeout</code> is a time (integer) in milliseconds, or <code>infinity</code>.</p><p>The following example is useful when new object code is to be loaded on all nodes in the network, and indicates some side effects that RPCs can produce:</p><pre><code type="none">%% Find object code for module Mod
+{Mod, Bin, File} = code:get_object_code(Mod),
+
+%% and load it on all nodes including this one
+{ResL, _} = rpc:multicall(code, load_binary, [Mod, File, Bin]),
+
+%% and then maybe check the ResL list.</code></pre><div class="note"><p>If you want the ability to distinguish between results, you may want to consider using the <a href="erpc.html#multicall/4"><code>erpc:multicall()</code></a> function from the <code>erpc</code> module instead.</p></div><div class="note"><p>You cannot make <em>any</em> assumptions about the process that will perform the <code>apply()</code>. It may be the calling process itself, an <code>rpc</code> server, another server, or a freshly spawned process.</p></div>
+  </section>
+</section>
+<section class="detail" id="nb_yield/1">
+
+  <div class="detail-header">
+    <a href="#nb_yield/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nb_yield/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>nb_yield(Key) -> {value, Val} | timeout
+            when Key :: <a href="#t:key/0">key</a>(), Val :: (Res :: term()) | {badrpc, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Equivalent to <code>nb_yield(Key, 0)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="nb_yield/2">
+
+  <div class="detail-header">
+    <a href="#nb_yield/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nb_yield/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>nb_yield(Key, Timeout) -> {value, Val} | timeout
+            when
+                Key :: <a href="#t:key/0">key</a>(),
+                Timeout :: 0..4294967295 | infinity,
+                Val :: (Res :: term()) | {badrpc, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Non-blocking version of <a href="rpc.html#yield/1"><code>yield/1</code></a>. It returns the tuple <code>{value, Val}</code> when the computation is finished, or <code>timeout</code> when <code>Timeout</code> milliseconds has elapsed.</p><p>See the note in <a href="rpc.html#call/4"><code>call/4</code></a> for more details of Val.</p><div class="note"><p>This function must be called by the same process from which <a href="rpc.html#async_call/4"><code>async_call/4</code></a> was made otherwise it will only return <code>timeout</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="parallel_eval/1">
+
+  <div class="detail-header">
+    <a href="#parallel_eval/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">parallel_eval/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>parallel_eval(FuncCalls) -> ResL
+                 when
+                     FuncCalls :: [{Module, Function, Args}],
+                     Module :: module(),
+                     Function :: atom(),
+                     Args :: [term()],
+                     ResL :: [term()].</pre>
+
+      </div>
+
+<p>Evaluates, for every tuple in <code>FuncCalls</code>, <code>apply(Module, Function, Args)</code> on some node in the network. Returns the list of return values, in the same order as in <code>FuncCalls</code>.</p>
+  </section>
+</section>
+<section class="detail" id="pinfo/1">
+
+  <div class="detail-header">
+    <a href="#pinfo/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pinfo/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pinfo(Pid) -> [{Item, Info}] | undefined when Pid :: pid(), Item :: atom(), Info :: term().</pre>
+
+      </div>
+
+<p>Location transparent version of the BIF <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#process_info/1"><code>erlang:process_info/1</code></a> in ERTS.</p>
+  </section>
+</section>
+<section class="detail" id="pinfo/2">
+
+  <div class="detail-header">
+    <a href="#pinfo/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pinfo/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pinfo(Pid, Item) -> {Item, Info} | undefined | []
+         when Pid :: pid(), Item :: atom(), Info :: term();
+     (Pid, ItemList) -> [{Item, Info}] | undefined | []
+         when Pid :: pid(), Item :: atom(), ItemList :: [Item], Info :: term().</pre>
+
+      </div>
+
+<p>Location transparent version of the BIF <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#process_info/2"><code>erlang:process_info/2</code></a> in ERTS.</p>
+  </section>
+</section>
+<section class="detail" id="pmap/3">
+
+  <div class="detail-header">
+    <a href="#pmap/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pmap/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pmap(FuncSpec, ExtraArgs, List1) -> List2
+        when
+            FuncSpec :: {Module, Function},
+            Module :: module(),
+            Function :: atom(),
+            ExtraArgs :: [term()],
+            List1 :: [Elem :: term()],
+            List2 :: [term()].</pre>
+
+      </div>
+
+<p>Evaluates <code>apply(Module, Function, [Elem|ExtraArgs])</code> for every element <code>Elem</code> in <code>List1</code>, in parallel. Returns the list of return values, in the same order as in <code>List1</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sbcast/2">
+
+  <div class="detail-header">
+    <a href="#sbcast/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sbcast/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sbcast(Name, Msg) -> {GoodNodes, BadNodes}
+          when Name :: atom(), Msg :: term(), GoodNodes :: [node()], BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Equivalent to <code>sbcast([node()|nodes()], Name, Msg)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sbcast/3">
+
+  <div class="detail-header">
+    <a href="#sbcast/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sbcast/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sbcast(Nodes, Name, Msg) -> {GoodNodes, BadNodes}
+          when
+              Name :: atom(),
+              Msg :: term(),
+              Nodes :: [node()],
+              GoodNodes :: [node()],
+              BadNodes :: [node()].</pre>
+
+      </div>
+
+<p>Broadcasts the message <code>Msg</code> synchronously to the registered process <code>Name</code> on the specified nodes.</p><p>Returns <code>{GoodNodes, BadNodes}</code>, where <code>GoodNodes</code> is the list of nodes that have <code>Name</code> as a registered process.</p><p>The function is synchronous in the sense that it is known that all servers have received the message when the call returns. It is not possible to know that the servers have processed the message.</p><p>Any further messages sent to the servers, after this function has returned, are received by all servers after this message.</p>
+  </section>
+</section>
+<section class="detail" id="server_call/4">
+
+  <div class="detail-header">
+    <a href="#server_call/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">server_call/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>server_call(Node, Name, ReplyWrapper, Msg) -> Reply | {error, Reason}
+               when
+                   Node :: node(),
+                   Name :: atom(),
+                   ReplyWrapper :: term(),
+                   Msg :: term(),
+                   Reply :: term(),
+                   Reason :: nodedown.</pre>
+
+      </div>
+
+<p>Can be used when interacting with a server called <code>Name</code> on node <code>Node</code>. It is assumed that the server receives messages in the format <code>{From, Msg}</code> and replies using <code>From ! {ReplyWrapper, Node, Reply}</code>. This function makes such a server call and ensures that the entire call is packed into an atomic transaction, which either succeeds or fails. It never hangs, unless the server itself hangs.</p><p>The function returns the answer <code>Reply</code> as produced by the server <code>Name</code>, or <code>{error, Reason}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="yield/1">
+
+  <div class="detail-header">
+    <a href="#yield/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">yield/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>yield(Key) -> Res | {badrpc, Reason} when Key :: <a href="#t:key/0">key</a>(), Res :: term(), Reason :: term().</pre>
+
+      </div>
+
+<p>Returns the promised answer from a previous <a href="rpc.html#async_call/4"><code>async_call/4</code></a>. If the answer is available, it is returned immediately. Otherwise, the calling process is suspended until the answer arrives from <code>Node</code>.</p><div class="note"><p>This function must be called by the same process from which <a href="rpc.html#async_call/4"><code>async_call/4</code></a> was made otherwise it will never return.</p></div><p>See the note in <a href="rpc.html#call/4"><code>call/4</code></a> for more details of the return value.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

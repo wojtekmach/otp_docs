@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="tools v3.5">
+
+    <title>cprof — tools v3.5</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-b955672ef1.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+tools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.5
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+cprof <small class="app-vsn">(tools v3.5)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The <code>cprof</code> module is used to profile a program to find out how many times different functions are called. Breakpoints similar to local call trace, but containing a counter, are used to minimise runtime performance impact.</p><p>Since breakpoints are used there is no need for special compilation of any module to be profiled. For now these breakpoints can only be set on BEAM code so BIFs cannot be call count traced.</p><p>The size of the call counters is the host machine word size. One bit is used when pausing the counter, so the maximum counter value for a 32-bit host is 2147483647.</p><p>The profiling result is delivered as a term containing a sorted list of entries, one per module. Each module entry contains a sorted list of functions. The sorting order in both cases is of decreasing call count.</p><p>Call count tracing is very lightweight compared to other forms of tracing since no trace message has to be generated. Some measurements indicates performance degradation in the vicinity of 10 percent.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="eprof.html">eprof</a>(3), <a href="fprof.html">fprof</a>(3), erlang(3), User's Guide</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/0">analyse/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="func_analysis_list"></li><li name="mod_analysis"></li><li name="mod_analysis_list"></li></ul><p>Collects and analyses the call counters presently in the node for either module <code>Mod</code>, or for all modules (except <code>cprof</code> itself), and returns</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/1">analyse/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/2">analyse/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pause/0">pause/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pause call count tracing for all functions in all modules and stop it for all functions in modules to be loaded. This is the same as <code>(pause({'_','_','_'})+stop({on_load}))</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pause/1">pause/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pause call counters for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pause/2">pause/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pause/3">pause/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart/0">restart/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Restart call counters for the matching functions in matching modules that are call count traced. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart/1">restart/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart/2">restart/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#restart/3">restart/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Start call count tracing for all functions in all modules, and also for all functions in modules to be loaded. This is the same as <code>(start({'_','_','_'})+start({on_load}))</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/1">start/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Start call count tracing for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>, for example <code>on_load</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/2">start/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/3">start/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stop call count tracing for all functions in all modules, and also for all functions in modules to be loaded. This is the same as <code>(stop({'_','_','_'})+stop({on_load}))</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stop call count tracing for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>, for example <code>on_load</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/2">stop/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/3">stop/3</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="analyse/0">
+
+  <div class="detail-header">
+    <a href="#analyse/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse() -> {AllCallCount :: non_neg_integer(), ModAnalysisList :: <a href="#t:mod_analysis_list/0">mod_analysis_list</a>()}.</pre>
+
+      </div>
+
+<ul class="types"><li name="func_analysis_list"></li><li name="mod_analysis"></li><li name="mod_analysis_list"></li></ul><p>Collects and analyses the call counters presently in the node for either module <code>Mod</code>, or for all modules (except <code>cprof</code> itself), and returns:</p><dl><dt><code>FuncAnalysisList</code></dt><dd>A list of tuples, one for each function in a module, in decreasing <code>FuncCallCount</code> order.</dd><dt><code>ModCallCount</code></dt><dd>The sum of <code>FuncCallCount</code> values for all functions in module <code>Mod</code>.</dd><dt><code>AllCallCount</code></dt><dd>The sum of <code>ModCallCount</code> values for all modules concerned in <code>ModAnalysisList</code>.</dd><dt><code>ModAnalysisList</code></dt><dd>A list of tuples, one for each module except <code>cprof</code>, in decreasing <code>ModCallCount</code> order.</dd></dl><p>If call counters are still running while <code>analyse/0..2</code> is executing, you might get an inconsistent result. This happens if the process executing <code>analyse/0..2</code> gets scheduled out so some other process can increment the counters that are being analysed, Calling <a href="cprof.html#pause/0"><code>pause()</code></a> before analysing takes care of the problem.</p><p>If the <code>Mod</code> argument is given, the result contains a <code>ModAnalysis</code> tuple for module <code>Mod</code> only, otherwise the result contains one <code>ModAnalysis</code> tuple for all modules returned from <a href="https://wojtekmach.pl/otp_docs/kernel/code.html#all_loaded/0"><code>code:all_loaded()</code></a> except <code>cprof</code> itself.</p><p>All functions with a <code>FuncCallCount</code> lower than <code>Limit</code> are excluded from <code>FuncAnalysisList</code>. They are still included in <code>ModCallCount</code>, though. The default value for <code>Limit</code> is <code>1</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse/1">
+
+  <div class="detail-header">
+    <a href="#analyse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(Limit) -> {AllCallCount :: non_neg_integer(), ModAnalysisList :: <a href="#t:mod_analysis_list/0">mod_analysis_list</a>()}
+           when Limit :: non_neg_integer();
+       (Mod) -> ModAnalysis :: <a href="#t:mod_analysis/0">mod_analysis</a>() when Mod :: module().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="analyse/2">
+
+  <div class="detail-header">
+    <a href="#analyse/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(Mod, Limit) -> ModAnalysis :: <a href="#t:mod_analysis/0">mod_analysis</a>()
+           when Mod :: module(), Limit :: non_neg_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="pause/0">
+
+  <div class="detail-header">
+    <a href="#pause/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pause/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pause() -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Pause call count tracing for all functions in all modules and stop it for all functions in modules to be loaded. This is the same as <code>(pause({'_','_','_'})+stop({on_load}))</code>.</p><p>See also <a href="cprof.html#pause/1"><code>pause/1..3</code></a> below.</p>
+  </section>
+</section>
+<section class="detail" id="pause/1">
+
+  <div class="detail-header">
+    <a href="#pause/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pause/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pause(FuncSpec) -> non_neg_integer() when FuncSpec :: (Mod :: module()) | mfa() | {FS :: term()}.</pre>
+
+      </div>
+
+<p>Pause call counters for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>.</p><p>The call counters for all matching functions that has got call count breakpoints are paused at their current count.</p><p>Return the number of matching functions that can have call count breakpoints, the same as <a href="cprof.html#start/0"><code>start/0..3</code></a> with the same arguments would have returned.</p>
+  </section>
+</section>
+<section class="detail" id="pause/2">
+
+  <div class="detail-header">
+    <a href="#pause/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pause/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pause(Mod, Func) -> non_neg_integer() when Mod :: module(), Func :: atom().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="pause/3">
+
+  <div class="detail-header">
+    <a href="#pause/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pause/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pause(Mod, Func, Arity) -> non_neg_integer()
+         when Mod :: module(), Func :: atom(), Arity :: arity().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="restart/0">
+
+  <div class="detail-header">
+    <a href="#restart/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>restart() -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Restart call counters for the matching functions in matching modules that are call count traced. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>.</p><p>The call counters for all matching functions that has got call count breakpoints are set to zero and running.</p><p>Return the number of matching functions that can have call count breakpoints, the same as <a href="cprof.html#start/0"><code>start/0..3</code></a> with the same arguments would have returned.</p>
+  </section>
+</section>
+<section class="detail" id="restart/1">
+
+  <div class="detail-header">
+    <a href="#restart/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>restart(FuncSpec) -> non_neg_integer() when FuncSpec :: (Mod :: module()) | mfa() | {FS :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="restart/2">
+
+  <div class="detail-header">
+    <a href="#restart/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>restart(Mod, Func) -> non_neg_integer() when Mod :: module(), Func :: atom().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="restart/3">
+
+  <div class="detail-header">
+    <a href="#restart/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">restart/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>restart(Mod, Func, Arity) -> non_neg_integer()
+           when Mod :: module(), Func :: atom(), Arity :: arity().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/0">
+
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start() -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Start call count tracing for all functions in all modules, and also for all functions in modules to be loaded. This is the same as <code>(start({'_','_','_'})+start({on_load}))</code>.</p><p>See also <a href="cprof.html#start/1"><code>start/1..3</code></a> below.</p>
+  </section>
+</section>
+<section class="detail" id="start/1">
+
+  <div class="detail-header">
+    <a href="#start/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(FuncSpec) -> non_neg_integer() when FuncSpec :: (Mod :: module()) | mfa() | {FS :: term()}.</pre>
+
+      </div>
+
+<p>Start call count tracing for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>, for example <code>on_load</code>.</p><p>Set call count breakpoints on the matching functions that has no call count breakpoints. Call counters are set to zero and running for all matching functions.</p><p>Return the number of matching functions that has got call count breakpoints.</p>
+  </section>
+</section>
+<section class="detail" id="start/2">
+
+  <div class="detail-header">
+    <a href="#start/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Mod, Func) -> non_neg_integer() when Mod :: module(), Func :: atom().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/3">
+
+  <div class="detail-header">
+    <a href="#start/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Mod, Func, Arity) -> non_neg_integer()
+         when Mod :: module(), Func :: atom(), Arity :: arity().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop() -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Stop call count tracing for all functions in all modules, and also for all functions in modules to be loaded. This is the same as <code>(stop({'_','_','_'})+stop({on_load}))</code>.</p><p>See also <a href="cprof.html#stop/1"><code>stop/1..3</code></a> below.</p>
+  </section>
+</section>
+<section class="detail" id="stop/1">
+
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(FuncSpec) -> non_neg_integer() when FuncSpec :: (Mod :: module()) | mfa() | {FS :: term()}.</pre>
+
+      </div>
+
+<p>Stop call count tracing for matching functions in matching modules. The <code>FS</code> argument can be used to specify the first argument to <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace_pattern/3"><code>erlang:trace_pattern/3</code></a>, for example <code>on_load</code>.</p><p>Remove call count breakpoints from the matching functions that has call count breakpoints.</p><p>Return the number of matching functions that can have call count breakpoints, the same as <a href="cprof.html#start/0"><code>start/0..3</code></a> with the same arguments would have returned.</p>
+  </section>
+</section>
+<section class="detail" id="stop/2">
+
+  <div class="detail-header">
+    <a href="#stop/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Mod, Func) -> non_neg_integer() when Mod :: module(), Func :: atom().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="stop/3">
+
+  <div class="detail-header">
+    <a href="#stop/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Mod, Func, Arity) -> non_neg_integer() when Mod :: module(), Func :: atom(), Arity :: arity().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

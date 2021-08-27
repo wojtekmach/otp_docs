@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="erts v12.0.3">
+
+    <title>zlib — erts v12.0.3</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-7dbc3c54d4.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+erts
+      </a>
+      <strong class="sidebar-projectVersion">
+        v12.0.3
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+zlib <small class="app-vsn">(erts v12.0.3)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides an API for the zlib library (<a href="http://www.zlib.net">www.zlib.net</a>). It is used to compress and decompress data. The data format is described by <a href="https://www.ietf.org/rfc/rfc1950.txt">RFC 1950</a>, <a href="https://www.ietf.org/rfc/rfc1951.txt">RFC 1951</a>, and <a href="https://www.ietf.org/rfc/rfc1952.txt">RFC 1952</a>.</p><p>A typical (compress) usage is as follows:</p><pre><code class="makeup erlang"><span class="n">Z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">open</span><span class="p" data-group-id="4883932538-1">(</span><span class="p" data-group-id="4883932538-1">)</span><span class="p">,</span><span class="w">
+</span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflateInit</span><span class="p" data-group-id="4883932538-2">(</span><span class="n">Z</span><span class="p">,</span><span class="ss">default</span><span class="p" data-group-id="4883932538-2">)</span><span class="p">,</span><span class="w">
+
+</span><span class="n">Compress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">fun</span><span class="p" data-group-id="4883932538-3">(</span><span class="ss">end_of_data</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">Cont</span><span class="p" data-group-id="4883932538-3">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p" data-group-id="4883932538-4">[</span><span class="p" data-group-id="4883932538-4">]</span><span class="p">;</span><span class="w">
+              </span><span class="p" data-group-id="4883932538-5">(</span><span class="n">Data</span><span class="p">,</span><span class="w"> </span><span class="n">Cont</span><span class="p" data-group-id="4883932538-5">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                 </span><span class="p" data-group-id="4883932538-6">[</span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflate</span><span class="p" data-group-id="4883932538-7">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Data</span><span class="p" data-group-id="4883932538-7">)</span><span class="p">|</span><span class="n">Cont</span><span class="p" data-group-id="4883932538-8">(</span><span class="n">Read</span><span class="p" data-group-id="4883932538-9">(</span><span class="p" data-group-id="4883932538-9">)</span><span class="p">,</span><span class="n">Cont</span><span class="p" data-group-id="4883932538-8">)</span><span class="p" data-group-id="4883932538-6">]</span><span class="w">
+           </span><span class="k">end</span><span class="p">,</span><span class="w">
+</span><span class="n">Compressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Compress</span><span class="p" data-group-id="4883932538-10">(</span><span class="n">Read</span><span class="p" data-group-id="4883932538-11">(</span><span class="p" data-group-id="4883932538-11">)</span><span class="p">,</span><span class="n">Compress</span><span class="p" data-group-id="4883932538-10">)</span><span class="p">,</span><span class="w">
+</span><span class="n">Last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflate</span><span class="p" data-group-id="4883932538-12">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4883932538-13">[</span><span class="p" data-group-id="4883932538-13">]</span><span class="p">,</span><span class="w"> </span><span class="ss">finish</span><span class="p" data-group-id="4883932538-12">)</span><span class="p">,</span><span class="w">
+</span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflateEnd</span><span class="p" data-group-id="4883932538-14">(</span><span class="n">Z</span><span class="p" data-group-id="4883932538-14">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">zlib</span><span class="p">:</span><span class="nf">close</span><span class="p" data-group-id="4883932538-15">(</span><span class="n">Z</span><span class="p" data-group-id="4883932538-15">)</span><span class="p">,</span><span class="w">
+</span><span class="nf">list_to_binary</span><span class="p" data-group-id="4883932538-16">(</span><span class="p" data-group-id="4883932538-17">[</span><span class="n">Compressed</span><span class="p">|</span><span class="n">Last</span><span class="p" data-group-id="4883932538-17">]</span><span class="p" data-group-id="4883932538-16">)</span></code></pre><p>In all functions errors, <code>{'EXIT',{Reason,Backtrace}}</code>, can be thrown, where <code>Reason</code> describes the error.</p><p>Typical <code>Reason</code>s:</p><dl><dt><code>badarg</code></dt><dd>Bad argument.</dd><dt><code>not_initialized</code></dt><dd>The stream hasn't been initialized, eg. if <a href="zlib.html#inflateInit/1"><code>inflateInit/1</code></a> wasn't called prior to a call to <a href="zlib.html#inflate/2"><code>inflate/2</code></a>.</dd><dt><code>not_on_controlling_process</code></dt><dd>The stream was used by a process that doesn't control it. Use <a href="zlib.html#set_controlling_process/2"><code>set_controlling_process/2</code></a> if you need to transfer a stream to a different process.</dd><dt><code>data_error</code></dt><dd>The data contains errors.</dd><dt><code>stream_error</code></dt><dd>Inconsistent stream state.</dd><dt><code>{need_dictionary,Adler32}</code></dt><dd>See <a href="zlib.html#inflate/2"><code>inflate/2</code></a>.</dd></dl>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zflush/0">-type zflush() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zlevel/0">-type zlevel() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zmemlevel/0">-type zmemlevel() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zmethod/0">-type zmethod() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zstrategy/0">-type zstrategy() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zstream/0">-type zstream() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A zlib stream, see <a href="zlib.html#open/0"><code>open/0</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zwindowbits/0">-type zwindowbits() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Normally in the range <code>-15..-8 | 8..15</code>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#adler32/2">adler32/2</a>
+
+      <span class="deprecated" title="zlib:adler32/2 is deprecated and will be removed in OTP 27; use erlang:adler32/1 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calculates the Adler-32 checksum for <code>Data</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#adler32/3">adler32/3</a>
+
+      <span class="deprecated" title="zlib:adler32/3 is deprecated and will be removed in OTP 27; use erlang:adler32/2 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Updates a running Adler-32 checksum for <code>Data</code>. If <code>Data</code> is the empty binary or the empty iolist, this function returns the required initial value for the checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#adler32_combine/4">adler32_combine/4</a>
+
+      <span class="deprecated" title="zlib:adler32_combine/4 is deprecated and will be removed in OTP 27; use erlang:adler_combine/3 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Combines two Adler-32 checksums into one. For two binaries or iolists, <code>Data1</code> and <code>Data2</code> with sizes of <code>Size1</code> and <code>Size2</code>, with Adler-32 checksums <code>Adler1</code> and <code>Adler2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#close/1">close/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Closes the stream referenced by <code>Z</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compress/1">compress/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compresses data with zlib headers and checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crc32/1">crc32/1</a>
+
+      <span class="deprecated" title="zlib:crc32/1 is deprecated and will be removed in OTP 27; use erlang:crc32/1 on the uncompressed data instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the current calculated CRC checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crc32/2">crc32/2</a>
+
+      <span class="deprecated" title="zlib:crc32/2 is deprecated and will be removed in OTP 27; use erlang:crc32/1 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calculates the CRC checksum for <code>Data</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crc32/3">crc32/3</a>
+
+      <span class="deprecated" title="zlib:crc32/3 is deprecated and will be removed in OTP 27; use erlang:crc32/2 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Updates a running CRC checksum for <code>Data</code>. If <code>Data</code> is the empty binary or the empty iolist, this function returns the required initial value for the CRC.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crc32_combine/4">crc32_combine/4</a>
+
+      <span class="deprecated" title="zlib:crc32_combine/4 is deprecated and will be removed in OTP 27; use erlang:crc32_combine/3 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Combines two CRC checksums into one. For two binaries or iolists, <code>Data1</code> and <code>Data2</code> with sizes of <code>Size1</code> and <code>Size2</code>, with CRC checksums <code>CRC1</code> and <code>CRC2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflate/2">deflate/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>deflate(Z, Data, none)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflate/3">deflate/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compresses as much data as possible, and stops when the input buffer becomes empty. It can introduce some output latency (reading input without producing any output) except when forced to flush.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateEnd/1">deflateEnd/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ends the deflate session and cleans all data used. Notice that this function throws a <code>data_error</code> exception if the last call to <a href="zlib.html#deflate/3"><code>deflate/3</code></a> was not called with <code>Flush</code> set to <code>finish</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateInit/1">deflateInit/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>zlib:deflateInit(Z, default)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateInit/2">deflateInit/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes a zlib stream for compression.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateInit/6">deflateInit/6</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initiates a zlib stream for compression.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateParams/3">deflateParams/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Dynamically updates the compression level and compression strategy. The interpretation of <code>Level</code> and <code>Strategy</code> is as in <a href="zlib.html#deflateInit/6"><code>deflateInit/6</code></a>. This can be used to switch between compression and straight copy of the input data, or to switch to a different kind of input data requiring a different strategy. If the compression level is changed, the input available so far is compressed with the old level (and can be flushed); the new level takes effect only at the next call of <a href="zlib.html#deflate/3"><code>deflate/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateReset/1">deflateReset/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="zlib.html#deflateEnd/1"><code>deflateEnd/1</code></a> followed by <a href="zlib.html#deflateInit/1"><code>deflateInit/1,2,6</code></a>, but does not free and reallocate all the internal compression state. The stream keeps the same compression level and any other attributes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#deflateSetDictionary/2">deflateSetDictionary/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes the compression dictionary from the specified byte sequence without producing any compressed output.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getBufSize/1">getBufSize/1</a>
+
+      <span class="deprecated" title="zlib:getBufSize/1 is deprecated and will be removed in OTP 27; this function will be removed in a future release">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the size of the intermediate buffer.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#gunzip/1">gunzip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Uncompresses data with gz headers and checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#gzip/1">gzip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compresses data with gz headers and checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflate/2">inflate/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="zlib.html#inflate/3"><code>inflate(Z, Data, [])</code></a></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflate/3">inflate/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Decompresses as much data as possible. It can introduce some output latency (reading input without producing any output).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateChunk/1">inflateChunk/1</a>
+
+      <span class="deprecated" title="zlib:inflateChunk/1 is deprecated and will be removed in OTP 27; use safeInflate/2 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code> </a>instead.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateChunk/2">inflateChunk/2</a>
+
+      <span class="deprecated" title="zlib:inflateChunk/2 is deprecated and will be removed in OTP 27; use safeInflate/2 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code> </a>instead.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateEnd/1">inflateEnd/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ends the inflate session and cleans all data used. Notice that this function throws a <code>data_error</code> exception if no end of stream was found (meaning that not all data has been uncompressed).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateGetDictionary/1">inflateGetDictionary/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the decompression dictionary currently in use by the stream. This function must be called between <a href="zlib.html#inflateInit/1"><code>inflateInit/1,2</code></a> and <a href="zlib.html#inflateEnd/1"><code>inflateEnd</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateInit/1">inflateInit/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes a zlib stream for decompression.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateInit/2">inflateInit/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes a decompression session on zlib stream.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateReset/1">inflateReset/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="zlib.html#inflateEnd/1"><code>inflateEnd/1</code></a> followed by <a href="zlib.html#inflateInit/1"><code>inflateInit/1</code></a>, but does not free and reallocate all the internal decompression state. The stream will keep attributes that could have been set by <code>inflateInit/1,2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inflateSetDictionary/2">inflateSetDictionary/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes the decompression dictionary from the specified uncompressed byte sequence. This function must be called as a response to an inflate operation (eg. <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code></a>) returning <code>{need_dictionary,Adler,Output}</code> or in the case of deprecated functions, throwing an <code>{'EXIT',{{need_dictionary,Adler},_StackTrace}}</code> exception.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/0">open/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Opens a zlib stream.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#safeInflate/2">safeInflate/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Like <a href="zlib.html#inflate/2"><code>inflate/2</code></a>, but returns once it has expanded beyond a small implementation-defined threshold. It's useful when decompressing untrusted input which could have been maliciously crafted to expand until the system runs out of memory.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setBufSize/2">setBufSize/2</a>
+
+      <span class="deprecated" title="zlib:setBufSize/2 is deprecated and will be removed in OTP 27; this function will be removed in a future release">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the intermediate buffer size.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_controlling_process/2">set_controlling_process/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Changes the controlling process of <code>Z</code> to <code>Pid</code>, which must be a local process.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uncompress/1">uncompress/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Uncompresses data with zlib headers and checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unzip/1">unzip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Uncompresses data without zlib headers and checksum.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip/1">zip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compresses data without zlib headers and checksum.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:zflush/0">
+
+  <div class="detail-header">
+    <a href="#t:zflush/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zflush() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zflush() :: none | sync | full | finish.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:zlevel/0">
+
+  <div class="detail-header">
+    <a href="#t:zlevel/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zlevel() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zlevel() :: none | default | best_compression | best_speed | 0..9.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:zmemlevel/0">
+
+  <div class="detail-header">
+    <a href="#t:zmemlevel/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zmemlevel() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zmemlevel() :: 1..9.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:zmethod/0">
+
+  <div class="detail-header">
+    <a href="#t:zmethod/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zmethod() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zmethod() :: deflated.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:zstrategy/0">
+
+  <div class="detail-header">
+    <a href="#t:zstrategy/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zstrategy() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zstrategy() :: default | filtered | huffman_only | rle.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:zstream/0">
+
+  <div class="detail-header">
+    <a href="#t:zstream/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zstream() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zstream() :: reference().</pre>
+
+      </div>
+
+<p>A zlib stream, see <a href="zlib.html#open/0"><code>open/0</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:zwindowbits/0">
+
+  <div class="detail-header">
+    <a href="#t:zwindowbits/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zwindowbits() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zwindowbits() :: -15..-8 | 8..47.</pre>
+
+      </div>
+
+<p>Normally in the range <code>-15..-8 | 8..15</code>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="adler32/2">
+
+  <div class="detail-header">
+    <a href="#adler32/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">adler32/2</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:adler32/2 is deprecated and will be removed in OTP 27; use erlang:adler32/1 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>adler32(Z, Data) -> CheckSum when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), CheckSum :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Calculates the Adler-32 checksum for <code>Data</code>.</p><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#adler32/1"><code>erlang:adler32/1</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="adler32/3">
+
+  <div class="detail-header">
+    <a href="#adler32/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">adler32/3</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:adler32/3 is deprecated and will be removed in OTP 27; use erlang:adler32/2 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>adler32(Z, PrevAdler, Data) -> CheckSum
+           when
+               Z :: <a href="#t:zstream/0">zstream</a>(),
+               PrevAdler :: non_neg_integer(),
+               Data :: iodata(),
+               CheckSum :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Updates a running Adler-32 checksum for <code>Data</code>. If <code>Data</code> is the empty binary or the empty iolist, this function returns the required initial value for the checksum.</p><p>Example:</p><pre><code class="makeup erlang"><span class="n">Crc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">foldl</span><span class="p" data-group-id="3009837902-1">(</span><span class="nf">fun</span><span class="p" data-group-id="3009837902-2">(</span><span class="n">Data</span><span class="p">,</span><span class="n">Crc0</span><span class="p" data-group-id="3009837902-2">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                      </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">adler32</span><span class="p" data-group-id="3009837902-3">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Crc0</span><span class="p">,</span><span class="w"> </span><span class="n">Data</span><span class="p" data-group-id="3009837902-3">)</span><span class="p">,</span><span class="w">
+                  </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">adler32</span><span class="p" data-group-id="3009837902-4">(</span><span class="n">Z</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="w"> </span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3009837902-4">)</span><span class="p">,</span><span class="w"> </span><span class="n">Datas</span><span class="p" data-group-id="3009837902-1">)</span></code></pre><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#adler32/2"><code>erlang:adler32/2</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="adler32_combine/4">
+
+  <div class="detail-header">
+    <a href="#adler32_combine/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">adler32_combine/4</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:adler32_combine/4 is deprecated and will be removed in OTP 27; use erlang:adler_combine/3 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>adler32_combine(Z, Adler1, Adler2, Size2) -> Adler
+                   when
+                       Z :: <a href="#t:zstream/0">zstream</a>(),
+                       Adler :: non_neg_integer(),
+                       Adler1 :: non_neg_integer(),
+                       Adler2 :: non_neg_integer(),
+                       Size2 :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Combines two Adler-32 checksums into one. For two binaries or iolists, <code>Data1</code> and <code>Data2</code> with sizes of <code>Size1</code> and <code>Size2</code>, with Adler-32 checksums <code>Adler1</code> and <code>Adler2</code>.</p><p>This function returns the <code>Adler</code> checksum of <code>[Data1,Data2]</code>, requiring only <code>Adler1</code>, <code>Adler2</code>, and <code>Size2</code>.</p><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#adler32_combine/3"><code>erlang:adler32_combine/3</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="close/1">
+
+  <div class="detail-header">
+    <a href="#close/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">close/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>close(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Closes the stream referenced by <code>Z</code>.</p>
+  </section>
+</section>
+<section class="detail" id="compress/1">
+
+  <div class="detail-header">
+    <a href="#compress/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compress/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compress(Data) -> Compressed when Data :: iodata(), Compressed :: binary().</pre>
+
+      </div>
+
+<p>Compresses data with zlib headers and checksum.</p>
+  </section>
+</section>
+<section class="detail" id="crc32/1">
+
+  <div class="detail-header">
+    <a href="#crc32/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crc32/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:crc32/1 is deprecated and will be removed in OTP 27; use erlang:crc32/1 on the uncompressed data instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>crc32(Z) -> CRC when Z :: <a href="#t:zstream/0">zstream</a>(), CRC :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Gets the current calculated CRC checksum.</p><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#crc32/1"><code>erlang:crc32/1</code></a> on the uncompressed data instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="crc32/2">
+
+  <div class="detail-header">
+    <a href="#crc32/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crc32/2</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:crc32/2 is deprecated and will be removed in OTP 27; use erlang:crc32/1 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>crc32(Z, Data) -> CRC when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), CRC :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Calculates the CRC checksum for <code>Data</code>.</p><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#crc32/1"><code>erlang:crc32/1</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="crc32/3">
+
+  <div class="detail-header">
+    <a href="#crc32/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crc32/3</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:crc32/3 is deprecated and will be removed in OTP 27; use erlang:crc32/2 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>crc32(Z, PrevCRC, Data) -> CRC
+         when
+             Z :: <a href="#t:zstream/0">zstream</a>(),
+             PrevCRC :: non_neg_integer(),
+             Data :: iodata(),
+             CRC :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Updates a running CRC checksum for <code>Data</code>. If <code>Data</code> is the empty binary or the empty iolist, this function returns the required initial value for the CRC.</p><p>Example:</p><pre><code class="makeup erlang"><span class="n">Crc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">foldl</span><span class="p" data-group-id="2253760632-1">(</span><span class="nf">fun</span><span class="p" data-group-id="2253760632-2">(</span><span class="n">Data</span><span class="p">,</span><span class="n">Crc0</span><span class="p" data-group-id="2253760632-2">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                      </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">crc32</span><span class="p" data-group-id="2253760632-3">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Crc0</span><span class="p">,</span><span class="w"> </span><span class="n">Data</span><span class="p" data-group-id="2253760632-3">)</span><span class="p">,</span><span class="w">
+                  </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">crc32</span><span class="p" data-group-id="2253760632-4">(</span><span class="n">Z</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="w"> </span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2253760632-4">)</span><span class="p">,</span><span class="w"> </span><span class="n">Datas</span><span class="p" data-group-id="2253760632-1">)</span></code></pre><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#crc32/2"><code>erlang:crc32/2</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="crc32_combine/4">
+
+  <div class="detail-header">
+    <a href="#crc32_combine/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crc32_combine/4</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:crc32_combine/4 is deprecated and will be removed in OTP 27; use erlang:crc32_combine/3 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>crc32_combine(Z, CRC1, CRC2, Size2) -> CRC
+                 when
+                     Z :: <a href="#t:zstream/0">zstream</a>(),
+                     CRC :: non_neg_integer(),
+                     CRC1 :: non_neg_integer(),
+                     CRC2 :: non_neg_integer(),
+                     Size2 :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Combines two CRC checksums into one. For two binaries or iolists, <code>Data1</code> and <code>Data2</code> with sizes of <code>Size1</code> and <code>Size2</code>, with CRC checksums <code>CRC1</code> and <code>CRC2</code>.</p><p>This function returns the <code>CRC</code> checksum of <code>[Data1,Data2]</code>, requiring only <code>CRC1</code>, <code>CRC2</code>, and <code>Size2</code>.</p><div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="erlang.html#crc32_combine/3"><code>erlang:crc32_combine/3</code></a> instead.</p></div>
+  </section>
+</section>
+<section class="detail" id="deflate/2">
+
+  <div class="detail-header">
+    <a href="#deflate/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflate/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflate(Z, Data) -> Compressed when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), Compressed :: iolist().</pre>
+
+      </div>
+
+<p>Same as <code>deflate(Z, Data, none)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="deflate/3">
+
+  <div class="detail-header">
+    <a href="#deflate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflate/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflate(Z, Data, Flush) -> Compressed
+           when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), Flush :: <a href="#t:zflush/0">zflush</a>(), Compressed :: iolist().</pre>
+
+      </div>
+
+<p>Compresses as much data as possible, and stops when the input buffer becomes empty. It can introduce some output latency (reading input without producing any output) except when forced to flush.</p><p>If <code>Flush</code> is set to <code>sync</code>, all pending output is flushed to the output buffer and the output is aligned on a byte boundary, so that the decompressor can get all input data available so far. Flushing can degrade compression for some compression algorithms; thus, use it only when necessary.</p><p>If <code>Flush</code> is set to <code>full</code>, all output is flushed as with <code>sync</code>, and the compression state is reset so that decompression can restart from this point if previous compressed data has been damaged or if random access is desired. Using <code>full</code> too often can seriously degrade the compression.</p><p>If <code>Flush</code> is set to <code>finish</code>, pending input is processed, pending output is flushed, and <code>deflate/3</code> returns. Afterwards the only possible operations on the stream are <a href="zlib.html#deflateReset/1"><code>deflateReset/1</code></a> or <a href="zlib.html#deflateEnd/1"><code>deflateEnd/1</code></a>.</p><p><code>Flush</code> can be set to <code>finish</code> immediately after <a href="zlib.html#deflateInit/1"><code>deflateInit</code></a> if all compression is to be done in one step.</p><p>Example:</p><pre><code class="makeup erlang"><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflateInit</span><span class="p" data-group-id="1999398382-1">(</span><span class="n">Z</span><span class="p" data-group-id="1999398382-1">)</span><span class="p">,</span><span class="w">
+</span><span class="n">B1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflate</span><span class="p" data-group-id="1999398382-2">(</span><span class="n">Z</span><span class="p">,</span><span class="n">Data</span><span class="p" data-group-id="1999398382-2">)</span><span class="p">,</span><span class="w">
+</span><span class="n">B2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflate</span><span class="p" data-group-id="1999398382-3">(</span><span class="n">Z</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="w"> </span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="ss">finish</span><span class="p" data-group-id="1999398382-3">)</span><span class="p">,</span><span class="w">
+</span><span class="nc">zlib</span><span class="p">:</span><span class="nf">deflateEnd</span><span class="p" data-group-id="1999398382-4">(</span><span class="n">Z</span><span class="p" data-group-id="1999398382-4">)</span><span class="p">,</span><span class="w">
+</span><span class="nf">list_to_binary</span><span class="p" data-group-id="1999398382-5">(</span><span class="p" data-group-id="1999398382-6">[</span><span class="n">B1</span><span class="p">,</span><span class="n">B2</span><span class="p" data-group-id="1999398382-6">]</span><span class="p" data-group-id="1999398382-5">)</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="deflateEnd/1">
+
+  <div class="detail-header">
+    <a href="#deflateEnd/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateEnd/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateEnd(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Ends the deflate session and cleans all data used. Notice that this function throws a <code>data_error</code> exception if the last call to <a href="zlib.html#deflate/3"><code>deflate/3</code></a> was not called with <code>Flush</code> set to <code>finish</code>.</p>
+  </section>
+</section>
+<section class="detail" id="deflateInit/1">
+
+  <div class="detail-header">
+    <a href="#deflateInit/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateInit/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateInit(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Same as <code>zlib:deflateInit(Z, default)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="deflateInit/2">
+
+  <div class="detail-header">
+    <a href="#deflateInit/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateInit/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateInit(Z, Level) -> ok when Z :: <a href="#t:zstream/0">zstream</a>(), Level :: <a href="#t:zlevel/0">zlevel</a>().</pre>
+
+      </div>
+
+<p>Initializes a zlib stream for compression.</p><p><code>Level</code> decides the compression level to be used:</p><ul><li><code>default</code> gives default compromise between speed and compression</li><li><code>none</code> (0) gives no compression</li><li><code>best_speed</code> (1) gives best speed</li><li><code>best_compression</code> (9) gives best compression</li></ul>
+  </section>
+</section>
+<section class="detail" id="deflateInit/6">
+
+  <div class="detail-header">
+    <a href="#deflateInit/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateInit/6</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateInit(Z, Level, Method, WindowBits, MemLevel, Strategy) -> ok
+               when
+                   Z :: <a href="#t:zstream/0">zstream</a>(),
+                   Level :: <a href="#t:zlevel/0">zlevel</a>(),
+                   Method :: <a href="#t:zmethod/0">zmethod</a>(),
+                   WindowBits :: <a href="#t:zwindowbits/0">zwindowbits</a>(),
+                   MemLevel :: <a href="#t:zmemlevel/0">zmemlevel</a>(),
+                   Strategy :: <a href="#t:zstrategy/0">zstrategy</a>().</pre>
+
+      </div>
+
+<p>Initiates a zlib stream for compression.</p><dl><dt><code>Level</code></dt><dd><p>Compression level to use:</p><ul><li><code>default</code> gives default compromise between speed and compression</li><li><code>none</code> (0) gives no compression</li><li><code>best_speed</code> (1) gives best speed</li><li><code>best_compression</code> (9) gives best compression</li></ul></dd><dt><code>Method</code></dt><dd><p>Compression method to use, currently the only supported method is <code>deflated</code>.</p></dd><dt><code>WindowBits</code></dt><dd><p>The base two logarithm of the window size (the size of the history buffer). It is to be in the range 8 through 15. Larger values result in better compression at the expense of memory usage. Defaults to 15 if <a href="zlib.html#deflateInit/2"><code>deflateInit/2</code></a> is used. A negative <code>WindowBits</code> value suppresses the zlib header (and checksum) from the stream. Notice that the zlib source mentions this only as a undocumented feature.</p><div class="warning"><p>Due to a known bug in the underlying zlib library, <code>WindowBits</code> values 8 and -8 do not work as expected. In zlib versions before 1.2.9 values 8 and -8 are automatically changed to 9 and -9. <em>From zlib version 1.2.9 value -8 is rejected</em> causing <code>zlib:deflateInit/6</code> to fail (8 is still changed to 9). It also seem possible that future versions of zlib may fix this bug and start accepting 8 and -8 as is.</p><p>Conclusion: Avoid values 8 and -8 unless you know your zlib version supports them.</p></div></dd><dt><code>MemLevel</code></dt><dd><p>Specifies how much memory is to be allocated for the internal compression state: <code>MemLevel</code>=1 uses minimum memory but is slow and reduces compression ratio; <code>MemLevel</code>=9 uses maximum memory for optimal speed. Defaults to 8.</p></dd><dt><code>Strategy</code></dt><dd><p>Tunes the compression algorithm. Use the following values:</p><ul><li><code>default</code> for normal data</li><li><code>filtered</code> for data produced by a filter (or predictor)</li><li><code>huffman_only</code> to force Huffman encoding only (no string match)</li><li><code>rle</code> to limit match distances to one (run-length encoding)</li></ul><p>Filtered data consists mostly of small values with a somewhat random distribution. In this case, the compression algorithm is tuned to compress them better. The effect of <code>filtered</code> is to force more Huffman coding and less string matching; it is somewhat intermediate between <code>default</code> and <code>huffman_only</code>. <code>rle</code> is designed to be almost as fast as <code>huffman_only</code>, but gives better compression for PNG image data.</p><p><code>Strategy</code> affects only the compression ratio, but not the correctness of the compressed output even if it is not set appropriately.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="deflateParams/3">
+
+  <div class="detail-header">
+    <a href="#deflateParams/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateParams/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateParams(Z, Level, Strategy) -> ok
+                 when Z :: <a href="#t:zstream/0">zstream</a>(), Level :: <a href="#t:zlevel/0">zlevel</a>(), Strategy :: <a href="#t:zstrategy/0">zstrategy</a>().</pre>
+
+      </div>
+
+<p>Dynamically updates the compression level and compression strategy. The interpretation of <code>Level</code> and <code>Strategy</code> is as in <a href="zlib.html#deflateInit/6"><code>deflateInit/6</code></a>. This can be used to switch between compression and straight copy of the input data, or to switch to a different kind of input data requiring a different strategy. If the compression level is changed, the input available so far is compressed with the old level (and can be flushed); the new level takes effect only at the next call of <a href="zlib.html#deflate/3"><code>deflate/3</code></a>.</p><p>Before the call of <code>deflateParams</code>, the stream state must be set as for a call of <code>deflate/3</code>, as the currently available input may have to be compressed and flushed.</p>
+  </section>
+</section>
+<section class="detail" id="deflateReset/1">
+
+  <div class="detail-header">
+    <a href="#deflateReset/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateReset/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateReset(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Equivalent to <a href="zlib.html#deflateEnd/1"><code>deflateEnd/1</code></a> followed by <a href="zlib.html#deflateInit/1"><code>deflateInit/1,2,6</code></a>, but does not free and reallocate all the internal compression state. The stream keeps the same compression level and any other attributes.</p>
+  </section>
+</section>
+<section class="detail" id="deflateSetDictionary/2">
+
+  <div class="detail-header">
+    <a href="#deflateSetDictionary/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">deflateSetDictionary/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>deflateSetDictionary(Z, Dictionary) -> Adler32
+                        when Z :: <a href="#t:zstream/0">zstream</a>(), Dictionary :: iodata(), Adler32 :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Initializes the compression dictionary from the specified byte sequence without producing any compressed output.</p><p>This function must be called immediately after <a href="zlib.html#deflateInit/1"><code>deflateInit/1,2,6</code></a> or <a href="zlib.html#deflateReset/1"><code>deflateReset/1</code></a>, before any call of <a href="zlib.html#deflate/3"><code>deflate/3</code></a>.</p><p>The compressor and decompressor must use the same dictionary (see <a href="zlib.html#inflateSetDictionary/2"><code>inflateSetDictionary/2</code></a>).</p><p>The Adler checksum of the dictionary is returned.</p>
+  </section>
+</section>
+<section class="detail" id="getBufSize/1">
+
+  <div class="detail-header">
+    <a href="#getBufSize/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getBufSize/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:getBufSize/1 is deprecated and will be removed in OTP 27; this function will be removed in a future release.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getBufSize(Z) -> non_neg_integer() when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Gets the size of the intermediate buffer.</p><div class="warning"><p>This function is deprecated and will be removed in a future release.</p></div>
+  </section>
+</section>
+<section class="detail" id="gunzip/1">
+
+  <div class="detail-header">
+    <a href="#gunzip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">gunzip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>gunzip(Data) -> Decompressed when Data :: iodata(), Decompressed :: binary().</pre>
+
+      </div>
+
+<p>Uncompresses data with gz headers and checksum.</p>
+  </section>
+</section>
+<section class="detail" id="gzip/1">
+
+  <div class="detail-header">
+    <a href="#gzip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">gzip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>gzip(Data) -> Compressed when Data :: iodata(), Compressed :: binary().</pre>
+
+      </div>
+
+<p>Compresses data with gz headers and checksum.</p>
+  </section>
+</section>
+<section class="detail" id="inflate/2">
+
+  <div class="detail-header">
+    <a href="#inflate/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflate/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflate(Z, Data) -> Decompressed when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), Decompressed :: iolist().</pre>
+
+      </div>
+
+<p>Equivalent to <a href="zlib.html#inflate/3"><code>inflate(Z, Data, [])</code></a></p>
+  </section>
+</section>
+<section class="detail" id="inflate/3">
+
+  <div class="detail-header">
+    <a href="#inflate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflate/3</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflate(Z, Data, Options) -> Decompressed
+           when
+               Z :: <a href="#t:zstream/0">zstream</a>(),
+               Data :: iodata(),
+               Options :: [{exception_on_need_dict, boolean()}],
+               Decompressed ::
+                   iolist() | {need_dictionary, Adler32 :: non_neg_integer(), Output :: iolist()}.</pre>
+
+      </div>
+
+<p>Decompresses as much data as possible. It can introduce some output latency (reading input without producing any output).</p><p>Currently the only available option is <code>{exception_on_need_dict,boolean()}</code> which controls whether the function should throw an exception when a preset dictionary is required for decompression. When set to false, a <code>need_dictionary</code> tuple will be returned instead. See <a href="zlib.html#inflateSetDictionary/2"><code>inflateSetDictionary/2</code></a> for details.</p><div class="warning"><p>This option defaults to <code>true</code> for backwards compatibility but we intend to remove the exception behavior in a future release. New code that needs to handle dictionaries manually should always specify <code>{exception_on_need_dict,false}</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="inflateChunk/1">
+
+  <div class="detail-header">
+    <a href="#inflateChunk/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateChunk/1</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:inflateChunk/1 is deprecated and will be removed in OTP 27; use safeInflate/2 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateChunk(Z) -> Decompressed | {more, Decompressed}
+                when Z :: <a href="#t:zstream/0">zstream</a>(), Decompressed :: iolist().</pre>
+
+      </div>
+
+<div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code> </a>instead.</p></div><p>Reads the next chunk of uncompressed data, initialized by <a href="zlib.html#inflateChunk/2"><code>inflateChunk/2</code></a>.</p><p>This function is to be repeatedly called, while it returns <code>{more, Decompressed}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="inflateChunk/2">
+
+  <div class="detail-header">
+    <a href="#inflateChunk/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateChunk/2</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:inflateChunk/2 is deprecated and will be removed in OTP 27; use safeInflate/2 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateChunk(Z, Data) -> Decompressed | {more, Decompressed}
+                when Z :: <a href="#t:zstream/0">zstream</a>(), Data :: iodata(), Decompressed :: iolist().</pre>
+
+      </div>
+
+<div class="warning"><p>This function is deprecated and will be removed in a future release. Use <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code> </a>instead.</p></div><p>Like <a href="zlib.html#inflate/2"><code>inflate/2</code></a>, but decompresses no more data than will fit in the buffer configured through <a href="zlib.html#setBufSize/2"><code>setBufSize/2</code> </a>. Is is useful when decompressing a stream with a high compression ratio, such that a small amount of compressed input can expand up to 1000 times.</p><p>This function returns <code>{more, Decompressed}</code>, when there is more output available, and <a href="zlib.html#inflateChunk/1"><code>inflateChunk/1</code></a> is to be used to read it.</p><p>This function can introduce some output latency (reading input without producing any output).</p><p>An exception will be thrown if a preset dictionary is required for further decompression. See <a href="zlib.html#inflateSetDictionary/2"><code>inflateSetDictionary/2</code></a> for details.</p><p>Example:</p><pre><code class="makeup erlang"><span class="nf">walk</span><span class="p" data-group-id="0224180587-1">(</span><span class="n">Compressed</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p" data-group-id="0224180587-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">open</span><span class="p" data-group-id="0224180587-2">(</span><span class="p" data-group-id="0224180587-2">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateInit</span><span class="p" data-group-id="0224180587-3">(</span><span class="n">Z</span><span class="p" data-group-id="0224180587-3">)</span><span class="p">,</span><span class="w">
+    </span><span class="c1">% Limit single uncompressed chunk size to 512kb</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">setBufSize</span><span class="p" data-group-id="0224180587-4">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="mi">512</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p" data-group-id="0224180587-4">)</span><span class="p">,</span><span class="w">
+    </span><span class="nf">loop</span><span class="p" data-group-id="0224180587-5">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateChunk</span><span class="p" data-group-id="0224180587-6">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p" data-group-id="0224180587-6">)</span><span class="p" data-group-id="0224180587-5">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateEnd</span><span class="p" data-group-id="0224180587-7">(</span><span class="n">Z</span><span class="p" data-group-id="0224180587-7">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">close</span><span class="p" data-group-id="0224180587-8">(</span><span class="n">Z</span><span class="p" data-group-id="0224180587-8">)</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">loop</span><span class="p" data-group-id="0224180587-9">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0224180587-10">{</span><span class="ss">more</span><span class="p">,</span><span class="w"> </span><span class="n">Uncompressed</span><span class="p" data-group-id="0224180587-10">}</span><span class="p" data-group-id="0224180587-9">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Handler</span><span class="p" data-group-id="0224180587-11">(</span><span class="n">Uncompressed</span><span class="p" data-group-id="0224180587-11">)</span><span class="p">,</span><span class="w">
+    </span><span class="nf">loop</span><span class="p" data-group-id="0224180587-12">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateChunk</span><span class="p" data-group-id="0224180587-13">(</span><span class="n">Z</span><span class="p" data-group-id="0224180587-13">)</span><span class="p" data-group-id="0224180587-12">)</span><span class="p">;</span><span class="w">
+</span><span class="nf">loop</span><span class="p" data-group-id="0224180587-14">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="n">Uncompressed</span><span class="p" data-group-id="0224180587-14">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Handler</span><span class="p" data-group-id="0224180587-15">(</span><span class="n">Uncompressed</span><span class="p" data-group-id="0224180587-15">)</span><span class="p">.</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="inflateEnd/1">
+
+  <div class="detail-header">
+    <a href="#inflateEnd/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateEnd/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateEnd(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Ends the inflate session and cleans all data used. Notice that this function throws a <code>data_error</code> exception if no end of stream was found (meaning that not all data has been uncompressed).</p>
+  </section>
+</section>
+<section class="detail" id="inflateGetDictionary/1">
+
+  <div class="detail-header">
+    <a href="#inflateGetDictionary/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateGetDictionary/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateGetDictionary(Z) -> Dictionary when Z :: <a href="#t:zstream/0">zstream</a>(), Dictionary :: binary().</pre>
+
+      </div>
+
+<p>Returns the decompression dictionary currently in use by the stream. This function must be called between <a href="zlib.html#inflateInit/1"><code>inflateInit/1,2</code></a> and <a href="zlib.html#inflateEnd/1"><code>inflateEnd</code></a>.</p><p>Only supported if ERTS was compiled with zlib &gt;= 1.2.8.</p>
+  </section>
+</section>
+<section class="detail" id="inflateInit/1">
+
+  <div class="detail-header">
+    <a href="#inflateInit/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateInit/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateInit(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Initializes a zlib stream for decompression.</p>
+  </section>
+</section>
+<section class="detail" id="inflateInit/2">
+
+  <div class="detail-header">
+    <a href="#inflateInit/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateInit/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateInit(Z, WindowBits) -> ok when Z :: <a href="#t:zstream/0">zstream</a>(), WindowBits :: <a href="#t:zwindowbits/0">zwindowbits</a>().</pre>
+
+      </div>
+
+<p>Initializes a decompression session on zlib stream.</p><p><code>WindowBits</code> is the base two logarithm of the maximum window size (the size of the history buffer). It is to be in the range 8 through 15. Default to 15 if <a href="zlib.html#inflateInit/1"><code>inflateInit/1</code></a> is used.</p><p>If a compressed stream with a larger window size is specified as input, <a href="zlib.html#inflate/2"><code>inflate/2</code></a> throws the <code>data_error</code> exception.</p><p>A negative <code>WindowBits</code> value makes zlib ignore the zlib header (and checksum) from the stream. Notice that the zlib source mentions this only as a undocumented feature.</p>
+  </section>
+</section>
+<section class="detail" id="inflateReset/1">
+
+  <div class="detail-header">
+    <a href="#inflateReset/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateReset/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateReset(Z) -> ok when Z :: <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Equivalent to <a href="zlib.html#inflateEnd/1"><code>inflateEnd/1</code></a> followed by <a href="zlib.html#inflateInit/1"><code>inflateInit/1</code></a>, but does not free and reallocate all the internal decompression state. The stream will keep attributes that could have been set by <code>inflateInit/1,2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="inflateSetDictionary/2">
+
+  <div class="detail-header">
+    <a href="#inflateSetDictionary/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inflateSetDictionary/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inflateSetDictionary(Z, Dictionary) -> ok when Z :: <a href="#t:zstream/0">zstream</a>(), Dictionary :: iodata().</pre>
+
+      </div>
+
+<p>Initializes the decompression dictionary from the specified uncompressed byte sequence. This function must be called as a response to an inflate operation (eg. <a href="zlib.html#safeInflate/2"><code>safeInflate/2</code></a>) returning <code>{need_dictionary,Adler,Output}</code> or in the case of deprecated functions, throwing an <code>{'EXIT',{{need_dictionary,Adler},_StackTrace}}</code> exception.</p><p>The dictionary chosen by the compressor can be determined from the Adler value returned or thrown by the call to the inflate function. The compressor and decompressor must use the same dictionary (See <a href="zlib.html#deflateSetDictionary/2"><code>deflateSetDictionary/2</code></a>).</p><p>After setting the dictionary the inflate operation should be retried without new input.</p><p>Example:</p><pre><code class="makeup erlang"><span class="nf">deprecated_unpack</span><span class="p" data-group-id="4658385328-1">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p">,</span><span class="w"> </span><span class="n">Dict</span><span class="p" data-group-id="4658385328-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+     </span><span class="k">case</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflate</span><span class="p" data-group-id="4658385328-2">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p" data-group-id="4658385328-2">)</span><span class="w"> </span><span class="k">of</span><span class="w">
+          </span><span class="p" data-group-id="4658385328-3">{</span><span class="ss">&#39;EXIT&#39;</span><span class="p">,</span><span class="p" data-group-id="4658385328-4">{</span><span class="p" data-group-id="4658385328-5">{</span><span class="ss">need_dictionary</span><span class="p">,</span><span class="p">_</span><span class="n">DictID</span><span class="p" data-group-id="4658385328-5">}</span><span class="p">,</span><span class="p">_</span><span class="p" data-group-id="4658385328-4">}</span><span class="p" data-group-id="4658385328-3">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                 </span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateSetDictionary</span><span class="p" data-group-id="4658385328-6">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Dict</span><span class="p" data-group-id="4658385328-6">)</span><span class="p">,</span><span class="w">
+                 </span><span class="n">Uncompressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflate</span><span class="p" data-group-id="4658385328-7">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4658385328-8">[</span><span class="p" data-group-id="4658385328-8">]</span><span class="p" data-group-id="4658385328-7">)</span><span class="p">;</span><span class="w">
+          </span><span class="n">Uncompressed</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                 </span><span class="n">Uncompressed</span><span class="w">
+     </span><span class="k">end</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">new_unpack</span><span class="p" data-group-id="4658385328-9">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p">,</span><span class="w"> </span><span class="n">Dict</span><span class="p" data-group-id="4658385328-9">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="k">case</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflate</span><span class="p" data-group-id="4658385328-10">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4658385328-11">[</span><span class="p" data-group-id="4658385328-12">{</span><span class="ss">exception_on_need_dict</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p" data-group-id="4658385328-12">}</span><span class="p" data-group-id="4658385328-11">]</span><span class="p" data-group-id="4658385328-10">)</span><span class="w"> </span><span class="k">of</span><span class="w">
+        </span><span class="p" data-group-id="4658385328-13">{</span><span class="ss">need_dictionary</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">DictId</span><span class="p">,</span><span class="w"> </span><span class="n">Output</span><span class="p" data-group-id="4658385328-13">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateSetDictionary</span><span class="p" data-group-id="4658385328-14">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Dict</span><span class="p" data-group-id="4658385328-14">)</span><span class="p">,</span><span class="w">
+            </span><span class="p" data-group-id="4658385328-15">[</span><span class="n">Output</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflate</span><span class="p" data-group-id="4658385328-16">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4658385328-17">[</span><span class="p" data-group-id="4658385328-17">]</span><span class="p" data-group-id="4658385328-16">)</span><span class="p" data-group-id="4658385328-15">]</span><span class="p">;</span><span class="w">
+        </span><span class="n">Uncompressed</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="n">Uncompressed</span><span class="w">
+    </span><span class="k">end</span><span class="p">.</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="open/0">
+
+  <div class="detail-header">
+    <a href="#open/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>open() -> <a href="#t:zstream/0">zstream</a>().</pre>
+
+      </div>
+
+<p>Opens a zlib stream.</p>
+  </section>
+</section>
+<section class="detail" id="safeInflate/2">
+
+  <div class="detail-header">
+    <a href="#safeInflate/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">safeInflate/2</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>safeInflate(Z, Data) -> Result
+               when
+                   Z :: <a href="#t:zstream/0">zstream</a>(),
+                   Data :: iodata(),
+                   Result ::
+                       {continue, Output :: iolist()} |
+                       {finished, Output :: iolist()} |
+                       {need_dictionary, Adler32 :: non_neg_integer(), Output :: iolist()}.</pre>
+
+      </div>
+
+<p>Like <a href="zlib.html#inflate/2"><code>inflate/2</code></a>, but returns once it has expanded beyond a small implementation-defined threshold. It's useful when decompressing untrusted input which could have been maliciously crafted to expand until the system runs out of memory.</p><p>This function returns <code>{continue | finished, Output}</code>, where Output is the data that was decompressed in this call. New input can be queued up on each call if desired, and the function will return <code>{finished, Output}</code> once all queued data has been decompressed.</p><p>This function can introduce some output latency (reading input without producing any output).</p><p>If a preset dictionary is required for further decompression, this function returns a <code>need_dictionary</code> tuple. See <a href="zlib.html#inflateSetDictionary/2"><code>inflateSetDictionary/2</code></a>) for details.</p><p>Example:</p><pre><code class="makeup erlang"><span class="nf">walk</span><span class="p" data-group-id="1528282273-1">(</span><span class="n">Compressed</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p" data-group-id="1528282273-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">open</span><span class="p" data-group-id="1528282273-2">(</span><span class="p" data-group-id="1528282273-2">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateInit</span><span class="p" data-group-id="1528282273-3">(</span><span class="n">Z</span><span class="p" data-group-id="1528282273-3">)</span><span class="p">,</span><span class="w">
+    </span><span class="nf">loop</span><span class="p" data-group-id="1528282273-4">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">safeInflate</span><span class="p" data-group-id="1528282273-5">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Compressed</span><span class="p" data-group-id="1528282273-5">)</span><span class="p" data-group-id="1528282273-4">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">inflateEnd</span><span class="p" data-group-id="1528282273-6">(</span><span class="n">Z</span><span class="p" data-group-id="1528282273-6">)</span><span class="p">,</span><span class="w">
+    </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">close</span><span class="p" data-group-id="1528282273-7">(</span><span class="n">Z</span><span class="p" data-group-id="1528282273-7">)</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">loop</span><span class="p" data-group-id="1528282273-8">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1528282273-9">{</span><span class="ss">continue</span><span class="p">,</span><span class="w"> </span><span class="n">Output</span><span class="p" data-group-id="1528282273-9">}</span><span class="p" data-group-id="1528282273-8">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Handler</span><span class="p" data-group-id="1528282273-10">(</span><span class="n">Output</span><span class="p" data-group-id="1528282273-10">)</span><span class="p">,</span><span class="w">
+    </span><span class="nf">loop</span><span class="p" data-group-id="1528282273-11">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="nc">zlib</span><span class="p">:</span><span class="nf">safeInflate</span><span class="p" data-group-id="1528282273-12">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1528282273-13">[</span><span class="p" data-group-id="1528282273-13">]</span><span class="p" data-group-id="1528282273-12">)</span><span class="p" data-group-id="1528282273-11">)</span><span class="p">;</span><span class="w">
+</span><span class="nf">loop</span><span class="p" data-group-id="1528282273-14">(</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1528282273-15">{</span><span class="ss">finished</span><span class="p">,</span><span class="w"> </span><span class="n">Output</span><span class="p" data-group-id="1528282273-15">}</span><span class="p" data-group-id="1528282273-14">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Handler</span><span class="p" data-group-id="1528282273-16">(</span><span class="n">Output</span><span class="p" data-group-id="1528282273-16">)</span><span class="p">.</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="setBufSize/2">
+
+  <div class="detail-header">
+    <a href="#setBufSize/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setBufSize/2</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. zlib:setBufSize/2 is deprecated and will be removed in OTP 27; this function will be removed in a future release.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setBufSize(Z, Size) -> ok when Z :: <a href="#t:zstream/0">zstream</a>(), Size :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Sets the intermediate buffer size.</p><div class="warning"><p>This function is deprecated and will be removed in a future release.</p></div>
+  </section>
+</section>
+<section class="detail" id="set_controlling_process/2">
+
+  <div class="detail-header">
+    <a href="#set_controlling_process/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_controlling_process/2</h1>
+
+
+      <span class="note">(since OTP 20.1.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_controlling_process(Z, Pid) -> ok when Z :: <a href="#t:zstream/0">zstream</a>(), Pid :: pid().</pre>
+
+      </div>
+
+<p>Changes the controlling process of <code>Z</code> to <code>Pid</code>, which must be a local process.</p>
+  </section>
+</section>
+<section class="detail" id="uncompress/1">
+
+  <div class="detail-header">
+    <a href="#uncompress/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uncompress/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uncompress(Data) -> Decompressed when Data :: iodata(), Decompressed :: binary().</pre>
+
+      </div>
+
+<p>Uncompresses data with zlib headers and checksum.</p>
+  </section>
+</section>
+<section class="detail" id="unzip/1">
+
+  <div class="detail-header">
+    <a href="#unzip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unzip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unzip(Data) -> Decompressed when Data :: iodata(), Decompressed :: binary().</pre>
+
+      </div>
+
+<p>Uncompresses data without zlib headers and checksum.</p>
+  </section>
+</section>
+<section class="detail" id="zip/1">
+
+  <div class="detail-header">
+    <a href="#zip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip(Data) -> Compressed when Data :: iodata(), Compressed :: binary().</pre>
+
+      </div>
+
+<p>Compresses data without zlib headers and checksum.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

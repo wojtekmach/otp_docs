@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>gen_tcp — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+gen_tcp <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for communicating with sockets using the TCP/IP protocol.</p><p>The following code fragment is a simple example of a client connecting to a server at port 5678, transferring a binary, and closing the connection:</p><pre><code type="none">client() -&gt;
+    SomeHostInNet = &quot;localhost&quot;, % to make it runnable on one machine
+    {ok, Sock} = gen_tcp:connect(SomeHostInNet, 5678, 
+                                 [binary, {packet, 0}]),
+    ok = gen_tcp:send(Sock, &quot;Some Data&quot;),
+    ok = gen_tcp:close(Sock).</code></pre><p>At the other end, a server is listening on port 5678, accepts the connection, and receives the binary:</p><pre><code type="none">server() -&gt;
+    {ok, LSock} = gen_tcp:listen(5678, [binary, {packet, 0}, 
+                                        {active, false}]),
+    {ok, Sock} = gen_tcp:accept(LSock),
+    {ok, Bin} = do_recv(Sock, []),
+    ok = gen_tcp:close(Sock),
+    ok = gen_tcp:close(LSock),
+    Bin.
+
+do_recv(Sock, Bs) -&gt;
+    case gen_tcp:recv(Sock, 0) of
+        {ok, B} -&gt;
+            do_recv(Sock, [Bs, B]);
+        {error, closed} -&gt;
+            {ok, list_to_binary(Bs)}
+    end.</code></pre><p>For more examples, see section <a href="gen_tcp.html#content#examples">Examples</a>.</p><div class="note"><p>Functions that create sockets can take an optional option; <code>{inet_backend, Backend}</code> that, if specified, has to be the first option. This selects the implementation backend towards the platform's socket API.</p><p>This is a <em>temporary</em> option that will be ignored in a future release.</p><p>The default is <code>Backend = inet</code> that selects the traditional <code>inet_drv.c</code> driver. The other choice is <code>Backend = socket</code> that selects the new <a href="socket.html"><code>socket</code></a> module and its NIF implementation.</p><p>The system default can be changed when the node is started with the application <code>kernel</code>'s configuration variable <code>inet_backend</code>.</p><p>For <code>gen_tcp</code> with <code>inet_backend = socket</code> we have tried to be as &quot;compatible&quot; as possible which has sometimes been impossible. Here is a list of cases when the behaviour of inet-backend <code>inet</code> (default) and <code>socket</code> are different:</p><ul><li><p><a href="gen_tcp.html#content#non_blocking_send">Non-blocking send</a></p><p>If a user calling <a href="gen_tcp.html#send/2"><code>gen_tcp:send/2</code></a> with <code>inet_backend = inet</code>, tries to send more data than there is room for in the OS buffers, the &quot;rest data&quot; is buffered by the inet driver (and later sent in the background). The effect for the user is that the call is non-blocking.</p><p>This is <em>not</em> the effect when <code>inet_backend = socket</code>, since there is no buffering. Instead the user hangs either until all data has been sent or the <code>send_timeout</code> timeout has been reached.</p></li><li><p>Remote close detected by background send.</p><p>An background send will detect a 'remote close' and (the inet driver will) mark the socket as 'closed'. No other action is taken. If the socket has <code>active</code> set to <code>false</code> (passive) at this point and no one is reading, this will not be noticed. But as soon as the socket is &quot;activated&quot; (<code>active</code> set to not <code>false</code>, <a href="gen_tcp.html#send/2">send/2</a> is called or <a href="gen_tcp.html#recv/2">recv/2,3</a> is called), an error message will be sent to the caller or (socket) owner: <code>{tcp_error, Socket, econnreset}</code>. Any data in the OS receive buffers will be lost!</p><p>This behaviour is <em>not</em> replicated by the socket implementation. A send operation will detect a remote close and immediately return this to the caller, but do nothing else. A reader will therefor be able to extract any data from the OS buffers. If the socket is set to <code>active</code> to not <code>false</code>, the data will be received as expected (<code>{tcp, ...}</code> and then a closed message (<code>{tcp_closed, ...}</code> will be received (not an error).</p></li><li><p>The option <a href="inet.html#option-show_econnreset">show_econnreset</a> basically do <em>not</em> work as described when used with <code>inet_backend = socket</code>. The &quot;issue&quot; is that a remote close (as described above) <em>do</em> allow a reader to extract what is in the read buffers before a close is &quot;delivered&quot;.</p></li><li><p>The option <a href="inet.html#option-nodelay">nodelay</a> is a TCP specific option that is <em>not</em> compatible with <code>domain = local</code>.</p><p>When using <code>inet_backend = socket</code>, trying to create a socket (via listen or connect) with <code>domain = local</code> (for example with option {ifaddr, {local,&quot;/tmp/test&quot;}}) <em>will fail</em> with <code>{error, enotsup}</code>.</p><p>This does not actually work for <code>inet_backend = inet</code> either, but in that case the error is simply <em>ignored</em>, which is a <em>bad</em> idea. We have choosen to <em>not</em> ignore this error for <code>inet_backend = socket</code>.</p></li><li><p><a href="gen_tcp.html#content#async_shutdown_write">Async shutdown write</a></p><p>Calling <a href="gen_tcp.html#shutdown/2">gen_tcp:shutdown(Socket, write | read_write)</a> on a socket created with <code>inet_backend = socket</code> will take <em>immediate</em> effect, unlike for a socket created with <code>inet_backend = inet</code>.</p><p>See <a href="gen_tcp.html#content#async_shutdown_write">async shutdown write</a> for more info.</p></li></ul></div><h2 id="module-examples" class="section-heading">
+  <a href="#module-examples" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Examples
+</h2>
+<a id="examples"></a><p>The following example illustrates use of option <code>{active,once}</code> and multiple accepts by implementing a server as a number of worker processes doing accept on a single listening socket. Function <code>start/2</code> takes the number of worker processes and the port number on which to listen for incoming connections. If <code>LPort</code> is specified as <code>0</code>, an ephemeral port number is used, which is why the start function returns the actual port number allocated:</p><pre><code type="none">start(Num,LPort) -&gt;
+    case gen_tcp:listen(LPort,[{active, false},{packet,2}]) of
+        {ok, ListenSock} -&gt;
+            start_servers(Num,ListenSock),
+            {ok, Port} = inet:port(ListenSock),
+            Port;
+        {error,Reason} -&gt;
+            {error,Reason}
+    end.
+
+start_servers(0,_) -&gt;
+    ok;
+start_servers(Num,LS) -&gt;
+    spawn(?MODULE,server,[LS]),
+    start_servers(Num-1,LS).
+
+server(LS) -&gt;
+    case gen_tcp:accept(LS) of
+        {ok,S} -&gt;
+            loop(S),
+            server(LS);
+        Other -&gt;
+            io:format(&quot;accept returned ~w - goodbye!~n&quot;,[Other]),
+            ok
+    end.
+
+loop(S) -&gt;
+    inet:setopts(S,[{active,once}]),
+    receive
+        {tcp,S,Data} -&gt;
+            Answer = process(Data), % Not implemented in this example
+            gen_tcp:send(S,Answer),
+            loop(S);
+        {tcp_closed,S} -&gt;
+            io:format(&quot;Socket ~w closed [~w]~n&quot;,[S,self()]),
+            ok
+    end.</code></pre><p>Example of a simple client:</p><pre><code type="none">client(PortNo,Message) -&gt;
+    {ok,Sock} = gen_tcp:connect(&quot;localhost&quot;,PortNo,[{active,false},
+                                                    {packet,2}]),
+    gen_tcp:send(Sock,Message),
+    A = gen_tcp:recv(Sock,0),
+    gen_tcp:close(Sock),
+    A.</code></pre><p>The <code>send</code> call does not accept a time-out option because time-outs on send is handled through socket option <code>send_timeout</code>. The behavior of a send operation with no receiver is mainly defined by the underlying TCP stack and the network infrastructure. To write code that handles a hanging receiver that can eventually cause the sender to hang on a <code>send</code> do like the following.</p><p>Consider a process that receives data from a client process to be forwarded to a server on the network. The process is connected to the server through TCP/IP and does not get any acknowledge for each message it sends, but has to rely on the send time-out option to detect that the other end is unresponsive. Option <code>send_timeout</code> can be used when connecting:</p><pre><code type="none">...
+{ok,Sock} = gen_tcp:connect(HostAddress, Port,
+                            [{active,false},
+                             {send_timeout, 5000},
+                             {packet,2}]),
+                loop(Sock), % See below
+...</code></pre><p>In the loop where requests are handled, send time-outs can now be detected:</p><pre><code type="none">loop(Sock) -&gt;
+    receive
+        {Client, send_data, Binary} -&gt;
+            case gen_tcp:send(Sock,[Binary]) of
+                {error, timeout} -&gt;
+                    io:format(&quot;Send timeout, closing!~n&quot;,
+                              []),
+                    handle_send_timeout(), % Not implemented here
+                    Client ! {self(),{error_sending, timeout}},
+                    %% Usually, it's a good idea to give up in case of a 
+                    %% send timeout, as you never know how much actually 
+                    %% reached the server, maybe only a packet header?!
+                    gen_tcp:close(Sock);
+                {error, OtherSendError} -&gt;
+                    io:format(&quot;Some other error on socket (~p), closing&quot;,
+                              [OtherSendError]),
+                    Client ! {self(),{error_sending, OtherSendError}},
+                    gen_tcp:close(Sock);
+                ok -&gt;
+                    Client ! {self(), data_sent},
+                    loop(Sock)
+            end
+    end.</code></pre><p>Usually it suffices to detect time-outs on receive, as most protocols include some sort of acknowledgment from the server, but if the protocol is strictly one way, option <code>send_timeout</code> comes in handy.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:connect_option/0">-type connect_option() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:listen_option/0">-type listen_option() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:option/0">-type option() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:option_name/0">-type option_name() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:pktoptions_value/0">-type pktoptions_value() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If the platform implements the IPv4 option <code>IP_PKTOPTIONS</code>, or the IPv6 option <code>IPV6_PKTOPTIONS</code> or <code>IPV6_2292PKTOPTIONS</code> for the socket this value is returned from <a href="inet.html#getopts/2"><code>inet:getopts/2</code></a> when called with the option name <a href="gen_tcp.html#t:option_name/0"><code>pktoptions</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:socket/0">socket()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>As returned by <a href="gen_tcp.html#accept/1"><code>accept/1,2</code></a> and <a href="gen_tcp.html#connect/3"><code>connect/3,4</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#accept/1">accept/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Accepts an incoming connection request on a listening socket. <code>Socket</code> must be a socket returned from <a href="gen_tcp.html#listen/2"><code>listen/2</code></a>. <code>Timeout</code> specifies a time-out value in milliseconds. Defaults to <code>infinity</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#accept/2">accept/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#close/1">close/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Closes a TCP socket.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#connect/3">connect/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Connects to a server on TCP port <code>Port</code> on the host with IP address <code>Address</code>. Argument <code>Address</code> can be a hostname or an IP address.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#connect/4">connect/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#controlling_process/2">controlling_process/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Assigns a new controlling process <code>Pid</code> to <code>Socket</code>. The controlling process is the process that receives messages from the socket. If called by any other process than the current controlling process, <code>{error, not_owner}</code> is returned. If the process identified by <code>Pid</code> is not an existing local pid, <code>{error, badarg}</code> is returned. <code>{error, badarg}</code> may also be returned in some cases when <code>Socket</code> is closed during the execution of this function.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#listen/2">listen/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets up a socket to listen on port <code>Port</code> on the local host.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#recv/2">recv/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Receives a packet from a socket in passive mode. A closed socket is indicated by return value <code>{error, closed}</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#recv/3">recv/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/2">send/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sends a packet on a socket.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#shutdown/2">shutdown/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Closes a socket in one or two directions.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:connect_option/0">
+
+  <div class="detail-header">
+    <a href="#t:connect_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type connect_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>connect_option() ::
+    {ip, <a href="inet.html#t:socket_address/0">inet:socket_address</a>()} |
+    {fd, Fd :: non_neg_integer()} |
+    {ifaddr, <a href="inet.html#t:socket_address/0">inet:socket_address</a>()} |
+    <a href="inet.html#t:address_family/0">inet:address_family</a>() |
+    {port, <a href="inet.html#t:port_number/0">inet:port_number</a>()} |
+    {tcp_module, module()} |
+    {netns, <a href="file.html#t:filename_all/0">file:filename_all</a>()} |
+    {bind_to_device, binary()} |
+    <a href="#t:option/0">option</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:listen_option/0">
+
+  <div class="detail-header">
+    <a href="#t:listen_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type listen_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>listen_option() ::
+    {ip, <a href="inet.html#t:socket_address/0">inet:socket_address</a>()} |
+    {fd, Fd :: non_neg_integer()} |
+    {ifaddr, <a href="inet.html#t:socket_address/0">inet:socket_address</a>()} |
+    <a href="inet.html#t:address_family/0">inet:address_family</a>() |
+    {port, <a href="inet.html#t:port_number/0">inet:port_number</a>()} |
+    {backlog, B :: non_neg_integer()} |
+    {tcp_module, module()} |
+    {netns, <a href="file.html#t:filename_all/0">file:filename_all</a>()} |
+    {bind_to_device, binary()} |
+    <a href="#t:option/0">option</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:option/0">
+
+  <div class="detail-header">
+    <a href="#t:option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>option() ::
+    {active, true | false | once | -32768..32767} |
+    {buffer, non_neg_integer()} |
+    {delay_send, boolean()} |
+    {deliver, port | term} |
+    {dontroute, boolean()} |
+    {exit_on_close, boolean()} |
+    {header, non_neg_integer()} |
+    {high_msgq_watermark, pos_integer()} |
+    {high_watermark, non_neg_integer()} |
+    {keepalive, boolean()} |
+    {linger, {boolean(), non_neg_integer()}} |
+    {low_msgq_watermark, pos_integer()} |
+    {low_watermark, non_neg_integer()} |
+    {mode, list | binary} |
+    list | binary |
+    {nodelay, boolean()} |
+    {packet,
+     0 | 1 | 2 | 4 | raw | sunrm | asn1 | cdr | fcgi | line | tpkt | http | httph | http_bin |
+     httph_bin} |
+    {packet_size, non_neg_integer()} |
+    {priority, non_neg_integer()} |
+    {raw, Protocol :: non_neg_integer(), OptionNum :: non_neg_integer(), ValueBin :: binary()} |
+    {recbuf, non_neg_integer()} |
+    {reuseaddr, boolean()} |
+    {send_timeout, non_neg_integer() | infinity} |
+    {send_timeout_close, boolean()} |
+    {show_econnreset, boolean()} |
+    {sndbuf, non_neg_integer()} |
+    {tos, non_neg_integer()} |
+    {tclass, non_neg_integer()} |
+    {ttl, non_neg_integer()} |
+    {recvtos, boolean()} |
+    {recvtclass, boolean()} |
+    {recvttl, boolean()} |
+    {ipv6_v6only, boolean()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:option_name/0">
+
+  <div class="detail-header">
+    <a href="#t:option_name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type option_name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>option_name() ::
+    active | buffer | delay_send | deliver | dontroute | exit_on_close | header |
+    high_msgq_watermark | high_watermark | keepalive | linger | low_msgq_watermark |
+    low_watermark | mode | nodelay | packet | packet_size | priority |
+    {raw,
+     Protocol :: non_neg_integer(),
+     OptionNum :: non_neg_integer(),
+     ValueSpec :: (ValueSize :: non_neg_integer()) | (ValueBin :: binary())} |
+    recbuf | reuseaddr | send_timeout | send_timeout_close | show_econnreset | sndbuf | tos |
+    tclass | ttl | recvtos | recvtclass | recvttl | pktoptions | ipv6_v6only.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:pktoptions_value/0">
+
+  <div class="detail-header">
+    <a href="#t:pktoptions_value/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type pktoptions_value() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pktoptions_value() :: {pktoptions, <a href="inet.html#t:ancillary_data/0">inet:ancillary_data</a>()}.</pre>
+
+      </div>
+
+<p>If the platform implements the IPv4 option <code>IP_PKTOPTIONS</code>, or the IPv6 option <code>IPV6_PKTOPTIONS</code> or <code>IPV6_2292PKTOPTIONS</code> for the socket this value is returned from <a href="inet.html#getopts/2"><code>inet:getopts/2</code></a> when called with the option name <a href="gen_tcp.html#t:option_name/0"><code>pktoptions</code></a>.</p><div class="note"><p>This option appears to be VERY Linux specific, and its existence in future Linux kernel versions is also worrying since the option is part of RFC 2292 which is since long (2003) obsoleted by RFC 3542 that <em>explicitly</em> removes this possibility to get packet information from a stream socket. For comparision: it has existed in FreeBSD but is now removed, at least since FreeBSD 10.</p></div>
+  </section>
+</section>
+<section class="detail" id="t:socket/0">
+
+  <div class="detail-header">
+    <a href="#t:socket/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">socket()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>socket() :: <a href="inet.html#t:socket/0">inet:socket</a>().</pre>
+
+      </div>
+
+<p>As returned by <a href="gen_tcp.html#accept/1"><code>accept/1,2</code></a> and <a href="gen_tcp.html#connect/3"><code>connect/3,4</code></a>.</p><a id="connect"></a>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="accept/1">
+
+  <div class="detail-header">
+    <a href="#accept/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">accept/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>accept(ListenSocket) -> {ok, Socket} | {error, Reason}
+          when
+              ListenSocket :: <a href="#t:socket/0">socket</a>(),
+              Socket :: <a href="#t:socket/0">socket</a>(),
+              Reason :: closed | system_limit | <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+<p>Accepts an incoming connection request on a listening socket. <code>Socket</code> must be a socket returned from <a href="gen_tcp.html#listen/2"><code>listen/2</code></a>. <code>Timeout</code> specifies a time-out value in milliseconds. Defaults to <code>infinity</code>.</p><p>Returns:</p><ul><li><p><code>{ok, Socket}</code> if a connection is established</p></li><li><p><code>{error, closed}</code> if <code>ListenSocket</code> is closed</p></li><li><p><code>{error, timeout}</code> if no connection is established within the specified time</p></li><li><p><code>{error, system_limit}</code> if all available ports in the Erlang emulator are in use</p></li><li><p>A POSIX error value if something else goes wrong, see <a href="inet.html"><code>inet(3)</code></a> for possible error values</p></li></ul><p>Packets can be sent to the returned socket <code>Socket</code> using <a href="gen_tcp.html#send/2"><code>send/2</code></a>. Packets sent from the peer are delivered as messages (unless <code>{active, false}</code> is specified in the option list for the listening socket, in which case packets are retrieved by calling <a href="gen_tcp.html#recv/2"><code>recv/2</code></a>):</p><pre><code type="none">{tcp, Socket, Data}</code></pre><div class="note"><p>The <code>accept</code> call does <em>not</em> have to be issued from the socket owner process. Using version 5.5.3 and higher of the emulator, multiple simultaneous accept calls can be issued from different processes, which allows for a pool of acceptor processes handling incoming connections.</p></div>
+  </section>
+</section>
+<section class="detail" id="accept/2">
+
+  <div class="detail-header">
+    <a href="#accept/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">accept/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>accept(ListenSocket, Timeout) -> {ok, Socket} | {error, Reason}
+          when
+              ListenSocket :: <a href="#t:socket/0">socket</a>(),
+              Timeout :: timeout(),
+              Socket :: <a href="#t:socket/0">socket</a>(),
+              Reason :: closed | timeout | system_limit | <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="close/1">
+
+  <div class="detail-header">
+    <a href="#close/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">close/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>close(Socket) -> ok when Socket :: <a href="#t:socket/0">socket</a>().</pre>
+
+      </div>
+
+<p>Closes a TCP socket.</p><p>Note that in most implementations of TCP, doing a <code>close</code> does not guarantee that any data sent is delivered to the recipient before the close is detected at the remote side. If you want to guarantee delivery of the data to the recipient there are two common ways to achieve this.</p><ol><li><p>Use <a href="gen_tcp.html#shutdown/2"><code>gen_tcp:shutdown(Sock, write)</code></a> to signal that no more data is to be sent and wait for the read side of the socket to be closed.</p></li><li><p>Use the socket option <a href="inet.html#packet"><code>{packet, N}</code></a> (or something similar) to make it possible for the receiver to close the connection when it knowns it has received all the data.</p></li></ol>
+  </section>
+</section>
+<section class="detail" id="connect/3">
+
+  <div class="detail-header">
+    <a href="#connect/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">connect/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>connect(Address, Port, Options) -> {ok, Socket} | {error, Reason}
+           when
+               Address :: <a href="inet.html#t:socket_address/0">inet:socket_address</a>() | <a href="inet.html#t:hostname/0">inet:hostname</a>(),
+               Port :: <a href="inet.html#t:port_number/0">inet:port_number</a>(),
+               Options :: [<a href="#t:connect_option/0">connect_option</a>()],
+               Socket :: <a href="#t:socket/0">socket</a>(),
+               Reason :: <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+<p>Connects to a server on TCP port <code>Port</code> on the host with IP address <code>Address</code>. Argument <code>Address</code> can be a hostname or an IP address.</p><p>The following options are available:</p><dl><dt><code>{ip, Address}</code></dt><dd><p>If the host has many network interfaces, this option specifies which one to use.</p></dd><dt><code>{ifaddr, Address}</code></dt><dd><p>Same as <code>{ip, Address}</code>. If the host has many network interfaces, this option specifies which one to use.</p></dd><dt><code>{fd, integer() &gt;= 0}</code></dt><dd><p>If a socket has somehow been connected without using <code>gen_tcp</code>, use this option to pass the file descriptor for it. If <code>{ip, Address}</code> and/or <code>{port, port_number()}</code> is combined with this option, the <code>fd</code> is bound to the specified interface and port before connecting. If these options are not specified, it is assumed that the <code>fd</code> is already bound appropriately.</p></dd><dt><code>inet</code></dt><dd><p>Sets up the socket for IPv4.</p></dd><dt><code>inet6</code></dt><dd><p>Sets up the socket for IPv6.</p></dd><dt><code>local</code></dt><dd><p>Sets up a Unix Domain Socket. See <a href="inet.html#t:local_address/0"><code>inet:local_address()</code></a></p></dd><dt><code>{port, Port}</code></dt><dd><p>Specifies which local port number to use.</p></dd><dt><code>{tcp_module, module()}</code></dt><dd><p>Overrides which callback module is used. Defaults to <code>inet_tcp</code> for IPv4 and <code>inet6_tcp</code> for IPv6.</p></dd><dt><code>Opt</code></dt><dd><p>See <a href="inet.html#setopts/2"><code>inet:setopts/2</code></a>.</p></dd></dl><p>Packets can be sent to the returned socket <code>Socket</code> using <a href="gen_tcp.html#send/2"><code>send/2</code></a>. Packets sent from the peer are delivered as messages:</p><pre><code type="none">{tcp, Socket, Data}</code></pre><p>If the socket is in <code>{active, N}</code> mode (see <a href="inet.html#setopts/2"><code>inet:setopts/2</code></a> for details) and its message counter drops to <code>0</code>, the following message is delivered to indicate that the socket has transitioned to passive (<code>{active, false}</code>) mode:</p><pre><code type="none">{tcp_passive, Socket}</code></pre><p>If the socket is closed, the following message is delivered:</p><pre><code type="none">{tcp_closed, Socket}</code></pre><p>If an error occurs on the socket, the following message is delivered (unless <code>{active, false}</code> is specified in the option list for the socket, in which case packets are retrieved by calling <a href="gen_tcp.html#recv/2"><code>recv/2</code></a>):</p><pre><code type="none">{tcp_error, Socket, Reason}</code></pre><p>The optional <code>Timeout</code> parameter specifies a time-out in milliseconds. Defaults to <code>infinity</code>.</p><div class="note"><p>Keep in mind that if the underlying OS <code>connect()</code> call returns a timeout, <code>gen_tcp:connect</code> will also return a timeout (i.e. <code>{error, etimedout}</code>), even if a larger <code>Timeout</code> was specified.</p></div><div class="note"><p>The default values for options specified to <code>connect</code> can be affected by the Kernel configuration parameter <code>inet_default_connect_options</code>. For details, see <a href="inet.html"><code>inet(3)</code></a>.</p></div>
+  </section>
+</section>
+<section class="detail" id="connect/4">
+
+  <div class="detail-header">
+    <a href="#connect/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">connect/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>connect(Address, Port, Options, Timeout) -> {ok, Socket} | {error, Reason}
+           when
+               Address :: <a href="inet.html#t:socket_address/0">inet:socket_address</a>() | <a href="inet.html#t:hostname/0">inet:hostname</a>(),
+               Port :: <a href="inet.html#t:port_number/0">inet:port_number</a>(),
+               Options :: [<a href="inet.html#t:inet_backend/0">inet:inet_backend</a>() | <a href="#t:connect_option/0">connect_option</a>()],
+               Timeout :: timeout(),
+               Socket :: <a href="#t:socket/0">socket</a>(),
+               Reason :: timeout | <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="controlling_process/2">
+
+  <div class="detail-header">
+    <a href="#controlling_process/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">controlling_process/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>controlling_process(Socket, Pid) -> ok | {error, Reason}
+                       when
+                           Socket :: <a href="#t:socket/0">socket</a>(),
+                           Pid :: pid(),
+                           Reason :: closed | not_owner | badarg | <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+<p>Assigns a new controlling process <code>Pid</code> to <code>Socket</code>. The controlling process is the process that receives messages from the socket. If called by any other process than the current controlling process, <code>{error, not_owner}</code> is returned. If the process identified by <code>Pid</code> is not an existing local pid, <code>{error, badarg}</code> is returned. <code>{error, badarg}</code> may also be returned in some cases when <code>Socket</code> is closed during the execution of this function.</p><p>If the socket is set in active mode, this function will transfer any messages in the mailbox of the caller to the new controlling process. If any other process is interacting with the socket while the transfer is happening, the transfer may not work correctly and messages may remain in the caller's mailbox. For instance changing the sockets active mode before the transfer is complete may cause this.</p>
+  </section>
+</section>
+<section class="detail" id="listen/2">
+
+  <div class="detail-header">
+    <a href="#listen/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">listen/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>listen(Port, Options) -> {ok, ListenSocket} | {error, Reason}
+          when
+              Port :: <a href="inet.html#t:port_number/0">inet:port_number</a>(),
+              Options :: [<a href="inet.html#t:inet_backend/0">inet:inet_backend</a>() | <a href="#t:listen_option/0">listen_option</a>()],
+              ListenSocket :: <a href="#t:socket/0">socket</a>(),
+              Reason :: system_limit | <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+<p>Sets up a socket to listen on port <code>Port</code> on the local host.</p><p>If <code>Port == 0</code>, the underlying OS assigns an available port number, use <a href="inet.html#port/1"><code>inet:port/1</code></a> to retrieve it.</p><p>The following options are available:</p><dl><dt><code>list</code></dt><dd><p>Received <code>Packet</code> is delivered as a list.</p></dd><dt><code>binary</code></dt><dd><p>Received <code>Packet</code> is delivered as a binary.</p></dd><dt><code>{backlog, B}</code></dt><dd><p><code>B</code> is an integer &gt;= <code>0</code>. The backlog value defines the maximum length that the queue of pending connections can grow to. Defaults to <code>5</code>.</p></dd><dt><code>{ip, Address}</code></dt><dd><p>If the host has many network interfaces, this option specifies which one to listen on.</p></dd><dt><code>{port, Port}</code></dt><dd><p>Specifies which local port number to use.</p></dd><dt><code>{fd, Fd}</code></dt><dd><p>If a socket has somehow been connected without using <code>gen_tcp</code>, use this option to pass the file descriptor for it.</p></dd><dt><code>{ifaddr, Address}</code></dt><dd><p>Same as <code>{ip, Address}</code>. If the host has many network interfaces, this option specifies which one to use.</p></dd><dt><code>inet6</code></dt><dd><p>Sets up the socket for IPv6.</p></dd><dt><code>inet</code></dt><dd><p>Sets up the socket for IPv4.</p></dd><dt><code>{tcp_module, module()}</code></dt><dd><p>Overrides which callback module is used. Defaults to <code>inet_tcp</code> for IPv4 and <code>inet6_tcp</code> for IPv6.</p></dd><dt><code>Opt</code></dt><dd><p>See <a href="inet.html#setopts/2"><code>inet:setopts/2</code></a>.</p></dd></dl><p>The returned socket <code>ListenSocket</code> should be used in calls to <a href="gen_tcp.html#accept/1"><code>accept/1,2</code></a> to accept incoming connection requests.</p><div class="note"><p>The default values for options specified to <code>listen</code> can be affected by the Kernel configuration parameter <code>inet_default_listen_options</code>. For details, see <a href="inet.html"><code>inet(3)</code></a>.</p></div>
+  </section>
+</section>
+<section class="detail" id="recv/2">
+
+  <div class="detail-header">
+    <a href="#recv/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">recv/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>recv(Socket, Length) -> {ok, Packet} | {error, Reason}
+        when
+            Socket :: <a href="#t:socket/0">socket</a>(),
+            Length :: non_neg_integer(),
+            Packet :: string() | binary() | HttpPacket,
+            Reason :: closed | <a href="inet.html#t:posix/0">inet:posix</a>(),
+            HttpPacket :: term().</pre>
+
+      </div>
+
+<p>Receives a packet from a socket in passive mode. A closed socket is indicated by return value <code>{error, closed}</code>.</p><p>Argument <code>Length</code> is only meaningful when the socket is in <code>raw</code> mode and denotes the number of bytes to read. If <code>Length</code> is <code>0</code>, all available bytes are returned. If <code>Length</code> &gt; <code>0</code>, exactly <code>Length</code> bytes are returned, or an error; possibly discarding less than <code>Length</code> bytes of data when the socket is closed from the other side.</p><p>The optional <code>Timeout</code> parameter specifies a time-out in milliseconds. Defaults to <code>infinity</code>.</p>
+  </section>
+</section>
+<section class="detail" id="recv/3">
+
+  <div class="detail-header">
+    <a href="#recv/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">recv/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>recv(Socket, Length, Timeout) -> {ok, Packet} | {error, Reason}
+        when
+            Socket :: <a href="#t:socket/0">socket</a>(),
+            Length :: non_neg_integer(),
+            Timeout :: timeout(),
+            Packet :: string() | binary() | HttpPacket,
+            Reason :: closed | timeout | <a href="inet.html#t:posix/0">inet:posix</a>(),
+            HttpPacket :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="send/2">
+
+  <div class="detail-header">
+    <a href="#send/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>send(Socket, Packet) -> ok | {error, Reason}
+        when
+            Socket :: <a href="#t:socket/0">socket</a>(),
+            Packet :: iodata(),
+            Reason :: closed | {timeout, RestData} | <a href="inet.html#t:posix/0">inet:posix</a>(),
+            RestData :: binary().</pre>
+
+      </div>
+
+<p>Sends a packet on a socket.</p><p>There is no <code>send</code> call with a time-out option, use socket option <code>send_timeout</code> if time-outs are desired. See section <a href="gen_tcp.html#content#examples">Examples</a>.</p><p>The return value <code>{error, {timeout, RestData}}</code> can only be returned when <code>inet_backend = socket</code>.</p><a id="non_blocking_send"></a><div class="note"><p>Non-blocking send.</p><p>If the user tries to send more data than there is room for in the OS send buffers, the 'rest data' is put into (inet driver) internal buffers and later sent in the background. The function immediately returns ok (<em>not</em> informing the caller that not all of the data was actually sent). Any issue while sending the 'rest data' is maybe returned later.</p><p>When using <code>inet_backend = socket</code>, the behaviour is different. There is <em>no</em> buffering done (like the inet-driver does), instead the caller will &quot;hang&quot; until all of the data has been sent or send timeout (as specified by the <code>send_timeout</code> option) expires (the function can hang even when using 'inet' backend if the internal buffers are full).</p><p>If this happens when using <code>packet =/= raw</code>, we have a partial package written. A new package therefor <em>must not</em> be written at this point, as there is no way for the peer to distinguish this from the data portion of the current package. Instead, set package to raw, send the rest data (as raw data) and then set package to the wanted package type again.</p></div>
+  </section>
+</section>
+<section class="detail" id="shutdown/2">
+
+  <div class="detail-header">
+    <a href="#shutdown/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">shutdown/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>shutdown(Socket, How) -> ok | {error, Reason}
+            when Socket :: <a href="#t:socket/0">socket</a>(), How :: read | write | read_write, Reason :: <a href="inet.html#t:posix/0">inet:posix</a>().</pre>
+
+      </div>
+
+<p>Closes a socket in one or two directions.</p><p><code>How == write</code> means closing the socket for writing, reading from it is still possible.</p><p>If <code>How == read</code> or there is no outgoing data buffered in the <code>Socket</code> port, the socket is shut down immediately and any error encountered is returned in <code>Reason</code>.</p><p>If there is data buffered in the socket port, the attempt to shutdown the socket is postponed until that data is written to the kernel socket send buffer. If any errors are encountered, the socket is closed and <code>{error, closed}</code> is returned on the next <a href="gen_tcp.html#recv/2"><code>recv/2</code></a> or <a href="gen_tcp.html#send/2"><code>send/2</code></a>.</p><p>Option <code>{exit_on_close, false}</code> is useful if the peer has done a shutdown on the write side.</p><a id="async_shutdown_write"></a><div class="note"><p>Async shutdown write (write or read_write).</p><p>If the shutdown attempt is made while the inet-driver is sending buffered data in the background, the shutdown is postponed until all buffered data has been sent. The function immediately returns <code>ok</code> and the caller is <em>not</em> informed (that the shutdown has <em>not yet</em> been performed).</p><p>When using <code>inet_backend = socket</code>, the behaviour is different. A shutdown with <code>How == write | read_write</code>, the operation will take <em>immediate</em> effect (unlike the inet-driver, which basically saves the operation for later).</p></div>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

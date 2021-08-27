@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="tools v3.5">
+
+    <title>fprof — tools v3.5</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-b955672ef1.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+tools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.5
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+fprof <small class="app-vsn">(tools v3.5)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module is used to profile a program to find out how the execution time is used. Trace to file is used to minimize runtime performance impact.</p><p>The <code>fprof</code> module uses tracing to collect profiling data, hence there is no need for special compilation of any module to be profiled. When it starts tracing, <code>fprof</code> will erase all previous tracing in the node and set the necessary trace flags on the profiling target processes as well as local call trace on all functions in all loaded modules and all modules to be loaded. <code>fprof</code> erases all tracing in the node when it stops tracing.</p><p><code>fprof</code> presents both <em>own time</em> i.e how much time a function has used for its own execution, and <em>accumulated time</em> i.e including called functions. All presented times are collected using trace timestamps. <code>fprof</code> tries to collect cpu time timestamps, if the host machine OS supports it. Therefore the times may be wallclock times and OS scheduling will randomly strike all called functions in a presumably fair way.</p><p>If, however, the profiling time is short, and the host machine OS does not support high resolution cpu time measurements, some few OS schedulings may show up as ridiculously long execution times for functions doing practically nothing. An example of a function more or less just composing a tuple in about 100 times the normal execution time has been seen, and when the tracing was repeated, the execution time became normal.</p><p>Profiling is essentially done in 3 steps:</p><dl><dt><code>1</code></dt><dd>Tracing; to file, as mentioned in the previous paragraph. The trace contains entries for function calls, returns to function, process scheduling, other process related (spawn, etc) events, and garbage collection. All trace entries are timestamped.</dd><dt><code>2</code></dt><dd>Profiling; the trace file is read, the execution call stack is simulated, and raw profile data is calculated from the simulated call stack and the trace timestamps. The profile data is stored in the <code>fprof</code> server state. During this step the trace data may be dumped in text format to file or console.</dd><dt><code>3</code></dt><dd>Analysing; the raw profile data is sorted, filtered and dumped in text format either to file or console. The text format intended to be both readable for a human reader, as well as parsable with the standard erlang parsing tools.</dd></dl><p>Since <code>fprof</code> uses trace to file, the runtime performance degradation is minimized, but still far from negligible, especially for programs that use the filesystem heavily by themselves. Where you place the trace file is also important, e.g on Solaris <code>/tmp</code> is usually a good choice since it is essentially a RAM disk, while any NFS (network) mounted disk is a bad idea.</p><p><code>fprof</code> can also skip the file step and trace to a tracer process that does the profiling in runtime.</p><a id="analysis"></a><h2 id="module-analysis-format" class="section-heading">
+  <a href="#module-analysis-format" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Analysis format
+</h2>
+<p>This section describes the output format of the analyse command. See <a href="fprof.html#analyse/0">analyse/0</a>.</p><p>The format is parsable with the standard Erlang parsing tools <code>erl_scan</code> and <code>erl_parse</code>, <code>file:consult/1</code> or <code>io:read/2</code>. The parse format is not explained here - it should be easy for the interested to try it out. Note that some flags to <code>analyse/1</code> will affect the format.</p><p>The following example was run on OTP/R8 on Solaris 8, all OTP internals in this example are very version dependent.</p><p>As an example, we will use the following function, that you may recognise as a slightly modified benchmark function from the manpage file(3):</p><pre><code type="none">-module(foo).
+-export([create_file_slow/2]).
+
+create_file_slow(Name, N) when is_integer(N), N &gt;= 0 -&gt;
+    {ok, FD} = 
+        file:open(Name, [raw, write, delayed_write, binary]),
+    if N &gt; 256 -&gt;
+            ok = file:write(FD, 
+                            lists:map(fun (X) -&gt; &lt;&lt;X:32/unsigned&gt;&gt; end,
+                            lists:seq(0, 255))),
+            ok = create_file_slow(FD, 256, N);
+       true -&gt;
+            ok = create_file_slow(FD, 0, N)
+    end,
+    ok = file:close(FD).
+
+create_file_slow(FD, M, M) -&gt;
+    ok;
+create_file_slow(FD, M, N) -&gt;
+    ok = file:write(FD, &lt;&lt;M:32/unsigned&gt;&gt;),
+    create_file_slow(FD, M+1, N).</code></pre><p>Let us have a look at the printout after running:</p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">fprof</span><span class="p">:</span><span class="nf">apply</span><span class="p" data-group-id="4207120447-1">(</span><span class="ss">foo</span><span class="p">,</span><span class="w"> </span><span class="ss">create_file_slow</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4207120447-2">[</span><span class="ss">junk</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="p" data-group-id="4207120447-2">]</span><span class="p" data-group-id="4207120447-1">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">fprof</span><span class="p">:</span><span class="nf">profile</span><span class="p" data-group-id="4207120447-3">(</span><span class="p" data-group-id="4207120447-3">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">fprof</span><span class="p">:</span><span class="nf">analyse</span><span class="p" data-group-id="4207120447-4">(</span><span class="p" data-group-id="4207120447-4">)</span><span class="p">.</span></code></pre><p>The printout starts with:</p><pre><code class="makeup erlang"><span class="c1">%% Analysis results:</span><span class="w">
+</span><span class="p" data-group-id="5226522882-1">{</span><span class="w">  </span><span class="ss">analysis_options</span><span class="p">,</span><span class="w">
+ </span><span class="p" data-group-id="5226522882-2">[</span><span class="p" data-group-id="5226522882-3">{</span><span class="ss">callers</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p" data-group-id="5226522882-3">}</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="5226522882-4">{</span><span class="ss">sort</span><span class="p">,</span><span class="w"> </span><span class="ss">acc</span><span class="p" data-group-id="5226522882-4">}</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="5226522882-5">{</span><span class="ss">totals</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p" data-group-id="5226522882-5">}</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="5226522882-6">{</span><span class="ss">details</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p" data-group-id="5226522882-6">}</span><span class="p" data-group-id="5226522882-2">]</span><span class="p" data-group-id="5226522882-1">}</span><span class="p">.</span><span class="w">
+
+</span><span class="c1">%                                       CNT       ACC       OWN        </span><span class="w">
+</span><span class="p" data-group-id="5226522882-7">[</span><span class="p" data-group-id="5226522882-8">{</span><span class="w"> </span><span class="ss">totals</span><span class="p">,</span><span class="w">                             </span><span class="mi">9627</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.119</span><span class="p">,</span><span class="w"> </span><span class="mf">1659.074</span><span class="p" data-group-id="5226522882-8">}</span><span class="p" data-group-id="5226522882-7">]</span><span class="p">.</span><span class="w">  </span><span class="c1">%%%</span></code></pre><p>The CNT column shows the total number of function calls that was found in the trace. In the ACC column is the total time of the trace from first timestamp to last. And in the OWN column is the sum of the execution time in functions found in the trace, not including called functions. In this case it is very close to the ACC time since the emulator had practically nothing else to do than to execute our test program.</p><p>All time values in the printout are in milliseconds.</p><p>The printout continues:</p><pre><code class="makeup erlang"><span class="c1">%                                       CNT       ACC       OWN        </span><span class="w">
+</span><span class="p" data-group-id="5130239680-1">[</span><span class="p" data-group-id="5130239680-2">{</span><span class="w"> </span><span class="s">&quot;&lt;0.28.0&gt;&quot;</span><span class="p">,</span><span class="w">                         </span><span class="mi">9627</span><span class="p">,</span><span class="ss">undefined</span><span class="p">,</span><span class="w"> </span><span class="mf">1659.074</span><span class="p" data-group-id="5130239680-2">}</span><span class="p" data-group-id="5130239680-1">]</span><span class="p">.</span><span class="w">   </span><span class="c1">%%</span></code></pre><p>This is the printout header of one process. The printout contains only this one process since we did <code>fprof:apply/3</code> which traces only the current process. Therefore the CNT and OWN columns perfectly matches the totals above. The ACC column is undefined since summing the ACC times of all calls in the process makes no sense - you would get something like the ACC value from totals above multiplied by the average depth of the call stack, or something.</p><p>All paragraphs up to the next process header only concerns function calls within this process.</p><p>Now we come to something more interesting:</p><pre><code class="makeup erlang"><span class="p" data-group-id="4167353641-1">{</span><span class="p" data-group-id="4167353641-2">[</span><span class="p" data-group-id="4167353641-3">{</span><span class="ss">undefined</span><span class="p">,</span><span class="w">                             </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.076</span><span class="p">,</span><span class="w">    </span><span class="mf">0.030</span><span class="p" data-group-id="4167353641-3">}</span><span class="p" data-group-id="4167353641-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="4167353641-4">{</span><span class="w"> </span><span class="p" data-group-id="4167353641-5">{</span><span class="ss">fprof</span><span class="p">,</span><span class="ss">apply_start_stop</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="4167353641-5">}</span><span class="p">,</span><span class="w">            </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.076</span><span class="p">,</span><span class="w">    </span><span class="mf">0.030</span><span class="p" data-group-id="4167353641-4">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="4167353641-6">[</span><span class="p" data-group-id="4167353641-7">{</span><span class="p" data-group-id="4167353641-8">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-8">}</span><span class="p">,</span><span class="w">              </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.046</span><span class="p">,</span><span class="w">    </span><span class="mf">0.103</span><span class="p" data-group-id="4167353641-7">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-9">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                               </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="4167353641-9">}</span><span class="p" data-group-id="4167353641-6">]</span><span class="p" data-group-id="4167353641-1">}</span><span class="p">.</span><span class="w">    
+
+</span><span class="p" data-group-id="4167353641-10">{</span><span class="p" data-group-id="4167353641-11">[</span><span class="p" data-group-id="4167353641-12">{</span><span class="p" data-group-id="4167353641-13">{</span><span class="ss">fprof</span><span class="p">,</span><span class="ss">apply_start_stop</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="4167353641-13">}</span><span class="p">,</span><span class="w">            </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.046</span><span class="p">,</span><span class="w">    </span><span class="mf">0.103</span><span class="p" data-group-id="4167353641-12">}</span><span class="p" data-group-id="4167353641-11">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="4167353641-14">{</span><span class="w"> </span><span class="p" data-group-id="4167353641-15">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-15">}</span><span class="p">,</span><span class="w">              </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1691.046</span><span class="p">,</span><span class="w">    </span><span class="mf">0.103</span><span class="p" data-group-id="4167353641-14">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="4167353641-16">[</span><span class="p" data-group-id="4167353641-17">{</span><span class="p" data-group-id="4167353641-18">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">close</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="4167353641-18">}</span><span class="p">,</span><span class="w">                        </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1398.873</span><span class="p">,</span><span class="w">    </span><span class="mf">0.019</span><span class="p" data-group-id="4167353641-17">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-19">{</span><span class="p" data-group-id="4167353641-20">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="4167353641-20">}</span><span class="p">,</span><span class="w">              </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mf">249.678</span><span class="p">,</span><span class="w">    </span><span class="mf">0.029</span><span class="p" data-group-id="4167353641-19">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-21">{</span><span class="p" data-group-id="4167353641-22">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">open</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-22">}</span><span class="p">,</span><span class="w">                         </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mf">20.778</span><span class="p">,</span><span class="w">    </span><span class="mf">0.055</span><span class="p" data-group-id="4167353641-21">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-23">{</span><span class="p" data-group-id="4167353641-24">{</span><span class="ss">lists</span><span class="p">,</span><span class="ss">map</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-24">}</span><span class="p">,</span><span class="w">                         </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mf">16.590</span><span class="p">,</span><span class="w">    </span><span class="mf">0.043</span><span class="p" data-group-id="4167353641-23">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-25">{</span><span class="p" data-group-id="4167353641-26">{</span><span class="ss">lists</span><span class="p">,</span><span class="ss">seq</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-26">}</span><span class="p">,</span><span class="w">                         </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">4.708</span><span class="p">,</span><span class="w">    </span><span class="mf">0.017</span><span class="p" data-group-id="4167353641-25">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4167353641-27">{</span><span class="p" data-group-id="4167353641-28">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4167353641-28">}</span><span class="p">,</span><span class="w">                        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.316</span><span class="p">,</span><span class="w">    </span><span class="mf">0.021</span><span class="p" data-group-id="4167353641-27">}</span><span class="p" data-group-id="4167353641-16">]</span><span class="p" data-group-id="4167353641-10">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>The printout consists of one paragraph per called function. The function <em>marked</em> with '%' is the one the paragraph concerns - <code>foo:create_file_slow/2</code>. Above the marked function are the <em>calling</em> functions - those that has called the marked, and below are those <em>called</em> by the marked function.</p><p>The paragraphs are per default sorted in decreasing order of the ACC column for the marked function. The calling list and called list within one paragraph are also per default sorted in decreasing order of their ACC column.</p><p>The columns are: CNT - the number of times the function has been called, ACC - the time spent in the function including called functions, and OWN - the time spent in the function not including called functions.</p><p>The rows for the <em>calling</em> functions contain statistics for the <em>marked</em> function with the constraint that only the occasions when a call was made from the <em>row's</em> function to the <em>marked</em> function are accounted for.</p><p>The row for the <em>marked</em> function simply contains the sum of all <em>calling</em> rows.</p><p>The rows for the <em>called</em> functions contains statistics for the <em>row's</em> function with the constraint that only the occasions when a call was made from the <em>marked</em> to the <em>row's</em> function are accounted for.</p><p>So, we see that <code>foo:create_file_slow/2</code> used very little time for its own execution. It spent most of its time in <code>file:close/1</code>. The function <code>foo:create_file_slow/3</code> that writes 3/4 of the file contents is the second biggest time thief.</p><p>We also see that the call to <code>file:write/2</code> that writes 1/4 of the file contents takes very little time in itself. What takes time is to build the data (<code>lists:seq/2</code> and <code>lists:map/2</code>).</p><p>The function 'undefined' that has called <code>fprof:apply_start_stop/4</code> is an unknown function because that call was not recorded in the trace. It was only recorded that the execution returned from <code>fprof:apply_start_stop/4</code> to some other function above in the call stack, or that the process exited from there.</p><p>Let us continue down the printout to find:</p><pre><code class="makeup erlang"><span class="p" data-group-id="3341499377-1">{</span><span class="p" data-group-id="3341499377-2">[</span><span class="p" data-group-id="3341499377-3">{</span><span class="p" data-group-id="3341499377-4">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="3341499377-4">}</span><span class="p">,</span><span class="w">              </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mf">249.678</span><span class="p">,</span><span class="w">    </span><span class="mf">0.029</span><span class="p" data-group-id="3341499377-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="3341499377-5">{</span><span class="p" data-group-id="3341499377-6">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="3341499377-6">}</span><span class="p">,</span><span class="w">            </span><span class="mi">768</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">   </span><span class="mf">23.294</span><span class="p" data-group-id="3341499377-5">}</span><span class="p" data-group-id="3341499377-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="3341499377-7">{</span><span class="w"> </span><span class="p" data-group-id="3341499377-8">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="3341499377-8">}</span><span class="p">,</span><span class="w">            </span><span class="mi">769</span><span class="p">,</span><span class="w">  </span><span class="mf">249.678</span><span class="p">,</span><span class="w">   </span><span class="mf">23.323</span><span class="p" data-group-id="3341499377-7">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="3341499377-9">[</span><span class="p" data-group-id="3341499377-10">{</span><span class="p" data-group-id="3341499377-11">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="3341499377-11">}</span><span class="p">,</span><span class="w">                      </span><span class="mi">768</span><span class="p">,</span><span class="w">  </span><span class="mf">220.314</span><span class="p">,</span><span class="w">   </span><span class="mf">14.539</span><span class="p" data-group-id="3341499377-10">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="3341499377-12">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                              </span><span class="mi">57</span><span class="p">,</span><span class="w">    </span><span class="mf">6.041</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="3341499377-12">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="3341499377-13">{</span><span class="p" data-group-id="3341499377-14">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="3341499377-14">}</span><span class="p">,</span><span class="w">            </span><span class="mi">768</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">   </span><span class="mf">23.294</span><span class="p" data-group-id="3341499377-13">}</span><span class="p" data-group-id="3341499377-9">]</span><span class="p" data-group-id="3341499377-1">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>If you compare with the code you will see there also that <code>foo:create_file_slow/3</code> was called only from <code>foo:create_file_slow/2</code> and itself, and called only <code>file:write/2</code>, note the number of calls to <code>file:write/2</code>. But here we see that <code>suspend</code> was called a few times. This is a pseudo function that indicates that the process was suspended while executing in <code>foo:create_file_slow/3</code>, and since there is no <code>receive</code> or <code>erlang:yield/0</code> in the code, it must be Erlang scheduling suspensions, or the trace file driver compensating for large file write operations (these are regarded as a schedule out followed by a schedule in to the same process).</p><p></p><p>Let us find the <code>suspend</code> entry:</p><pre><code class="makeup erlang"><span class="p" data-group-id="8502172390-1">{</span><span class="p" data-group-id="8502172390-2">[</span><span class="p" data-group-id="8502172390-3">{</span><span class="p" data-group-id="8502172390-4">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-4">}</span><span class="p">,</span><span class="w">                       </span><span class="mi">53</span><span class="p">,</span><span class="w">    </span><span class="mf">6.281</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-5">{</span><span class="p" data-group-id="8502172390-6">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="8502172390-6">}</span><span class="p">,</span><span class="w">             </span><span class="mi">57</span><span class="p">,</span><span class="w">    </span><span class="mf">6.041</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-5">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-7">{</span><span class="p" data-group-id="8502172390-8">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="8502172390-8">}</span><span class="p">,</span><span class="w">            </span><span class="mi">50</span><span class="p">,</span><span class="w">    </span><span class="mf">4.582</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-7">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-9">{</span><span class="p" data-group-id="8502172390-10">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_get_response</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8502172390-10">}</span><span class="p">,</span><span class="w">       </span><span class="mi">34</span><span class="p">,</span><span class="w">    </span><span class="mf">2.986</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-9">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-11">{</span><span class="p" data-group-id="8502172390-12">{</span><span class="ss">lists</span><span class="p">,</span><span class="ss">map</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-12">}</span><span class="p">,</span><span class="w">                        </span><span class="mi">10</span><span class="p">,</span><span class="w">    </span><span class="mf">2.104</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-11">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-13">{</span><span class="p" data-group-id="8502172390-14">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-14">}</span><span class="p">,</span><span class="w">                  </span><span class="mi">17</span><span class="p">,</span><span class="w">    </span><span class="mf">1.852</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-13">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-15">{</span><span class="p" data-group-id="8502172390-16">{</span><span class="ss">erlang</span><span class="p">,</span><span class="nb">port_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-16">}</span><span class="p">,</span><span class="w">              </span><span class="mi">15</span><span class="p">,</span><span class="w">    </span><span class="mf">1.713</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-15">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-17">{</span><span class="p" data-group-id="8502172390-18">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-18">}</span><span class="p">,</span><span class="w">            </span><span class="mi">22</span><span class="p">,</span><span class="w">    </span><span class="mf">1.482</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-17">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-19">{</span><span class="p" data-group-id="8502172390-20">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">translate_response</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="8502172390-20">}</span><span class="p">,</span><span class="w">     </span><span class="mi">11</span><span class="p">,</span><span class="w">    </span><span class="mf">1.441</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-19">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-21">{</span><span class="p" data-group-id="8502172390-22">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">&#39;-drv_command/2-fun-0-&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8502172390-22">}</span><span class="p">,</span><span class="w">  </span><span class="mi">15</span><span class="p">,</span><span class="w">    </span><span class="mf">1.340</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-21">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-23">{</span><span class="p" data-group-id="8502172390-24">{</span><span class="ss">lists</span><span class="p">,</span><span class="ss">seq</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="8502172390-24">}</span><span class="p">,</span><span class="w">                         </span><span class="mi">3</span><span class="p">,</span><span class="w">    </span><span class="mf">0.880</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-23">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-25">{</span><span class="p" data-group-id="8502172390-26">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">&#39;-create_file_slow/2-fun-0-&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8502172390-26">}</span><span class="p">,</span><span class="w">   </span><span class="mi">5</span><span class="p">,</span><span class="w">    </span><span class="mf">0.523</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-25">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-27">{</span><span class="p" data-group-id="8502172390-28">{</span><span class="ss">erlang</span><span class="p">,</span><span class="nb">bump_reductions</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="8502172390-28">}</span><span class="p">,</span><span class="w">            </span><span class="mi">4</span><span class="p">,</span><span class="w">    </span><span class="mf">0.503</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-27">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-29">{</span><span class="p" data-group-id="8502172390-30">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="8502172390-30">}</span><span class="p">,</span><span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.165</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-29">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-31">{</span><span class="p" data-group-id="8502172390-32">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">i32</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="8502172390-32">}</span><span class="p">,</span><span class="w">                     </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.109</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-31">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="8502172390-33">{</span><span class="p" data-group-id="8502172390-34">{</span><span class="ss">fprof</span><span class="p">,</span><span class="ss">apply_start_stop</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="8502172390-34">}</span><span class="p">,</span><span class="w">            </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-33">}</span><span class="p" data-group-id="8502172390-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="8502172390-35">{</span><span class="w"> </span><span class="ss">suspend</span><span class="p">,</span><span class="w">                             </span><span class="mi">299</span><span class="p">,</span><span class="w">   </span><span class="mf">32.002</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="8502172390-35">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="8502172390-36">[</span><span class="w"> </span><span class="p" data-group-id="8502172390-36">]</span><span class="p" data-group-id="8502172390-1">}</span><span class="p">.</span></code></pre><p>We find no particulary long suspend times, so no function seems to have waited in a receive statement. Actually, <code>prim_file:drv_command/4</code> contains a receive statement, but in this test program, the message lies in the process receive buffer when the receive statement is entered. We also see that the total suspend time for the test run is small.</p><p>The <code>suspend</code> pseudo function has got an OWN time of zero. This is to prevent the process total OWN time from including time in suspension. Whether suspend time is really ACC or OWN time is more of a philosophical question.</p><p>Now we look at another interesting pseudo function, <code>garbage_collect</code>:</p><pre><code class="makeup erlang"><span class="p" data-group-id="5435915059-1">{</span><span class="p" data-group-id="5435915059-2">[</span><span class="p" data-group-id="5435915059-3">{</span><span class="p" data-group-id="5435915059-4">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="5435915059-4">}</span><span class="p">,</span><span class="w">            </span><span class="mi">25</span><span class="p">,</span><span class="w">    </span><span class="mf">0.873</span><span class="p">,</span><span class="w">    </span><span class="mf">0.873</span><span class="p" data-group-id="5435915059-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5435915059-5">{</span><span class="p" data-group-id="5435915059-6">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="5435915059-6">}</span><span class="p">,</span><span class="w">                  </span><span class="mi">16</span><span class="p">,</span><span class="w">    </span><span class="mf">0.692</span><span class="p">,</span><span class="w">    </span><span class="mf">0.692</span><span class="p" data-group-id="5435915059-5">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5435915059-7">{</span><span class="p" data-group-id="5435915059-8">{</span><span class="ss">lists</span><span class="p">,</span><span class="ss">map</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="5435915059-8">}</span><span class="p">,</span><span class="w">                         </span><span class="mi">2</span><span class="p">,</span><span class="w">    </span><span class="mf">0.195</span><span class="p">,</span><span class="w">    </span><span class="mf">0.195</span><span class="p" data-group-id="5435915059-7">}</span><span class="p" data-group-id="5435915059-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="5435915059-9">{</span><span class="w"> </span><span class="nb">garbage_collect</span><span class="p">,</span><span class="w">                      </span><span class="mi">43</span><span class="p">,</span><span class="w">    </span><span class="mf">1.760</span><span class="p">,</span><span class="w">    </span><span class="mf">1.760</span><span class="p" data-group-id="5435915059-9">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="5435915059-10">[</span><span class="w"> </span><span class="p" data-group-id="5435915059-10">]</span><span class="p" data-group-id="5435915059-1">}</span><span class="p">.</span></code></pre><p>Here we see that no function distinguishes itself considerably, which is very normal.</p><p>The <code>garbage_collect</code> pseudo function has not got an OWN time of zero like <code>suspend</code>, instead it is equal to the ACC time.</p><p>Garbage collect often occurs while a process is suspended, but <code>fprof</code> hides this fact by pretending that the suspended function was first unsuspended and then garbage collected. Otherwise the printout would show <code>garbage_collect</code> being called from <code>suspend</code> but not which function that might have caused the garbage collection.</p><p>Let us now get back to the test code:</p><pre><code class="makeup erlang"><span class="p" data-group-id="4498543536-1">{</span><span class="p" data-group-id="4498543536-2">[</span><span class="p" data-group-id="4498543536-3">{</span><span class="p" data-group-id="4498543536-4">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="4498543536-4">}</span><span class="p">,</span><span class="w">            </span><span class="mi">768</span><span class="p">,</span><span class="w">  </span><span class="mf">220.314</span><span class="p">,</span><span class="w">   </span><span class="mf">14.539</span><span class="p" data-group-id="4498543536-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4498543536-5">{</span><span class="p" data-group-id="4498543536-6">{</span><span class="ss">foo</span><span class="p">,</span><span class="ss">create_file_slow</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4498543536-6">}</span><span class="p">,</span><span class="w">              </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.316</span><span class="p">,</span><span class="w">    </span><span class="mf">0.021</span><span class="p" data-group-id="4498543536-5">}</span><span class="p" data-group-id="4498543536-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="4498543536-7">{</span><span class="w"> </span><span class="p" data-group-id="4498543536-8">{</span><span class="ss">file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4498543536-8">}</span><span class="p">,</span><span class="w">                      </span><span class="mi">769</span><span class="p">,</span><span class="w">  </span><span class="mf">220.630</span><span class="p">,</span><span class="w">   </span><span class="mf">14.560</span><span class="p" data-group-id="4498543536-7">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="4498543536-9">[</span><span class="p" data-group-id="4498543536-10">{</span><span class="p" data-group-id="4498543536-11">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="4498543536-11">}</span><span class="p">,</span><span class="w">                 </span><span class="mi">769</span><span class="p">,</span><span class="w">  </span><span class="mf">199.789</span><span class="p">,</span><span class="w">   </span><span class="mf">22.573</span><span class="p" data-group-id="4498543536-10">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="4498543536-12">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                              </span><span class="mi">53</span><span class="p">,</span><span class="w">    </span><span class="mf">6.281</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="4498543536-12">}</span><span class="p" data-group-id="4498543536-9">]</span><span class="p" data-group-id="4498543536-1">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>Not unexpectedly, we see that <code>file:write/2</code> was called from <code>foo:create_file_slow/3</code> and <code>foo:create_file_slow/2</code>. The number of calls in each case as well as the used time are also just confirms the previous results.</p><p>We see that <code>file:write/2</code> only calls <code>prim_file:write/2</code>, but let us refrain from digging into the internals of the kernel application.</p><p>But, if we nevertheless <em>do</em> dig down we find the call to the linked in driver that does the file operations towards the host operating system:</p><pre><code class="makeup erlang"><span class="p" data-group-id="6112983834-1">{</span><span class="p" data-group-id="6112983834-2">[</span><span class="p" data-group-id="6112983834-3">{</span><span class="p" data-group-id="6112983834-4">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="6112983834-4">}</span><span class="p">,</span><span class="w">           </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1458.356</span><span class="p">,</span><span class="w"> </span><span class="mf">1456.643</span><span class="p" data-group-id="6112983834-3">}</span><span class="p" data-group-id="6112983834-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="6112983834-5">{</span><span class="w"> </span><span class="p" data-group-id="6112983834-6">{</span><span class="ss">erlang</span><span class="p">,</span><span class="nb">port_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="6112983834-6">}</span><span class="p">,</span><span class="w">             </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1458.356</span><span class="p">,</span><span class="w"> </span><span class="mf">1456.643</span><span class="p" data-group-id="6112983834-5">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="6112983834-7">[</span><span class="p" data-group-id="6112983834-8">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                              </span><span class="mi">15</span><span class="p">,</span><span class="w">    </span><span class="mf">1.713</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="6112983834-8">}</span><span class="p" data-group-id="6112983834-7">]</span><span class="p" data-group-id="6112983834-1">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>This is 86 % of the total run time, and as we saw before it is the close operation the absolutely biggest contributor. We find a comparison ratio a little bit up in the call stack:</p><pre><code class="makeup erlang"><span class="p" data-group-id="5630277913-1">{</span><span class="p" data-group-id="5630277913-2">[</span><span class="p" data-group-id="5630277913-3">{</span><span class="p" data-group-id="5630277913-4">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">close</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="5630277913-4">}</span><span class="p">,</span><span class="w">                   </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1398.748</span><span class="p">,</span><span class="w">    </span><span class="mf">0.024</span><span class="p" data-group-id="5630277913-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5630277913-5">{</span><span class="p" data-group-id="5630277913-6">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">write</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="5630277913-6">}</span><span class="p">,</span><span class="w">                 </span><span class="mi">769</span><span class="p">,</span><span class="w">  </span><span class="mf">174.672</span><span class="p">,</span><span class="w">   </span><span class="mf">12.810</span><span class="p" data-group-id="5630277913-5">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5630277913-7">{</span><span class="p" data-group-id="5630277913-8">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="5630277913-8">}</span><span class="p">,</span><span class="w">                </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mf">19.755</span><span class="p">,</span><span class="w">    </span><span class="mf">0.017</span><span class="p" data-group-id="5630277913-7">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5630277913-9">{</span><span class="p" data-group-id="5630277913-10">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="5630277913-10">}</span><span class="p">,</span><span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.147</span><span class="p">,</span><span class="w">    </span><span class="mf">0.016</span><span class="p" data-group-id="5630277913-9">}</span><span class="p" data-group-id="5630277913-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="5630277913-11">{</span><span class="w"> </span><span class="p" data-group-id="5630277913-12">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="5630277913-12">}</span><span class="p">,</span><span class="w">           </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1593.322</span><span class="p">,</span><span class="w">   </span><span class="mf">12.867</span><span class="p" data-group-id="5630277913-11">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="5630277913-13">[</span><span class="p" data-group-id="5630277913-14">{</span><span class="p" data-group-id="5630277913-15">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="5630277913-15">}</span><span class="p">,</span><span class="w">           </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1578.973</span><span class="p">,</span><span class="w">   </span><span class="mf">27.265</span><span class="p" data-group-id="5630277913-14">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="5630277913-16">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                              </span><span class="mi">22</span><span class="p">,</span><span class="w">    </span><span class="mf">1.482</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="5630277913-16">}</span><span class="p" data-group-id="5630277913-13">]</span><span class="p" data-group-id="5630277913-1">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>The time for file operations in the linked in driver distributes itself as 1 % for open, 11 % for write and 87 % for close. All data is probably buffered in the operating system until the close.</p><p>The unsleeping reader may notice that the ACC times for <code>prim_file:drv_command/2</code> and <code>prim_file:drv_command/4</code> is not equal between the paragraphs above, even though it is easy to believe that <code>prim_file:drv_command/2</code> is just a passthrough function.</p><p>The missing time can be found in the paragraph for <code>prim_file:drv_command/4</code> where it is evident that not only <code>prim_file:drv_command/2</code> is called but also a fun:</p><pre><code class="makeup erlang"><span class="p" data-group-id="9642747548-1">{</span><span class="p" data-group-id="9642747548-2">[</span><span class="p" data-group-id="9642747548-3">{</span><span class="p" data-group-id="9642747548-4">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9642747548-4">}</span><span class="p">,</span><span class="w">           </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1578.973</span><span class="p">,</span><span class="w">   </span><span class="mf">27.265</span><span class="p" data-group-id="9642747548-3">}</span><span class="p" data-group-id="9642747548-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="9642747548-5">{</span><span class="w"> </span><span class="p" data-group-id="9642747548-6">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="9642747548-6">}</span><span class="p">,</span><span class="w">           </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1578.973</span><span class="p">,</span><span class="w">   </span><span class="mf">27.265</span><span class="p" data-group-id="9642747548-5">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="9642747548-7">[</span><span class="p" data-group-id="9642747548-8">{</span><span class="p" data-group-id="9642747548-9">{</span><span class="ss">erlang</span><span class="p">,</span><span class="nb">port_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9642747548-9">}</span><span class="p">,</span><span class="w">             </span><span class="mi">772</span><span class="p">,</span><span class="w"> </span><span class="mf">1458.356</span><span class="p">,</span><span class="w"> </span><span class="mf">1456.643</span><span class="p" data-group-id="9642747548-8">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9642747548-10">{</span><span class="p" data-group-id="9642747548-11">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">&#39;-drv_command/2-fun-0-&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="9642747548-11">}</span><span class="p">,</span><span class="w"> </span><span class="mi">772</span><span class="p">,</span><span class="w">   </span><span class="mf">87.897</span><span class="p">,</span><span class="w">   </span><span class="mf">12.736</span><span class="p" data-group-id="9642747548-10">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9642747548-12">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                              </span><span class="mi">50</span><span class="p">,</span><span class="w">    </span><span class="mf">4.582</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="9642747548-12">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9642747548-13">{</span><span class="nb">garbage_collect</span><span class="p">,</span><span class="w">                      </span><span class="mi">25</span><span class="p">,</span><span class="w">    </span><span class="mf">0.873</span><span class="p">,</span><span class="w">    </span><span class="mf">0.873</span><span class="p" data-group-id="9642747548-13">}</span><span class="p" data-group-id="9642747548-7">]</span><span class="p" data-group-id="9642747548-1">}</span><span class="p">.</span><span class="w">    </span></code></pre><p>And some more missing time can be explained by the fact that <code>prim_file:open_int/4</code> both calls <code>prim_file:drv_command/2</code> directly as well as through <code>prim_file:open_int_setopts/3</code>, which complicates the picture.</p><pre><code class="makeup erlang"><span class="p" data-group-id="9315768869-1">{</span><span class="p" data-group-id="9315768869-2">[</span><span class="p" data-group-id="9315768869-3">{</span><span class="p" data-group-id="9315768869-4">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9315768869-4">}</span><span class="p">,</span><span class="w">                    </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mf">20.309</span><span class="p">,</span><span class="w">    </span><span class="mf">0.029</span><span class="p" data-group-id="9315768869-3">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-5">{</span><span class="p" data-group-id="9315768869-6">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="9315768869-6">}</span><span class="p">,</span><span class="w">                </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.057</span><span class="p" data-group-id="9315768869-5">}</span><span class="p" data-group-id="9315768869-2">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="9315768869-7">{</span><span class="w"> </span><span class="p" data-group-id="9315768869-8">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="9315768869-8">}</span><span class="p">,</span><span class="w">                </span><span class="mi">2</span><span class="p">,</span><span class="w">   </span><span class="mf">20.309</span><span class="p">,</span><span class="w">    </span><span class="mf">0.086</span><span class="p" data-group-id="9315768869-7">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="9315768869-9">[</span><span class="p" data-group-id="9315768869-10">{</span><span class="p" data-group-id="9315768869-11">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9315768869-11">}</span><span class="p">,</span><span class="w">             </span><span class="mi">1</span><span class="p">,</span><span class="w">   </span><span class="mf">19.755</span><span class="p">,</span><span class="w">    </span><span class="mf">0.017</span><span class="p" data-group-id="9315768869-10">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-12">{</span><span class="p" data-group-id="9315768869-13">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="9315768869-13">}</span><span class="p">,</span><span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.360</span><span class="p">,</span><span class="w">    </span><span class="mf">0.032</span><span class="p" data-group-id="9315768869-12">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-14">{</span><span class="p" data-group-id="9315768869-15">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_open</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9315768869-15">}</span><span class="p">,</span><span class="w">                </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.071</span><span class="p">,</span><span class="w">    </span><span class="mf">0.030</span><span class="p" data-group-id="9315768869-14">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-16">{</span><span class="p" data-group-id="9315768869-17">{</span><span class="ss">erlang</span><span class="p">,</span><span class="nb">list_to_binary</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="9315768869-17">}</span><span class="p">,</span><span class="w">             </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.020</span><span class="p">,</span><span class="w">    </span><span class="mf">0.020</span><span class="p" data-group-id="9315768869-16">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-18">{</span><span class="p" data-group-id="9315768869-19">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">i32</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="9315768869-19">}</span><span class="p">,</span><span class="w">                     </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.017</span><span class="p">,</span><span class="w">    </span><span class="mf">0.017</span><span class="p" data-group-id="9315768869-18">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-20">{</span><span class="p" data-group-id="9315768869-21">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="9315768869-21">}</span><span class="p">,</span><span class="w">                </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.057</span><span class="p" data-group-id="9315768869-20">}</span><span class="p" data-group-id="9315768869-9">]</span><span class="p" data-group-id="9315768869-1">}</span><span class="p">.</span><span class="w">    
+</span><span class="p">.</span><span class="w">
+</span><span class="p">.</span><span class="w">
+</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="9315768869-22">{</span><span class="p" data-group-id="9315768869-23">[</span><span class="p" data-group-id="9315768869-24">{</span><span class="p" data-group-id="9315768869-25">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="9315768869-25">}</span><span class="p">,</span><span class="w">                </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.360</span><span class="p">,</span><span class="w">    </span><span class="mf">0.032</span><span class="p" data-group-id="9315768869-24">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-26">{</span><span class="p" data-group-id="9315768869-27">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="9315768869-27">}</span><span class="p">,</span><span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.016</span><span class="p" data-group-id="9315768869-26">}</span><span class="p" data-group-id="9315768869-23">]</span><span class="p">,</span><span class="w">     
+ </span><span class="p" data-group-id="9315768869-28">{</span><span class="w"> </span><span class="p" data-group-id="9315768869-29">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="9315768869-29">}</span><span class="p">,</span><span class="w">        </span><span class="mi">2</span><span class="p">,</span><span class="w">    </span><span class="mf">0.360</span><span class="p">,</span><span class="w">    </span><span class="mf">0.048</span><span class="p" data-group-id="9315768869-28">}</span><span class="p">,</span><span class="w">     </span><span class="c1">%</span><span class="w">
+ </span><span class="p" data-group-id="9315768869-30">[</span><span class="p" data-group-id="9315768869-31">{</span><span class="ss">suspend</span><span class="p">,</span><span class="w">                               </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.165</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p" data-group-id="9315768869-31">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-32">{</span><span class="p" data-group-id="9315768869-33">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">drv_command</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="9315768869-33">}</span><span class="p">,</span><span class="w">             </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.147</span><span class="p">,</span><span class="w">    </span><span class="mf">0.016</span><span class="p" data-group-id="9315768869-32">}</span><span class="p">,</span><span class="w">      
+  </span><span class="p" data-group-id="9315768869-34">{</span><span class="p" data-group-id="9315768869-35">{</span><span class="ss">prim_file</span><span class="p">,</span><span class="ss">open_int_setopts</span><span class="p">,</span><span class="mi">3</span><span class="p" data-group-id="9315768869-35">}</span><span class="p">,</span><span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="mf">0.000</span><span class="p">,</span><span class="w">    </span><span class="mf">0.016</span><span class="p" data-group-id="9315768869-34">}</span><span class="p" data-group-id="9315768869-30">]</span><span class="p" data-group-id="9315768869-22">}</span><span class="p">.</span><span class="w">    </span></code></pre><h2 id="module-notes" class="section-heading">
+  <a href="#module-notes" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Notes
+</h2>
+<p>The actual supervision of execution times is in itself a CPU intensive activity. A message is written on the trace file for every function call that is made by the profiled code.</p><p>The ACC time calculation is sometimes difficult to make correct, since it is difficult to define. This happens especially when a function occurs in several instances in the call stack, for example by calling itself perhaps through other functions and perhaps even non-tail recursively.</p><p>To produce sensible results, <code>fprof</code> tries not to charge any function more than once for ACC time. The instance highest up (with longest duration) in the call stack is chosen.</p><p>Sometimes a function may unexpectedly waste a lot (some 10 ms or more depending on host machine OS) of OWN (and ACC) time, even functions that do practically nothing at all. The problem may be that the OS has chosen to schedule out the Erlang runtime system process for a while, and if the OS does not support high resolution cpu time measurements <code>fprof</code> will use wallclock time for its calculations, and it will appear as functions randomly burn virtual machine time.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p>dbg(3), <a href="eprof.html">eprof</a>(3), erlang(3), io(3), Tools User's Guide</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/0">analyse/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>analyse([])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/1">analyse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>analyse([OptionName])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/1">analyse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>analyse([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/1">analyse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="analyse_option"></li></ul><p>Analyses raw profile data in the <code>fprof</code> server. If called while there is no raw profile data available, <code>{error, no_profile}</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/2">analyse/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>analyse([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/2">apply/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>apply(Func, Args, [])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/3">apply/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>apply({Module, Function}, Args, [])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/3">apply/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="apply_option"></li><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Calls <code>erlang:apply(Func, Args)</code> surrounded by <code>trace([start, ...])</code> and <code>trace(stop)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/4">apply/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="apply_option"></li><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Same as <code>apply({Module, Function}, Args, OptionList)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#profile/0">profile/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>profile([])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#profile/1">profile/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>profile([OptionName])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#profile/1">profile/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>profile([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#profile/1">profile/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="profile_option"></li></ul><p>Compiles a trace into raw profile data held by the <code>fprof</code> server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#profile/2">profile/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>profile([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts the <code>fprof</code> server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>stop(normal)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stops the <code>fprof</code> server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/1">trace/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([start, verbose])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/1">trace/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([OptionName])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/1">trace/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/1">trace/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Starts or stops tracing.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/2">trace/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([start, {file, Filename}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/2">trace/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([start, verbose, {file, Filename}])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trace/2">trace/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>trace([{OptionName, OptionValue}])</code>.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="analyse/0">
+
+  <div class="detail-header">
+    <a href="#analyse/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse() -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>analyse([])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse/1">
+
+  <div class="detail-header">
+    <a href="#analyse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+       (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:analyse_option/0">analyse_option</a>(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>analyse([OptionName])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse/1">
+
+  <div class="detail-header">
+    <a href="#analyse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+       (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:analyse_option/0">analyse_option</a>(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>analyse([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse/1">
+
+  <div class="detail-header">
+    <a href="#analyse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+       (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:analyse_option/0">analyse_option</a>(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<ul class="types"><li name="analyse_option"></li></ul><p>Analyses raw profile data in the <code>fprof</code> server. If called while there is no raw profile data available, <code>{error, no_profile}</code> is returned.</p><p><code>Destfile</code> is used to call <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#open/2"><code>file:open/2</code></a>.</p><p>Option description:</p><dl><dt><code>dest</code> | <code>{dest, Dest}</code></dt><dd>Specifies the destination for the analysis. If this option is not given or it is <code>dest</code>, the destination will be the caller's group leader, otherwise the destination <code>Dest</code> is either the <code>pid()</code> of an I/O device or a filename. And, finally, if the filename is <code>[]</code> - <code>&quot;fprof.analysis&quot;</code> is used instead.</dd><dt><code>append</code></dt><dd>Causes the analysis to be appended to the destination file. This option is only allowed with the <code>{dest, Destfile}</code> option.</dd><dt><code>{cols, Cols}</code></dt><dd>Specifies the number of columns in the analysis text. If this option is not given the number of columns is set to 80.</dd><dt><code>callers</code> | <code>{callers, true}</code></dt><dd>Prints callers and called information in the analysis. This is the default.</dd><dt><code>{callers, false}</code> | <code>no_callers</code></dt><dd>Suppresses the printing of callers and called information in the analysis.</dd><dt><code>{sort, SortSpec}</code></dt><dd>Specifies if the analysis should be sorted according to the ACC column, which is the default, or the OWN column. See <a href="fprof.html#content#analysis">Analysis Format</a> below.</dd><dt><code>totals</code> | <code>{totals, true}</code></dt><dd>Includes a section containing call statistics for all calls regardless of process, in the analysis.</dd><dt><code>{totals, false}</code></dt><dd>Supresses the totals section in the analysis, which is the default.</dd><dt><code>details</code> | <code>{details, true}</code></dt><dd>Prints call statistics for each process in the analysis. This is the default.</dd><dt><code>{details, false}</code> | <code>no_details</code></dt><dd>Suppresses the call statistics for each process from the analysis.</dd></dl>
+  </section>
+</section>
+<section class="detail" id="analyse/2">
+
+  <div class="detail-header">
+    <a href="#analyse/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(OptionName, OptionValue) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>analyse([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="apply/2">
+
+  <div class="detail-header">
+    <a href="#apply/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Func, Args) -> term()
+         when Func :: fun() | {Module :: module(), Function :: atom()}, Args :: [term()].</pre>
+
+      </div>
+
+<p>Same as <code>apply(Func, Args, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="apply/3">
+
+  <div class="detail-header">
+    <a href="#apply/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Module, Function, Args) -> term()
+         when Module :: module(), Function :: atom(), Args :: [term()];
+     (Func, Args, OptionList) -> term()
+         when
+             Func :: fun() | {Module :: module(), Function :: atom()},
+             Args :: [term()],
+             OptionList :: [Option],
+             Option :: <a href="#t:apply_option/0">apply_option</a>().</pre>
+
+      </div>
+
+<p>Same as <code>apply({Module, Function}, Args, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="apply/3">
+
+  <div class="detail-header">
+    <a href="#apply/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Module, Function, Args) -> term()
+         when Module :: module(), Function :: atom(), Args :: [term()];
+     (Func, Args, OptionList) -> term()
+         when
+             Func :: fun() | {Module :: module(), Function :: atom()},
+             Args :: [term()],
+             OptionList :: [Option],
+             Option :: <a href="#t:apply_option/0">apply_option</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="apply_option"></li><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Calls <code>erlang:apply(Func, Args)</code> surrounded by <code>trace([start, ...])</code> and <code>trace(stop)</code>.</p><p>Some effort is made to keep the trace clean from unnecessary trace messages; tracing is started and stopped from a spawned process while the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#apply/2"><code>erlang:apply/2</code></a> call is made in the current process, only surrounded by <code>receive</code> and <code>send</code> statements towards the trace starting process. The trace starting process exits when not needed any more.</p><p>The <code>TraceStartOption</code> is any option allowed for <a href="fprof.html#trace/1"><code>trace/1</code></a>. The options <code>[start, {procs, [self() | PidList]} | OptList]</code> are given to <code>trace/1</code>, where <code>OptList</code> is <code>OptionList</code> with <code>continue</code>, <code>start</code> and <code>{procs, _}</code> options removed.</p><p>The <code>continue</code> option inhibits the call to <code>trace(stop)</code> and leaves it up to the caller to stop tracing at a suitable time.</p>
+  </section>
+</section>
+<section class="detail" id="apply/4">
+
+  <div class="detail-header">
+    <a href="#apply/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Module, Function, Args, OptionList) -> term()
+         when
+             Module :: module(),
+             Function :: atom(),
+             Args :: [term()],
+             OptionList :: [Option],
+             Option :: <a href="#t:apply_option/0">apply_option</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="apply_option"></li><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Same as <code>apply({Module, Function}, Args, OptionList)</code>.</p><p><code>OptionList</code> is an option list allowed for <a href="fprof.html#apply/3"><code>apply/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="profile/0">
+
+  <div class="detail-header">
+    <a href="#profile/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">profile/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>profile() -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>profile([])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="profile/1">
+
+  <div class="detail-header">
+    <a href="#profile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">profile/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>profile(OptionName) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), Tracer :: pid(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) ->
+           ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionName :: atom(),
+               OptionValue :: term(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term();
+       (OptionList) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:profile_option/0">profile_option</a>(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>profile([OptionName])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="profile/1">
+
+  <div class="detail-header">
+    <a href="#profile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">profile/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>profile(OptionName) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), Tracer :: pid(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) ->
+           ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionName :: atom(),
+               OptionValue :: term(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term();
+       (OptionList) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:profile_option/0">profile_option</a>(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>profile([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="profile/1">
+
+  <div class="detail-header">
+    <a href="#profile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">profile/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>profile(OptionName) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when OptionName :: atom(), Tracer :: pid(), ServerPid :: pid(), Reason :: term();
+       ({OptionName, OptionValue}) ->
+           ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionName :: atom(),
+               OptionValue :: term(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term();
+       (OptionList) -> ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionList :: [Option],
+               Option :: <a href="#t:profile_option/0">profile_option</a>(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<ul class="types"><li name="profile_option"></li></ul><p>Compiles a trace into raw profile data held by the <code>fprof</code> server.</p><p><code>Dumpfile</code> is used to call <code>file:open/2</code>, and <code>Filename</code> is used to call <code>dbg:trace_port(file, Filename)</code>. Please see <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#open/2"><code>file:open/2</code></a> and <a href="https://wojtekmach.pl/otp_docs/runtime_tools/dbg.html#trace_port/2"><code>dbg:trace_port/2</code></a>.</p><p>Option description:</p><dl><dt><code>file</code> | <code>{file, Filename}</code></dt><dd>Reads the file <code>Filename</code> and creates raw profile data that is stored in RAM by the <code>fprof</code> server. If the option <code>file</code> is given, or none of these options are given, the file <code>&quot;fprof.trace&quot;</code> is read. The call will return when the whole trace has been read with the return value <code>ok</code> if successful. This option is not allowed with the <code>start</code> or <code>stop</code> options.</dd><dt><code>dump</code> | <code>{dump, Dump}</code></dt><dd>Specifies the destination for the trace text dump. If this option is not given, no dump is generated, if it is <code>dump</code> the destination will be the caller's group leader, otherwise the destination <code>Dump</code> is either the pid of an I/O device or a filename. And, finally, if the filename is <code>[]</code> - <code>&quot;fprof.dump&quot;</code> is used instead. This option is not allowed with the <code>stop</code> option.</dd><dt><code>append</code></dt><dd>Causes the trace text dump to be appended to the destination file. This option is only allowed with the <code>{dump, Dumpfile}</code> option.</dd><dt><code>start</code></dt><dd>Starts a tracer process that profiles trace data in runtime. The call will return immediately with the return value <code>{ok, Tracer}</code> if successful. This option is not allowed with the <code>stop</code>, <code>file</code> or <code>{file, Filename}</code> options.</dd><dt><code>stop</code></dt><dd>Stops the tracer process that profiles trace data in runtime. The return value will be value <code>ok</code> if successful. This option is not allowed with the <code>start</code>, <code>file</code> or <code>{file, Filename}</code> options.</dd></dl>
+  </section>
+</section>
+<section class="detail" id="profile/2">
+
+  <div class="detail-header">
+    <a href="#profile/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">profile/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>profile(OptionName, OptionValue) ->
+           ok | {ok, Tracer} | {error, Reason} | {'EXIT', ServerPid, Reason}
+           when
+               OptionName :: atom(),
+               OptionValue :: term(),
+               Tracer :: pid(),
+               ServerPid :: pid(),
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>profile([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="start/0">
+
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start() -> {ok, Pid} | {error, {already_started, Pid}} when Pid :: pid().</pre>
+
+      </div>
+
+<p>Starts the <code>fprof</code> server.</p><p>Note that it seldom needs to be started explicitly since it is automatically started by the functions that need a running server.</p>
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>stop(normal)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/1">
+
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Reason) -> ok when Reason :: term().</pre>
+
+      </div>
+
+<p>Stops the <code>fprof</code> server.</p><p>The supplied <code>Reason</code> becomes the exit reason for the server process. Default Any <code>Reason</code> other than <code>kill</code> sends a request to the server and waits for it to clean up, reply and exit. If <code>Reason</code> is <code>kill</code>, the server is bluntly killed.</p><p>If the <code>fprof</code> server is not running, this function returns immediately with the same return value.</p><div class="note"><p>When the <code>fprof</code> server is stopped the collected raw profile data is lost.</p></div>
+  </section>
+</section>
+<section class="detail" id="trace/1">
+
+  <div class="detail-header">
+    <a href="#trace/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(verbose) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when ServerPid :: pid(), Reason :: term();
+     (OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+     ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+     (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when
+             OptionList :: [Option],
+             Option :: <a href="#t:trace_option/0">trace_option</a>(),
+             ServerPid :: pid(),
+             Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([start, verbose])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trace/1">
+
+  <div class="detail-header">
+    <a href="#trace/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(verbose) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when ServerPid :: pid(), Reason :: term();
+     (OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+     ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+     (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when
+             OptionList :: [Option],
+             Option :: <a href="#t:trace_option/0">trace_option</a>(),
+             ServerPid :: pid(),
+             Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([OptionName])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trace/1">
+
+  <div class="detail-header">
+    <a href="#trace/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(verbose) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when ServerPid :: pid(), Reason :: term();
+     (OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+     ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+     (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when
+             OptionList :: [Option],
+             Option :: <a href="#t:trace_option/0">trace_option</a>(),
+             ServerPid :: pid(),
+             Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trace/1">
+
+  <div class="detail-header">
+    <a href="#trace/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(verbose) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when ServerPid :: pid(), Reason :: term();
+     (OptionName) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), ServerPid :: pid(), Reason :: term();
+     ({OptionName, OptionValue}) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term();
+     (OptionList) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when
+             OptionList :: [Option],
+             Option :: <a href="#t:trace_option/0">trace_option</a>(),
+             ServerPid :: pid(),
+             Reason :: term().</pre>
+
+      </div>
+
+<ul class="types"><li name="pid_spec"></li><li name="trace_option"></li></ul><p>Starts or stops tracing.</p><p><code>PidSpec</code> and <code>Tracer</code> are used in calls to <code>erlang:trace(PidSpec, true, [{tracer, Tracer} | Flags])</code>, and <code>Filename</code> is used to call <code>dbg:trace_port(file, Filename)</code>. Please see <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#trace/3"><code>erlang:trace/3</code></a> and <a href="https://wojtekmach.pl/otp_docs/runtime_tools/dbg.html#trace_port/2"><code>dbg:trace_port/2</code></a>.</p><p>Option description:</p><dl><dt><code>stop</code></dt><dd>Stops a running <code>fprof</code> trace and clears all tracing from the node. Either option <code>stop</code> or <code>start</code> must be specified, but not both.</dd><dt><code>start</code></dt><dd>Clears all tracing from the node and starts a new <code>fprof</code> trace. Either option <code>start</code> or <code>stop</code> must be specified, but not both.</dd><dt><code>verbose</code> | <code>{verbose, boolean()}</code></dt><dd>The options <code>verbose</code> or <code>{verbose, true}</code> adds some trace flags that <code>fprof</code> does not need, but that may be interesting for general debugging purposes. This option is only allowed with the <code>start</code> option.</dd><dt><code>cpu_time</code> | <code>{cpu_time, boolean()}</code></dt><dd>The options <code>cpu_time</code> or <code>{cpu_time, true}</code> makes the timestamps in the trace be in CPU time instead of wallclock time which is the default. This option is only allowed with the <code>start</code> option.<div class="warning"><p>Getting correct values out of cpu_time can be difficult. The best way to get correct values is to run using a single scheduler and bind that scheduler to a specific CPU, i.e. <code>erl +S 1 +sbt db</code>.</p></div></dd><dt><code>{procs, PidSpec}</code> | <code>{procs, [PidSpec]}</code></dt><dd>Specifies which processes that shall be traced. If this option is not given, the calling process is traced. All processes spawned by the traced processes are also traced. This option is only allowed with the <code>start</code> option.</dd><dt><code>file</code> | <code>{file, Filename}</code></dt><dd>Specifies the filename of the trace. If the option <code>file</code> is given, or none of these options are given, the file <code>&quot;fprof.trace&quot;</code> is used. This option is only allowed with the <code>start</code> option, but not with the <code>{tracer, Tracer}</code> option.</dd><dt><code>{tracer, Tracer}</code></dt><dd>Specifies that trace to process or port shall be done instead of trace to file. This option is only allowed with the <code>start</code> option, but not with the <code>{file, Filename}</code> option.</dd></dl>
+  </section>
+</section>
+<section class="detail" id="trace/2">
+
+  <div class="detail-header">
+    <a href="#trace/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(start, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (verbose, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (OptionName, OptionValue) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([start, {file, Filename}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trace/2">
+
+  <div class="detail-header">
+    <a href="#trace/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(start, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (verbose, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (OptionName, OptionValue) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([start, verbose, {file, Filename}])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trace/2">
+
+  <div class="detail-header">
+    <a href="#trace/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trace/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trace(start, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (verbose, Filename) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), ServerPid :: pid(), Reason :: term();
+     (OptionName, OptionValue) -> ok | {error, Reason} | {'EXIT', ServerPid, Reason}
+         when OptionName :: atom(), OptionValue :: term(), ServerPid :: pid(), Reason :: term().</pre>
+
+      </div>
+
+<p>Same as <code>trace([{OptionName, OptionValue}])</code>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

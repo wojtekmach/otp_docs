@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="tools v3.5">
+
+    <title>lcnt — tools v3.5</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-b955672ef1.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+tools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.5
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+lcnt <small class="app-vsn">(tools v3.5)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The <code>lcnt</code> module is used to profile the internal ethread locks in the Erlang Runtime System. With <code>lcnt</code> enabled, internal counters in the runtime system are updated each time a lock is taken. The counters stores information about the number of acquisition tries and the number of collisions that has occurred during the acquisition tries. The counters also record the waiting time a lock has caused for a blocked thread when a collision has occurred.</p><p>The data produced by the lock counters will give an estimate on how well the runtime system will behave from a parallelizable view point for the scenarios tested. This tool was mainly developed to help Erlang runtime developers iron out potential and generic bottlenecks.</p><p>Locks in the emulator are named after what type of resource they protect and where in the emulator they are initialized, those are lock 'classes'. Most of those locks are also instantiated several times, and given unique identifiers, to increase locking granularity. Typically an instantiated lock protects a disjunct set of the resource, for example ets tables, processes or ports. In other cases it protects a specific range of a resource, for example <code>pix_lock</code> which protects index to process mappings, and is given a unique number within the class. A unique lock in <code>lcnt</code> is referenced by a name (class) and an identifier: <code>{Name, Id}</code>.</p><p>Some locks in the system are static and protects global resources, for example <code>bif_timers</code> and the <code>run_queue</code> locks. Other locks are dynamic and not necessarily long lived, for example process locks and ets-table locks. The statistics data from short lived locks can be stored separately when the locks are deleted. This behavior is by default turned off to save memory but can be turned on via <code>lcnt:rt_opt({copy_save, true})</code>. The <code>lcnt:apply/1,2,3</code> functions enables this behavior during profiling.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p>LCNT User's Guide</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/1">apply/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>apply(Fun, [])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/2">apply/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Clears the lock counters and then setups the instrumentation to save all destroyed locks. After setup the function is called, passing the elements in <code>Args</code> as arguments. When the function returns the statistics are immediately collected to the server. After the collection the instrumentation is returned to its previous behavior. The result of the applied function is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply/3">apply/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>apply(fun() -&gt; erlang:apply(Module, Function, Args) end)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear/0">clear/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>clear(node())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear/1">clear/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Clears the internal lock statistics from the runtime system. This does not clear the data on the server only on runtime system. All counters for static locks are zeroed, all dynamic locks currently alive are zeroed and all saved locks now destroyed are removed. It also resets the duration timer.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#collect/0">collect/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>collect(node())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#collect/1">collect/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Collects lock statistics from the runtime system. The function starts a server if it is not already started. It then populates the server with lock statistics. If the server held any lock statistics data before the collect then that data is lost.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#conflicts/0">conflicts/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>conflicts([])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#conflicts/1">conflicts/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal locks and its statistics.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#information/0">information/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Prints lcnt server state and generic information about collected lock statistics.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inspect/1">inspect/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>inspect(Lock, [])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#inspect/2">inspect/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal lock counters for a specific lock.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#load/1">load/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Restores previously saved data to the server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#locations/0">locations/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>locations([])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#locations/1">locations/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal lock counters by source code locations.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pid/2">pid/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>pid(node(), Id, Serial)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pid/3">pid/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates a process id with creation 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#port/1">port/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>port(node(), Id)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#port/2">port/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates a port id with creation 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_clear/0">rt_clear/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>rt_clear(node())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_clear/1">rt_clear/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Clear the internal counters. Same as <a href="lcnt.html#clear/1"><code>lcnt:clear(Node)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_collect/0">rt_collect/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="lock_counter_data"></li></ul><p>Same as <code>rt_collect(node())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_collect/1">rt_collect/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="lock_counter_data"></li></ul><p>Returns a list of raw lock counter data.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_mask/0">rt_mask/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="category_atom"></li></ul><p>Same as <code>rt_mask(node())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_mask/1">rt_mask/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="category_atom"></li></ul><p>Refer to <a href="lcnt.html#rt_mask/2"><code>rt_mask/2</code></a>. for a list of valid categories. All categories are enabled by default.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_mask/1">rt_mask/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="category_atom"></li></ul><p>Same as <code>rt_mask(node(), Categories)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_mask/2">rt_mask/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="category_atom"></li></ul><p>Sets the lock category mask to the given categories.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_opt/1">rt_opt/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <code>rt_opt(node(), {Type, Value})</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rt_opt/2">rt_opt/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Option description</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#save/1">save/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Saves the collected data to file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts the lock profiler server. The server only act as a medium for the user and performs filtering and printing of data collected by <code>lcnt:collect/1</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stops the lock profiler server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#swap_pid_keys/0">swap_pid_keys/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Swaps places on <code>Name</code> and <code>Id</code> space for ports and processes.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="apply/1">
+
+  <div class="detail-header">
+    <a href="#apply/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Fun) -> term() when Fun :: fun().</pre>
+
+      </div>
+
+<p>Same as <code>apply(Fun, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="apply/2">
+
+  <div class="detail-header">
+    <a href="#apply/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/2</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Fun, Args) -> term() when Fun :: fun(), Args :: [term()].</pre>
+
+      </div>
+
+<p>Clears the lock counters and then setups the instrumentation to save all destroyed locks. After setup the function is called, passing the elements in <code>Args</code> as arguments. When the function returns the statistics are immediately collected to the server. After the collection the instrumentation is returned to its previous behavior. The result of the applied function is returned.</p><div class="warning"><p>This function should only be used for micro-benchmarks; it sets <code>copy_save</code> to <code>true</code> for the duration of the call, which can quickly lead to running out of memory.</p></div>
+  </section>
+</section>
+<section class="detail" id="apply/3">
+
+  <div class="detail-header">
+    <a href="#apply/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply/3</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>apply(Module, Function, Args) -> term()
+         when Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+<p>Same as <code>apply(fun() -&gt; erlang:apply(Module, Function, Args) end)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="clear/0">
+
+  <div class="detail-header">
+    <a href="#clear/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>clear() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>clear(node())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="clear/1">
+
+  <div class="detail-header">
+    <a href="#clear/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>clear(Node) -> ok when Node :: node().</pre>
+
+      </div>
+
+<p>Clears the internal lock statistics from the runtime system. This does not clear the data on the server only on runtime system. All counters for static locks are zeroed, all dynamic locks currently alive are zeroed and all saved locks now destroyed are removed. It also resets the duration timer.</p>
+  </section>
+</section>
+<section class="detail" id="collect/0">
+
+  <div class="detail-header">
+    <a href="#collect/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">collect/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>collect() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>collect(node())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="collect/1">
+
+  <div class="detail-header">
+    <a href="#collect/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">collect/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>collect(Node) -> ok when Node :: node().</pre>
+
+      </div>
+
+<p>Collects lock statistics from the runtime system. The function starts a server if it is not already started. It then populates the server with lock statistics. If the server held any lock statistics data before the collect then that data is lost.</p>
+  </section>
+</section>
+<section class="detail" id="conflicts/0">
+
+  <div class="detail-header">
+    <a href="#conflicts/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">conflicts/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>conflicts() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>conflicts([])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="conflicts/1">
+
+  <div class="detail-header">
+    <a href="#conflicts/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">conflicts/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>conflicts(Options) -> ok when Options :: [<a href="#t:option/0">option</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal locks and its statistics.</p><p>For option description, see <a href="lcnt.html#inspect/2"><code>lcnt:inspect/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="information/0">
+
+  <div class="detail-header">
+    <a href="#information/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">information/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>information() -> ok.</pre>
+
+      </div>
+
+<p>Prints lcnt server state and generic information about collected lock statistics.</p>
+  </section>
+</section>
+<section class="detail" id="inspect/1">
+
+  <div class="detail-header">
+    <a href="#inspect/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inspect/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inspect(Lock) -> ok
+           when
+               Lock :: Name | {Name, Id | [Id]},
+               Name :: atom() | pid() | port(),
+               Id :: atom() | integer() | pid() | port().</pre>
+
+      </div>
+
+<p>Same as <code>inspect(Lock, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="inspect/2">
+
+  <div class="detail-header">
+    <a href="#inspect/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">inspect/2</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>inspect(Lock, Options) -> ok
+           when
+               Lock :: Name | {Name, Id | [Id]},
+               Name :: atom() | pid() | port(),
+               Id :: atom() | integer() | pid() | port(),
+               Options :: [<a href="#t:option/0">option</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal lock counters for a specific lock.</p><p>Lock <code>Name</code> and <code>Id</code> for ports and processes are interchangeable with the use of <a href="lcnt.html#swap_pid_keys/0"><code>lcnt:swap_pid_keys/0</code></a> and is the reason why <code>pid()</code> and <code>port()</code> options can be used in both <code>Name</code> and <code>Id</code> space. Both pids and ports are special identifiers with stripped creation and can be recreated with <a href="lcnt.html#pid/3"><code>lcnt:pid/2,3</code></a> and <a href="lcnt.html#port/2"><code>lcnt:port/1,2</code></a>.</p><p>Option description:</p><dl><dt><code>{combine, boolean()}</code></dt><dd>Combine the statistics from different instances of a lock class.<br/>Default: <code>true</code></dd><dt><code>{locations, boolean()}</code></dt><dd>Print the statistics by source file and line numbers.<br/>Default: <code>false</code></dd><dt><code>{max_locks, MaxLocks}</code></dt><dd>Maximum number of locks printed or no limit with <code>none</code>.<br/>Default: <code>20</code></dd><dt><code>{print, PrintOptions}</code></dt><dd>Printing options:<dl><dt><code>name</code></dt><dd>Named lock or named set of locks (classes). The same name used for initializing the lock in the VM.</dd><dt><code>id</code></dt><dd>Internal id for set of locks, not always unique. This could be table name for ets tables (db_tab), port id for ports, integer identifiers for allocators, etc.</dd><dt><code>type</code></dt><dd>Type of lock: <code>rw_mutex</code>, <code>mutex</code>, <code>spinlock</code>, <code>rw_spinlock</code> or <code>proclock</code>.</dd><dt><code>entry</code></dt><dd>In combination with <code>{locations, true}</code> this option prints the lock operations source file and line number entry-points along with statistics for each entry.</dd><dt><code>tries</code></dt><dd>Number of acquisitions of this lock.</dd><dt><code>colls</code></dt><dd>Number of collisions when a thread tried to acquire this lock. This is when a trylock is EBUSY, a write try on read held rw_lock, a try read on write held rw_lock, a thread tries to lock an already locked lock. (Internal states supervises this).</dd><dt><code>ratio</code></dt><dd>The ratio between the number of collisions and the number of tries (acquisitions) in percentage.</dd><dt><code>time</code></dt><dd>Accumulated waiting time for this lock. This could be greater than actual wall clock time, it is accumulated for all threads. Trylock conflicts does not accumulate time.</dd><dt><code>duration</code></dt><dd>Percentage of accumulated waiting time of wall clock time. This percentage can be higher than 100% since accumulated time is from all threads.</dd></dl><br/>Default: <code>[name,id,tries,colls,ratio,time,duration]</code></dd><dt><code>{reverse, boolean()}</code></dt><dd>Reverses the order of sorting.<br/>Default: <code>false</code></dd><dt><code>{sort, Sort}</code></dt><dd>Column sorting orders.<br/>Default: <code>time</code></dd><dt><code>{thresholds, Thresholds}</code></dt><dd>Filtering thresholds. Anything values above the threshold value are passed through.<br/>Default: <code>[{tries, 0}, {colls, 0}, {time, 0}]</code></dd></dl>
+  </section>
+</section>
+<section class="detail" id="load/1">
+
+  <div class="detail-header">
+    <a href="#load/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">load/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>load(Filename) -> ok when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>().</pre>
+
+      </div>
+
+<p>Restores previously saved data to the server.</p>
+  </section>
+</section>
+<section class="detail" id="locations/0">
+
+  <div class="detail-header">
+    <a href="#locations/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">locations/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>locations() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>locations([])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="locations/1">
+
+  <div class="detail-header">
+    <a href="#locations/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">locations/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>locations(Options) -> ok when Options :: [<a href="#t:option/0">option</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="option"></li><li name="print"></li><li name="sort"></li><li name="threshold"></li></ul><p>Prints a list of internal lock counters by source code locations.</p><p>For option description, see <a href="lcnt.html#inspect/2"><code>lcnt:inspect/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="pid/2">
+
+  <div class="detail-header">
+    <a href="#pid/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pid/2</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pid(Id, Serial) -> pid() when Id :: integer(), Serial :: integer().</pre>
+
+      </div>
+
+<p>Same as <code>pid(node(), Id, Serial)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="pid/3">
+
+  <div class="detail-header">
+    <a href="#pid/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pid/3</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pid(Node, Id, Serial) -> pid() when Node :: node(), Id :: integer(), Serial :: integer().</pre>
+
+      </div>
+
+<p>Creates a process id with creation 0.</p>
+  </section>
+</section>
+<section class="detail" id="port/1">
+
+  <div class="detail-header">
+    <a href="#port/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">port/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>port(Id) -> port() when Id :: integer().</pre>
+
+      </div>
+
+<p>Same as <code>port(node(), Id)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="port/2">
+
+  <div class="detail-header">
+    <a href="#port/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">port/2</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>port(Node, Id) -> port() when Node :: node(), Id :: integer().</pre>
+
+      </div>
+
+<p>Creates a port id with creation 0.</p>
+  </section>
+</section>
+<section class="detail" id="rt_clear/0">
+
+  <div class="detail-header">
+    <a href="#rt_clear/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_clear/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_clear() -> ok.</pre>
+
+      </div>
+
+<p>Same as <code>rt_clear(node())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_clear/1">
+
+  <div class="detail-header">
+    <a href="#rt_clear/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_clear/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_clear(Node) -> ok when Node :: node().</pre>
+
+      </div>
+
+<p>Clear the internal counters. Same as <a href="lcnt.html#clear/1"><code>lcnt:clear(Node)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_collect/0">
+
+  <div class="detail-header">
+    <a href="#rt_collect/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_collect/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_collect() -> [<a href="#t:lock_counter_data/0">lock_counter_data</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="lock_counter_data"></li></ul><p>Same as <code>rt_collect(node())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_collect/1">
+
+  <div class="detail-header">
+    <a href="#rt_collect/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_collect/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_collect(Node) -> [<a href="#t:lock_counter_data/0">lock_counter_data</a>()] when Node :: node().</pre>
+
+      </div>
+
+<ul class="types"><li name="lock_counter_data"></li></ul><p>Returns a list of raw lock counter data.</p>
+  </section>
+</section>
+<section class="detail" id="rt_mask/0">
+
+  <div class="detail-header">
+    <a href="#rt_mask/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_mask/0</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_mask() -> [<a href="#t:category_atom/0">category_atom</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="category_atom"></li></ul><p>Same as <code>rt_mask(node())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_mask/1">
+
+  <div class="detail-header">
+    <a href="#rt_mask/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_mask/1</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_mask(Node) -> [<a href="#t:category_atom/0">category_atom</a>()] when Node :: node();
+       (Categories) -> ok | {error, copy_save_enabled} when Categories :: [<a href="#t:category_atom/0">category_atom</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="category_atom"></li></ul><p>Refer to <a href="lcnt.html#rt_mask/2"><code>rt_mask/2</code></a>. for a list of valid categories. All categories are enabled by default.</p>
+  </section>
+</section>
+<section class="detail" id="rt_mask/1">
+
+  <div class="detail-header">
+    <a href="#rt_mask/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_mask/1</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_mask(Node) -> [<a href="#t:category_atom/0">category_atom</a>()] when Node :: node();
+       (Categories) -> ok | {error, copy_save_enabled} when Categories :: [<a href="#t:category_atom/0">category_atom</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="category_atom"></li></ul><p>Same as <code>rt_mask(node(), Categories)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_mask/2">
+
+  <div class="detail-header">
+    <a href="#rt_mask/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_mask/2</h1>
+
+
+      <span class="note">(since OTP 20.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_mask(Node, Categories) -> ok | {error, copy_save_enabled}
+           when Node :: node(), Categories :: [<a href="#t:category_atom/0">category_atom</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="category_atom"></li></ul><p>Sets the lock category mask to the given categories.</p><p>This will fail if the <code>copy_save</code> option is enabled; see <a href="lcnt.html#rt_opt/2"><code>lcnt:rt_opt/2</code></a>.</p><p>Valid categories are:</p><ul><li><code>allocator</code></li><li><code>db</code> (ETS tables)</li><li><code>debug</code></li><li><code>distribution</code></li><li><code>generic</code></li><li><code>io</code></li><li><code>process</code></li><li><code>scheduler</code></li></ul><p>This list is subject to change at any time, as is the category any given lock may belong to.</p>
+  </section>
+</section>
+<section class="detail" id="rt_opt/1">
+
+  <div class="detail-header">
+    <a href="#rt_opt/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_opt/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_opt(Option) -> boolean()
+          when Option :: {Type, Value :: boolean()}, Type :: copy_save | process_locks.</pre>
+
+      </div>
+
+<p>Same as <code>rt_opt(node(), {Type, Value})</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rt_opt/2">
+
+  <div class="detail-header">
+    <a href="#rt_opt/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rt_opt/2</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rt_opt(Node, Option) -> boolean()
+          when
+              Node :: node(),
+              Option :: {Type, Value :: boolean()},
+              Type :: copy_save | process_locks.</pre>
+
+      </div>
+
+<p>Option description:</p><dl><dt><code>{copy_save, boolean()}</code></dt><dd>Retains the statistics of destroyed locks.<br/>Default: <code>false</code><div class="warning"><p>This option will use a lot of memory when enabled, which must be reclaimed with <code>lcnt:rt_clear</code>. Note that it makes no distinction between locks that were destroyed and locks for which counting was disabled, so enabling this option will disable changes to the lock category mask.</p></div></dd><dt><code>{process_locks, boolean()}</code></dt><dd>Profile process locks, equal to adding <code>process</code> to the lock category mask; see <code>lcnt:rt_mask/2</code><br/>Default: <code>true</code></dd></dl>
+  </section>
+</section>
+<section class="detail" id="save/1">
+
+  <div class="detail-header">
+    <a href="#save/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">save/1</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>save(Filename) -> ok when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>().</pre>
+
+      </div>
+
+<p>Saves the collected data to file.</p>
+  </section>
+</section>
+<section class="detail" id="start/0">
+
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start() -> {ok, Pid} | {error, {already_started, Pid}} when Pid :: pid().</pre>
+
+      </div>
+
+<p>Starts the lock profiler server. The server only act as a medium for the user and performs filtering and printing of data collected by <code>lcnt:collect/1</code>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop() -> ok.</pre>
+
+      </div>
+
+<p>Stops the lock profiler server.</p>
+  </section>
+</section>
+<section class="detail" id="swap_pid_keys/0">
+
+  <div class="detail-header">
+    <a href="#swap_pid_keys/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">swap_pid_keys/0</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>swap_pid_keys() -> ok.</pre>
+
+      </div>
+
+<p>Swaps places on <code>Name</code> and <code>Id</code> space for ports and processes.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

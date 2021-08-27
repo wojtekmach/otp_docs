@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>proc_lib — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+proc_lib <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module is used to start processes adhering to the OTP Design Principles. Specifically, the functions in this module are used by the OTP standard behaviors (for example, <code>gen_server</code> and <code>gen_statem</code>) when starting new processes. The functions can also be used to start <em>special processes</em>, user-defined processes that comply to the OTP design principles. For an example, see section sys and proc_lib in OTP Design Principles.</p><p>Some useful information is initialized when a process starts. The registered names, or the process identifiers, of the parent process, and the parent ancestors, are stored together with information about the function initially called in the process.</p><p>While in &quot;plain Erlang&quot;, a process is said to terminate normally only for exit reason <code>normal</code>, a process started using <code>proc_lib</code> is also said to terminate normally if it exits with reason <code>shutdown</code> or <code>{shutdown,Term}</code>. <code>shutdown</code> is the reason used when an application (supervision tree) is stopped.</p><p>When a process that is started using <code>proc_lib</code> terminates abnormally (that is, with another exit reason than <code>normal</code>, <code>shutdown</code>, or <code>{shutdown,Term}</code>), a <em>crash report</em> is generated, which is written to terminal by the default logger handler setup by Kernel. For more information about how crash reports were logged prior to Erlang/OTP 21.0, see SASL Error Logging in the SASL User's Guide.</p><p>Unlike in &quot;plain Erlang&quot;, <code>proc_lib</code> processes will not generate <em>error reports</em>, which are written to the terminal by the emulator. All exceptions are converted to <em>exits</em> which are ignored by the default <code>logger</code> handler.</p><p>The crash report contains the previously stored information, such as ancestors and initial function, the termination reason, and information about other processes that terminate as a result of this process terminating.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="https://wojtekmach.pl/otp_docs/kernel/error_logger.html"><code>error_logger(3)</code></a></p><p><a href="https://wojtekmach.pl/otp_docs/kernel/logger.html"><code>logger(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dict_or_pid/0">-type dict_or_pid() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:spawn_option/0">-type spawn_option() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>See <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/4"><code>erlang:spawn_opt/2,3,4,5</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:start_spawn_option/0">-type start_spawn_option() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A restricted set of <a href="proc_lib.html#t:spawn_option/0">spawn options</a>. Most notably <code>monitor</code> is <em>not</em> part of these options.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format/1">format/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="proc_lib.html#format/2"><code>format(CrashReport, latin1)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format/2">format/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><div class="note"><p>This function is deprecated in the sense that the <code>error_logger</code> is no longer the preferred interface for logging in Erlang/OTP. A new logging API was added in Erlang/OTP 21.0, but legacy <code>error_logger</code> handlers can still be used. New Logger handlers do not need to use this function, since the formatting callback (<code>report_cb</code>) is included as metadata in the log event.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format/3">format/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><div class="note"><p>This function is deprecated in the sense that the <code>error_logger</code> is no longer the preferred interface for logging in Erlang/OTP. A new logging API was added in Erlang/OTP 21.0, but legacy <code>error_logger</code> handlers can still be used. New Logger handlers do not need to used this function, since the formatting callback (<code>report_cb</code>) is included as metadata in the log event.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hibernate/3">hibernate/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function does the same as (and does call) the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#hibernate/3"><code>hibernate/3</code></a> BIF, but ensures that exception handling and logging continues to work as expected when the process wakes up.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init_ack/1">init_ack/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function must be used by a process that has been started by a <a href="proc_lib.html#start/3"><code>start[_link]/3,4,5</code></a> function. It tells <code>Parent</code> that the process has initialized itself, has started, or has failed to initialize itself.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init_ack/2">init_ack/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#initial_call/1">initial_call/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Extracts the initial call of a process that was started using one of the spawn or start functions in this module. <code>Process</code> can either be a pid, an integer tuple (from which a pid can be created), or the process information of a process <code>Pid</code> fetched through an <code>erlang:process_info(Pid)</code> function call.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/1">spawn/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn/1"><code>spawn</code></a> BIFs.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/2">spawn/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/3">spawn/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn/4">spawn/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_link/1">spawn_link/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_link/1"><code>spawn_link</code></a> BIFs.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_link/2">spawn_link/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_link/3">spawn_link/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_link/4">spawn_link/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_opt/2">spawn_opt/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/2"><code>erlang:spawn_opt</code></a> BIFs.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_opt/3">spawn_opt/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_opt/4">spawn_opt/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#spawn_opt/5">spawn_opt/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/3">start/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a new process synchronously. Spawns the process and waits for it to start. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/4">start/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/5">start/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/3">start_link/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a new process synchronously. Spawns the process and waits for it to start. A link is atomically set on the newly spawned process. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/4">start_link/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/5">start_link/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_monitor/3">start_monitor/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a new process synchronously. Spawns the process and waits for it to start. A monitor is atomically set on the newly spawned process. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_monitor/4">start_monitor/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_monitor/5">start_monitor/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="proc_lib.html#stop/3"><code>stop(Process, normal, infinity)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/3">stop/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Orders the process to exit with the specified <code>Reason</code> and waits for it to terminate.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#translate_initial_call/1">translate_initial_call/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function is used by functions <a href="c.html#i/0"><code>c:i/0</code></a> and <a href="c.html#regs/0"><code>c:regs/0</code></a> to present process information.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:dict_or_pid/0">
+
+  <div class="detail-header">
+    <a href="#t:dict_or_pid/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dict_or_pid() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dict_or_pid() :: pid() | (ProcInfo :: [_]) | {X :: integer(), Y :: integer(), Z :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:spawn_option/0">
+
+  <div class="detail-header">
+    <a href="#t:spawn_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type spawn_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_option() :: <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#t:spawn_opt_option/0">erlang:spawn_opt_option</a>().</pre>
+
+      </div>
+
+<p>See <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/4"><code>erlang:spawn_opt/2,3,4,5</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:start_spawn_option/0">
+
+  <div class="detail-header">
+    <a href="#t:start_spawn_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type start_spawn_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_spawn_option() ::
+    link |
+    {priority, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#t:priority_level/0">erlang:priority_level</a>()} |
+    {max_heap_size, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#t:max_heap_size/0">erlang:max_heap_size</a>()} |
+    {min_heap_size, non_neg_integer()} |
+    {min_bin_vheap_size, non_neg_integer()} |
+    {fullsweep_after, non_neg_integer()} |
+    {message_queue_data, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#t:message_queue_data/0">erlang:message_queue_data</a>()}.</pre>
+
+      </div>
+
+<p>A restricted set of <a href="proc_lib.html#t:spawn_option/0">spawn options</a>. Most notably <code>monitor</code> is <em>not</em> part of these options.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="format/1">
+
+  <div class="detail-header">
+    <a href="#format/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format(CrashReport) -> string() when CrashReport :: [term()].</pre>
+
+      </div>
+
+<p>Equivalent to <a href="proc_lib.html#format/2"><code>format(CrashReport, latin1)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="format/2">
+
+  <div class="detail-header">
+    <a href="#format/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format/2</h1>
+
+
+      <span class="note">(since OTP R16B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format(CrashReport, Encoding) -> string()
+          when CrashReport :: [term()], Encoding :: latin1 | unicode | utf8.</pre>
+
+      </div>
+
+<div class="note"><p>This function is deprecated in the sense that the <code>error_logger</code> is no longer the preferred interface for logging in Erlang/OTP. A new logging API was added in Erlang/OTP 21.0, but legacy <code>error_logger</code> handlers can still be used. New Logger handlers do not need to use this function, since the formatting callback (<code>report_cb</code>) is included as metadata in the log event.</p></div><p>This function can be used by a user-defined legacy <code>error_logger</code> event handler to format a crash report. The crash report is sent using <a href="https://wojtekmach.pl/otp_docs/kernel/logger.html"><code>logger(3)</code></a>, and the event to be handled is of the format <code>{error_report, GL, {Pid, crash_report, CrashReport}}</code>, where <code>GL</code> is the group leader pid of process <code>Pid</code> that sent the crash report.</p>
+  </section>
+</section>
+<section class="detail" id="format/3">
+
+  <div class="detail-header">
+    <a href="#format/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format/3</h1>
+
+
+      <span class="note">(since OTP 18.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format(CrashReport, Encoding, Depth) -> string()
+          when
+              CrashReport :: [term()],
+              Encoding :: latin1 | unicode | utf8,
+              Depth :: unlimited | pos_integer().</pre>
+
+      </div>
+
+<div class="note"><p>This function is deprecated in the sense that the <code>error_logger</code> is no longer the preferred interface for logging in Erlang/OTP. A new logging API was added in Erlang/OTP 21.0, but legacy <code>error_logger</code> handlers can still be used. New Logger handlers do not need to used this function, since the formatting callback (<code>report_cb</code>) is included as metadata in the log event.</p></div><p>This function can be used by a user-defined legacy <code>error_logger</code> event handler to format a crash report. When Depth is specified as a positive integer, it is used in the format string to limit the output as follows: <code>io_lib:format(&quot;~P&quot;, [Term,Depth])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="hibernate/3">
+
+  <div class="detail-header">
+    <a href="#hibernate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hibernate/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>hibernate(Module, Function, Args) -> no_return()
+             when Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+<p>This function does the same as (and does call) the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#hibernate/3"><code>hibernate/3</code></a> BIF, but ensures that exception handling and logging continues to work as expected when the process wakes up.</p><p>Always use this function instead of the BIF for processes started using <code>proc_lib</code> functions.</p>
+  </section>
+</section>
+<section class="detail" id="init_ack/1">
+
+  <div class="detail-header">
+    <a href="#init_ack/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init_ack/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>init_ack(Ret) -> ok when Ret :: term().</pre>
+
+      </div>
+
+<p>This function must be used by a process that has been started by a <a href="proc_lib.html#start/3"><code>start[_link]/3,4,5</code></a> function. It tells <code>Parent</code> that the process has initialized itself, has started, or has failed to initialize itself.</p><p>Function <code>init_ack/1</code> uses the parent value previously stored by the start function used.</p><p>If this function is not called, the start function returns an error tuple (if a link and/or a time-out is used) or hang otherwise.</p><p>The following example illustrates how this function and <code>proc_lib:start_link/3</code> are used:</p><pre><code type="none">-module(my_proc).
+-export([start_link/0]).
+-export([init/1]).
+
+start_link() -&gt;
+    proc_lib:start_link(my_proc, init, [self()]).
+
+init(Parent) -&gt;
+    case do_initialization() of
+        ok -&gt;
+            proc_lib:init_ack(Parent, {ok, self()});
+        {error, Reason} -&gt;
+            exit(Reason)
+    end,
+    loop().
+
+...</code></pre>
+  </section>
+</section>
+<section class="detail" id="init_ack/2">
+
+  <div class="detail-header">
+    <a href="#init_ack/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init_ack/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>init_ack(Parent, Ret) -> ok when Parent :: pid(), Ret :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="initial_call/1">
+
+  <div class="detail-header">
+    <a href="#initial_call/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">initial_call/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>initial_call(Process) -> {Module, Function, Args} | false
+                when
+                    Process :: <a href="#t:dict_or_pid/0">dict_or_pid</a>(),
+                    Module :: module(),
+                    Function :: atom(),
+                    Args :: [atom()].</pre>
+
+      </div>
+
+<p>Extracts the initial call of a process that was started using one of the spawn or start functions in this module. <code>Process</code> can either be a pid, an integer tuple (from which a pid can be created), or the process information of a process <code>Pid</code> fetched through an <code>erlang:process_info(Pid)</code> function call.</p><div class="note"><p>The list <code>Args</code> no longer contains the arguments, but the same number of atoms as the number of arguments; the first atom is <code>'Argument__1'</code>, the second <code>'Argument__2'</code>, and so on. The reason is that the argument list could waste a significant amount of memory, and if the argument list contained funs, it could be impossible to upgrade the code for the module.</p><p>If the process was spawned using a fun, <code>initial_call/1</code> no longer returns the fun, but the module, function for the local function implementing the fun, and the arity, for example, <code>{some_module,-work/3-fun-0-,0}</code> (meaning that the fun was created in function <code>some_module:work/3</code>). The reason is that keeping the fun would prevent code upgrade for the module, and that a significant amount of memory could be wasted.</p></div>
+  </section>
+</section>
+<section class="detail" id="spawn/1">
+
+  <div class="detail-header">
+    <a href="#spawn/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn(Fun) -> pid() when Fun :: function().</pre>
+
+      </div>
+
+<p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn/1"><code>spawn</code></a> BIFs.</p>
+  </section>
+</section>
+<section class="detail" id="spawn/2">
+
+  <div class="detail-header">
+    <a href="#spawn/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn(Node, Fun) -> pid() when Node :: node(), Fun :: function().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn/3">
+
+  <div class="detail-header">
+    <a href="#spawn/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn(Module, Function, Args) -> pid()
+         when Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn/4">
+
+  <div class="detail-header">
+    <a href="#spawn/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn(Node, Module, Function, Args) -> pid()
+         when Node :: node(), Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_link/1">
+
+  <div class="detail-header">
+    <a href="#spawn_link/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_link/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_link(Fun) -> pid() when Fun :: function().</pre>
+
+      </div>
+
+<p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_link/1"><code>spawn_link</code></a> BIFs.</p>
+  </section>
+</section>
+<section class="detail" id="spawn_link/2">
+
+  <div class="detail-header">
+    <a href="#spawn_link/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_link/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_link(Node, Fun) -> pid() when Node :: node(), Fun :: function().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_link/3">
+
+  <div class="detail-header">
+    <a href="#spawn_link/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_link/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_link(Module, Function, Args) -> pid()
+              when Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_link/4">
+
+  <div class="detail-header">
+    <a href="#spawn_link/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_link/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_link(Node, Module, Function, Args) -> pid()
+              when Node :: node(), Module :: module(), Function :: atom(), Args :: [term()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_opt/2">
+
+  <div class="detail-header">
+    <a href="#spawn_opt/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_opt/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_opt(Fun, SpawnOpts) -> pid() | {pid(), reference()}
+             when Fun :: function(), SpawnOpts :: [<a href="#t:spawn_option/0">spawn_option</a>()].</pre>
+
+      </div>
+
+<p>Spawns a new process and initializes it as described in the beginning of this manual page. The process is spawned using the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/2"><code>erlang:spawn_opt</code></a> BIFs.</p>
+  </section>
+</section>
+<section class="detail" id="spawn_opt/3">
+
+  <div class="detail-header">
+    <a href="#spawn_opt/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_opt/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_opt(Node, Function, SpawnOpts) -> pid() | {pid(), reference()}
+             when Node :: node(), Function :: function(), SpawnOpts :: [<a href="#t:spawn_option/0">spawn_option</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_opt/4">
+
+  <div class="detail-header">
+    <a href="#spawn_opt/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_opt/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_opt(Module, Function, Args, SpawnOpts) -> pid() | {pid(), reference()}
+             when
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 SpawnOpts :: [<a href="#t:spawn_option/0">spawn_option</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="spawn_opt/5">
+
+  <div class="detail-header">
+    <a href="#spawn_opt/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">spawn_opt/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>spawn_opt(Node, Module, Function, Args, SpawnOpts) -> pid() | {pid(), reference()}
+             when
+                 Node :: node(),
+                 Module :: module(),
+                 Function :: atom(),
+                 Args :: [term()],
+                 SpawnOpts :: [<a href="#t:spawn_option/0">spawn_option</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/3">
+
+  <div class="detail-header">
+    <a href="#start/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Module, Function, Args) -> Ret
+         when
+             Module :: module(),
+             Function :: atom(),
+             Args :: [term()],
+             Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Starts a new process synchronously. Spawns the process and waits for it to start. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p><p>If <code>Time</code> is specified as an integer, this function waits for <code>Time</code> milliseconds for the new process to call <code>init_ack</code>, or <code>Ret = {error, timeout}</code> will be returned, and the process is killed.</p><p>Argument <code>SpawnOpts</code>, if specified, is passed as the last argument to the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/2"><code>spawn_opt/2,3,4,5</code></a> BIF.</p><div class="note"><p>Using spawn option <code>monitor</code> is not allowed. It causes the function to fail with reason <code>badarg</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="start/4">
+
+  <div class="detail-header">
+    <a href="#start/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Module, Function, Args, Time) -> Ret
+         when
+             Module :: module(),
+             Function :: atom(),
+             Args :: [term()],
+             Time :: timeout(),
+             Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/5">
+
+  <div class="detail-header">
+    <a href="#start/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Module, Function, Args, Time, SpawnOpts) -> Ret
+         when
+             Module :: module(),
+             Function :: atom(),
+             Args :: [term()],
+             Time :: timeout(),
+             SpawnOpts :: [<a href="#t:start_spawn_option/0">start_spawn_option</a>()],
+             Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_link/3">
+
+  <div class="detail-header">
+    <a href="#start_link/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Module, Function, Args) -> Ret
+              when
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Starts a new process synchronously. Spawns the process and waits for it to start. A link is atomically set on the newly spawned process. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p><p>If <code>Time</code> is specified as an integer, this function waits for <code>Time</code> milliseconds for the new process to call <code>init_ack</code>, or <code>Ret = {error, timeout}</code> will be returned, and the process is killed.</p><p>If the process crashes before it has called <code>init_ack/1,2</code>, <code>Ret = {error, Reason}</code> will be returned if the calling process traps exits.</p><p>Argument <code>SpawnOpts</code>, if specified, is passed as the last argument to the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/2"><code>spawn_opt/2,3,4,5</code></a> BIF.</p><div class="note"><p>Using spawn option <code>monitor</code> is not allowed. It causes the function to fail with reason <code>badarg</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="start_link/4">
+
+  <div class="detail-header">
+    <a href="#start_link/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Module, Function, Args, Time) -> Ret
+              when
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Time :: timeout(),
+                  Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_link/5">
+
+  <div class="detail-header">
+    <a href="#start_link/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Module, Function, Args, Time, SpawnOpts) -> Ret
+              when
+                  Module :: module(),
+                  Function :: atom(),
+                  Args :: [term()],
+                  Time :: timeout(),
+                  SpawnOpts :: [<a href="#t:start_spawn_option/0">start_spawn_option</a>()],
+                  Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_monitor/3">
+
+  <div class="detail-header">
+    <a href="#start_monitor/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_monitor/3</h1>
+
+
+      <span class="note">(since OTP 23.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_monitor(Module, Function, Args) -> {Ret, Mon}
+                 when
+                     Module :: module(),
+                     Function :: atom(),
+                     Args :: [term()],
+                     Mon :: reference(),
+                     Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Starts a new process synchronously. Spawns the process and waits for it to start. A monitor is atomically set on the newly spawned process. When the process has started, it <em>must</em> call <a href="proc_lib.html#init_ack/2"><code>init_ack(Parent, Ret)</code></a> or <a href="proc_lib.html#init_ack/1"><code>init_ack(Ret)</code></a>, where <code>Parent</code> is the process that evaluates this function. At this time, <code>Ret</code> is returned.</p><p>If <code>Time</code> is specified as an integer, this function waits for <code>Time</code> milliseconds for the new process to call <code>init_ack</code>, or <code>Ret = {error, timeout}</code> will be returned, and the process is killed.</p><p>The return value is <code>{Ret, Mon}</code> where <code>Ret</code> corresponds to the <code>Ret</code> argument in the call to <code>init_ack()</code>, and <code>Mon</code> is the monitor reference of the monitor that has been set up.</p><p>A <code>'DOWN'</code> message will be delivered to the caller if this function returns, and the spawned process terminates. This is true also in the case when the operation times out.</p><p>Argument <code>SpawnOpts</code>, if specified, is passed as the last argument to the <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#spawn_opt/2"><code>spawn_opt/2,3,4,5</code></a> BIF.</p><div class="note"><p>Using spawn option <code>monitor</code> is not allowed. It causes the function to fail with reason <code>badarg</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="start_monitor/4">
+
+  <div class="detail-header">
+    <a href="#start_monitor/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_monitor/4</h1>
+
+
+      <span class="note">(since OTP 23.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_monitor(Module, Function, Args, Time) -> {Ret, Mon}
+                 when
+                     Module :: module(),
+                     Function :: atom(),
+                     Args :: [term()],
+                     Time :: timeout(),
+                     Mon :: reference(),
+                     Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_monitor/5">
+
+  <div class="detail-header">
+    <a href="#start_monitor/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_monitor/5</h1>
+
+
+      <span class="note">(since OTP 23.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_monitor(Module, Function, Args, Time, SpawnOpts) -> {Ret, Mon}
+                 when
+                     Module :: module(),
+                     Function :: atom(),
+                     Args :: [term()],
+                     Time :: timeout(),
+                     SpawnOpts :: [<a href="#t:start_spawn_option/0">start_spawn_option</a>()],
+                     Mon :: reference(),
+                     Ret :: term() | {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="stop/1">
+
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Process) -> ok when Process :: pid() | RegName | {RegName, node()}, RegName :: atom().</pre>
+
+      </div>
+
+<p>Equivalent to <a href="proc_lib.html#stop/3"><code>stop(Process, normal, infinity)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/3">
+
+  <div class="detail-header">
+    <a href="#stop/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/3</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Process, Reason, Timeout) -> ok
+        when
+            Process :: pid() | RegName | {RegName, node()},
+            RegName :: atom(),
+            Reason :: term(),
+            Timeout :: timeout().</pre>
+
+      </div>
+
+<p>Orders the process to exit with the specified <code>Reason</code> and waits for it to terminate.</p><p>Returns <code>ok</code> if the process exits with the specified <code>Reason</code> within <code>Timeout</code> milliseconds.</p><p>If the call times out, a <code>timeout</code> exception is raised.</p><p>If the process does not exist, a <code>noproc</code> exception is raised.</p><p>The implementation of this function is based on the <code>terminate</code> system message, and requires that the process handles system messages correctly. For information about system messages, see <a href="sys.html"><code>sys(3)</code></a> and section sys and proc_lib in OTP Design Principles.</p>
+  </section>
+</section>
+<section class="detail" id="translate_initial_call/1">
+
+  <div class="detail-header">
+    <a href="#translate_initial_call/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">translate_initial_call/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>translate_initial_call(Process) -> {Module, Function, Arity}
+                          when
+                              Process :: <a href="#t:dict_or_pid/0">dict_or_pid</a>(),
+                              Module :: module(),
+                              Function :: atom(),
+                              Arity :: byte().</pre>
+
+      </div>
+
+<p>This function is used by functions <a href="c.html#i/0"><code>c:i/0</code></a> and <a href="c.html#regs/0"><code>c:regs/0</code></a> to present process information.</p><p>This function extracts the initial call of a process that was started using one of the spawn or start functions in this module, and translates it to more useful information. <code>Process</code> can either be a pid, an integer tuple (from which a pid can be created), or the process information of a process <code>Pid</code> fetched through an <code>erlang:process_info(Pid)</code> function call.</p><p>If the initial call is to one of the system-defined behaviors such as <code>gen_server</code> or <code>gen_event</code>, it is translated to more useful information. If a <code>gen_server</code> is spawned, the returned <code>Module</code> is the name of the callback module and <code>Function</code> is <code>init</code> (the function that initiates the new server).</p><p>A <code>supervisor</code> and a <code>supervisor_bridge</code> are also <code>gen_server</code> processes. To return information that this process is a supervisor and the name of the callback module, <code>Module</code> is <code>supervisor</code> and <code>Function</code> is the name of the supervisor callback module. <code>Arity</code> is <code>1</code>, as the <code>init/1</code> function is called initially in the callback module.</p><p>By default, <code>{proc_lib,init_p,5}</code> is returned if no information about the initial call can be found. It is assumed that the caller knows that the process has been spawned with the <code>proc_lib</code> module.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

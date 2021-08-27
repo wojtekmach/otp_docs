@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>string — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+string <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for string processing.</p><p>A string in this module is represented by <a href="unicode.html#t:chardata/0"><code>unicode:chardata()</code></a>, that is, a list of codepoints, binaries with UTF-8-encoded codepoints (<em>UTF-8 binaries</em>), or a mix of the two.</p><pre><code class="makeup erlang"><span class="s">&quot;abcd&quot;</span><span class="w">               </span><span class="ss">is</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;abcd&quot;</span><span class="p">&gt;&gt;</span><span class="w">           </span><span class="ss">is</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="w">
+</span><span class="p" data-group-id="1399345719-1">[</span><span class="s">&quot;abcd&quot;</span><span class="p" data-group-id="1399345719-1">]</span><span class="w">             </span><span class="ss">is</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc..åäö&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="w">  </span><span class="ss">is</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc..åäö&quot;</span><span class="p">&gt;&gt;</span><span class="w">       </span><span class="ss">is</span><span class="w"> </span><span class="n">NOT</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="p">,</span><span class="w">
+                     </span><span class="ss">but</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">binary</span><span class="w"> </span><span class="ss">with</span><span class="w"> </span><span class="n">Latin</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="ss">encoded</span><span class="w"> </span><span class="ss">codepoints</span><span class="w">
+</span><span class="p" data-group-id="1399345719-2">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..åäö&quot;</span><span class="p" data-group-id="1399345719-2">]</span><span class="w"> </span><span class="ss">is</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span><span class="w">
+</span><span class="p" data-group-id="1399345719-3">[</span><span class="ss">atom</span><span class="p" data-group-id="1399345719-3">]</span><span class="w">               </span><span class="ss">is</span><span class="w"> </span><span class="n">NOT</span><span class="w"> </span><span class="ss">a</span><span class="w"> </span><span class="ss">valid</span><span class="w"> </span><span class="ss">string</span></code></pre><p>This module operates on grapheme clusters. A <em>grapheme cluster</em> is a user-perceived character, which can be represented by several codepoints.</p><pre><code class="makeup erlang"><span class="s">&quot;å&quot;</span><span class="w">  </span><span class="p" data-group-id="4549420502-1">[</span><span class="mi">229</span><span class="p" data-group-id="4549420502-1">]</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p" data-group-id="4549420502-2">[</span><span class="mi">97</span><span class="p">,</span><span class="w"> </span><span class="mi">778</span><span class="p" data-group-id="4549420502-2">]</span><span class="w">
+</span><span class="s">&quot;e̊&quot;</span><span class="w">  </span><span class="p" data-group-id="4549420502-3">[</span><span class="mi">101</span><span class="p">,</span><span class="w"> </span><span class="mi">778</span><span class="p" data-group-id="4549420502-3">]</span></code></pre><p>The string length of &quot;ß↑e̊&quot; is 3, even though it is represented by the codepoints <code>[223,8593,101,778]</code> or the UTF-8 binary <code>&lt;&lt;195,159,226,134,145,101,204,138&gt;&gt;</code>.</p><p>Grapheme clusters for codepoints of class <code>prepend</code> and non-modern (or decomposed) Hangul is not handled for performance reasons in <a href="string.html#find/3"><code>find/3</code></a>, <a href="string.html#replace/3"><code>replace/3</code></a>, <a href="string.html#split/2"><code>split/2</code></a>, <a href="string.html#lexemes/2"><code>split/2</code></a> and <a href="string.html#trim/3"><code>trim/3</code></a>.</p><p>Splitting and appending strings is to be done on grapheme clusters borders. There is no verification that the results of appending strings are valid or normalized.</p><p>Most of the functions expect all input to be normalized to one form, see for example <a href="unicode.html#characters_to_nfc_list/1"><code>unicode:characters_to_nfc_list/1</code></a>.</p><p>Language or locale specific handling of input is not considered in any function.</p><p>The functions can crash for non-valid input strings. For example, the functions expect UTF-8 binaries but not all functions verify that all binaries are encoded correctly.</p><p>Unless otherwise specified the return value type is the same as the input type. That is, binary input returns binary output, list input returns a list output, and mixed input can return a mixed output.</p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">trim</span><span class="p" data-group-id="6156996379-1">(</span><span class="s">&quot;  sarah  &quot;</span><span class="p" data-group-id="6156996379-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;sarah&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">trim</span><span class="p" data-group-id="6156996379-2">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;  sarah  &quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="6156996379-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;sarah&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">lexemes</span><span class="p" data-group-id="6156996379-3">(</span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p" data-group-id="6156996379-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6156996379-4">[</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="s">&quot;bar&quot;</span><span class="p" data-group-id="6156996379-4">]</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">lexemes</span><span class="p" data-group-id="6156996379-5">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo bar&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p" data-group-id="6156996379-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6156996379-6">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;foo&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;bar&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="6156996379-6">]</span></code></pre><p>This module has been reworked in Erlang/OTP 20 to handle <a href="unicode.html#t:chardata/0"><code>unicode:chardata()</code></a> and operate on grapheme clusters. The <a href="string.html#content#oldapi"><code>old functions</code></a> that only work on Latin-1 lists as input are still available but should not be used, they will be deprecated in a future release.</p><h2 id="module-notes" class="section-heading">
+  <a href="#module-notes" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Notes
+</h2>
+<p>Some of the general string functions can seem to overlap each other. The reason is that this string package is the combination of two earlier packages and all functions of both packages have been retained.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:direction/0">-type direction() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A user-perceived character, consisting of one or more codepoints.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:grapheme_cluster/0">-type grapheme_cluster() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A user-perceived character, consisting of one or more codepoints.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#casefold/1">casefold/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>String</code> to a case-agnostic comparable string. Function <code>casefold/1</code> is preferred over <code>lowercase/1</code> when two strings are to be compared for equality. See also <a href="string.html#equal/4"><code>equal/4</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#centre/2">centre/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string, where <code>String</code> is centered in the string and surrounded by blanks or <code>Character</code>. The resulting string has length <code>Number</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#centre/3">centre/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chars/2">chars/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string consisting of <code>Number</code> characters <code>Character</code>. Optionally, the string can end with string <code>Tail</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chars/3">chars/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chomp/1">chomp/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string where any trailing <code>\n</code> or <code>\r\n</code> have been removed from <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chr/2">chr/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the index of the first occurrence of <code>Character</code> in <code>String</code>. Returns <code>0</code> if <code>Character</code> does not occur.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#concat/2">concat/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Concatenates <code>String1</code> and <code>String2</code> to form a new string <code>String3</code>, which is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#copies/2">copies/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string containing <code>String</code> repeated <code>Number</code> times.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cspan/2">cspan/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the length of the maximum initial segment of <code>String</code>, which consists entirely of characters not from <code>Chars</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/2">equal/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>A</code> and <code>B</code> are equal, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/3">equal/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#equal/4">equal/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find/2">find/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes anything before <code>SearchPattern</code> in <code>String</code> and returns the remainder of the string or <code>nomatch</code> if <code>SearchPattern</code> is not found. <code>Dir</code>, which can be <code>leading</code> or <code>trailing</code>, indicates from which direction characters are to be searched.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find/3">find/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_empty/1">is_empty/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>String</code> is the empty string, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/2">join/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string with the elements of <code>StringList</code> separated by the string in <code>Separator</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#left/2">left/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>String</code> with the length adjusted in accordance with <code>Number</code>. The left margin is fixed. If <code>length(String)</code> &lt; <code>Number</code>, then <code>String</code> is padded with blanks or <code>Character</code>s.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#left/3">left/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#len/1">len/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the number of characters in <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#length/1">length/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the number of grapheme clusters in <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lexemes/2">lexemes/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list of lexemes in <code>String</code>, separated by the grapheme clusters in <code>SeparatorList</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lowercase/1">lowercase/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>String</code> to lowercase.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_codepoint/1">next_codepoint/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the first codepoint in <code>String</code> and the rest of <code>String</code> in the tail. Returns an empty list if <code>String</code> is empty or an <code>{error, String}</code> tuple if the next byte is invalid.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next_grapheme/1">next_grapheme/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the first grapheme cluster in <code>String</code> and the rest of <code>String</code> in the tail. Returns an empty list if <code>String</code> is empty or an <code>{error, String}</code> tuple if the next byte is invalid.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nth_lexeme/3">nth_lexeme/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns lexeme number <code>N</code> in <code>String</code>, where lexemes are separated by the grapheme clusters in <code>SeparatorList</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/2">pad/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pads <code>String</code> to <code>Length</code> with grapheme cluster <code>Char</code>. <code>Dir</code>, which can be <code>leading</code>, <code>trailing</code>, or <code>both</code>, indicates where the padding should be added.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/3">pad/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pad/4">pad/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prefix/2">prefix/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If <code>Prefix</code> is the prefix of <code>String</code>, removes it and returns the remainder of <code>String</code>, otherwise returns <code>nomatch</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rchr/2">rchr/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the index of the last occurrence of <code>Character</code> in <code>String</code>. Returns <code>0</code> if <code>Character</code> does not occur.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/3">replace/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Replaces <code>SearchPattern</code> in <code>String</code> with <code>Replacement</code>. <code>Where</code>, default <code>leading</code>, indicates whether the <code>leading</code>, the <code>trailing</code> or <code>all</code> encounters of <code>SearchPattern</code> are to be replaced.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/4">replace/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reverse/1">reverse/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the reverse list of the grapheme clusters in <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#right/2">right/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>String</code> with the length adjusted in accordance with <code>Number</code>. The right margin is fixed. If the length of <code>(String)</code> &lt; <code>Number</code>, then <code>String</code> is padded with blanks or <code>Character</code>s.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#right/3">right/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rstr/2">rstr/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the position where the last occurrence of <code>SubString</code> begins in <code>String</code>. Returns <code>0</code> if <code>SubString</code> does not exist in <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#slice/2">slice/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a substring of <code>String</code> of at most <code>Length</code> grapheme clusters, starting at position <code>Start</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#slice/3">slice/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#span/2">span/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the length of the maximum initial segment of <code>String</code>, which consists entirely of characters from <code>Chars</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/2">split/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Splits <code>String</code> where <code>SearchPattern</code> is encountered and return the remaining parts. <code>Where</code>, default <code>leading</code>, indicates whether the <code>leading</code>, the <code>trailing</code> or <code>all</code> encounters of <code>SearchPattern</code> will split <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/3">split/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#str/2">str/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the position where the first occurrence of <code>SubString</code> begins in <code>String</code>. Returns <code>0</code> if <code>SubString</code> does not exist in <code>String</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/1">strip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, blanks or a number of <code>Character</code> have been removed. <code>Direction</code>, which can be <code>left</code>, <code>right</code>, or <code>both</code>, indicates from which direction blanks are to be removed. <code>strip/1</code> is equivalent to <code>strip(String, both)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/2">strip/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/3">strip/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_string/2">sub_string/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a substring of <code>String</code>, starting at position <code>Start</code> to the end of the string, or to and including position <code>Stop</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_string/3">sub_string/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_word/2">sub_word/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the word in position <code>Number</code> of <code>String</code>. Words are separated by blanks or <code>Character</code>s.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sub_word/3">sub_word/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#substr/2">substr/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a substring of <code>String</code>, starting at position <code>Start</code>, and ending at the end of the string or at length <code>Length</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#substr/3">substr/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/2">take/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Takes characters from <code>String</code> as long as the characters are members of set <code>Characters</code> or the complement of set <code>Characters</code>. <code>Dir</code>, which can be <code>leading</code> or <code>trailing</code>, indicates from which direction characters are to be taken.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/3">take/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/4">take/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#titlecase/1">titlecase/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>String</code> to titlecase.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_float/1">to_float/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Argument <code>String</code> is expected to start with a valid text represented float (the digits are ASCII values). Remaining characters in the string after the float are returned in <code>Rest</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_graphemes/1">to_graphemes/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>String</code> to a list of grapheme clusters.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_integer/1">to_integer/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Argument <code>String</code> is expected to start with a valid text represented integer (the digits are ASCII values). Remaining characters in the string after the integer are returned in <code>Rest</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_lower/1">to_lower/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_upper/1">to_upper/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tokens/2">tokens/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list of tokens in <code>String</code>, separated by the characters in <code>SeparatorList</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/1">trim/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a string, where leading or trailing, or both, <code>Characters</code> have been removed. <code>Dir</code> which can be <code>leading</code>, <code>trailing</code>, or <code>both</code>, indicates from which direction characters are to be removed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/2">trim/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trim/3">trim/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uppercase/1">uppercase/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>String</code> to uppercase.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#words/1">words/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the number of words in <code>String</code>, separated by blanks or <code>Character</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#words/2">words/2</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:direction/0">
+
+  <div class="detail-header">
+    <a href="#t:direction/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type direction() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>direction() :: leading | trailing.</pre>
+
+      </div>
+
+<p>A user-perceived character, consisting of one or more codepoints.</p>
+  </section>
+</section>
+<section class="detail" id="t:grapheme_cluster/0">
+
+  <div class="detail-header">
+    <a href="#t:grapheme_cluster/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type grapheme_cluster() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>grapheme_cluster() :: char() | [char()].</pre>
+
+      </div>
+
+<p>A user-perceived character, consisting of one or more codepoints.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="casefold/1">
+
+  <div class="detail-header">
+    <a href="#casefold/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">casefold/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>casefold(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Converts <code>String</code> to a case-agnostic comparable string. Function <code>casefold/1</code> is preferred over <code>lowercase/1</code> when two strings are to be compared for equality. See also <a href="string.html#equal/4"><code>equal/4</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">casefold</span><span class="p" data-group-id="9322490662-1">(</span><span class="s">&quot;Ω and ẞ SHARP S&quot;</span><span class="p" data-group-id="9322490662-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;ω and ss sharp s&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="centre/2">
+
+  <div class="detail-header">
+    <a href="#centre/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">centre/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>centre(String, Number) -> Centered
+          when String :: string(), Centered :: string(), Number :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns a string, where <code>String</code> is centered in the string and surrounded by blanks or <code>Character</code>. The resulting string has length <code>Number</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#pad/3"><code>pad/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="centre/3">
+
+  <div class="detail-header">
+    <a href="#centre/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">centre/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>centre(String, Number, Character) -> Centered
+          when
+              String :: string(),
+              Centered :: string(),
+              Number :: non_neg_integer(),
+              Character :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="chars/2">
+
+  <div class="detail-header">
+    <a href="#chars/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chars/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chars(Character, Number) -> String
+         when Character :: char(), Number :: non_neg_integer(), String :: string().</pre>
+
+      </div>
+
+<p>Returns a string consisting of <code>Number</code> characters <code>Character</code>. Optionally, the string can end with string <code>Tail</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="lists.html#duplicate/2"><code>lists:duplicate/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="chars/3">
+
+  <div class="detail-header">
+    <a href="#chars/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chars/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chars(Character, Number, Tail) -> String
+         when
+             Character :: char(),
+             Number :: non_neg_integer(),
+             Tail :: string(),
+             String :: string().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="chomp/1">
+
+  <div class="detail-header">
+    <a href="#chomp/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chomp/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chomp(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Returns a string where any trailing <code>\n</code> or <code>\r\n</code> have been removed from <code>String</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">182</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">chomp</span><span class="p" data-group-id="2546959634-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;\nHello\n\n&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2546959634-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;\nHello&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">183</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">chomp</span><span class="p" data-group-id="2546959634-2">(</span><span class="s">&quot;\nHello\r\r\n&quot;</span><span class="p" data-group-id="2546959634-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;\nHello\r&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="chr/2">
+
+  <div class="detail-header">
+    <a href="#chr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chr/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chr(String, Character) -> Index
+       when String :: string(), Character :: char(), Index :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the index of the first occurrence of <code>Character</code> in <code>String</code>. Returns <code>0</code> if <code>Character</code> does not occur.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#find/2"><code>find/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="concat/2">
+
+  <div class="detail-header">
+    <a href="#concat/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">concat/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>concat(String1, String2) -> String3
+          when String1 :: string(), String2 :: string(), String3 :: string().</pre>
+
+      </div>
+
+<p>Concatenates <code>String1</code> and <code>String2</code> to form a new string <code>String3</code>, which is returned.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <code>[String1, String2]</code> as <code>Data</code> argument, and call <a href="unicode.html#characters_to_list/2"><code>unicode:characters_to_list/2</code></a> or <a href="unicode.html#characters_to_binary/2"><code>unicode:characters_to_binary/2</code></a> to flatten the output.</p>
+  </section>
+</section>
+<section class="detail" id="copies/2">
+
+  <div class="detail-header">
+    <a href="#copies/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">copies/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>copies(String, Number) -> Copies
+          when String :: string(), Copies :: string(), Number :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns a string containing <code>String</code> repeated <code>Number</code> times.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="lists.html#duplicate/2"><code>lists:duplicate/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="cspan/2">
+
+  <div class="detail-header">
+    <a href="#cspan/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cspan/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>cspan(String, Chars) -> Length
+         when String :: string(), Chars :: string(), Length :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the length of the maximum initial segment of <code>String</code>, which consists entirely of characters not from <code>Chars</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#take/3"><code>take/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:cspan(&quot;\t    abcdef&quot;, &quot; \t&quot;).
+0</code></pre>
+  </section>
+</section>
+<section class="detail" id="equal/2">
+
+  <div class="detail-header">
+    <a href="#equal/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>equal(A, B) -> boolean() when A :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), B :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>A</code> and <code>B</code> are equal, otherwise <code>false</code>.</p><p>If <code>IgnoreCase</code> is <code>true</code> the function does <a href="string.html#casefold/1"><code>casefold</code>ing</a> on the fly before the equality test.</p><p>If <code>Norm</code> is not <code>none</code> the function applies normalization on the fly before the equality test. There are four available normalization forms: <a href="unicode.html#characters_to_nfc_list/1"><code>nfc</code></a>, <a href="unicode.html#characters_to_nfd_list/1"><code>nfd</code></a>, <a href="unicode.html#characters_to_nfkc_list/1"><code>nfkc</code></a>, and <a href="unicode.html#characters_to_nfkd_list/1"><code>nfkd</code></a>.</p><p>By default, <code>IgnoreCase</code> is <code>false</code> and <code>Norm</code> is <code>none</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">equal</span><span class="p" data-group-id="5193901839-1">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;åäö&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="5193901839-1">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">true</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">equal</span><span class="p" data-group-id="5193901839-2">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">unicode</span><span class="p">:</span><span class="nf">characters_to_nfd_binary</span><span class="p" data-group-id="5193901839-3">(</span><span class="s">&quot;åäö&quot;</span><span class="p" data-group-id="5193901839-3">)</span><span class="p" data-group-id="5193901839-2">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">false</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">equal</span><span class="p" data-group-id="5193901839-4">(</span><span class="s">&quot;åäö&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">unicode</span><span class="p">:</span><span class="nf">characters_to_nfd_binary</span><span class="p" data-group-id="5193901839-5">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="5193901839-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="ss">nfc</span><span class="p" data-group-id="5193901839-4">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="equal/3">
+
+  <div class="detail-header">
+    <a href="#equal/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>equal(A, B, IgnoreCase) -> boolean()
+         when A :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), B :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), IgnoreCase :: boolean().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="equal/4">
+
+  <div class="detail-header">
+    <a href="#equal/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">equal/4</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>equal(A, B, IgnoreCase, Norm) -> boolean()
+         when
+             A :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+             B :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+             IgnoreCase :: boolean(),
+             Norm :: none | nfc | nfd | nfkc | nfkd.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="find/2">
+
+  <div class="detail-header">
+    <a href="#find/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>find(String, SearchPattern) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>() | nomatch
+        when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Removes anything before <code>SearchPattern</code> in <code>String</code> and returns the remainder of the string or <code>nomatch</code> if <code>SearchPattern</code> is not found. <code>Dir</code>, which can be <code>leading</code> or <code>trailing</code>, indicates from which direction characters are to be searched.</p><p>By default, <code>Dir</code> is <code>leading</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">find</span><span class="p" data-group-id="0488055273-1">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="p" data-group-id="0488055273-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;..cd..ef&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">find</span><span class="p" data-group-id="0488055273-2">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p" data-group-id="0488055273-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;..ef&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">find</span><span class="p" data-group-id="0488055273-3">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">leading</span><span class="p" data-group-id="0488055273-3">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">nomatch</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">find</span><span class="p" data-group-id="0488055273-4">(</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p" data-group-id="0488055273-4">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">nomatch</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="find/3">
+
+  <div class="detail-header">
+    <a href="#find/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>find(String, SearchPattern, Dir) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>() | nomatch
+        when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Dir :: <a href="#t:direction/0">direction</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="is_empty/1">
+
+  <div class="detail-header">
+    <a href="#is_empty/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_empty/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_empty(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> boolean().</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>String</code> is the empty string, otherwise <code>false</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">is_empty</span><span class="p" data-group-id="2216845189-1">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="2216845189-1">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">false</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">is_empty</span><span class="p" data-group-id="2216845189-2">(</span><span class="p" data-group-id="2216845189-3">[</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2216845189-3">]</span><span class="p" data-group-id="2216845189-2">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">true</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="join/2">
+
+  <div class="detail-header">
+    <a href="#join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>join(StringList, Separator) -> String
+        when StringList :: [string()], Separator :: string(), String :: string().</pre>
+
+      </div>
+
+<p>Returns a string with the elements of <code>StringList</code> separated by the string in <code>Separator</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="lists.html#join/2"><code>lists:join/2</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; join([&quot;one&quot;, &quot;two&quot;, &quot;three&quot;], &quot;, &quot;).
+&quot;one, two, three&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="left/2">
+
+  <div class="detail-header">
+    <a href="#left/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">left/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>left(String, Number) -> Left
+        when String :: string(), Left :: string(), Number :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns <code>String</code> with the length adjusted in accordance with <code>Number</code>. The left margin is fixed. If <code>length(String)</code> &lt; <code>Number</code>, then <code>String</code> is padded with blanks or <code>Character</code>s.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#pad/2"><code>pad/2</code></a> or <a href="string.html#pad/3"><code>pad/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:left(&quot;Hello&quot;,10,$.).
+&quot;Hello.....&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="left/3">
+
+  <div class="detail-header">
+    <a href="#left/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">left/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>left(String, Number, Character) -> Left
+        when
+            String :: string(), Left :: string(), Number :: non_neg_integer(), Character :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="len/1">
+
+  <div class="detail-header">
+    <a href="#len/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">len/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>len(String) -> Length when String :: string(), Length :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the number of characters in <code>String</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#length/1"><code>length/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="length/1">
+
+  <div class="detail-header">
+    <a href="#length/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">length/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>length(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the number of grapheme clusters in <code>String</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">length</span><span class="p" data-group-id="2275951189-1">(</span><span class="s">&quot;ß↑e̊&quot;</span><span class="p" data-group-id="2275951189-1">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">3</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">length</span><span class="p" data-group-id="2275951189-2">(</span><span class="p">&lt;&lt;</span><span class="mi">195</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mi">226</span><span class="p">,</span><span class="mi">134</span><span class="p">,</span><span class="mi">145</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2275951189-2">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">3</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="lexemes/2">
+
+  <div class="detail-header">
+    <a href="#lexemes/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lexemes/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lexemes(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), SeparatorList :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()]) ->
+           [<a href="unicode.html#t:chardata/0">unicode:chardata</a>()].</pre>
+
+      </div>
+
+<p>Returns a list of lexemes in <code>String</code>, separated by the grapheme clusters in <code>SeparatorList</code>.</p><p>Notice that, as shown in this example, two or more adjacent separator graphemes clusters in <code>String</code> are treated as one. That is, there are no empty strings in the resulting list of lexemes. See also <a href="string.html#split/3"><code>split/3</code></a> which returns empty strings.</p><p>Notice that <code>[$\r,$\n]</code> is one grapheme cluster.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">lexemes</span><span class="p" data-group-id="2666625646-1">(</span><span class="s">&quot;abc de̊fxxghix jkl\r\nfoo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x e&quot;</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p" data-group-id="2666625646-2">[</span><span class="p" data-group-id="2666625646-3">[</span><span class="sc">$\</span><span class="ss">r</span><span class="p">,</span><span class="sc">$\</span><span class="ss">n</span><span class="p" data-group-id="2666625646-3">]</span><span class="p" data-group-id="2666625646-2">]</span><span class="p" data-group-id="2666625646-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2666625646-4">[</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;de̊f&quot;</span><span class="p">,</span><span class="s">&quot;ghi&quot;</span><span class="p">,</span><span class="s">&quot;jkl&quot;</span><span class="p">,</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="2666625646-4">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">lexemes</span><span class="p" data-group-id="2666625646-5">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc de̊fxxghix jkl\r\nfoo&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x e&quot;</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p" data-group-id="2666625646-6">[</span><span class="sc">$\</span><span class="ss">r</span><span class="p">,</span><span class="sc">$\</span><span class="ss">n</span><span class="p" data-group-id="2666625646-6">]</span><span class="p" data-group-id="2666625646-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2666625646-7">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;de̊f&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;ghi&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;jkl\r\nfoo&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="2666625646-7">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="lowercase/1">
+
+  <div class="detail-header">
+    <a href="#lowercase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lowercase/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lowercase(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Converts <code>String</code> to lowercase.</p><p>Notice that function <a href="string.html#casefold/1"><code>casefold/1</code></a> should be used when converting a string to be tested for equality.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">lowercase</span><span class="p" data-group-id="9440263591-1">(</span><span class="nc">string</span><span class="p">:</span><span class="nf">uppercase</span><span class="p" data-group-id="9440263591-2">(</span><span class="s">&quot;Michał&quot;</span><span class="p" data-group-id="9440263591-2">)</span><span class="p" data-group-id="9440263591-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;michał&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="next_codepoint/1">
+
+  <div class="detail-header">
+    <a href="#next_codepoint/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_codepoint/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>next_codepoint(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) ->
+                  maybe_improper_list(char(), <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) | {error, <a href="unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Returns the first codepoint in <code>String</code> and the rest of <code>String</code> in the tail. Returns an empty list if <code>String</code> is empty or an <code>{error, String}</code> tuple if the next byte is invalid.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">next_codepoint</span><span class="p" data-group-id="4466492525-1">(</span><span class="nc">unicode</span><span class="p">:</span><span class="nf">characters_to_binary</span><span class="p" data-group-id="4466492525-2">(</span><span class="s">&quot;e̊fg&quot;</span><span class="p" data-group-id="4466492525-2">)</span><span class="p" data-group-id="4466492525-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4466492525-3">[</span><span class="mi">101</span><span class="p">|</span><span class="p">&lt;&lt;</span><span class="s">&quot;̊fg&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="4466492525-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="next_grapheme/1">
+
+  <div class="detail-header">
+    <a href="#next_grapheme/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next_grapheme/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>next_grapheme(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) ->
+                 maybe_improper_list(<a href="#t:grapheme_cluster/0">grapheme_cluster</a>(), <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) |
+                 {error, <a href="unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Returns the first grapheme cluster in <code>String</code> and the rest of <code>String</code> in the tail. Returns an empty list if <code>String</code> is empty or an <code>{error, String}</code> tuple if the next byte is invalid.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">next_grapheme</span><span class="p" data-group-id="7962536529-1">(</span><span class="nc">unicode</span><span class="p">:</span><span class="nf">characters_to_binary</span><span class="p" data-group-id="7962536529-2">(</span><span class="s">&quot;e̊fg&quot;</span><span class="p" data-group-id="7962536529-2">)</span><span class="p" data-group-id="7962536529-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="7962536529-3">[</span><span class="s">&quot;e̊&quot;</span><span class="p">|</span><span class="p">&lt;&lt;</span><span class="s">&quot;fg&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="7962536529-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="nth_lexeme/3">
+
+  <div class="detail-header">
+    <a href="#nth_lexeme/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nth_lexeme/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>nth_lexeme(String, N, SeparatorList) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>()
+              when
+                  String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+                  N :: non_neg_integer(),
+                  SeparatorList :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].</pre>
+
+      </div>
+
+<p>Returns lexeme number <code>N</code> in <code>String</code>, where lexemes are separated by the grapheme clusters in <code>SeparatorList</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">nth_lexeme</span><span class="p" data-group-id="2114361078-1">(</span><span class="s">&quot;abc.de̊f.ghiejkl&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.e&quot;</span><span class="p" data-group-id="2114361078-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;ghi&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pad/2">
+
+  <div class="detail-header">
+    <a href="#pad/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pad(String, Length) -> <a href="unicode.html#t:charlist/0">unicode:charlist</a>() when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Length :: integer().</pre>
+
+      </div>
+
+<p>Pads <code>String</code> to <code>Length</code> with grapheme cluster <code>Char</code>. <code>Dir</code>, which can be <code>leading</code>, <code>trailing</code>, or <code>both</code>, indicates where the padding should be added.</p><p>By default, <code>Char</code> is <code>$\s</code> and <code>Dir</code> is <code>trailing</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">pad</span><span class="p" data-group-id="4587439666-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;He̊llö&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p" data-group-id="4587439666-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4587439666-2">[</span><span class="p">&lt;&lt;</span><span class="mi">72</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">138</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">108</span><span class="p">,</span><span class="mi">195</span><span class="p">,</span><span class="mi">182</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">32</span><span class="p" data-group-id="4587439666-2">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">io</span><span class="p">:</span><span class="nf">format</span><span class="p" data-group-id="4587439666-3">(</span><span class="s">&quot;&#39;~ts&#39;</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="p" data-group-id="4587439666-4">[</span><span class="nc">string</span><span class="p">:</span><span class="nf">pad</span><span class="p" data-group-id="4587439666-5">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="ss">leading</span><span class="p" data-group-id="4587439666-5">)</span><span class="p" data-group-id="4587439666-4">]</span><span class="p" data-group-id="4587439666-3">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">&#39;   He̊llö&#39;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">io</span><span class="p">:</span><span class="nf">format</span><span class="p" data-group-id="4587439666-6">(</span><span class="s">&quot;&#39;~ts&#39;</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="p" data-group-id="4587439666-7">[</span><span class="nc">string</span><span class="p">:</span><span class="nf">pad</span><span class="p" data-group-id="4587439666-8">(</span><span class="s">&quot;He̊llö&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="ss">both</span><span class="p" data-group-id="4587439666-8">)</span><span class="p" data-group-id="4587439666-7">]</span><span class="p" data-group-id="4587439666-6">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">&#39; He̊llö  &#39;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pad/3">
+
+  <div class="detail-header">
+    <a href="#pad/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pad(String, Length, Dir) -> <a href="unicode.html#t:charlist/0">unicode:charlist</a>()
+       when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Length :: integer(), Dir :: <a href="#t:direction/0">direction</a>() | both.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="pad/4">
+
+  <div class="detail-header">
+    <a href="#pad/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pad/4</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pad(String, Length, Dir, Char) -> <a href="unicode.html#t:charlist/0">unicode:charlist</a>()
+       when
+           String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+           Length :: integer(),
+           Dir :: <a href="#t:direction/0">direction</a>() | both,
+           Char :: <a href="#t:grapheme_cluster/0">grapheme_cluster</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="prefix/2">
+
+  <div class="detail-header">
+    <a href="#prefix/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prefix/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prefix(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Prefix :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> nomatch | <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>If <code>Prefix</code> is the prefix of <code>String</code>, removes it and returns the remainder of <code>String</code>, otherwise returns <code>nomatch</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">prefix</span><span class="p" data-group-id="2904667885-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;prefix of string&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pre&quot;</span><span class="p" data-group-id="2904667885-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;fix of string&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">prefix</span><span class="p" data-group-id="2904667885-2">(</span><span class="s">&quot;pre&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;prefix&quot;</span><span class="p" data-group-id="2904667885-2">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">nomatch</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="rchr/2">
+
+  <div class="detail-header">
+    <a href="#rchr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rchr/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rchr(String, Character) -> Index
+        when String :: string(), Character :: char(), Index :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the index of the last occurrence of <code>Character</code> in <code>String</code>. Returns <code>0</code> if <code>Character</code> does not occur.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#find/3"><code>find/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="replace/3">
+
+  <div class="detail-header">
+    <a href="#replace/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>replace(String, SearchPattern, Replacement) -> [<a href="unicode.html#t:chardata/0">unicode:chardata</a>()]
+           when
+               String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+               SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+               Replacement :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Replaces <code>SearchPattern</code> in <code>String</code> with <code>Replacement</code>. <code>Where</code>, default <code>leading</code>, indicates whether the <code>leading</code>, the <code>trailing</code> or <code>all</code> encounters of <code>SearchPattern</code> are to be replaced.</p><p>Can be implemented as:</p><pre><code class="makeup erlang"><span class="nc">lists</span><span class="p">:</span><span class="nf">join</span><span class="p" data-group-id="2025430836-1">(</span><span class="n">Replacement</span><span class="p">,</span><span class="w"> </span><span class="nf">split</span><span class="p" data-group-id="2025430836-2">(</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SearchPattern</span><span class="p">,</span><span class="w"> </span><span class="n">Where</span><span class="p" data-group-id="2025430836-2">)</span><span class="p" data-group-id="2025430836-1">)</span><span class="p">.</span></code></pre><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">replace</span><span class="p" data-group-id="4231144020-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p" data-group-id="4231144020-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4231144020-2">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;cd..ef&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="4231144020-2">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">replace</span><span class="p" data-group-id="4231144020-3">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..cd..ef&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">all</span><span class="p" data-group-id="4231144020-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4231144020-4">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="s">&quot;*&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;ef&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="4231144020-4">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="replace/4">
+
+  <div class="detail-header">
+    <a href="#replace/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace/4</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>replace(String, SearchPattern, Replacement, Where) -> [<a href="unicode.html#t:chardata/0">unicode:chardata</a>()]
+           when
+               String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+               SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+               Replacement :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+               Where :: <a href="#t:direction/0">direction</a>() | all.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="reverse/1">
+
+  <div class="detail-header">
+    <a href="#reverse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reverse/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>reverse(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].</pre>
+
+      </div>
+
+<p>Returns the reverse list of the grapheme clusters in <code>String</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Reverse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">reverse</span><span class="p" data-group-id="2888220919-1">(</span><span class="nc">unicode</span><span class="p">:</span><span class="nf">characters_to_nfd_binary</span><span class="p" data-group-id="2888220919-2">(</span><span class="s">&quot;ÅÄÖ&quot;</span><span class="p" data-group-id="2888220919-2">)</span><span class="p" data-group-id="2888220919-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2888220919-3">[</span><span class="p" data-group-id="2888220919-4">[</span><span class="mi">79</span><span class="p">,</span><span class="mi">776</span><span class="p" data-group-id="2888220919-4">]</span><span class="p">,</span><span class="p" data-group-id="2888220919-5">[</span><span class="mi">65</span><span class="p">,</span><span class="mi">776</span><span class="p" data-group-id="2888220919-5">]</span><span class="p">,</span><span class="p" data-group-id="2888220919-6">[</span><span class="mi">65</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="2888220919-6">]</span><span class="p" data-group-id="2888220919-3">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">io</span><span class="p">:</span><span class="nf">format</span><span class="p" data-group-id="2888220919-7">(</span><span class="s">&quot;~ts</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="p" data-group-id="2888220919-8">[</span><span class="n">Reverse</span><span class="p" data-group-id="2888220919-8">]</span><span class="p" data-group-id="2888220919-7">)</span><span class="p">.</span><span class="w">
+</span><span class="n">O</span><span class="err">̈</span><span class="n">A</span><span class="err">̈</span><span class="n">A</span><span class="err">̊</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="right/2">
+
+  <div class="detail-header">
+    <a href="#right/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">right/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>right(String, Number) -> Right
+         when String :: string(), Right :: string(), Number :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns <code>String</code> with the length adjusted in accordance with <code>Number</code>. The right margin is fixed. If the length of <code>(String)</code> &lt; <code>Number</code>, then <code>String</code> is padded with blanks or <code>Character</code>s.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#pad/3"><code>pad/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:right(&quot;Hello&quot;, 10, $.).
+&quot;.....Hello&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="right/3">
+
+  <div class="detail-header">
+    <a href="#right/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">right/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>right(String, Number, Character) -> Right
+         when
+             String :: string(),
+             Right :: string(),
+             Number :: non_neg_integer(),
+             Character :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="rstr/2">
+
+  <div class="detail-header">
+    <a href="#rstr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rstr/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rstr(String, SubString) -> Index
+        when String :: string(), SubString :: string(), Index :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the position where the last occurrence of <code>SubString</code> begins in <code>String</code>. Returns <code>0</code> if <code>SubString</code> does not exist in <code>String</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#find/3"><code>find/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:rstr(&quot; Hello Hello World World &quot;, &quot;Hello World&quot;).
+8</code></pre>
+  </section>
+</section>
+<section class="detail" id="slice/2">
+
+  <div class="detail-header">
+    <a href="#slice/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">slice/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>slice(String, Start) -> Slice
+         when
+             String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Start :: non_neg_integer(), Slice :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Returns a substring of <code>String</code> of at most <code>Length</code> grapheme clusters, starting at position <code>Start</code>.</p><p>By default, <code>Length</code> is <code>infinity</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">slice</span><span class="p" data-group-id="0079773645-1">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;He̊llö Wörld&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="0079773645-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;ö Wörld&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">slice</span><span class="p" data-group-id="0079773645-2">(</span><span class="p" data-group-id="0079773645-3">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="0079773645-3">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p" data-group-id="0079773645-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;ö Wö&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">slice</span><span class="p" data-group-id="0079773645-4">(</span><span class="p" data-group-id="0079773645-5">[</span><span class="s">&quot;He̊llö &quot;</span><span class="p">,</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;Wörld&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="0079773645-5">]</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="mi">50</span><span class="p" data-group-id="0079773645-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;ö Wörld&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="slice/3">
+
+  <div class="detail-header">
+    <a href="#slice/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">slice/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>slice(String, Start, Length) -> Slice
+         when
+             String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+             Start :: non_neg_integer(),
+             Length :: infinity | non_neg_integer(),
+             Slice :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="span/2">
+
+  <div class="detail-header">
+    <a href="#span/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">span/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>span(String, Chars) -> Length
+        when String :: string(), Chars :: string(), Length :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the length of the maximum initial segment of <code>String</code>, which consists entirely of characters from <code>Chars</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#take/2"><code>take/2</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:span(&quot;\t    abcdef&quot;, &quot; \t&quot;).
+5</code></pre>
+  </section>
+</section>
+<section class="detail" id="split/2">
+
+  <div class="detail-header">
+    <a href="#split/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>split(String, SearchPattern) -> [<a href="unicode.html#t:chardata/0">unicode:chardata</a>()]
+         when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Splits <code>String</code> where <code>SearchPattern</code> is encountered and return the remaining parts. <code>Where</code>, default <code>leading</code>, indicates whether the <code>leading</code>, the <code>trailing</code> or <code>all</code> encounters of <code>SearchPattern</code> will split <code>String</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4746132191-1">(</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p" data-group-id="4746132191-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4746132191-2">[</span><span class="s">&quot;ab&quot;</span><span class="p">,</span><span class="s">&quot;bc..cd&quot;</span><span class="p" data-group-id="4746132191-2">]</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4746132191-3">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..bc..cd&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p" data-group-id="4746132191-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4746132191-4">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..bc&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="4746132191-4">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4746132191-5">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab..bc....cd&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;..&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">all</span><span class="p" data-group-id="4746132191-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4746132191-6">[</span><span class="p">&lt;&lt;</span><span class="s">&quot;ab&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;bc&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;cd&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="4746132191-6">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="split/3">
+
+  <div class="detail-header">
+    <a href="#split/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>split(String, SearchPattern, Where) -> [<a href="unicode.html#t:chardata/0">unicode:chardata</a>()]
+         when
+             String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+             SearchPattern :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+             Where :: <a href="#t:direction/0">direction</a>() | all.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="str/2">
+
+  <div class="detail-header">
+    <a href="#str/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">str/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>str(String, SubString) -> Index
+       when String :: string(), SubString :: string(), Index :: non_neg_integer().</pre>
+
+      </div>
+
+<p>Returns the position where the first occurrence of <code>SubString</code> begins in <code>String</code>. Returns <code>0</code> if <code>SubString</code> does not exist in <code>String</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#find/2"><code>find/2</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:str(&quot; Hello Hello World World &quot;, &quot;Hello World&quot;).
+8</code></pre>
+  </section>
+</section>
+<section class="detail" id="strip/1">
+
+  <div class="detail-header">
+    <a href="#strip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip(string()) -> string().</pre>
+
+      </div>
+
+<p>Returns a string, where leading or trailing, or both, blanks or a number of <code>Character</code> have been removed. <code>Direction</code>, which can be <code>left</code>, <code>right</code>, or <code>both</code>, indicates from which direction blanks are to be removed. <code>strip/1</code> is equivalent to <code>strip(String, both)</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#trim/3"><code>trim/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:strip(&quot;...Hello.....&quot;, both, $.).
+&quot;Hello&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="strip/2">
+
+  <div class="detail-header">
+    <a href="#strip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip(String, Direction) -> Stripped
+         when String :: string(), Stripped :: string(), Direction :: left | right | both.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="strip/3">
+
+  <div class="detail-header">
+    <a href="#strip/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip(String, Direction, Character) -> Stripped
+         when
+             String :: string(),
+             Stripped :: string(),
+             Direction :: left | right | both,
+             Character :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sub_string/2">
+
+  <div class="detail-header">
+    <a href="#sub_string/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_string/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub_string(String, Start) -> SubString
+              when String :: string(), SubString :: string(), Start :: pos_integer().</pre>
+
+      </div>
+
+<p>Returns a substring of <code>String</code>, starting at position <code>Start</code> to the end of the string, or to and including position <code>Stop</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#slice/3"><code>slice/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">sub_string(&quot;Hello World&quot;, 4, 8).
+&quot;lo Wo&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="sub_string/3">
+
+  <div class="detail-header">
+    <a href="#sub_string/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_string/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub_string(String, Start, Stop) -> SubString
+              when
+                  String :: string(),
+                  SubString :: string(),
+                  Start :: pos_integer(),
+                  Stop :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sub_word/2">
+
+  <div class="detail-header">
+    <a href="#sub_word/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_word/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub_word(String, Number) -> Word when String :: string(), Word :: string(), Number :: integer().</pre>
+
+      </div>
+
+<p>Returns the word in position <code>Number</code> of <code>String</code>. Words are separated by blanks or <code>Character</code>s.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#nth_lexeme/3"><code>nth_lexeme/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; string:sub_word(&quot; Hello old boy !&quot;,3,$o).
+&quot;ld b&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="sub_word/3">
+
+  <div class="detail-header">
+    <a href="#sub_word/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sub_word/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sub_word(String, Number, Character) -> Word
+            when String :: string(), Word :: string(), Number :: integer(), Character :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="substr/2">
+
+  <div class="detail-header">
+    <a href="#substr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">substr/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>substr(String, Start) -> SubString
+          when String :: string(), SubString :: string(), Start :: pos_integer().</pre>
+
+      </div>
+
+<p>Returns a substring of <code>String</code>, starting at position <code>Start</code>, and ending at the end of the string or at length <code>Length</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#slice/3"><code>slice/3</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; substr(&quot;Hello World&quot;, 4, 5).
+&quot;lo Wo&quot;</code></pre>
+  </section>
+</section>
+<section class="detail" id="substr/3">
+
+  <div class="detail-header">
+    <a href="#substr/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">substr/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>substr(String, Start, Length) -> SubString
+          when
+              String :: string(),
+              SubString :: string(),
+              Start :: pos_integer(),
+              Length :: non_neg_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="take/2">
+
+  <div class="detail-header">
+    <a href="#take/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take(String, Characters) -> {Leading, Trailing}
+        when
+            String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Leading :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Trailing :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Takes characters from <code>String</code> as long as the characters are members of set <code>Characters</code> or the complement of set <code>Characters</code>. <code>Dir</code>, which can be <code>leading</code> or <code>trailing</code>, indicates from which direction characters are to be taken.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">take</span><span class="p" data-group-id="3602389636-1">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p" data-group-id="3602389636-2">(</span><span class="sc">$a</span><span class="p">,</span><span class="sc">$z</span><span class="p" data-group-id="3602389636-2">)</span><span class="p" data-group-id="3602389636-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3602389636-3">{</span><span class="s">&quot;abc&quot;</span><span class="p">,</span><span class="s">&quot;0z123&quot;</span><span class="p" data-group-id="3602389636-3">}</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">take</span><span class="p" data-group-id="3602389636-4">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p" data-group-id="3602389636-5">(</span><span class="sc">$0</span><span class="p">,</span><span class="sc">$9</span><span class="p" data-group-id="3602389636-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="ss">leading</span><span class="p" data-group-id="3602389636-4">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3602389636-6">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;0z123&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3602389636-6">}</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">take</span><span class="p" data-group-id="3602389636-7">(</span><span class="s">&quot;abc0z123&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p" data-group-id="3602389636-8">(</span><span class="sc">$0</span><span class="p">,</span><span class="sc">$9</span><span class="p" data-group-id="3602389636-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p" data-group-id="3602389636-7">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3602389636-9">{</span><span class="s">&quot;abc0z&quot;</span><span class="p">,</span><span class="s">&quot;123&quot;</span><span class="p" data-group-id="3602389636-9">}</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">take</span><span class="p" data-group-id="3602389636-10">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc0z123&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p" data-group-id="3602389636-11">(</span><span class="sc">$a</span><span class="p">,</span><span class="sc">$z</span><span class="p" data-group-id="3602389636-11">)</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p" data-group-id="3602389636-10">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3602389636-12">{</span><span class="p">&lt;&lt;</span><span class="s">&quot;abc0z&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;123&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3602389636-12">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="take/3">
+
+  <div class="detail-header">
+    <a href="#take/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take(String, Characters, Complement) -> {Leading, Trailing}
+        when
+            String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Complement :: boolean(),
+            Leading :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Trailing :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="take/4">
+
+  <div class="detail-header">
+    <a href="#take/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/4</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take(String, Characters, Complement, Dir) -> {Leading, Trailing}
+        when
+            String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()],
+            Complement :: boolean(),
+            Dir :: <a href="#t:direction/0">direction</a>(),
+            Leading :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Trailing :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="titlecase/1">
+
+  <div class="detail-header">
+    <a href="#titlecase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">titlecase/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>titlecase(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Converts <code>String</code> to titlecase.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">titlecase</span><span class="p" data-group-id="7530050114-1">(</span><span class="s">&quot;ß is a SHARP s&quot;</span><span class="p" data-group-id="7530050114-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;Ss is a SHARP s&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_float/1">
+
+  <div class="detail-header">
+    <a href="#to_float/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_float/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_float(String) -> {Float, Rest} | {error, Reason}
+            when
+                String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+                Float :: float(),
+                Rest :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+                Reason :: no_float | badarg.</pre>
+
+      </div>
+
+<p>Argument <code>String</code> is expected to start with a valid text represented float (the digits are ASCII values). Remaining characters in the string after the float are returned in <code>Rest</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="0013059623-1">{</span><span class="n">F1</span><span class="p">,</span><span class="n">Fs</span><span class="p" data-group-id="0013059623-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_float</span><span class="p" data-group-id="0013059623-2">(</span><span class="s">&quot;1.0-1.0e-1&quot;</span><span class="p" data-group-id="0013059623-2">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="0013059623-3">{</span><span class="n">F2</span><span class="p">,</span><span class="p" data-group-id="0013059623-4">[</span><span class="p" data-group-id="0013059623-4">]</span><span class="p" data-group-id="0013059623-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_float</span><span class="p" data-group-id="0013059623-5">(</span><span class="n">Fs</span><span class="p" data-group-id="0013059623-5">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">F1</span><span class="o">+</span><span class="n">F2</span><span class="p">.</span><span class="w">
+</span><span class="mf">0.9</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_float</span><span class="p" data-group-id="0013059623-6">(</span><span class="s">&quot;3/2=1.5&quot;</span><span class="p" data-group-id="0013059623-6">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="0013059623-7">{</span><span class="ss">error</span><span class="p">,</span><span class="ss">no_float</span><span class="p" data-group-id="0013059623-7">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_float</span><span class="p" data-group-id="0013059623-8">(</span><span class="s">&quot;-1.5eX&quot;</span><span class="p" data-group-id="0013059623-8">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="0013059623-9">{</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span><span class="s">&quot;eX&quot;</span><span class="p" data-group-id="0013059623-9">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_graphemes/1">
+
+  <div class="detail-header">
+    <a href="#to_graphemes/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_graphemes/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_graphemes(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].</pre>
+
+      </div>
+
+<p>Converts <code>String</code> to a list of grapheme clusters.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_graphemes</span><span class="p" data-group-id="5911605147-1">(</span><span class="s">&quot;ß↑e̊&quot;</span><span class="p" data-group-id="5911605147-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="5911605147-2">[</span><span class="mi">223</span><span class="p">,</span><span class="mi">8593</span><span class="p">,</span><span class="p" data-group-id="5911605147-3">[</span><span class="mi">101</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="5911605147-3">]</span><span class="p" data-group-id="5911605147-2">]</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_graphemes</span><span class="p" data-group-id="5911605147-4">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;ß↑e̊&quot;</span><span class="o">/</span><span class="ss">utf8</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="5911605147-4">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="5911605147-5">[</span><span class="mi">223</span><span class="p">,</span><span class="mi">8593</span><span class="p">,</span><span class="p" data-group-id="5911605147-6">[</span><span class="mi">101</span><span class="p">,</span><span class="mi">778</span><span class="p" data-group-id="5911605147-6">]</span><span class="p" data-group-id="5911605147-5">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_integer/1">
+
+  <div class="detail-header">
+    <a href="#to_integer/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_integer/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_integer(String) -> {Int, Rest} | {error, Reason}
+              when
+                  String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+                  Int :: integer(),
+                  Rest :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+                  Reason :: no_integer | badarg.</pre>
+
+      </div>
+
+<p>Argument <code>String</code> is expected to start with a valid text represented integer (the digits are ASCII values). Remaining characters in the string after the integer are returned in <code>Rest</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="7265939395-1">{</span><span class="n">I1</span><span class="p">,</span><span class="n">Is</span><span class="p" data-group-id="7265939395-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_integer</span><span class="p" data-group-id="7265939395-2">(</span><span class="s">&quot;33+22&quot;</span><span class="p" data-group-id="7265939395-2">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="7265939395-3">{</span><span class="n">I2</span><span class="p">,</span><span class="p" data-group-id="7265939395-4">[</span><span class="p" data-group-id="7265939395-4">]</span><span class="p" data-group-id="7265939395-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_integer</span><span class="p" data-group-id="7265939395-5">(</span><span class="n">Is</span><span class="p" data-group-id="7265939395-5">)</span><span class="p">,</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">I1</span><span class="o">-</span><span class="n">I2</span><span class="p">.</span><span class="w">
+</span><span class="mi">11</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_integer</span><span class="p" data-group-id="7265939395-6">(</span><span class="s">&quot;0.5&quot;</span><span class="p" data-group-id="7265939395-6">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="7265939395-7">{</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;.5&quot;</span><span class="p" data-group-id="7265939395-7">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">to_integer</span><span class="p" data-group-id="7265939395-8">(</span><span class="s">&quot;x=2&quot;</span><span class="p" data-group-id="7265939395-8">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="7265939395-9">{</span><span class="ss">error</span><span class="p">,</span><span class="ss">no_integer</span><span class="p" data-group-id="7265939395-9">}</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="to_lower/1">
+
+  <div class="detail-header">
+    <a href="#to_lower/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_lower/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_lower(String) -> Result when String :: <a href="io_lib.html#t:latin1_string/0">io_lib:latin1_string</a>(), Result :: <a href="io_lib.html#t:latin1_string/0">io_lib:latin1_string</a>();
+        (Char) -> CharResult when Char :: char(), CharResult :: char().</pre>
+
+      </div>
+
+<p>The specified string or character is case-converted. Notice that the supported character set is ISO/IEC 8859-1 (also called Latin 1); all values outside this set are unchanged</p><p>This function is <a href="string.html#content#oldapi">obsolete</a> use <a href="string.html#lowercase/1"><code>lowercase/1</code></a>, <a href="string.html#uppercase/1"><code>uppercase/1</code></a>, <a href="string.html#titlecase/1"><code>titlecase/1</code></a> or <a href="string.html#casefold/1"><code>casefold/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="to_upper/1">
+
+  <div class="detail-header">
+    <a href="#to_upper/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_upper/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_upper(String) -> Result when String :: <a href="io_lib.html#t:latin1_string/0">io_lib:latin1_string</a>(), Result :: <a href="io_lib.html#t:latin1_string/0">io_lib:latin1_string</a>();
+        (Char) -> CharResult when Char :: char(), CharResult :: char().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="tokens/2">
+
+  <div class="detail-header">
+    <a href="#tokens/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tokens/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tokens(String, SeparatorList) -> Tokens
+          when
+              String :: string(),
+              SeparatorList :: string(),
+              Tokens :: [Token :: nonempty_string()].</pre>
+
+      </div>
+
+<p>Returns a list of tokens in <code>String</code>, separated by the characters in <code>SeparatorList</code>.</p><p><em>Example:</em></p><pre><code type="none">&gt; tokens(&quot;abc defxxghix jkl&quot;, &quot;x &quot;).
+[&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;, &quot;jkl&quot;]</code></pre><p>Notice that, as shown in this example, two or more adjacent separator characters in <code>String</code> are treated as one. That is, there are no empty strings in the resulting list of tokens.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#lexemes/2"><code>lexemes/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="trim/1">
+
+  <div class="detail-header">
+    <a href="#trim/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trim(String) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>() when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Returns a string, where leading or trailing, or both, <code>Characters</code> have been removed. <code>Dir</code> which can be <code>leading</code>, <code>trailing</code>, or <code>both</code>, indicates from which direction characters are to be removed.</p><p>Default <code>Characters</code> is the set of nonbreakable whitespace codepoints, defined as Pattern_White_Space in <a href="http://unicode.org/reports/tr31/">Unicode Standard Annex #31</a>. <code>By default, Dir</code> is <code>both</code>.</p><p>Notice that <code>[$\r,$\n]</code> is one grapheme cluster according to the Unicode Standard.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">trim</span><span class="p" data-group-id="2506443184-1">(</span><span class="s">&quot;\t  Hello  \n&quot;</span><span class="p" data-group-id="2506443184-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;Hello&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">trim</span><span class="p" data-group-id="2506443184-2">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;\t  Hello  \n&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="ss">leading</span><span class="p" data-group-id="2506443184-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;Hello  \n&quot;</span><span class="p">&gt;&gt;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">trim</span><span class="p" data-group-id="2506443184-3">(</span><span class="p">&lt;&lt;</span><span class="s">&quot;.Hello.\n&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="ss">trailing</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;\n.&quot;</span><span class="p" data-group-id="2506443184-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;.Hello&quot;</span><span class="p">&gt;&gt;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="trim/2">
+
+  <div class="detail-header">
+    <a href="#trim/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trim(String, Dir) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>()
+        when String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(), Dir :: <a href="#t:direction/0">direction</a>() | both.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="trim/3">
+
+  <div class="detail-header">
+    <a href="#trim/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trim/3</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trim(String, Dir, Characters) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>()
+        when
+            String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>(),
+            Dir :: <a href="#t:direction/0">direction</a>() | both,
+            Characters :: [<a href="#t:grapheme_cluster/0">grapheme_cluster</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="uppercase/1">
+
+  <div class="detail-header">
+    <a href="#uppercase/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uppercase/1</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uppercase(String :: <a href="unicode.html#t:chardata/0">unicode:chardata</a>()) -> <a href="unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Converts <code>String</code> to uppercase.</p><p>See also <a href="string.html#titlecase/1"><code>titlecase/1</code></a>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">string</span><span class="p">:</span><span class="nf">uppercase</span><span class="p" data-group-id="3169615181-1">(</span><span class="s">&quot;Michał&quot;</span><span class="p" data-group-id="3169615181-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;MICHAŁ&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="words/1">
+
+  <div class="detail-header">
+    <a href="#words/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">words/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>words(String) -> Count when String :: string(), Count :: pos_integer().</pre>
+
+      </div>
+
+<p>Returns the number of words in <code>String</code>, separated by blanks or <code>Character</code>.</p><p>This function is <a href="string.html#content#oldapi">obsolete</a>. Use <a href="string.html#lexemes/2"><code>lexemes/2</code></a>.</p><p><em>Example:</em></p><pre><code type="none">&gt; words(&quot; Hello old boy!&quot;, $o).
+4</code></pre>
+  </section>
+</section>
+<section class="detail" id="words/2">
+
+  <div class="detail-header">
+    <a href="#words/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">words/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>words(String, Character) -> Count
+         when String :: string(), Character :: char(), Count :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

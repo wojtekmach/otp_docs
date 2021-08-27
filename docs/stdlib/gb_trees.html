@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>gb_trees — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+gb_trees <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides Prof. Arne Andersson's General Balanced Trees. These have no storage overhead compared to unbalanced binary trees, and their performance is better than AVL trees.</p><p>This module considers two keys as different if and only if they do not compare equal (<code>==</code>).</p><h2 id="module-data-structure" class="section-heading">
+  <a href="#module-data-structure" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Data Structure
+</h2>
+<p>Trees and iterators are built using opaque data structures that should not be pattern-matched from outside this module.</p><p>There is no attempt to balance trees after deletions. As deletions do not increase the height of a tree, this should be OK.</p><p>The original balance condition <em>h(T) &lt;= ceil(c * log(|T|))</em> has been changed to the similar (but not quite equivalent) condition <em>2 ^ h(T) &lt;= |T| ^ c</em>. This should also be OK.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="dict.html"><code>dict(3)</code></a>, <a href="gb_sets.html"><code>gb_sets(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:iter/0">-type iter() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:iter/2">-type iter(Arg1,Arg2) :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A general balanced tree iterator.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tree/0">-type tree() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tree/2">-type tree(Arg1,Arg2) :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A general balanced tree.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#balance/1">balance/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Rebalances <code>Tree1</code>. Notice that this is rarely necessary, but can be motivated when many nodes have been deleted from the tree without further insertions. Rebalancing can then be forced to minimize lookup times, as deletion does not rebalance the tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/2">delete/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the node with key <code>Key</code> from <code>Tree1</code> and returns the new tree. Assumes that the key is present in the tree, crashes otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_any/2">delete_any/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the node with key <code>Key</code> from <code>Tree1</code> if the key is present in the tree, otherwise does nothing. Returns the new tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#empty/0">empty/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a new empty tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enter/3">enter/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Key</code> with value <code>Value</code> into <code>Tree1</code> if the key is not present in the tree, otherwise updates <code>Key</code> to value <code>Value</code> in <code>Tree1</code>. Returns the new tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#from_orddict/1">from_orddict/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Turns an ordered list <code>List</code> of key-value tuples into a tree. The list must not contain duplicate keys.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get/2">get/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Retrieves the value stored with <code>Key</code> in <code>Tree</code>. Assumes that the key is present in the tree, crashes otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/3">insert/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts <code>Key</code> with value <code>Value</code> into <code>Tree1</code> and returns the new tree. Assumes that the key is not present in the tree, crashes otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_defined/2">is_defined/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>Key</code> is present in <code>Tree</code>, otherwise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_empty/1">is_empty/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>true</code> if <code>Tree</code> is an empty tree, othwewise <code>false</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#iterator/1">iterator/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns an iterator that can be used for traversing the entries of <code>Tree</code>; see <a href="gb_trees.html#next/1"><code>next/1</code></a>. The implementation of this is very efficient; traversing the whole tree using <code>next/1</code> is only slightly slower than getting the list of all elements using <a href="gb_trees.html#to_list/1"><code>to_list/1</code></a> and traversing that. The main advantage of the iterator approach is that it does not require the complete list of all elements to be built in memory at one time.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#iterator_from/2">iterator_from/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns an iterator that can be used for traversing the entries of <code>Tree</code>; see <a href="gb_trees.html#next/1"><code>next/1</code></a>. The difference as compared to the iterator returned by <a href="gb_trees.html#iterator/1"><code>iterator/1</code></a> is that the first key greater than or equal to <code>Key</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keys/1">keys/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the keys in <code>Tree</code> as an ordered list.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#largest/1">largest/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{Key, Value}</code>, where <code>Key</code> is the largest key in <code>Tree</code>, and <code>Value</code> is the value associated with this key. Assumes that the tree is not empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lookup/2">lookup/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Looks up <code>Key</code> in <code>Tree</code>. Returns <code>{value, Value}</code>, or <code>none</code> if <code>Key</code> is not present.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#map/2">map/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Maps function F(K, V1) -&gt; V2 to all key-value pairs of tree <code>Tree1</code>. Returns a new tree <code>Tree2</code> with the same set of keys as <code>Tree1</code> and the new set of values <code>V2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#next/1">next/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{Key, Value, Iter2}</code>, where <code>Key</code> is the smallest key referred to by iterator <code>Iter1</code>, and <code>Iter2</code> is the new iterator to be used for traversing the remaining nodes, or the atom <code>none</code> if no nodes remain.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#size/1">size/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the number of nodes in <code>Tree</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#smallest/1">smallest/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{Key, Value}</code>, where <code>Key</code> is the smallest key in <code>Tree</code>, and <code>Value</code> is the value associated with this key. Assumes that the tree is not empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take/2">take/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a value <code>Value</code> from node with key <code>Key</code> and new <code>Tree2</code> without the node with this value. Assumes that the node with key is present in the tree, crashes otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take_any/2">take_any/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a value <code>Value</code> from node with key <code>Key</code> and new <code>Tree2</code> without the node with this value. Returns <code>error</code> if the node with the key is not present in the tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take_largest/1">take_largest/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{Key, Value, Tree2}</code>, where <code>Key</code> is the largest key in <code>Tree1</code>, <code>Value</code> is the value associated with this key, and <code>Tree2</code> is this tree with the corresponding node deleted. Assumes that the tree is not empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#take_smallest/1">take_smallest/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{Key, Value, Tree2}</code>, where <code>Key</code> is the smallest key in <code>Tree1</code>, <code>Value</code> is the value associated with this key, and <code>Tree2</code> is this tree with the corresponding node deleted. Assumes that the tree is not empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#to_list/1">to_list/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts a tree into an ordered list of key-value tuples.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update/3">update/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Updates <code>Key</code> to value <code>Value</code> in <code>Tree1</code> and returns the new tree. Assumes that the key is present in the tree.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#values/1">values/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the values in <code>Tree</code> as an ordered list, sorted by their corresponding keys. Duplicates are not removed.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:iter/0">
+
+  <div class="detail-header">
+    <a href="#t:iter/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type iter() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>iter() :: <a href="#t:iter/2">iter</a>(_, _).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:iter/2">
+
+  <div class="detail-header">
+    <a href="#t:iter/2" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type iter(Arg1,Arg2) :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>iter(Key, Value)</pre>
+
+      </div>
+
+<p>A general balanced tree iterator.</p>
+  </section>
+</section>
+<section class="detail" id="t:tree/0">
+
+  <div class="detail-header">
+    <a href="#t:tree/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type tree() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tree() :: <a href="#t:tree/2">tree</a>(_, _).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:tree/2">
+
+  <div class="detail-header">
+    <a href="#t:tree/2" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type tree(Arg1,Arg2) :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tree(Key, Value)</pre>
+
+      </div>
+
+<p>A general balanced tree.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="balance/1">
+
+  <div class="detail-header">
+    <a href="#balance/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">balance/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>balance(Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Rebalances <code>Tree1</code>. Notice that this is rarely necessary, but can be motivated when many nodes have been deleted from the tree without further insertions. Rebalancing can then be forced to minimize lookup times, as deletion does not rebalance the tree.</p>
+  </section>
+</section>
+<section class="detail" id="delete/2">
+
+  <div class="detail-header">
+    <a href="#delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete(Key, Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Removes the node with key <code>Key</code> from <code>Tree1</code> and returns the new tree. Assumes that the key is present in the tree, crashes otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="delete_any/2">
+
+  <div class="detail-header">
+    <a href="#delete_any/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_any/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete_any(Key, Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Removes the node with key <code>Key</code> from <code>Tree1</code> if the key is present in the tree, otherwise does nothing. Returns the new tree.</p>
+  </section>
+</section>
+<section class="detail" id="empty/0">
+
+  <div class="detail-header">
+    <a href="#empty/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">empty/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>empty() -> <a href="#t:tree/0">tree</a>().</pre>
+
+      </div>
+
+<p>Returns a new empty tree.</p>
+  </section>
+</section>
+<section class="detail" id="enter/3">
+
+  <div class="detail-header">
+    <a href="#enter/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enter/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>enter(Key, Value, Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Inserts <code>Key</code> with value <code>Value</code> into <code>Tree1</code> if the key is not present in the tree, otherwise updates <code>Key</code> to value <code>Value</code> in <code>Tree1</code>. Returns the new tree.</p>
+  </section>
+</section>
+<section class="detail" id="from_orddict/1">
+
+  <div class="detail-header">
+    <a href="#from_orddict/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">from_orddict/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>from_orddict(List) -> Tree when List :: [{Key, Value}], Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Turns an ordered list <code>List</code> of key-value tuples into a tree. The list must not contain duplicate keys.</p>
+  </section>
+</section>
+<section class="detail" id="get/2">
+
+  <div class="detail-header">
+    <a href="#get/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get(Key, Tree) -> Value when Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Retrieves the value stored with <code>Key</code> in <code>Tree</code>. Assumes that the key is present in the tree, crashes otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="insert/3">
+
+  <div class="detail-header">
+    <a href="#insert/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insert(Key, Value, Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Inserts <code>Key</code> with value <code>Value</code> into <code>Tree1</code> and returns the new tree. Assumes that the key is not present in the tree, crashes otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="is_defined/2">
+
+  <div class="detail-header">
+    <a href="#is_defined/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_defined/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_defined(Key, Tree) -> boolean() when Tree :: <a href="#t:tree/2">tree</a>(Key, Value :: term()).</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>Key</code> is present in <code>Tree</code>, otherwise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="is_empty/1">
+
+  <div class="detail-header">
+    <a href="#is_empty/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_empty/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_empty(Tree) -> boolean() when Tree :: <a href="#t:tree/0">tree</a>().</pre>
+
+      </div>
+
+<p>Returns <code>true</code> if <code>Tree</code> is an empty tree, othwewise <code>false</code>.</p>
+  </section>
+</section>
+<section class="detail" id="iterator/1">
+
+  <div class="detail-header">
+    <a href="#iterator/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">iterator/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>iterator(Tree) -> Iter when Tree :: <a href="#t:tree/2">tree</a>(Key, Value), Iter :: <a href="#t:iter/2">iter</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns an iterator that can be used for traversing the entries of <code>Tree</code>; see <a href="gb_trees.html#next/1"><code>next/1</code></a>. The implementation of this is very efficient; traversing the whole tree using <code>next/1</code> is only slightly slower than getting the list of all elements using <a href="gb_trees.html#to_list/1"><code>to_list/1</code></a> and traversing that. The main advantage of the iterator approach is that it does not require the complete list of all elements to be built in memory at one time.</p>
+  </section>
+</section>
+<section class="detail" id="iterator_from/2">
+
+  <div class="detail-header">
+    <a href="#iterator_from/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">iterator_from/2</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>iterator_from(Key, Tree) -> Iter when Tree :: <a href="#t:tree/2">tree</a>(Key, Value), Iter :: <a href="#t:iter/2">iter</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns an iterator that can be used for traversing the entries of <code>Tree</code>; see <a href="gb_trees.html#next/1"><code>next/1</code></a>. The difference as compared to the iterator returned by <a href="gb_trees.html#iterator/1"><code>iterator/1</code></a> is that the first key greater than or equal to <code>Key</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="keys/1">
+
+  <div class="detail-header">
+    <a href="#keys/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keys/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keys(Tree) -> [Key] when Tree :: <a href="#t:tree/2">tree</a>(Key, Value :: term()).</pre>
+
+      </div>
+
+<p>Returns the keys in <code>Tree</code> as an ordered list.</p>
+  </section>
+</section>
+<section class="detail" id="largest/1">
+
+  <div class="detail-header">
+    <a href="#largest/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">largest/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>largest(Tree) -> {Key, Value} when Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns <code>{Key, Value}</code>, where <code>Key</code> is the largest key in <code>Tree</code>, and <code>Value</code> is the value associated with this key. Assumes that the tree is not empty.</p>
+  </section>
+</section>
+<section class="detail" id="lookup/2">
+
+  <div class="detail-header">
+    <a href="#lookup/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">lookup/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lookup(Key, Tree) -> none | {value, Value} when Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Looks up <code>Key</code> in <code>Tree</code>. Returns <code>{value, Value}</code>, or <code>none</code> if <code>Key</code> is not present.</p>
+  </section>
+</section>
+<section class="detail" id="map/2">
+
+  <div class="detail-header">
+    <a href="#map/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">map/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>map(Function, Tree1) -> Tree2
+       when
+           Function :: fun((K :: Key, V1 :: Value1) -> V2 :: Value2),
+           Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value1),
+           Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value2).</pre>
+
+      </div>
+
+<p>Maps function F(K, V1) -&gt; V2 to all key-value pairs of tree <code>Tree1</code>. Returns a new tree <code>Tree2</code> with the same set of keys as <code>Tree1</code> and the new set of values <code>V2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="next/1">
+
+  <div class="detail-header">
+    <a href="#next/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">next/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>next(Iter1) -> none | {Key, Value, Iter2}
+        when Iter1 :: <a href="#t:iter/2">iter</a>(Key, Value), Iter2 :: <a href="#t:iter/2">iter</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns <code>{Key, Value, Iter2}</code>, where <code>Key</code> is the smallest key referred to by iterator <code>Iter1</code>, and <code>Iter2</code> is the new iterator to be used for traversing the remaining nodes, or the atom <code>none</code> if no nodes remain.</p>
+  </section>
+</section>
+<section class="detail" id="size/1">
+
+  <div class="detail-header">
+    <a href="#size/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">size/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>size(Tree) -> non_neg_integer() when Tree :: <a href="#t:tree/0">tree</a>().</pre>
+
+      </div>
+
+<p>Returns the number of nodes in <code>Tree</code>.</p>
+  </section>
+</section>
+<section class="detail" id="smallest/1">
+
+  <div class="detail-header">
+    <a href="#smallest/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">smallest/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>smallest(Tree) -> {Key, Value} when Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns <code>{Key, Value}</code>, where <code>Key</code> is the smallest key in <code>Tree</code>, and <code>Value</code> is the value associated with this key. Assumes that the tree is not empty.</p>
+  </section>
+</section>
+<section class="detail" id="take/2">
+
+  <div class="detail-header">
+    <a href="#take/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take(Key, Tree1) -> {Value, Tree2}
+        when Tree1 :: <a href="#t:tree/2">tree</a>(Key, _), Tree2 :: <a href="#t:tree/2">tree</a>(Key, _), Key :: term(), Value :: term().</pre>
+
+      </div>
+
+<p>Returns a value <code>Value</code> from node with key <code>Key</code> and new <code>Tree2</code> without the node with this value. Assumes that the node with key is present in the tree, crashes otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="take_any/2">
+
+  <div class="detail-header">
+    <a href="#take_any/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take_any/2</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take_any(Key, Tree1) -> {Value, Tree2} | error
+            when Tree1 :: <a href="#t:tree/2">tree</a>(Key, _), Tree2 :: <a href="#t:tree/2">tree</a>(Key, _), Key :: term(), Value :: term().</pre>
+
+      </div>
+
+<p>Returns a value <code>Value</code> from node with key <code>Key</code> and new <code>Tree2</code> without the node with this value. Returns <code>error</code> if the node with the key is not present in the tree.</p>
+  </section>
+</section>
+<section class="detail" id="take_largest/1">
+
+  <div class="detail-header">
+    <a href="#take_largest/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take_largest/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take_largest(Tree1) -> {Key, Value, Tree2}
+                when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns <code>{Key, Value, Tree2}</code>, where <code>Key</code> is the largest key in <code>Tree1</code>, <code>Value</code> is the value associated with this key, and <code>Tree2</code> is this tree with the corresponding node deleted. Assumes that the tree is not empty.</p>
+  </section>
+</section>
+<section class="detail" id="take_smallest/1">
+
+  <div class="detail-header">
+    <a href="#take_smallest/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">take_smallest/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>take_smallest(Tree1) -> {Key, Value, Tree2}
+                 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Returns <code>{Key, Value, Tree2}</code>, where <code>Key</code> is the smallest key in <code>Tree1</code>, <code>Value</code> is the value associated with this key, and <code>Tree2</code> is this tree with the corresponding node deleted. Assumes that the tree is not empty.</p>
+  </section>
+</section>
+<section class="detail" id="to_list/1">
+
+  <div class="detail-header">
+    <a href="#to_list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">to_list/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>to_list(Tree) -> [{Key, Value}] when Tree :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Converts a tree into an ordered list of key-value tuples.</p>
+  </section>
+</section>
+<section class="detail" id="update/3">
+
+  <div class="detail-header">
+    <a href="#update/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update(Key, Value, Tree1) -> Tree2 when Tree1 :: <a href="#t:tree/2">tree</a>(Key, Value), Tree2 :: <a href="#t:tree/2">tree</a>(Key, Value).</pre>
+
+      </div>
+
+<p>Updates <code>Key</code> to value <code>Value</code> in <code>Tree1</code> and returns the new tree. Assumes that the key is present in the tree.</p>
+  </section>
+</section>
+<section class="detail" id="values/1">
+
+  <div class="detail-header">
+    <a href="#values/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">values/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>values(Tree) -> [Value] when Tree :: <a href="#t:tree/2">tree</a>(Key :: term(), Value).</pre>
+
+      </div>
+
+<p>Returns the values in <code>Tree</code> as an ordered list, sorted by their corresponding keys. Duplicates are not removed.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

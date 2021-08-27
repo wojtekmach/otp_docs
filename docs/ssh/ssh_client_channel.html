@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="ssh v4.12.3">
+
+    <title>ssh_client_channel — ssh v4.12.3</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-86a0e6f80e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+ssh
+      </a>
+      <strong class="sidebar-projectVersion">
+        v4.12.3
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+ssh_client_channel <small>behaviour</small> <small class="app-vsn">(ssh v4.12.3)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<div class="note"><p>This module replaces ssh_channel.</p><p>The old module is still available for compatibility, but should not be used for new programs. The old module will not be maintained except for some error corrections</p></div><p>SSH services (clients and servers) are implemented as channels that are multiplexed over an SSH connection and communicates over the <a href="http://www.ietf.org/rfc/rfc4254.txt">SSH Connection Protocol</a>. This module provides a callback API that takes care of generic channel aspects for clients, such as flow control and close messages. It lets the callback functions take care of the service (application) specific parts. This behavior also ensures that the channel process honors the principal of an OTP-process so that it can be part of a supervisor tree. This is a requirement of channel processes implementing a subsystem that will be added to the <code>ssh</code> applications supervisor tree.</p><div class="note"><p>When implementing a <code>ssh</code> subsystem for daemons, use <a href="ssh_server_channel.html">-behaviour(ssh_server_channel)</a> (Replaces ssh_daemon_channel) instead.</p></div><div class="dont"><p>Functions in this module are not supposed to be called outside a module implementing this behaviour!</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:code_change/3">Module:code_change(OldVsn, State, Extra) -&gt; {ok,
+      NewState}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">OldVsn = term()</li><li class="description">In the case of an upgrade, <code>OldVsn</code> is <code>Vsn</code>, and in the case of a downgrade, <code>OldVsn</code> is <code>{down,Vsn}</code>. <code>Vsn</code> is defined by the <code>vsn</code> attribute(s) of the old version of the callback module <code>Module</code>. If no such attribute is defined, the version is the checksum of the BEAM file.</li><li class="type">State = term()</li><li class="description">Internal state of the channel.</li><li class="type">Extra = term()</li><li class="description">Passed &quot;as-is&quot; from the <code>{advanced,Extra}</code> part of the update instruction.</li></ul><p>Converts process state when code is changed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_call/3">Module:handle_call(Msg, From, State) -&gt; Result</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Msg = term()</li><li class="type">From = opaque()</li><li class="description">Is to be used as argument to <a href="ssh_client_channel.html#reply/2">reply/2</a></li><li class="type">State = term()</li><li class="type">Result = {reply, Reply, NewState} | {reply, Reply, NewState, timeout()} | {noreply, NewState} | {noreply , NewState, timeout()} | {stop, Reason, Reply, NewState} | {stop, Reason, NewState}</li><li class="type">Reply = term()</li><li class="description">Will be the return value of <a href="ssh_client_channel.html#call/2">call/[2,3]</a></li><li class="type">NewState = term()</li><li class="type">Reason = term()</li></ul><p>Handles messages sent by calling <a href="ssh_client_channel.html#call/2">call/[2,3]</a></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_cast/2">Module:handle_cast(Msg, State) -&gt; Result</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Msg = term()</li><li class="type">State = term()</li><li class="type">Result = {noreply, NewState} | {noreply, NewState, timeout()} | {stop, Reason, NewState}</li><li class="type">NewState = term()</li><li class="type">Reason = term()</li></ul><p>Handles messages sent by calling <code>cast/2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_msg/2">Module:handle_msg(Msg, State) -&gt; {ok, State} |
+      {stop, ChannelId, State}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Msg = timeout | term()</li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="type">State = term()</li></ul><p>Handles other messages than SSH Connection Protocol, call, or cast messages sent to the channel.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:handle_ssh_msg/2">Module:handle_ssh_msg(Msg, State) -&gt; {ok, State} | {stop,
+      ChannelId, State}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Msg = <a href="ssh_connection.html#t:event/0">ssh_connection:event()</a></li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="type">State = term()</li></ul><p>Handles SSH Connection Protocol messages that may need service-specific attention. For details, see <a href="ssh_connection.html#t:event/0">ssh_connection:event()</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:init/1">Module:init(Args) -&gt; {ok, State} | {ok, State, timeout()} |
+      {stop, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Args = term()</li><li class="description">Last argument to <code>start_link/4</code>.</li><li class="type">State = term()</li><li class="type">Reason = term()</li></ul><p>Makes necessary initializations and returns the initial channel state if the initializations succeed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:terminate/2">Module:terminate(Reason, State) -&gt; _</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Reason = term()</li><li class="type">State = term()</li></ul><p>This function is called by a channel process when it is about to terminate. Before this function is called, <a href="ssh_connection.html#close/2">ssh_connection:close/2 </a>is called, if it has not been called earlier. This function does any necessary cleaning up. When it returns, the channel process terminates with reason <code>Reason</code>. The return value is ignored.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/2">call(ChannelRef, Msg) -&gt;</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">ChannelRef = pid()</li><li class="description">As returned by <a href="ssh_client_channel.html#start_link/4">start_link/4</a></li><li class="type">Msg = term()</li><li class="type">Timeout = timeout()</li><li class="type">Reply = term()</li><li class="type">Reason = closed | timeout</li></ul><p>Makes a synchronous call to the channel process by sending a message and waiting until a reply arrives, or a time-out occurs. The channel calls <a href="ssh_client_channel.html#c:handle_call/3">Module:handle_call/3</a> to handle the message. If the channel process does not exist, <code>{error, closed}</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#call/3">call(ChannelRef, Msg, Timeout) -&gt; Reply | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cast/2">cast(ChannelRef, Msg) -&gt; ok </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">ChannelRef = pid()</li><li class="description">As returned by <a href="ssh_client_channel.html#start_link/4">start_link/4</a></li><li class="type">Msg = term()</li></ul><p>Sends an asynchronous message to the channel process and returns ok immediately, ignoring if the destination node or channel process does not exist. The channel calls <a href="ssh_client_channel.html#c:handle_cast/2">Module:handle_cast/2</a> to handle the message.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enter_loop/1">enter_loop(State) -&gt; _ </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">State = term()</li><li class="description">as returned by <a href="ssh_client_channel.html#init/1">init/1</a></li></ul><p>Makes an existing process an <code>ssh_client_channel</code> (replaces ssh_channel) process. Does not return, instead the calling process enters the <code>ssh_client_channel</code> (replaces ssh_channel) process receive loop and become an <code>ssh_client_channel</code> process. The process must have been started using one of the start functions in <code>proc_lib</code>, see the <a href="https://wojtekmach.pl/otp_docs/stdlib/proc_lib.html">proc_lib(3)</a> manual page in STDLIB. The user is responsible for any initialization of the process and must call <a href="ssh_client_channel.html#init/1">init/1</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#init/1">init(Options) -&gt; {ok, State} |  {ok, State, Timeout} | {stop, Reason} </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Options = [{Option, Value}]</li><li class="type">State = term()</li><li class="type">Timeout = timeout()</li><li class="type">Reason = term()</li></ul><p>The following options must be present</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reply/2">reply(Client, Reply) -&gt; _</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Client = opaque()</li><li class="type">Reply = term()</li></ul><p>This function can be used by a channel to send a reply to a client that called <code>call/[2,3]</code> when the reply cannot be defined in the return value of <a href="ssh_client_channel.html#c:handle_call/3">Module:handle_call/3</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/4">start(SshConnection, ChannelId, ChannelCb, CbInitArgs) -&gt; </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">SshConnection = <a href="ssh.html#t:connection_ref/0">ssh:connection_ref()</a></li><li class="description">As returned by <a href="ssh.html#connect/3">ssh:connect/3</a></li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="description">As returned by <a href="ssh_connection.html#session_channel/2">ssh_connection:session_channel/[2,4]</a>.</li><li class="type">ChannelCb = atom()</li><li class="description">Name of the module implementing the service-specific parts of the channel.</li><li class="type">CbInitArgs = [term()]</li><li class="description">Argument list for the <code>init</code> function in the callback module.</li><li class="type">ChannelRef = pid()</li></ul><p>Starts a process that handles an SSH channel. It is called internally, by the <code>ssh</code> daemon, or explicitly by the <code>ssh</code> client implementations. The behavior sets the <code>trap_exit</code> flag to <code>true</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/4">start_link(SshConnection, ChannelId, ChannelCb, CbInitArgs) -&gt;
+      {ok, ChannelRef} | {error, Reason}</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="callbacks" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#callbacks">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Callbacks
+          </h1>
+          <div class="callbacks-list">
+<section class="detail" id="c:code_change/3">
+
+  <div class="detail-header">
+    <a href="#c:code_change/3" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:code_change(OldVsn, State, Extra) -&gt; {ok,
+      NewState}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>code_change(OldVsn :: term() | {down, term()}, State :: term(), Extra :: term()) ->
+               {ok, NewState :: term()} | {error, Reason :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">OldVsn = term()</li><li class="description">In the case of an upgrade, <code>OldVsn</code> is <code>Vsn</code>, and in the case of a downgrade, <code>OldVsn</code> is <code>{down,Vsn}</code>. <code>Vsn</code> is defined by the <code>vsn</code> attribute(s) of the old version of the callback module <code>Module</code>. If no such attribute is defined, the version is the checksum of the BEAM file.</li><li class="type">State = term()</li><li class="description">Internal state of the channel.</li><li class="type">Extra = term()</li><li class="description">Passed &quot;as-is&quot; from the <code>{advanced,Extra}</code> part of the update instruction.</li></ul><p>Converts process state when code is changed.</p><p>This function is called by a client-side channel when it is to update its internal state during a release upgrade or downgrade, that is, when the instruction <code>{update,Module,Change,...}</code>, where <code>Change={advanced,Extra}</code>, is given in the <code>appup</code> file. For more information, refer to Section 9.11.6 Release Handling Instructions in the System Documentation.</p><div class="note"><p>Soft upgrade according to the OTP release concept is not straight forward for the server side, as subsystem channel processes are spawned by the <code>ssh</code> application and hence added to its supervisor tree. The subsystem channels can be upgraded when upgrading the user application, if the callback functions can handle two versions of the state, but this function cannot be used in the normal way.</p></div>
+  </section>
+</section>
+<section class="detail" id="c:handle_call/3">
+
+  <div class="detail-header">
+    <a href="#c:handle_call/3" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:handle_call(Msg, From, State) -&gt; Result</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_call(Request :: term(), From :: {pid(), Tag :: term()}, State :: term()) ->
+               {reply, Reply :: term(), NewState :: term()} |
+               {reply, Reply :: term(), NewState :: term(), timeout() | hibernate} |
+               {noreply, NewState :: term()} |
+               {noreply, NewState :: term(), timeout() | hibernate} |
+               {stop, Reason :: term(), Reply :: term(), NewState :: term()} |
+               {stop, Reason :: term(), NewState :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Msg = term()</li><li class="type">From = opaque()</li><li class="description">Is to be used as argument to <a href="ssh_client_channel.html#reply/2">reply/2</a></li><li class="type">State = term()</li><li class="type">Result = {reply, Reply, NewState} | {reply, Reply, NewState, timeout()} | {noreply, NewState} | {noreply , NewState, timeout()} | {stop, Reason, Reply, NewState} | {stop, Reason, NewState}</li><li class="type">Reply = term()</li><li class="description">Will be the return value of <a href="ssh_client_channel.html#call/2">call/[2,3]</a></li><li class="type">NewState = term()</li><li class="type">Reason = term()</li></ul><p>Handles messages sent by calling <a href="ssh_client_channel.html#call/2">call/[2,3]</a></p><p>For more detailed information on time-outs,, see Section <a href="ssh_client_channel.html#content#cb_timeouts">Callback timeouts</a>.</p>
+  </section>
+</section>
+<section class="detail" id="c:handle_cast/2">
+
+  <div class="detail-header">
+    <a href="#c:handle_cast/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:handle_cast(Msg, State) -&gt; Result</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_cast(Request :: term(), State :: term()) ->
+               {noreply, NewState :: term()} |
+               {noreply, NewState :: term(), timeout() | hibernate} |
+               {stop, Reason :: term(), NewState :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Msg = term()</li><li class="type">State = term()</li><li class="type">Result = {noreply, NewState} | {noreply, NewState, timeout()} | {stop, Reason, NewState}</li><li class="type">NewState = term()</li><li class="type">Reason = term()</li></ul><p>Handles messages sent by calling <code>cast/2</code>.</p><p>For more detailed information on time-outs, see Section <a href="ssh_client_channel.html#content#cb_timeouts">Callback timeouts</a>.</p>
+  </section>
+</section>
+<section class="detail" id="c:handle_msg/2">
+
+  <div class="detail-header">
+    <a href="#c:handle_msg/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:handle_msg(Msg, State) -&gt; {ok, State} |
+      {stop, ChannelId, State}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_msg(Msg :: term(), State :: term()) ->
+              {ok, State :: term()} | {stop, ChannelId :: <a href="ssh.html#t:channel_id/0">ssh:channel_id</a>(), State :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Msg = timeout | term()</li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="type">State = term()</li></ul><p>Handles other messages than SSH Connection Protocol, call, or cast messages sent to the channel.</p><p>Possible Erlang 'EXIT' messages is to be handled by this function and all channels are to handle the following message.</p><dl><dt><code>{ssh_channel_up, </code><a href="ssh.html#t:channel_id/0">ssh:channel_id()</a><code>, </code><a href="ssh.html#t:connection_ref/0">ssh:connection_ref()</a><code>}</code></dt><dd><p>This is the first message that the channel receives. It is sent just before the <a href="ssh_client_channel.html#init/1">init/1</a> function returns successfully. This is especially useful if the server wants to send a message to the client without first receiving a message from it. If the message is not useful for your particular scenario, ignore it by immediately returning <code>{ok, State}</code>.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="c:handle_ssh_msg/2">
+
+  <div class="detail-header">
+    <a href="#c:handle_ssh_msg/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:handle_ssh_msg(Msg, State) -&gt; {ok, State} | {stop,
+      ChannelId, State}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle_ssh_msg(<a href="ssh_connection.html#t:event/0">ssh_connection:event</a>(), State :: term()) ->
+                  {ok, State :: term()} | {stop, ChannelId :: <a href="ssh.html#t:channel_id/0">ssh:channel_id</a>(), State :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Msg = <a href="ssh_connection.html#t:event/0">ssh_connection:event()</a></li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="type">State = term()</li></ul><p>Handles SSH Connection Protocol messages that may need service-specific attention. For details, see <a href="ssh_connection.html#t:event/0">ssh_connection:event()</a>.</p><p>The following message is taken care of by the <code>ssh_client_channel</code> behavior.</p><dl><dt><code>{closed, </code><a href="ssh.html#t:channel_id/0">ssh:channel_id()</a><code>}</code></dt><dd><p>The channel behavior sends a close message to the other side, if such a message has not already been sent. Then it terminates the channel with reason <code>normal</code>.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="c:init/1">
+
+  <div class="detail-header">
+    <a href="#c:init/1" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:init(Args) -&gt; {ok, State} | {ok, State, timeout()} |
+      {stop, Reason}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>init(Args :: term()) ->
+        {ok, State :: term()} |
+        {ok, State :: term(), timeout() | hibernate} |
+        {stop, Reason :: term()} |
+        ignore.</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Args = term()</li><li class="description">Last argument to <code>start_link/4</code>.</li><li class="type">State = term()</li><li class="type">Reason = term()</li></ul><p>Makes necessary initializations and returns the initial channel state if the initializations succeed.</p><p>For more detailed information on time-outs, see Section <a href="ssh_client_channel.html#content#cb_timeouts">Callback timeouts</a>.</p>
+  </section>
+</section>
+<section class="detail" id="c:terminate/2">
+
+  <div class="detail-header">
+    <a href="#c:terminate/2" class="detail-link" title="Link to this callback">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this callback</span>
+    </a>
+    <h1 class="signature">Module:terminate(Reason, State) -&gt; _</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>terminate(Reason :: normal | shutdown | {shutdown, term()} | term(), State :: term()) -> term().</pre>
+
+      </div>
+
+<ul class="types"><li class="type">Reason = term()</li><li class="type">State = term()</li></ul><p>This function is called by a channel process when it is about to terminate. Before this function is called, <a href="ssh_connection.html#close/2">ssh_connection:close/2 </a>is called, if it has not been called earlier. This function does any necessary cleaning up. When it returns, the channel process terminates with reason <code>Reason</code>. The return value is ignored.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="call/2">
+
+  <div class="detail-header">
+    <a href="#call/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call(ChannelRef, Msg) -&gt;</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">ChannelRef = pid()</li><li class="description">As returned by <a href="ssh_client_channel.html#start_link/4">start_link/4</a></li><li class="type">Msg = term()</li><li class="type">Timeout = timeout()</li><li class="type">Reply = term()</li><li class="type">Reason = closed | timeout</li></ul><p>Makes a synchronous call to the channel process by sending a message and waiting until a reply arrives, or a time-out occurs. The channel calls <a href="ssh_client_channel.html#c:handle_call/3">Module:handle_call/3</a> to handle the message. If the channel process does not exist, <code>{error, closed}</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="call/3">
+
+  <div class="detail-header">
+    <a href="#call/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">call(ChannelRef, Msg, Timeout) -&gt; Reply | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="cast/2">
+
+  <div class="detail-header">
+    <a href="#cast/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cast(ChannelRef, Msg) -&gt; ok </h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">ChannelRef = pid()</li><li class="description">As returned by <a href="ssh_client_channel.html#start_link/4">start_link/4</a></li><li class="type">Msg = term()</li></ul><p>Sends an asynchronous message to the channel process and returns ok immediately, ignoring if the destination node or channel process does not exist. The channel calls <a href="ssh_client_channel.html#c:handle_cast/2">Module:handle_cast/2</a> to handle the message.</p>
+  </section>
+</section>
+<section class="detail" id="enter_loop/1">
+
+  <div class="detail-header">
+    <a href="#enter_loop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enter_loop(State) -&gt; _ </h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">State = term()</li><li class="description">as returned by <a href="ssh_client_channel.html#init/1">init/1</a></li></ul><p>Makes an existing process an <code>ssh_client_channel</code> (replaces ssh_channel) process. Does not return, instead the calling process enters the <code>ssh_client_channel</code> (replaces ssh_channel) process receive loop and become an <code>ssh_client_channel</code> process. The process must have been started using one of the start functions in <code>proc_lib</code>, see the <a href="https://wojtekmach.pl/otp_docs/stdlib/proc_lib.html">proc_lib(3)</a> manual page in STDLIB. The user is responsible for any initialization of the process and must call <a href="ssh_client_channel.html#init/1">init/1</a>.</p>
+  </section>
+</section>
+<section class="detail" id="init/1">
+
+  <div class="detail-header">
+    <a href="#init/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">init(Options) -&gt; {ok, State} |  {ok, State, Timeout} | {stop, Reason} </h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Options = [{Option, Value}]</li><li class="type">State = term()</li><li class="type">Timeout = timeout()</li><li class="type">Reason = term()</li></ul><p>The following options must be present:</p><dl><dt><code>{channel_cb, atom()}</code></dt><dd><p>The module that implements the channel behaviour.</p></dd><dt><code>{init_args(), list()}</code></dt><dd><p>The list of arguments to the <code>init</code> function of the callback module.</p></dd><dt><code>{cm, </code><a href="ssh.html#t:connection_ref/0">ssh:connection_ref()</a><code>}</code></dt><dd><p>Reference to the <code>ssh</code> connection as returned by <a href="ssh.html#connect/3">ssh:connect/3</a>.</p></dd><dt><code>{channel_id, </code><a href="ssh.html#t:channel_id/0">ssh:channel_id()</a><code>}</code></dt><dd><p>Id of the <code>ssh</code> channel as returned by <a href="ssh_connection.html#session_channel/2">ssh_connection:session_channel/2,4</a>.</p></dd></dl><div class="note"><p>This function is normally not called by the user. The user only needs to call if the channel process needs to be started with help of <code>proc_lib</code> instead of calling <code>start/4</code> or <code>start_link/4</code>.</p></div>
+  </section>
+</section>
+<section class="detail" id="reply/2">
+
+  <div class="detail-header">
+    <a href="#reply/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reply(Client, Reply) -&gt; _</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Client = opaque()</li><li class="type">Reply = term()</li></ul><p>This function can be used by a channel to send a reply to a client that called <code>call/[2,3]</code> when the reply cannot be defined in the return value of <a href="ssh_client_channel.html#c:handle_call/3">Module:handle_call/3</a>.</p><p><code>Client</code> must be the <code>From</code> argument provided to the callback function <code>handle_call/3</code>. <code>Reply</code> is an arbitrary term, which is given back to the client as the return value of <a href="ssh_client_channel.html#call/2">call/[2,3].</a></p>
+  </section>
+</section>
+<section class="detail" id="start/4">
+
+  <div class="detail-header">
+    <a href="#start/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start(SshConnection, ChannelId, ChannelCb, CbInitArgs) -&gt; </h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">SshConnection = <a href="ssh.html#t:connection_ref/0">ssh:connection_ref()</a></li><li class="description">As returned by <a href="ssh.html#connect/3">ssh:connect/3</a></li><li class="type">ChannelId = <a href="ssh.html#t:channel_id/0">ssh:channel_id()</a></li><li class="description">As returned by <a href="ssh_connection.html#session_channel/2">ssh_connection:session_channel/[2,4]</a>.</li><li class="type">ChannelCb = atom()</li><li class="description">Name of the module implementing the service-specific parts of the channel.</li><li class="type">CbInitArgs = [term()]</li><li class="description">Argument list for the <code>init</code> function in the callback module.</li><li class="type">ChannelRef = pid()</li></ul><p>Starts a process that handles an SSH channel. It is called internally, by the <code>ssh</code> daemon, or explicitly by the <code>ssh</code> client implementations. The behavior sets the <code>trap_exit</code> flag to <code>true</code>.</p>
+  </section>
+</section>
+<section class="detail" id="start_link/4">
+
+  <div class="detail-header">
+    <a href="#start_link/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link(SshConnection, ChannelId, ChannelCb, CbInitArgs) -&gt;
+      {ok, ChannelRef} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

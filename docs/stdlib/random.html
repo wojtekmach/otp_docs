@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>random — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+random <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides a random number generator. The method is attributed to B.A. Wichmann and I.D. Hill in 'An efficient and portable pseudo-random number generator', Journal of Applied Statistics. AS183. 1982. Also Byte March 1987.</p><p>The algorithm is a modification of the version attributed to Richard A. O'Keefe in the standard Prolog library.</p><p>Every time a random number is requested, a state is used to calculate it, and a new state is produced. The state can either be implicit (kept in the process dictionary) or be an explicit argument and return value. In this implementation, the state (the type <code>ran()</code>) consists of a tuple of three integers.</p><div class="note"><p>This random number generator is not cryptographically strong. If a strong cryptographic random number generator is needed, use one of functions in the <a href="https://wojtekmach.pl/otp_docs/crypto/crypto.html"><code>crypto</code></a> module, for example, <a href="https://wojtekmach.pl/otp_docs/crypto/crypto.html"><code>crypto:strong_rand_bytes/1</code></a>.</p></div><div class="note"><p>The improved <a href="rand.html"><code>rand</code></a> module is to be used instead of this module.</p></div><h2 id="module-note" class="section-heading">
+  <a href="#module-note" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Note
+</h2>
+<p>Some of the functions use the process dictionary variable <code>random_seed</code> to remember the current seed.</p><p>If a process calls <a href="random.html#uniform/0"><code>uniform/0</code></a> or <a href="random.html#uniform/1"><code>uniform/1</code></a> without setting a seed first, <a href="random.html#seed/0"><code>seed/0</code></a> is called automatically.</p><p>The implementation changed in Erlang/OTP R15. Upgrading to R15 breaks applications that expect a specific output for a specified seed. The output is still deterministic number series, but different compared to releases older than R15. Seed <code>{0,0,0}</code> does, for example, no longer produce a flawed series of only zeros.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:ran/0">-type ran() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The state.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#seed/0">seed/0</a>
+
+      <span class="deprecated" title="random:seed/0 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Seeds random number generation with default (fixed) values in the process dictionary and returns the old state.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#seed/1">seed/1</a>
+
+      <span class="deprecated" title="random:seed/1 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code>seed({A1, A2, A3})</code> is equivalent to <code>seed(A1, A2, A3)</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#seed/3">seed/3</a>
+
+      <span class="deprecated" title="random:seed/3 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Seeds random number generation with integer values in the process dictionary and returns the old state.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#seed0/0">seed0/0</a>
+
+      <span class="deprecated" title="random:seed0/0 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the default state.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uniform/0">uniform/0</a>
+
+      <span class="deprecated" title="random:uniform/0 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a random float uniformly distributed between <code>0.0</code> and <code>1.0</code>, updating the state in the process dictionary.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uniform/1">uniform/1</a>
+
+      <span class="deprecated" title="random:uniform/1 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns, for a specified integer <code>N &gt;= 1</code>, a random integer uniformly distributed between <code>1</code> and <code>N</code>, updating the state in the process dictionary.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uniform_s/1">uniform_s/1</a>
+
+      <span class="deprecated" title="random:uniform_s/1 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns, for a specified state, a random float uniformly distributed between <code>0.0</code> and <code>1.0</code>, and a new state.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#uniform_s/2">uniform_s/2</a>
+
+      <span class="deprecated" title="random:uniform_s/2 is deprecated; use the 'rand' module instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns, for a specified integer <code>N &gt;= 1</code> and a state, a random integer uniformly distributed between <code>1</code> and <code>N</code>, and a new state.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:ran/0">
+
+  <div class="detail-header">
+    <a href="#t:ran/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type ran() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>ran() :: {integer(), integer(), integer()}.</pre>
+
+      </div>
+
+<p>The state.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="seed/0">
+
+  <div class="detail-header">
+    <a href="#seed/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">seed/0</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:seed/0 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>seed() -> <a href="#t:ran/0">ran</a>().</pre>
+
+      </div>
+
+<p>Seeds random number generation with default (fixed) values in the process dictionary and returns the old state.</p>
+  </section>
+</section>
+<section class="detail" id="seed/1">
+
+  <div class="detail-header">
+    <a href="#seed/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">seed/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:seed/1 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>seed(SValue) -> undefined | <a href="#t:ran/0">ran</a>()
+        when SValue :: {A1, A2, A3} | integer(), A1 :: integer(), A2 :: integer(), A3 :: integer().</pre>
+
+      </div>
+
+<p><code>seed({A1, A2, A3})</code> is equivalent to <code>seed(A1, A2, A3)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="seed/3">
+
+  <div class="detail-header">
+    <a href="#seed/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">seed/3</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:seed/3 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>seed(A1, A2, A3) -> undefined | <a href="#t:ran/0">ran</a>() when A1 :: integer(), A2 :: integer(), A3 :: integer().</pre>
+
+      </div>
+
+<p>Seeds random number generation with integer values in the process dictionary and returns the old state.</p><p>The following is an easy way of obtaining a unique value to seed with:</p><pre><code type="none">random:seed(erlang:phash2([node()]),
+            erlang:monotonic_time(),
+            erlang:unique_integer())</code></pre><p>For details, see <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#phash2/1"><code>erlang:phash2/1</code></a>, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#node/0"><code>erlang:node/0</code></a>, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#monotonic_time/0"><code>erlang:monotonic_time/0</code></a>, and <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#unique_integer/0"><code>erlang:unique_integer/0</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="seed0/0">
+
+  <div class="detail-header">
+    <a href="#seed0/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">seed0/0</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:seed0/0 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>seed0() -> <a href="#t:ran/0">ran</a>().</pre>
+
+      </div>
+
+<p>Returns the default state.</p>
+  </section>
+</section>
+<section class="detail" id="uniform/0">
+
+  <div class="detail-header">
+    <a href="#uniform/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uniform/0</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:uniform/0 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uniform() -> float().</pre>
+
+      </div>
+
+<p>Returns a random float uniformly distributed between <code>0.0</code> and <code>1.0</code>, updating the state in the process dictionary.</p>
+  </section>
+</section>
+<section class="detail" id="uniform/1">
+
+  <div class="detail-header">
+    <a href="#uniform/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uniform/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:uniform/1 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uniform(N) -> pos_integer() when N :: pos_integer().</pre>
+
+      </div>
+
+<p>Returns, for a specified integer <code>N &gt;= 1</code>, a random integer uniformly distributed between <code>1</code> and <code>N</code>, updating the state in the process dictionary.</p>
+  </section>
+</section>
+<section class="detail" id="uniform_s/1">
+
+  <div class="detail-header">
+    <a href="#uniform_s/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uniform_s/1</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:uniform_s/1 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uniform_s(State0) -> {float(), State1} when State0 :: <a href="#t:ran/0">ran</a>(), State1 :: <a href="#t:ran/0">ran</a>().</pre>
+
+      </div>
+
+<p>Returns, for a specified state, a random float uniformly distributed between <code>0.0</code> and <code>1.0</code>, and a new state.</p>
+  </section>
+</section>
+<section class="detail" id="uniform_s/2">
+
+  <div class="detail-header">
+    <a href="#uniform_s/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">uniform_s/2</h1>
+
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. random:uniform_s/2 is deprecated; use the 'rand' module instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>uniform_s(N, State0) -> {integer(), State1}
+             when N :: pos_integer(), State0 :: <a href="#t:ran/0">ran</a>(), State1 :: <a href="#t:ran/0">ran</a>().</pre>
+
+      </div>
+
+<p>Returns, for a specified integer <code>N &gt;= 1</code> and a state, a random integer uniformly distributed between <code>1</code> and <code>N</code>, and a new state.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="sasl v4.1">
+
+    <title>release_handler — sasl v4.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-9927bf350d.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+sasl
+      </a>
+      <strong class="sidebar-projectVersion">
+        v4.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+release_handler <small class="app-vsn">(sasl v4.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The <em>release handler</em> process belongs to the SASL application, which is responsible for <em>release handling</em>, that is, unpacking, installation, and removal of release packages.</p><p>An introduction to release handling and an example is provided in OTP Design Principles in <em>System Documentation</em>.</p><p>A <em>release package</em> is a compressed tar file containing code for a certain version of a release, created by calling <a href="systools.html#make_tar/1"><code>systools:make_tar/1,2</code></a>. The release package is to be located in the <code>$ROOT/releases</code> directory of the previous version of the release, where <code>$ROOT</code> is the installation root directory, <a href="https://wojtekmach.pl/otp_docs/kernel/code.html#root_dir/0"><code>code:root_dir()</code></a>. Another <code>releases</code> directory can be specified using the SASL configuration parameter <code>releases_dir</code> or the OS environment variable <code>RELDIR</code>. The release handler must have write access to this directory to install the new release. The persistent state of the release handler is stored there in a file called <code>RELEASES</code>.</p><p>A release package is always to contain:</p><ul><li>A release resource file, <code>Name.rel</code></li><li>A boot script, <code>Name.boot</code></li></ul><p>The <code>.rel</code> file contains information about the release: its name, version, and which ERTS and application versions it uses.</p><p>A release package can also contain:</p><ul><li>A release upgrade file, <code>relup</code></li><li>A system configuration file, <code>sys.config</code></li><li>A system configuration source file, <code>sys.config.src</code></li></ul><p>The <code>relup</code> file contains instructions for how to upgrade to, or downgrade from, this version of the release.</p><p>The release package can be <em>unpacked</em>, which extracts the files. An unpacked release can be <em>installed</em>. The currently used version of the release is then upgraded or downgraded to the specified version by evaluating the instructions in the <code>relup</code> file. An installed release can be made <em>permanent</em>. Only one permanent release can exist in the system, and this release is used if the system is restarted. An installed release, except the permanent one, can be <em>removed</em>. When a release is removed, all files belonging to that release only are deleted.</p><p>Each release version has a status, which can be <code>unpacked</code>, <code>current</code>, <code>permanent</code>, or <code>old</code>. There is always one latest release, which either has status <code>permanent</code> (normal case) or <code>current</code> (installed, but not yet made permanent). The meaning of the status values are illustrated in the following table:</p><pre><code class="makeup erlang"><span class="w">        </span><span class="n">Status</span><span class="w">     </span><span class="n">Action</span><span class="w">                </span><span class="n">NextStatus</span><span class="w">
+        </span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">--</span><span class="o">-</span><span class="w">
+</span><span class="w">        </span><span class="p">-</span><span class="w">          </span><span class="na">unpack</span><span class="w">                </span><span class="ss">unpacked</span><span class="w">
+        </span><span class="ss">unpacked</span><span class="w">   </span><span class="ss">install</span><span class="w">               </span><span class="ss">current</span><span class="w">
+                   </span><span class="ss">remove</span><span class="w">                </span><span class="o">-</span><span class="w">
+        </span><span class="ss">current</span><span class="w">    </span><span class="ss">make_permanent</span><span class="w">        </span><span class="ss">permanent</span><span class="w">
+                   </span><span class="ss">install</span><span class="w"> </span><span class="ss">other</span><span class="w">         </span><span class="ss">old</span><span class="w">
+                   </span><span class="ss">remove</span><span class="w">                </span><span class="o">-</span><span class="w">
+        </span><span class="ss">permanent</span><span class="w">  </span><span class="ss">make</span><span class="w"> </span><span class="ss">other</span><span class="w"> </span><span class="ss">permanent</span><span class="w">  </span><span class="ss">old</span><span class="w">
+                   </span><span class="ss">install</span><span class="w">               </span><span class="ss">permanent</span><span class="w">
+        </span><span class="ss">old</span><span class="w">        </span><span class="ss">reboot_old</span><span class="w">            </span><span class="ss">permanent</span><span class="w">
+                   </span><span class="ss">install</span><span class="w">               </span><span class="ss">current</span><span class="w">
+                   </span><span class="ss">remove</span><span class="w">                </span><span class="o">-</span></code></pre><p>The release handler process is a locally registered process on each node. When a release is installed in a distributed system, the release handler on each node must be called. The release installation can be synchronized between nodes. From an operator view, it can be unsatisfactory to specify each node. The aim is to install one release package in the system, no matter how many nodes there are. It is recommended that software management functions are written that take care of this problem. Such a function can have knowledge of the system architecture, so it can contact each individual release handler to install the package.</p><p>For release handling to work properly, the runtime system must know which release it is running. It must also be able to change (in runtime) which boot script and system configuration file are to be used if the system is restarted. This is taken care of automatically if Erlang is started as an embedded system. Read about this in Embedded System in <em>System Documentation</em>. In this case, the system configuration file <code>sys.config</code> is mandatory.</p><p>The installation of a new release can restart the system. Which program to use is specified by the SASL configuration parameter <code>start_prg</code>, which defaults to <code>$ROOT/bin/start</code>.</p><p>The emulator restart on Windows NT expects that the system is started using the <code>erlsrv</code> program (as a service). Furthermore, the release handler expects that the service is named <code>NodeName</code>_<code>Release</code>, where <code>NodeName</code> is the first part of the Erlang node name (up to, but not including the &quot;@&quot;) and <code>Release</code> is the current release version. The release handler furthermore expects that a program like <code>start_erl.exe</code> is specified as &quot;machine&quot; to <code>erlsrv</code>. During upgrading with restart, a new service is registered and started. The new service is set to automatic and the old service is removed when the new release is made permanent.</p><p>The release handler at a node running on a diskless machine, or with a read-only file system, must be configured accordingly using the following SASL configuration parameters (for details, see sasl(6)):</p><dl><dt><code>masters</code></dt><dd><p>This node uses some master nodes to store and fetch release information. All master nodes must be operational whenever release information is written by this node.</p></dd><dt><code>client_directory</code></dt><dd><p>The <code>client_directory</code> in the directory structure of the master nodes must be specified.</p></dd><dt><code>static_emulator</code></dt><dd><p>This parameter specifies if the Erlang emulator is statically installed at the client node. A node with a static emulator cannot dynamically switch to a new emulator, as the executable files are statically written into memory.</p></dd></dl><p>The release handler can also be used to unpack and install release packages when not running Erlang as an embedded system. However, in this case the user must somehow ensure that correct boot scripts and configuration files are used if the system must be restarted.</p><p>Functions are provided for using another file structure than the structure defined in OTP. These functions can be used to test a release upgrade locally.</p><h2 id="module-typical-error-reasons" class="section-heading">
+  <a href="#module-typical-error-reasons" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Typical Error Reasons
+</h2>
+<dl><dt><code>{bad_masters, Masters}</code></dt><dd><p>The master nodes <code>Masters</code> are not alive.</p></dd><dt><code>{bad_rel_file, File}</code></dt><dd><p>Specified <code>.rel</code> file <code>File</code> cannot be read or does not contain a single term.</p></dd><dt><code>{bad_rel_data, Data}</code></dt><dd><p>Specified <code>.rel</code> file does not contain a recognized release specification, but another term <code>Data</code>.</p></dd><dt><code>{bad_relup_file, File}</code></dt><dd><p>Specified <code>relup</code> file <code>Relup</code> contains bad data.</p></dd><dt><code>{cannot_extract_file, Name, Reason}</code></dt><dd><p>Problems when extracting from a tar file, <a href="https://wojtekmach.pl/otp_docs/stdlib/erl_tar.html#extract/2"><code>erl_tar:extract/2</code></a> returned <code>{error, {Name, Reason}}</code>.</p></dd><dt><code>{existing_release, Vsn}</code></dt><dd><p>Specified release version <code>Vsn</code> is already in use.</p></dd><dt><code>{Master, Reason, When}</code></dt><dd><p>Some operation, indicated by the term <code>When</code>, failed on the master node <code>Master</code> with the specified error reason <code>Reason</code>.</p></dd><dt><code>{no_matching_relup, Vsn, CurrentVsn}</code></dt><dd><p>Cannot find a script for upgrading/downgrading between <code>CurrentVsn</code> and <code>Vsn</code>.</p></dd><dt><code>{no_such_directory, Path}</code></dt><dd><p>The directory <code>Path</code>does not exist.</p></dd><dt><code>{no_such_file, Path}</code></dt><dd><p>The path <code>Path</code> (file or directory) does not exist.</p></dd><dt><code>{no_such_file, {Master, Path}}</code></dt><dd><p>The path <code>Path</code> (file or directory) does not exist at the master node <code>Master</code>.</p></dd><dt><code>{no_such_release, Vsn}</code></dt><dd><p>The specified release version <code>Vsn</code> does not exist.</p></dd><dt><code>{not_a_directory, Path}</code></dt><dd><p><code>Path</code> exists but is not a directory.</p></dd><dt><code>{Posix, File}</code></dt><dd><p>Some file operation failed for <code>File</code>. <code>Posix</code> is an atom named from the Posix error codes, such as <code>enoent</code>, <code>eacces</code>, or <code>eisdir</code>. See <a href="https://wojtekmach.pl/otp_docs/kernel/file.html"><code>file(3)</code></a> in Kernel.</p></dd><dt><code>Posix</code></dt><dd><p>Some file operation failed, as for the previous item in the list.</p></dd></dl><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p>OTP Design Principles, <code>config(4)</code>, <code>rel(4)</code>, <code>relup(4)</code>, <code>script(4)</code>, <a href="https://wojtekmach.pl/otp_docs/stdlib/sys.html"><code>sys(3)</code></a>, <a href="systools.html"><code>systools(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_install_release/1">check_install_release(Vsn) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = OtherVsn = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = purge</li><li class="type">Descr = term()</li><li class="type">Reason = term()</li></ul><p>Checks if the specified version <code>Vsn</code> of the release can be installed. The release must not have status <code>current</code>. Issues warnings if <code>relup</code> file or <code>sys.config</code> is not present. If <code>relup</code> file is present, its contents are checked and <code>{error,Reason}</code> is returned if an error is found. Also checks that all required applications are present and that all new code can be loaded; <code>{error,Reason}</code> is returned if an error is found.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_install_release/2">check_install_release(Vsn,Opts) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_RELEASES/4">create_RELEASES(Root, RelDir, RelFile, AppDirs) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Root = RelDir = RelFile = string()</li><li class="type">AppDirs = [{App, Vsn, Dir}]</li><li class="type"> App = atom()</li><li class="type"> Vsn = Dir = string()</li><li class="type">Reason = term()</li></ul><p>Creates an initial <code>RELEASES</code> file to be used by the release handler. This file must exist to install new releases.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#downgrade_app/2">downgrade_app(App, Dir) -&gt;</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">App = atom()</li><li class="type">Dir = OldVsn = string()</li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Downgrades an application <code>App</code> from the current version to a previous version <code>OldVsn</code> located in <code>Dir</code> according to the <code>.appup</code> file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#downgrade_app/3">downgrade_app(App, OldVsn, Dir) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#downgrade_script/3">downgrade_script(App, OldVsn, Dir) -&gt; {ok, Script}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">App = atom()</li><li class="type">OldVsn = Dir = string()</li><li class="type">Script = Instructions</li></ul><p>Tries to find an application downgrade script for <code>App</code> from the current version to a previous version <code>OldVsn</code> located in <code>Dir</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#eval_appup_script/4">eval_appup_script(App, ToVsn, ToDir, Script) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">App = atom()</li><li class="type">ToVsn = ToDir = string()</li><li class="type">Script</li><li class="description">See <a href="release_handler.html#upgrade_script/2"><code>upgrade_script/2</code></a>, <a href="release_handler.html#downgrade_script/3"><code>downgrade_script/3</code></a></li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Evaluates an application upgrade or downgrade script <code>Script</code>, the result from calling <a href="release_handler.html#upgrade_script/2"><code>upgrade_script/2</code></a> or <a href="release_handler.html#downgrade_script/3"><code>downgrade_script/3</code></a>, exactly in the same way as <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a> does.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#install_file/2">install_file(Vsn, File) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = File = string()</li><li class="type">Reason = term()</li></ul><p>Installs a release-dependent file in the release structure. The release-dependent file must be in the release structure when a new release is installed: <code>start.boot</code>, <code>relup</code>, and <code>sys.config</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#install_release/1">install_release(Vsn) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = OtherVsn = string()</li><li class="type">Opt = {error_action, Action} | {code_change_timeout, Timeout}</li><li class="type">   | {suspend_timeout, Timeout} | {update_paths, Bool}</li><li class="type"> Action = restart | reboot</li><li class="type"> Timeout = default | infinity | pos_integer()</li><li class="type"> Bool = boolean()</li><li class="type">Descr = term()</li><li class="type">Reason = {illegal_option, Opt} | {already_installed, Vsn} | {change_appl_data, term()} | {missing_base_app, OtherVsn, App} | {could_not_create_hybrid_boot, term()} | term()</li><li class="type">App = atom()</li></ul><p>Installs the specified version <code>Vsn</code> of the release. Looks first for a <code>relup</code> file for <code>Vsn</code> and a script <code>{UpFromVsn,Descr1,Instructions1}</code> in this file for upgrading from the current version. If not found, the function looks for a <code>relup</code> file for the current version and a script <code>{Vsn,Descr2,Instructions2}</code> in this file for downgrading to <code>Vsn</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#install_release/2">install_release(Vsn, [Opt]) -&gt; {ok, OtherVsn, Descr} | {continue_after_restart, OtherVsn, Descr} | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#make_permanent/1">make_permanent(Vsn) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {bad_status, Status} | term()</li></ul><p>Makes the specified release version <code>Vsn</code> permanent.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reboot_old_release/1">reboot_old_release(Vsn) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {bad_status, Status} | term()</li></ul><p>Reboots the system by making the old release permanent, and calls <a href="https://wojtekmach.pl/otp_docs/erts/init.html#reboot/0"><code>init:reboot()</code></a> directly. The release must have status <code>old</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_release/1">remove_release(Vsn) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {permanent, Vsn} | client_node | term()</li></ul><p>Removes a release and its files from the system. The release must not be the permanent release. Removes only the files and directories not in use by another release.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_removed/1">set_removed(Vsn) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {permanent, Vsn} | term()</li></ul><p>Makes it possible to handle removal of releases outside the release handler. Tells the release handler that the release is removed from the system. This function does not delete any files.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_unpacked/2">set_unpacked(RelFile, AppDirs) -&gt; {ok, Vsn} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">RelFile = string()</li><li class="type">AppDirs = [{App, Vsn, Dir}]</li><li class="type"> App = atom()</li><li class="type"> Vsn = Dir = string()</li><li class="type">Reason = term()</li></ul><p>Makes it possible to handle unpacking of releases outside the release handler. Tells the release handler that the release is unpacked. <code>Vsn</code> is extracted from the release resource file <code>RelFile</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unpack_release/1">unpack_release(Name) -&gt; {ok, Vsn} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Reason = client_node | term()</li></ul><p>Unpacks a release package <code>Name.tar.gz</code> located in the <code>releases</code> directory.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#upgrade_app/2">upgrade_app(App, Dir) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">App = atom()</li><li class="type">Dir = string()</li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Upgrades an application <code>App</code> from the current version to a new version located in <code>Dir</code> according to the <code>.appup</code> file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#upgrade_script/2">upgrade_script(App, Dir) -&gt; {ok, NewVsn, Script}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">App = atom()</li><li class="type">Dir = string()</li><li class="type">NewVsn = string()</li><li class="type">Script = Instructions</li></ul><p>Tries to find an application upgrade script for <code>App</code> from the current version to a new version located in <code>Dir</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_releases/0">which_releases() -&gt; [{Name, Vsn, Apps, Status}]</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Apps = [&quot;App-Vsn&quot;]</li><li class="type">Status = unpacked | current | permanent | old</li></ul><p>Returns all releases known to the release handler.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_releases/1">which_releases(Status) -&gt; [{Name, Vsn, Apps, Status}]</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Apps = [&quot;App-Vsn&quot;]</li><li class="type">Status = unpacked | current | permanent | old</li></ul><p>Returns all releases, known to the release handler, of a specific status.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="check_install_release/1">
+
+  <div class="detail-header">
+    <a href="#check_install_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_install_release(Vsn) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R14B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = OtherVsn = string()</li><li class="type">Opts = [Opt]</li><li class="type">Opt = purge</li><li class="type">Descr = term()</li><li class="type">Reason = term()</li></ul><p>Checks if the specified version <code>Vsn</code> of the release can be installed. The release must not have status <code>current</code>. Issues warnings if <code>relup</code> file or <code>sys.config</code> is not present. If <code>relup</code> file is present, its contents are checked and <code>{error,Reason}</code> is returned if an error is found. Also checks that all required applications are present and that all new code can be loaded; <code>{error,Reason}</code> is returned if an error is found.</p><p>Evaluates all instructions that occur before the <code>point_of_no_return</code> instruction in the release upgrade script.</p><p>Returns the same as <a href="release_handler.html#install_release/1"><code>install_release/1</code></a>. <code>Descr</code> defaults to &quot;&quot; if no <code>relup</code> file is found.</p><p>If option <code>purge</code> is specified, all old code that can be soft-purged is purged after all other checks are successfully completed. This can be useful to reduce the time needed by <a href="release_handler.html#install_release/1"><code>install_release/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="check_install_release/2">
+
+  <div class="detail-header">
+    <a href="#check_install_release/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_install_release(Vsn,Opts) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R14B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="create_RELEASES/4">
+
+  <div class="detail-header">
+    <a href="#create_RELEASES/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_RELEASES(Root, RelDir, RelFile, AppDirs) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Root = RelDir = RelFile = string()</li><li class="type">AppDirs = [{App, Vsn, Dir}]</li><li class="type"> App = atom()</li><li class="type"> Vsn = Dir = string()</li><li class="type">Reason = term()</li></ul><p>Creates an initial <code>RELEASES</code> file to be used by the release handler. This file must exist to install new releases.</p><p><code>Root</code> is the root of the installation (<code>$ROOT</code>) as described earlier. <code>RelDir</code> is the directory where the <code>RELEASES</code> file is to be created (normally <code>$ROOT/releases</code>). <code>RelFile</code> is the name of the <code>.rel</code> file that describes the initial release, including the extension <code>.rel</code>.</p><p><code>AppDirs</code> can be used to specify from where the modules for the specified applications are to be loaded. <code>App</code> is the name of an application, <code>Vsn</code> is the version, and <code>Dir</code> is the name of the directory where <code>App-Vsn</code> is located. The corresponding modules are to be located under <code>Dir/App-Vsn/ebin</code>. The directories for applications not specified in <code>AppDirs</code> are assumed to be located in <code>$ROOT/lib</code>.</p>
+  </section>
+</section>
+<section class="detail" id="downgrade_app/2">
+
+  <div class="detail-header">
+    <a href="#downgrade_app/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">downgrade_app(App, Dir) -&gt;</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">App = atom()</li><li class="type">Dir = OldVsn = string()</li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Downgrades an application <code>App</code> from the current version to a previous version <code>OldVsn</code> located in <code>Dir</code> according to the <code>.appup</code> file.</p><p><code>App</code> is the name of the application, which must be started. <code>OldVsn</code> is the previous application version and can be omitted if <code>Dir</code> is of the format <code>&quot;App-OldVsn&quot;</code>. <code>Dir</code> is the library directory of the previous version of <code>App</code>. The corresponding modules and the old <code>.app</code> file are to be located under <code>Dir/ebin</code>. The <code>.appup</code> file is to be located in the <code>ebin</code> directory of the <em>current</em> library directory of the application (<a href="https://wojtekmach.pl/otp_docs/kernel/code.html#lib_dir/1"><code>code:lib_dir(App)</code></a>).</p><p>The function looks in the <code>.appup</code> file and tries to find a downgrade script to the previous version of the application using <a href="release_handler.html#downgrade_script/3"><code>downgrade_script/3</code></a>. This script is evaluated using <a href="release_handler.html#eval_appup_script/4"><code>eval_appup_script/4</code></a>, exactly in the same way as <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a> does.</p><p>Returns one of the following:</p><ul><li><code>{ok, Unpurged}</code> if evaluating the script is successful, where <code>Unpurged</code> is a list of unpurged modules</li><li><code>restart_emulator</code> if this instruction is encountered in the script</li><li><code>{error, Reason}</code> if an error occurred when finding or evaluating the script</li></ul>
+  </section>
+</section>
+<section class="detail" id="downgrade_app/3">
+
+  <div class="detail-header">
+    <a href="#downgrade_app/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">downgrade_app(App, OldVsn, Dir) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="downgrade_script/3">
+
+  <div class="detail-header">
+    <a href="#downgrade_script/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">downgrade_script(App, OldVsn, Dir) -&gt; {ok, Script}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">App = atom()</li><li class="type">OldVsn = Dir = string()</li><li class="type">Script = Instructions</li></ul><p>Tries to find an application downgrade script for <code>App</code> from the current version to a previous version <code>OldVsn</code> located in <code>Dir</code>.</p><p>The downgrade script can then be evaluated using <a href="release_handler.html#eval_appup_script/4"><code>eval_appup_script/4</code></a>. It is recommended to use <a href="release_handler.html#downgrade_app/2"><code>downgrade_app/2,3</code></a> instead, but this function (<code>downgrade_script</code>) is useful to inspect the contents of the script.</p><p><code>App</code> is the name of the application, which must be started. <code>Dir</code> is the previous library directory of <code>App</code>. The corresponding modules and the old <code>.app</code> file are to be located under <code>Dir/ebin</code>. The <code>.appup</code> file is to be located in the <code>ebin</code> directory of the <em>current</em> library directory of the application (<a href="https://wojtekmach.pl/otp_docs/kernel/code.html#lib_dir/1"><code>code:lib_dir(App)</code>)</a>.</p><p>The function looks in the <code>.appup</code> file and tries to find a downgrade script from the current application version. High-level instructions are translated to low-level instructions. The instructions are sorted in the same manner as when generating a <code>relup</code> file.</p><p>Returns <code>{ok, Script}</code> if successful. For details about <code>Script</code>, see <code>appup(4)</code>.</p><p>Failure: If a script cannot be found, the function fails with an appropriate error reason.</p>
+  </section>
+</section>
+<section class="detail" id="eval_appup_script/4">
+
+  <div class="detail-header">
+    <a href="#eval_appup_script/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">eval_appup_script(App, ToVsn, ToDir, Script) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">App = atom()</li><li class="type">ToVsn = ToDir = string()</li><li class="type">Script</li><li class="description">See <a href="release_handler.html#upgrade_script/2"><code>upgrade_script/2</code></a>, <a href="release_handler.html#downgrade_script/3"><code>downgrade_script/3</code></a></li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Evaluates an application upgrade or downgrade script <code>Script</code>, the result from calling <a href="release_handler.html#upgrade_script/2"><code>upgrade_script/2</code></a> or <a href="release_handler.html#downgrade_script/3"><code>downgrade_script/3</code></a>, exactly in the same way as <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a> does.</p><p><code>App</code> is the name of the application, which must be started. <code>ToVsn</code> is the version to be upgraded/downgraded to, and <code>ToDir</code> is the library directory of this version. The corresponding modules as well as the <code>.app</code> and <code>.appup</code> files are to be located under <code>Dir/ebin</code>.</p><p>Returns one of the following:</p><ul><li><code>{ok, Unpurged}</code> if evaluating the script is successful, where <code>Unpurged</code> is a list of unpurged modules</li><li><code>restart_emulator</code> if this instruction is encountered in the script</li><li><code>{error, Reason}</code> if an error occurred when finding or evaluating the script</li></ul><p>If the <code>restart_new_emulator</code> instruction is found in the script, <a href="release_handler.html#eval_appup_script/4"><code>eval_appup_script/4</code></a> returns <code>{error,restart_new_emulator}</code>. This because <code>restart_new_emulator</code> requires a new version of the emulator to be started before the rest of the upgrade instructions can be executed, and this can only be done by <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="install_file/2">
+
+  <div class="detail-header">
+    <a href="#install_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">install_file(Vsn, File) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = File = string()</li><li class="type">Reason = term()</li></ul><p>Installs a release-dependent file in the release structure. The release-dependent file must be in the release structure when a new release is installed: <code>start.boot</code>, <code>relup</code>, and <code>sys.config</code>.</p><p>The function can be called, for example, when these files are generated at the target. The function is to be called after <a href="release_handler.html#set_unpacked/2"><code>set_unpacked/2</code></a> has been called.</p>
+  </section>
+</section>
+<section class="detail" id="install_release/1">
+
+  <div class="detail-header">
+    <a href="#install_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">install_release(Vsn) -&gt; {ok, OtherVsn, Descr} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = OtherVsn = string()</li><li class="type">Opt = {error_action, Action} | {code_change_timeout, Timeout}</li><li class="type">   | {suspend_timeout, Timeout} | {update_paths, Bool}</li><li class="type"> Action = restart | reboot</li><li class="type"> Timeout = default | infinity | pos_integer()</li><li class="type"> Bool = boolean()</li><li class="type">Descr = term()</li><li class="type">Reason = {illegal_option, Opt} | {already_installed, Vsn} | {change_appl_data, term()} | {missing_base_app, OtherVsn, App} | {could_not_create_hybrid_boot, term()} | term()</li><li class="type">App = atom()</li></ul><p>Installs the specified version <code>Vsn</code> of the release. Looks first for a <code>relup</code> file for <code>Vsn</code> and a script <code>{UpFromVsn,Descr1,Instructions1}</code> in this file for upgrading from the current version. If not found, the function looks for a <code>relup</code> file for the current version and a script <code>{Vsn,Descr2,Instructions2}</code> in this file for downgrading to <code>Vsn</code>.</p><p>If a script is found, the first thing that happens is that the application specifications are updated according to the <code>.app</code> files and <code>sys.config</code> belonging to the release version <code>Vsn</code>.</p><p>After the application specifications have been updated, the instructions in the script are evaluated and the function returns <code>{ok,OtherVsn,Descr}</code> if successful. <code>OtherVsn</code> and <code>Descr</code> are the version (<code>UpFromVsn</code> or <code>Vsn</code>) and description (<code>Descr1</code> or <code>Descr2</code>) as specified in the script.</p><p>If <code>{continue_after_restart,OtherVsn,Descr}</code> is returned, the emulator is restarted before the upgrade instructions are executed. This occurs if the emulator or any of the applications Kernel, STDLIB, or SASL are updated. The new emulator version and these core applications execute after the restart. For all other applications the old versions are started and the upgrade is performed as normal by executing the upgrade instructions.</p><p>If a recoverable error occurs, the function returns <code>{error,Reason}</code> and the original application specifications are restored. If a non-recoverable error occurs, the system is restarted.</p><p><em>Options</em>:</p><dl><dt><code>error_action</code></dt><dd><p>Defines if the node is to be restarted (<a href="https://wojtekmach.pl/otp_docs/erts/init.html#restart/0"><code>init:restart()</code></a>) or rebooted (<a href="https://wojtekmach.pl/otp_docs/erts/init.html#reboot/0"><code>init:reboot()</code></a>) if there is an error during the installation. Default is <code>restart</code>.</p></dd><dt><code>code_change_timeout</code></dt><dd><p>Defines the time-out for all calls to <a href="https://wojtekmach.pl/otp_docs/stdlib/sys.html#change_code/4"><code>sys:change_code</code></a>. If no value is specified or <code>default</code> is specified, the default value defined in <code>sys</code> is used.</p></dd><dt><code>suspend_timeout</code></dt><dd><p>Defines the time-out for all calls to <a href="https://wojtekmach.pl/otp_docs/stdlib/sys.html#suspend/1"><code>sys:suspend</code></a>. If no value is specified, the values defined by the <code>Timeout</code> parameter of the <code>upgrade</code> or <code>suspend</code> instructions are used. If <code>default</code> is specified, the default value defined in <code>sys</code> is used.</p></dd><dt><code>{update_paths,Bool}</code></dt><dd><p>Indicates if all application code paths are to be updated (<code>Bool==true</code>) or if only code paths for modified applications are to be updated (<code>Bool==false</code>, default). This option has only effect for other application directories than the default <code>$ROOT/lib/App-Vsn</code>, that is, application directories specified in argument <code>AppDirs</code> in a call to <a href="release_handler.html#create_RELEASES/4"><code>create_RELEASES/4</code></a> or <a href="release_handler.html#set_unpacked/2"><code>set_unpacked/2</code></a>.</p><p><em>Example:</em></p><p>In the current version <code>CurVsn</code> of a release, the application directory of <code>myapp</code> is <code>$ROOT/lib/myapp-1.0</code>. A new version <code>NewVsn</code> is unpacked outside the release handler and the release handler is informed about this with a call as follows:</p><pre><code type="none">release_handler:set_unpacked(RelFile, [{myapp,&quot;1.0&quot;,&quot;/home/user&quot;},...]).
+=&gt; {ok,NewVsn}</code></pre><p>If <code>NewVsn</code> is installed with option <code>{update_paths,true}</code>, then <a href="https://wojtekmach.pl/otp_docs/kernel/code.html#lib_dir/1"><code>code:lib_dir(myapp)</code></a> returns <code>/home/user/myapp-1.0</code>.</p></dd></dl><div class="note"><p>Installing a new release can be time consuming if there are many processes in the system. The reason is that each process must be checked for references to old code before a module can be purged. This check can lead to garbage collections and copying of data.</p><p>To speed up the execution of <a href="release_handler.html#install_release/1"><code>install_release</code></a>, first call <a href="release_handler.html#check_install_release/1"><code>check_install_release</code></a>, using option <code>purge</code>. This does the same check for old code. Then purges all modules that can be soft-purged. The purged modules do then no longer have any old code, and <a href="release_handler.html#install_release/1"><code>install_release</code></a> does not need to do the checks.</p><p>This does not reduce the overall time for the upgrade, but it allows checks and purge to be executed in the background before the real upgrade is started.</p></div><div class="note"><p>When upgrading the emulator from a version older than OTP R15, an attempt is made to load new application beam code into the old emulator. Sometimes the new beam format cannot be read by the old emulator, so the code loading fails and the complete upgrade is terminated. To overcome this problem, the new application code is to be compiled with the old emulator. For more information about emulator upgrade from pre OTP R15 versions, see Design Principles in <em>System Documentation</em>.</p></div>
+  </section>
+</section>
+<section class="detail" id="install_release/2">
+
+  <div class="detail-header">
+    <a href="#install_release/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">install_release(Vsn, [Opt]) -&gt; {ok, OtherVsn, Descr} | {continue_after_restart, OtherVsn, Descr} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="make_permanent/1">
+
+  <div class="detail-header">
+    <a href="#make_permanent/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">make_permanent(Vsn) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {bad_status, Status} | term()</li></ul><p>Makes the specified release version <code>Vsn</code> permanent.</p>
+  </section>
+</section>
+<section class="detail" id="reboot_old_release/1">
+
+  <div class="detail-header">
+    <a href="#reboot_old_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reboot_old_release(Vsn) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {bad_status, Status} | term()</li></ul><p>Reboots the system by making the old release permanent, and calls <a href="https://wojtekmach.pl/otp_docs/erts/init.html#reboot/0"><code>init:reboot()</code></a> directly. The release must have status <code>old</code>.</p>
+  </section>
+</section>
+<section class="detail" id="remove_release/1">
+
+  <div class="detail-header">
+    <a href="#remove_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove_release(Vsn) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {permanent, Vsn} | client_node | term()</li></ul><p>Removes a release and its files from the system. The release must not be the permanent release. Removes only the files and directories not in use by another release.</p>
+  </section>
+</section>
+<section class="detail" id="set_removed/1">
+
+  <div class="detail-header">
+    <a href="#set_removed/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_removed(Vsn) -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Vsn = string()</li><li class="type">Reason = {permanent, Vsn} | term()</li></ul><p>Makes it possible to handle removal of releases outside the release handler. Tells the release handler that the release is removed from the system. This function does not delete any files.</p>
+  </section>
+</section>
+<section class="detail" id="set_unpacked/2">
+
+  <div class="detail-header">
+    <a href="#set_unpacked/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_unpacked(RelFile, AppDirs) -&gt; {ok, Vsn} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">RelFile = string()</li><li class="type">AppDirs = [{App, Vsn, Dir}]</li><li class="type"> App = atom()</li><li class="type"> Vsn = Dir = string()</li><li class="type">Reason = term()</li></ul><p>Makes it possible to handle unpacking of releases outside the release handler. Tells the release handler that the release is unpacked. <code>Vsn</code> is extracted from the release resource file <code>RelFile</code>.</p><p><code>AppDirs</code> can be used to specify from where the modules for the specified applications are to be loaded. <code>App</code> is the name of an application, <code>Vsn</code> is the version, and <code>Dir</code> is the name of the directory where <code>App-Vsn</code> is located. The corresponding modules are to be located under <code>Dir/App-Vsn/ebin</code>. The directories for applications not specified in <code>AppDirs</code> are assumed to be located in <code>$ROOT/lib</code>.</p>
+  </section>
+</section>
+<section class="detail" id="unpack_release/1">
+
+  <div class="detail-header">
+    <a href="#unpack_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unpack_release(Name) -&gt; {ok, Vsn} | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Reason = client_node | term()</li></ul><p>Unpacks a release package <code>Name.tar.gz</code> located in the <code>releases</code> directory.</p><p>Performs some checks on the package, for example, checks that all mandatory files are present, and extracts its contents.</p>
+  </section>
+</section>
+<section class="detail" id="upgrade_app/2">
+
+  <div class="detail-header">
+    <a href="#upgrade_app/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">upgrade_app(App, Dir) -&gt; {ok, Unpurged} | restart_emulator | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">App = atom()</li><li class="type">Dir = string()</li><li class="type">Unpurged = [Module]</li><li class="type"> Module = atom()</li><li class="type">Reason = term()</li></ul><p>Upgrades an application <code>App</code> from the current version to a new version located in <code>Dir</code> according to the <code>.appup</code> file.</p><p><code>App</code> is the name of the application, which must be started. <code>Dir</code> is the new library directory of <code>App</code>. The corresponding modules as well as the <code>.app</code> and <code>.appup</code> files are to be located under <code>Dir/ebin</code>.</p><p>The function looks in the <code>.appup</code> file and tries to find an upgrade script from the current version of the application using <a href="release_handler.html#upgrade_script/2"><code>upgrade_script/2</code></a>. This script is evaluated using <a href="release_handler.html#eval_appup_script/4"><code>eval_appup_script/4</code></a>, exactly in the same way as <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a> does.</p><p>Returns one of the following:</p><ul><li><code>{ok, Unpurged}</code> if evaluating the script is successful, where <code>Unpurged</code> is a list of unpurged modules</li><li><code>restart_emulator</code> if this instruction is encountered in the script</li><li><code>{error, Reason}</code> if an error occurred when finding or evaluating the script</li></ul><p>If the <code>restart_new_emulator</code> instruction is found in the script, <a href="release_handler.html#upgrade_app/2"><code>upgrade_app/2</code></a> returns <code>{error,restart_new_emulator}</code>. This because <code>restart_new_emulator</code> requires a new version of the emulator to be started before the rest of the upgrade instructions can be executed, and this can only be done by <a href="release_handler.html#install_release/1"><code>install_release/1,2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="upgrade_script/2">
+
+  <div class="detail-header">
+    <a href="#upgrade_script/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">upgrade_script(App, Dir) -&gt; {ok, NewVsn, Script}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">App = atom()</li><li class="type">Dir = string()</li><li class="type">NewVsn = string()</li><li class="type">Script = Instructions</li></ul><p>Tries to find an application upgrade script for <code>App</code> from the current version to a new version located in <code>Dir</code>.</p><p>The upgrade script can then be evaluated using <a href="release_handler.html#eval_appup_script/4"><code>eval_appup_script/4</code></a>. It is recommended to use <a href="release_handler.html#upgrade_app/2"><code>upgrade_app/2</code></a> instead, but this function (<code>upgrade_script</code>) is useful to inspect the contents of the script.</p><p><code>App</code> is the name of the application, which must be started. <code>Dir</code> is the new library directory of <code>App</code>. The corresponding modules as well as the <code>.app</code> and <code>.appup</code> files are to be located under <code>Dir/ebin</code>.</p><p>The function looks in the <code>.appup</code> file and tries to find an upgrade script from the current application version. High-level instructions are translated to low-level instructions. The instructions are sorted in the same manner as when generating a <code>relup</code> file.</p><p>Returns <code>{ok, NewVsn, Script}</code> if successful, where <code>NewVsn</code> is the new application version. For details about <code>Script</code>, see <code>appup(4)</code>.</p><p>Failure: If a script cannot be found, the function fails with an appropriate error reason.</p>
+  </section>
+</section>
+<section class="detail" id="which_releases/0">
+
+  <div class="detail-header">
+    <a href="#which_releases/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_releases() -&gt; [{Name, Vsn, Apps, Status}]</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Apps = [&quot;App-Vsn&quot;]</li><li class="type">Status = unpacked | current | permanent | old</li></ul><p>Returns all releases known to the release handler.</p>
+  </section>
+</section>
+<section class="detail" id="which_releases/1">
+
+  <div class="detail-header">
+    <a href="#which_releases/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_releases(Status) -&gt; [{Name, Vsn, Apps, Status}]</h1>
+
+
+      <span class="note">(since OTP R15B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Name = Vsn = string()</li><li class="type">Apps = [&quot;App-Vsn&quot;]</li><li class="type">Status = unpacked | current | permanent | old</li></ul><p>Returns all releases, known to the release handler, of a specific status.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

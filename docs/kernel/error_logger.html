@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>error_logger — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+error_logger <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<div class="note"><p>In Erlang/OTP 21.0, a new API for logging was added. The old <code>error_logger</code> module can still be used by legacy code, but log events are redirected to the new Logger API. New code should use the Logger API directly.</p><p><code>error_logger</code> is no longer started by default, but is automatically started when an event handler is added with <code>error_logger:add_report_handler/1,2</code>. The <code>error_logger</code> module is then also added as a handler to the new logger.</p><p>See <a href="logger.html"><code>logger(3)</code></a> and the Logging chapter in the User's Guide for more information.</p></div><p>The Erlang <em>error logger</em> is an event manager (see OTP Design Principles and <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>), registered as <code>error_logger</code>.</p><p>Error logger is no longer started by default, but is automatically started when an event handler is added with <a href="error_logger.html#add_report_handler/1"><code>add_report_handler/1,2</code></a>. The <code>error_logger</code> module is then also added as a handler to the new logger, causing log events to be forwarded from logger to error logger, and consequently to all installed error logger event handlers.</p><p>User-defined event handlers can be added to handle application-specific events.</p><p>Existing event handlers provided by STDLIB and SASL are still available, but are no longer used by OTP.</p><p>Warning events were introduced in Erlang/OTP R9C and are enabled by default as from Erlang/OTP 18.0. To retain backwards compatibility with existing user-defined event handlers, the warning events can be tagged as <code>errors</code> or <code>info</code> using command-line flag <code>+W &lt;e | i | w&gt;</code>, thus showing up as <code>ERROR REPORT</code> or <code>INFO REPORT</code> in the logs.</p><a id="events"></a><h2 id="module-events" class="section-heading">
+  <a href="#module-events" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Events
+</h2>
+<p>All event handlers added to the error logger must handle the following events. <code>Gleader</code> is the group leader pid of the process that sent the event, and <code>Pid</code> is the process that sent the event.</p><dl><dt><code>{error, Gleader, {Pid, Format, Data}}</code></dt><dd><p>Generated when <code>error_msg/1,2</code> or <code>format</code> is called.</p></dd><dt><code>{error_report, Gleader, {Pid, std_error, Report}}</code></dt><dd><p>Generated when <code>error_report/1</code> is called.</p></dd><dt><code>{error_report, Gleader, {Pid, Type, Report}}</code></dt><dd><p>Generated when <code>error_report/2</code> is called.</p></dd><dt><code>{warning_msg, Gleader, {Pid, Format, Data}}</code></dt><dd><p>Generated when <code>warning_msg/1,2</code> is called if warnings are set to be tagged as warnings.</p></dd><dt><code>{warning_report, Gleader, {Pid, std_warning, Report}}</code></dt><dd><p>Generated when <code>warning_report/1</code> is called if warnings are set to be tagged as warnings.</p></dd><dt><code>{warning_report, Gleader, {Pid, Type, Report}}</code></dt><dd><p>Generated when <code>warning_report/2</code> is called if warnings are set to be tagged as warnings.</p></dd><dt><code>{info_msg, Gleader, {Pid, Format, Data}}</code></dt><dd><p>Generated when <code>info_msg/1,2</code> is called.</p></dd><dt><code>{info_report, Gleader, {Pid, std_info, Report}}</code></dt><dd><p>Generated when <code>info_report/1</code> is called.</p></dd><dt><code>{info_report, Gleader, {Pid, Type, Report}}</code></dt><dd><p>Generated when <code>info_report/2</code> is called.</p></dd></dl><p>Notice that some system-internal events can also be received. Therefore a catch-all clause last in the definition of the event handler callback function <code>Module:handle_event/2</code> is necessary. This also applies for <code>Module:handle_info/2</code>, as the event handler must also take care of some system-internal messages.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>, <a href="logger.html"><code>logger(3)</code></a>, <a href="https://wojtekmach.pl/otp_docs/stdlib/log_mf_h.html"><code>log_mf_h(3)</code></a>, <code>kernel(6)</code>, <code>sasl(6)</code></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:report/0">-type report() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_report_handler/1">add_report_handler/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a new event handler to the error logger. The event handler must be implemented as a <code>gen_event</code> callback module, see <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_report_handler/2">add_report_handler/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_report_handler/1">delete_report_handler/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes an event handler from the error logger by calling <code>gen_event:delete_handler(error_logger, Handler, [])</code>, see <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error_msg/1">error_msg/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard error event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error_msg/2">error_msg/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error_report/1">error_report/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard error event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error_report/2">error_report/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a user-defined error event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format/2">format/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_format_depth/0">get_format_depth/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>max(10, Depth)</code>, where <code>Depth</code> is the value of <code>error_logger_format_depth</code> in the Kernel application, if Depth is an integer. Otherwise, <code>unlimited</code> is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info_msg/1">info_msg/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard information event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info_msg/2">info_msg/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info_report/1">info_report/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard information event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info_report/2">info_report/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a user-defined information event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#logfile/1">logfile/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="open_error"></li></ul><p>Enables or disables printout of standard events to a file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tty/1">tty/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enables (<code>Flag == true</code>) or disables (<code>Flag == false</code>) printout of standard events to the terminal.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning_map/0">warning_map/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the current mapping for warning events. Events sent using <code>warning_msg/1,2</code> or <code>warning_report/1,2</code> are tagged as errors, warnings (default), or info, depending on the value of command-line flag <code>+W</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning_msg/1">warning_msg/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard warning event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning_msg/2">warning_msg/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning_report/1">warning_report/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a standard warning event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning_report/2">warning_report/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Log a user-defined warning event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:report/0">
+
+  <div class="detail-header">
+    <a href="#t:report/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type report() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>report() :: [{Tag :: term(), Data :: term()} | term()] | string() | term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="add_report_handler/1">
+
+  <div class="detail-header">
+    <a href="#add_report_handler/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_report_handler/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_report_handler(Handler) -> any() when Handler :: module().</pre>
+
+      </div>
+
+<p>Adds a new event handler to the error logger. The event handler must be implemented as a <code>gen_event</code> callback module, see <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>.</p><p><code>Handler</code> is typically the name of the callback module and <code>Args</code> is an optional term (defaults to []) passed to the initialization callback function <code>Handler:init/1</code>. The function returns <code>ok</code> if successful.</p><p>The event handler must be able to handle the events in this module, see section <a href="error_logger.html#content#events">Events</a>.</p><p>The first time this function is called, <code>error_logger</code> is added as a Logger handler, and the <code>error_logger</code> process is started.</p>
+  </section>
+</section>
+<section class="detail" id="add_report_handler/2">
+
+  <div class="detail-header">
+    <a href="#add_report_handler/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_report_handler/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_report_handler(Handler, Args) -> Result
+                      when
+                          Handler :: module(),
+                          Args :: <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html#t:handler_args/0">gen_event:handler_args</a>(),
+                          Result :: <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html#t:add_handler_ret/0">gen_event:add_handler_ret</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="delete_report_handler/1">
+
+  <div class="detail-header">
+    <a href="#delete_report_handler/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_report_handler/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete_report_handler(Handler) -> Result
+                         when Handler :: module(), Result :: <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html#t:del_handler_ret/0">gen_event:del_handler_ret</a>().</pre>
+
+      </div>
+
+<p>Deletes an event handler from the error logger by calling <code>gen_event:delete_handler(error_logger, Handler, [])</code>, see <a href="https://wojtekmach.pl/otp_docs/stdlib/gen_event.html"><code>gen_event(3)</code></a>.</p><p>If no more event handlers exist after the deletion, <code>error_logger</code> is removed as a Logger handler, and the <code>error_logger</code> process is stopped.</p>
+  </section>
+</section>
+<section class="detail" id="error_msg/1">
+
+  <div class="detail-header">
+    <a href="#error_msg/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error_msg/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_msg(Format) -> ok when Format :: string().</pre>
+
+      </div>
+
+<p>Log a standard error event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p><p>Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler.</p><p>These functions are kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_ERROR</code></a> macro or <a href="logger.html#error/1"><code>logger:error/1,2,3</code></a> instead.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">error_msg</span><span class="p" data-group-id="4274538435-1">(</span><span class="s">&quot;An error occurred in </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4274538435-2">[</span><span class="ss">a_module</span><span class="p" data-group-id="4274538435-2">]</span><span class="p" data-group-id="4274538435-1">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">ERROR</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">18</span><span class="p">:</span><span class="mf">43.376917</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">An</span><span class="w"> </span><span class="ss">error</span><span class="w"> </span><span class="ss">occurred</span><span class="w"> </span><span class="ss">in</span><span class="w"> </span><span class="ss">a_module</span><span class="w">
+</span><span class="ss">ok</span></code></pre><div class="warning"><p>If the Unicode translation modifier (<code>t</code>) is used in the format string, all event handlers must ensure that the formatted output is correctly encoded for the I/O device.</p></div>
+  </section>
+</section>
+<section class="detail" id="error_msg/2">
+
+  <div class="detail-header">
+    <a href="#error_msg/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error_msg/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_msg(Format, Data) -> ok when Format :: string(), Data :: list().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="error_report/1">
+
+  <div class="detail-header">
+    <a href="#error_report/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error_report/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_report(Report) -> ok when Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a standard error event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_ERROR</code></a> macro or <a href="logger.html#error/1"><code>logger:error/1,2,3</code></a> instead.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">error_report</span><span class="p" data-group-id="8108178336-1">(</span><span class="p" data-group-id="8108178336-2">[</span><span class="p" data-group-id="8108178336-3">{</span><span class="ss">tag1</span><span class="p">,</span><span class="ss">data1</span><span class="p" data-group-id="8108178336-3">}</span><span class="p">,</span><span class="ss">a_term</span><span class="p">,</span><span class="p" data-group-id="8108178336-4">{</span><span class="ss">tag2</span><span class="p">,</span><span class="ss">data</span><span class="p" data-group-id="8108178336-4">}</span><span class="p" data-group-id="8108178336-2">]</span><span class="p" data-group-id="8108178336-1">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">ERROR</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">23.699306</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+    </span><span class="nc">tag1</span><span class="p">:</span><span class="w"> </span><span class="ss">data1</span><span class="w">
+    </span><span class="ss">a_term</span><span class="w">
+    </span><span class="nc">tag2</span><span class="p">:</span><span class="w"> </span><span class="ss">data</span><span class="w">
+</span><span class="ss">ok</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">error_report</span><span class="p" data-group-id="8108178336-5">(</span><span class="s">&quot;Serious error in my module&quot;</span><span class="p" data-group-id="8108178336-5">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">ERROR</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mf">45.972445</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">Serious</span><span class="w"> </span><span class="ss">error</span><span class="w"> </span><span class="ss">in</span><span class="w"> </span><span class="ss">my</span><span class="w"> </span><span class="ss">module</span><span class="w">
+</span><span class="ss">ok</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="error_report/2">
+
+  <div class="detail-header">
+    <a href="#error_report/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error_report/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_report(Type, Report) -> ok when Type :: term(), Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a user-defined error event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>Error logger also adds a <code>domain</code> field with value <code>[Type]</code> to this event's metadata, causing the filters of the default Logger handler to discard the event. A different Logger handler, or an error logger event handler, must be added to handle this event.</p><p>It is recommended that <code>Report</code> follows the same structure as for <a href="error_logger.html#error_report/1"><code>error_report/1</code></a>.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_ERROR</code></a> macro or <a href="logger.html#error/1"><code>logger:error/1,2,3</code></a> instead.</p>
+  </section>
+</section>
+<section class="detail" id="format/2">
+
+  <div class="detail-header">
+    <a href="#format/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format(Format, Data) -> ok when Format :: string(), Data :: list().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="get_format_depth/0">
+
+  <div class="detail-header">
+    <a href="#get_format_depth/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_format_depth/0</h1>
+
+
+      <span class="note">(since OTP 20.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_format_depth() -> unlimited | pos_integer().</pre>
+
+      </div>
+
+<p>Returns <code>max(10, Depth)</code>, where <code>Depth</code> is the value of <code>error_logger_format_depth</code> in the Kernel application, if Depth is an integer. Otherwise, <code>unlimited</code> is returned.</p><div class="note"><p>The <code>error_logger_format_depth</code> variable is deprecated since the <a href="logger.html">Logger API</a> was introduced in Erlang/OTP 21.0. The variable, and this function, are kept for backwards compatibility since they still might be used by legacy report handlers.</p></div>
+  </section>
+</section>
+<section class="detail" id="info_msg/1">
+
+  <div class="detail-header">
+    <a href="#info_msg/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info_msg/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info_msg(Format) -> ok when Format :: string().</pre>
+
+      </div>
+
+<p>Log a standard information event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p><p>Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler.</p><p>These functions are kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_INFO</code></a> macro or <a href="logger.html#info/1"><code>logger:info/1,2,3</code></a> instead.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">info_msg</span><span class="p" data-group-id="1664801670-1">(</span><span class="s">&quot;Something happened in </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1664801670-2">[</span><span class="ss">a_module</span><span class="p" data-group-id="1664801670-2">]</span><span class="p" data-group-id="1664801670-1">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">INFO</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">03</span><span class="p">:</span><span class="mf">32.612462</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">Something</span><span class="w"> </span><span class="ss">happened</span><span class="w"> </span><span class="ss">in</span><span class="w"> </span><span class="ss">a_module</span><span class="w">
+</span><span class="ss">ok</span></code></pre><div class="warning"><p>If the Unicode translation modifier (<code>t</code>) is used in the format string, all event handlers must ensure that the formatted output is correctly encoded for the I/O device.</p></div>
+  </section>
+</section>
+<section class="detail" id="info_msg/2">
+
+  <div class="detail-header">
+    <a href="#info_msg/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info_msg/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info_msg(Format, Data) -> ok when Format :: string(), Data :: list().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="info_report/1">
+
+  <div class="detail-header">
+    <a href="#info_report/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info_report/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info_report(Report) -> ok when Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a standard information event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_INFO</code></a> macro or <a href="logger.html#info/1"><code>logger:info/1,2,3</code></a> instead.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">info_report</span><span class="p" data-group-id="9967486813-1">(</span><span class="p" data-group-id="9967486813-2">[</span><span class="p" data-group-id="9967486813-3">{</span><span class="ss">tag1</span><span class="p">,</span><span class="ss">data1</span><span class="p" data-group-id="9967486813-3">}</span><span class="p">,</span><span class="ss">a_term</span><span class="p">,</span><span class="p" data-group-id="9967486813-4">{</span><span class="ss">tag2</span><span class="p">,</span><span class="ss">data</span><span class="p" data-group-id="9967486813-4">}</span><span class="p" data-group-id="9967486813-2">]</span><span class="p" data-group-id="9967486813-1">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">INFO</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">35.994440</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+    </span><span class="nc">tag1</span><span class="p">:</span><span class="w"> </span><span class="ss">data1</span><span class="w">
+    </span><span class="ss">a_term</span><span class="w">
+    </span><span class="nc">tag2</span><span class="p">:</span><span class="w"> </span><span class="ss">data</span><span class="w">
+</span><span class="ss">ok</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">info_report</span><span class="p" data-group-id="9967486813-5">(</span><span class="s">&quot;Something strange happened&quot;</span><span class="p" data-group-id="9967486813-5">)</span><span class="p">.</span><span class="w">
+</span><span class="o">=</span><span class="n">INFO</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">22</span><span class="o">-</span><span class="n">May</span><span class="o">-</span><span class="mi">2018</span><span class="p">:</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mf">49.066872</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">Something</span><span class="w"> </span><span class="ss">strange</span><span class="w"> </span><span class="ss">happened</span><span class="w">
+</span><span class="ss">ok</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="info_report/2">
+
+  <div class="detail-header">
+    <a href="#info_report/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info_report/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info_report(Type, Report) -> ok when Type :: any(), Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a user-defined information event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>Error logger also adds a <code>domain</code> field with value <code>[Type]</code> to this event's metadata, causing the filters of the default Logger handler to discard the event. A different Logger handler, or an error logger event handler, must be added to handle this event.</p><p>It is recommended that <code>Report</code> follows the same structure as for <a href="error_logger.html#info_report/1"><code>info_report/1</code></a>.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_INFO</code></a> macro or <a href="logger.html#info/1"><code>logger:info/1,2,3</code></a> instead.</p>
+  </section>
+</section>
+<section class="detail" id="logfile/1">
+
+  <div class="detail-header">
+    <a href="#logfile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">logfile/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>logfile(Request :: {open, Filename}) -> ok | {error, OpenReason}
+           when Filename :: <a href="file.html#t:name/0">file:name</a>(), OpenReason :: allready_have_logfile | <a href="#t:open_error/0">open_error</a>();
+       (Request :: close) -> ok | {error, CloseReason} when CloseReason :: module_not_found;
+       (Request :: filename) -> Filename | {error, FilenameReason}
+           when Filename :: <a href="file.html#t:name/0">file:name</a>(), FilenameReason :: no_log_file.</pre>
+
+      </div>
+
+<ul class="types"><li name="open_error"></li></ul><p>Enables or disables printout of standard events to a file.</p><p>This is done by adding or deleting the <code>error_logger_file_h</code> event handler, and thus indirectly adding <code>error_logger</code> as a Logger handler.</p><p>Notice that this function does not manipulate the Logger configuration directly, meaning that if the default Logger handler is already logging to a file, this function can potentially cause logging to a second file.</p><p>This function is useful as a shortcut during development and testing, but must not be used in a production system. See section Logging in the Kernel User's Guide, and the <a href="logger.html"><code>logger(3)</code></a> manual page for information about how to configure Logger for live systems.</p><p><code>Request</code> is one of the following:</p><dl><dt><code>{open, Filename}</code></dt><dd><p>Opens log file <code>Filename</code>. Returns <code>ok</code> if successful, or <code>{error, allready_have_logfile}</code> if logging to file is already enabled, or an error tuple if another error occurred (for example, if <code>Filename</code> cannot be opened). The file is opened with encoding UTF-8.</p></dd><dt><code>close</code></dt><dd><p>Closes the current log file. Returns <code>ok</code>, or <code>{error, module_not_found}</code>.</p></dd><dt><code>filename</code></dt><dd><p>Returns the name of the log file <code>Filename</code>, or <code>{error, no_log_file}</code> if logging to file is not enabled.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="tty/1">
+
+  <div class="detail-header">
+    <a href="#tty/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tty/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tty(Flag) -> ok when Flag :: boolean().</pre>
+
+      </div>
+
+<p>Enables (<code>Flag == true</code>) or disables (<code>Flag == false</code>) printout of standard events to the terminal.</p><p>This is done by manipulating the Logger configuration. The function is useful as a shortcut during development and testing, but must not be used in a production system. See section Logging in the Kernel User's Guide, and the <a href="logger.html"><code>logger(3)</code></a> manual page for information about how to configure Logger for live systems.</p>
+  </section>
+</section>
+<section class="detail" id="warning_map/0">
+
+  <div class="detail-header">
+    <a href="#warning_map/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning_map/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warning_map() -> Tag when Tag :: error | warning | info.</pre>
+
+      </div>
+
+<p>Returns the current mapping for warning events. Events sent using <code>warning_msg/1,2</code> or <code>warning_report/1,2</code> are tagged as errors, warnings (default), or info, depending on the value of command-line flag <code>+W</code>.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="ss">os</span><span class="sc">$ </span><span class="ss">erl</span><span class="w">
+</span><span class="n">Erlang</span><span class="w"> </span><span class="p" data-group-id="4781412299-1">(</span><span class="n">BEAM</span><span class="p" data-group-id="4781412299-1">)</span><span class="w"> </span><span class="ss">emulator</span><span class="w"> </span><span class="ss">version</span><span class="w"> </span><span class="mf">5.4</span><span class="p">.</span><span class="mi">8</span><span class="w"> </span><span class="p" data-group-id="4781412299-2">[</span><span class="ss">hipe</span><span class="p" data-group-id="4781412299-2">]</span><span class="w"> </span><span class="p" data-group-id="4781412299-3">[</span><span class="nc">threads</span><span class="p">:</span><span class="mi">0</span><span class="p" data-group-id="4781412299-3">]</span><span class="w"> </span><span class="p" data-group-id="4781412299-4">[</span><span class="ss">kernel</span><span class="o">-</span><span class="ss">poll</span><span class="p" data-group-id="4781412299-4">]</span><span class="w">
+
+</span><span class="n">Eshell</span><span class="w"> </span><span class="n">V5</span><span class="p">.</span><span class="mf">4.8</span><span class="w">  </span><span class="p" data-group-id="4781412299-5">(</span><span class="ss">abort</span><span class="w"> </span><span class="ss">with</span><span class="w"> </span><span class="err">^</span><span class="n">G</span><span class="p" data-group-id="4781412299-5">)</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">warning_map</span><span class="p" data-group-id="4781412299-6">(</span><span class="p" data-group-id="4781412299-6">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">warning</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">warning_msg</span><span class="p" data-group-id="4781412299-7">(</span><span class="s">&quot;Warnings tagged as: </span><span class="si">~p</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4781412299-8">[</span><span class="ss">warning</span><span class="p" data-group-id="4781412299-8">]</span><span class="p" data-group-id="4781412299-7">)</span><span class="p">.</span><span class="w">
+
+</span><span class="o">=</span><span class="n">WARNING</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">11</span><span class="o">-</span><span class="n">Aug</span><span class="o">-</span><span class="mi">2005</span><span class="p">:</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mi">55</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">Warnings</span><span class="w"> </span><span class="ss">tagged</span><span class="w"> </span><span class="nc">as</span><span class="p">:</span><span class="w"> </span><span class="ss">warning</span><span class="w">
+</span><span class="ss">ok</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w">
+</span><span class="n">User</span><span class="w"> </span><span class="ss">switch</span><span class="w"> </span><span class="ss">command</span><span class="w">
+ </span><span class="o">--</span><span class="o">&gt;</span><span class="w"> </span><span class="ss">q</span><span class="w">
+</span><span class="ss">os</span><span class="sc">$ </span><span class="ss">erl</span><span class="w"> </span><span class="o">+</span><span class="n">W</span><span class="w"> </span><span class="ss">e</span><span class="w">
+</span><span class="n">Erlang</span><span class="w"> </span><span class="p" data-group-id="4781412299-9">(</span><span class="n">BEAM</span><span class="p" data-group-id="4781412299-9">)</span><span class="w"> </span><span class="ss">emulator</span><span class="w"> </span><span class="ss">version</span><span class="w"> </span><span class="mf">5.4</span><span class="p">.</span><span class="mi">8</span><span class="w"> </span><span class="p" data-group-id="4781412299-10">[</span><span class="ss">hipe</span><span class="p" data-group-id="4781412299-10">]</span><span class="w"> </span><span class="p" data-group-id="4781412299-11">[</span><span class="nc">threads</span><span class="p">:</span><span class="mi">0</span><span class="p" data-group-id="4781412299-11">]</span><span class="w"> </span><span class="p" data-group-id="4781412299-12">[</span><span class="ss">kernel</span><span class="o">-</span><span class="ss">poll</span><span class="p" data-group-id="4781412299-12">]</span><span class="w">
+
+</span><span class="n">Eshell</span><span class="w"> </span><span class="n">V5</span><span class="p">.</span><span class="mf">4.8</span><span class="w">  </span><span class="p" data-group-id="4781412299-13">(</span><span class="ss">abort</span><span class="w"> </span><span class="ss">with</span><span class="w"> </span><span class="err">^</span><span class="n">G</span><span class="p" data-group-id="4781412299-13">)</span><span class="w">
+</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">warning_map</span><span class="p" data-group-id="4781412299-14">(</span><span class="p" data-group-id="4781412299-14">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">error</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">error_logger</span><span class="p">:</span><span class="nf">warning_msg</span><span class="p" data-group-id="4781412299-15">(</span><span class="s">&quot;Warnings tagged as: </span><span class="si">~p</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4781412299-16">[</span><span class="ss">error</span><span class="p" data-group-id="4781412299-16">]</span><span class="p" data-group-id="4781412299-15">)</span><span class="p">.</span><span class="w">
+
+</span><span class="o">=</span><span class="n">ERROR</span><span class="w"> </span><span class="n">REPORT</span><span class="o">==</span><span class="o">==</span><span class="w"> </span><span class="mi">11</span><span class="o">-</span><span class="n">Aug</span><span class="o">-</span><span class="mi">2005</span><span class="p">:</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mi">23</span><span class="w"> </span><span class="o">==</span><span class="o">=</span><span class="w">
+</span><span class="n">Warnings</span><span class="w"> </span><span class="ss">tagged</span><span class="w"> </span><span class="nc">as</span><span class="p">:</span><span class="w"> </span><span class="ss">error</span><span class="w">
+</span><span class="ss">ok</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="warning_msg/1">
+
+  <div class="detail-header">
+    <a href="#warning_msg/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning_msg/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warning_msg(Format) -> ok when Format :: string().</pre>
+
+      </div>
+
+<p>Log a standard warning event. The <code>Format</code> and <code>Data</code> arguments are the same as the arguments of <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#format/2"><code>io:format/2</code></a> in STDLIB.</p><p>Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler. The log level can be changed to error or info, see <a href="error_logger.html#warning_map/0"><code>warning_map/0</code></a>.</p><p>These functions are kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_WARNING</code></a> macro or <a href="logger.html#warning/1"><code>logger:warning/1,2,3</code></a> instead.</p><div class="warning"><p>If the Unicode translation modifier (<code>t</code>) is used in the format string, all event handlers must ensure that the formatted output is correctly encoded for the I/O device.</p></div>
+  </section>
+</section>
+<section class="detail" id="warning_msg/2">
+
+  <div class="detail-header">
+    <a href="#warning_msg/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning_msg/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warning_msg(Format, Data) -> ok when Format :: string(), Data :: list().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="warning_report/1">
+
+  <div class="detail-header">
+    <a href="#warning_report/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning_report/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warning_report(Report) -> ok when Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a standard warning event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>The event is handled by the default Logger handler. The log level can be changed to error or info, see <a href="error_logger.html#warning_map/0"><code>warning_map/0</code></a>.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_WARNING</code></a> macro or <a href="logger.html#warning/1"><code>logger:warning/1,2,3</code></a> instead.</p>
+  </section>
+</section>
+<section class="detail" id="warning_report/2">
+
+  <div class="detail-header">
+    <a href="#warning_report/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning_report/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warning_report(Type, Report) -> ok when Type :: any(), Report :: <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Log a user-defined warning event. Error logger forwards the event to Logger, including metadata that allows backwards compatibility with legacy error logger event handlers.</p><p>Error logger also adds a <code>domain</code> field with value <code>[Type]</code> to this event's metadata, causing the filters of the default Logger handler to discard the event. A different Logger handler, or an error logger event handler, must be added to handle this event.</p><p>The log level can be changed to error or info, see <a href="error_logger.html#warning_map/0"><code>warning_map/0</code></a>.</p><p>It is recommended that <code>Report</code> follows the same structure as for <a href="error_logger.html#warning_report/1"><code>warning_report/1</code></a>.</p><p>This functions is kept for backwards compatibility and must not be used by new code. Use the <a href="logger.html#macros"><code>?LOG_WARNING</code></a> macro or <a href="logger.html#warning/1"><code>logger:warning/1,2,3</code></a> instead.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

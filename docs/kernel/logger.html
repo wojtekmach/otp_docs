@@ -1,0 +1,3128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>logger — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+logger <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module implements the main API for logging in Erlang/OTP. To create a log event, use the <a href="logger.html#content#logging_API">API functions</a> or the log <a href="logger.html#content#macros">macros</a>, for example:</p><pre><code class="makeup erlang"><span class="o">?</span><span class="n">LOG_ERROR</span><span class="p" data-group-id="6837236659-1">(</span><span class="s">&quot;error happened because: </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6837236659-2">[</span><span class="n">Reason</span><span class="p" data-group-id="6837236659-2">]</span><span class="p" data-group-id="6837236659-1">)</span><span class="p">.</span><span class="w">   </span><span class="c1">% With macro</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">error</span><span class="p" data-group-id="6837236659-3">(</span><span class="s">&quot;error happened because: </span><span class="si">~p</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6837236659-4">[</span><span class="n">Reason</span><span class="p" data-group-id="6837236659-4">]</span><span class="p" data-group-id="6837236659-3">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% Without macro</span><span class="w">
+    </span></code></pre><p>To configure the Logger backend, use Kernel configuration parameters or <a href="logger.html#content#configuration_API">configuration functions</a> in the Logger API.</p><p>By default, the Kernel application installs one log handler at system start. This handler is named <code>default</code>. It receives and processes standard log events produced by the Erlang runtime system, standard behaviours and different Erlang/OTP applications. The log events are by default printed to the terminal.</p><p>If you want your systems logs to be printed to a file instead, you must configure the default handler to do so. The simplest way is to include the following in your <code>sys.config</code>:</p><pre><code class="makeup erlang"><span class="p" data-group-id="7845859771-1">[</span><span class="p" data-group-id="7845859771-2">{</span><span class="ss">kernel</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="7845859771-3">[</span><span class="p" data-group-id="7845859771-4">{</span><span class="ss">logger</span><span class="p">,</span><span class="w">
+    </span><span class="p" data-group-id="7845859771-5">[</span><span class="p" data-group-id="7845859771-6">{</span><span class="ss">handler</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">,</span><span class="w"> </span><span class="ss">logger_std_h</span><span class="p">,</span><span class="w">
+      </span><span class="p" data-group-id="7845859771-7">#{</span><span class="ss">config</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="7845859771-8">#{</span><span class="ss">file</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;path/to/file.log&quot;</span><span class="p" data-group-id="7845859771-8">}</span><span class="p" data-group-id="7845859771-7">}</span><span class="p" data-group-id="7845859771-6">}</span><span class="p" data-group-id="7845859771-5">]</span><span class="p" data-group-id="7845859771-4">}</span><span class="p" data-group-id="7845859771-3">]</span><span class="p" data-group-id="7845859771-2">}</span><span class="p" data-group-id="7845859771-1">]</span><span class="p">.</span><span class="w">
+      </span></code></pre><p>For more information about:</p><ul><li>the Logger facility in general, see the User's Guide.</li><li>how to configure Logger, see the Configuration section in the User's Guide.</li><li>the built-in handlers, see <a href="logger_std_h.html">logger_std_h</a> and <a href="logger_disk_log_h.html">logger_disk_log_h</a>.</li><li>the built-in formatter, see <a href="logger_formatter.html">logger_formatter</a>.</li><li>built-in filters, see <a href="logger_filters.html">logger_filters</a>.</li></ul><div class="note"><p>Since Logger is new in Erlang/OTP 21.0, we do reserve the right to introduce changes to the Logger API and functionality in patches following this release. These changes might or might not be backwards compatible with the initial version.</p></div><h2 id="module-macros" class="section-heading">
+  <a href="#module-macros" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Macros
+</h2>
+<p>The following macros are defined in <code>logger.hrl</code>, which is included in a module with the directive</p><pre><code class="makeup erlang"><span class="w">    </span><span class="p">-</span><span class="na">include_lib</span><span class="p" data-group-id="5684049799-1">(</span><span class="s">&quot;kernel/include/logger.hrl&quot;</span><span class="p" data-group-id="5684049799-1">)</span><span class="p">.</span></code></pre><ul><li><code>?LOG_EMERGENCY(StringOrReport[,Metadata])</code></li><li><code>?LOG_EMERGENCY(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_ALERT(StringOrReport[,Metadata])</code></li><li><code>?LOG_ALERT(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_CRITICAL(StringOrReport[,Metadata])</code></li><li><code>?LOG_CRITICAL(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_ERROR(StringOrReport[,Metadata])</code></li><li><code>?LOG_ERROR(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_WARNING(StringOrReport[,Metadata])</code></li><li><code>?LOG_WARNING(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_NOTICE(StringOrReport[,Metadata])</code></li><li><code>?LOG_NOTICE(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_INFO(StringOrReport[,Metadata])</code></li><li><code>?LOG_INFO(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG_DEBUG(StringOrReport[,Metadata])</code></li><li><code>?LOG_DEBUG(FunOrFormat,Args[,Metadata])</code></li><li><code>?LOG(Level,StringOrReport[,Metadata])</code></li><li><code>?LOG(Level,FunOrFormat,Args[,Metadata])</code></li></ul><p>All macros expand to a call to Logger, where <code>Level</code> is taken from the macro name, or from the first argument in the case of the <code>?LOG</code> macro. Location data is added to the metadata as described under the <a href="logger.html#t:metadata/0"><code>metadata()</code></a> type definition.</p><p>The call is wrapped in a case statement and will be evaluated only if <code>Level</code> is equal to or below the configured log level.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><code>config(4)</code>, <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html"><code>erlang(3)</code></a>, <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html"><code>io(3)</code></a>, <a href="logger_disk_log_h.html"><code>logger_disk_log_h(3)</code></a>, <a href="logger_filters.html"><code>logger_filters(3)</code></a>, <a href="logger_formatter.html"><code>logger_formatter(3)</code></a>, <a href="logger_std_h.html"><code>logger_std_h(3)</code></a>, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html"><code>unicode(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:filter/0">-type filter() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A filter which can be installed as a handler filter, or as a primary filter in Logger.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:filter_arg/0">-type filter_arg() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The second argument to the filter fun.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:filter_id/0">-type filter_id() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A unique identifier for a filter.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:filter_return/0">-type filter_return() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The return value from the filter fun.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:formatter_config/0">-type formatter_config() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Configuration data for the formatter. See <a href="logger_formatter.html"><code>logger_formatter(3)</code></a> for an example of a formatter implementation.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handler_config/0">-type handler_config() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Handler configuration data for Logger. The following default values apply</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handler_id/0">-type handler_id() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A unique identifier for a handler instance.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:level/0">-type level() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The severity level for the message to be logged.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:log_event/0">-type log_event() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:metadata/0">-type metadata() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Metadata for the log event.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:msg_fun/0">-type msg_fun() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:msg_fun_return/0">-type msg_fun_return() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:olp_config/0">-type olp_config() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:primary_config/0">-type primary_config() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Primary configuration data for Logger. The following default values apply</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:report/0">-type report() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:report_cb/0">-type report_cb() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A fun which converts a <a href="logger.html#t:report/0"><code>report()</code> </a>to a format string and arguments, or directly to a string. See section Log Message in the User's Guide for more information.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:report_cb_config/0">-type report_cb_config() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:timestamp/0">-type timestamp() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A timestamp produced with <a href="logger.html#timestamp/0"><code>logger:timestamp()</code></a>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_handler/3">add_handler/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add a handler with the given configuration.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_handler_filter/3">add_handler_filter/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add a filter to the specified handler.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_handlers/1">add_handlers/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Reads the application configuration parameter <code>logger</code> and calls <code>add_handlers/1</code> with its contents.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_handlers/1">add_handlers/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="config_handler"></li></ul><p>This function should be used by custom Logger handlers to make configuration consistent no matter which handler the system uses. Normal usage is to add a call to <code>logger:add_handlers/1</code> just after the processes that the handler needs are started, and pass the application's <code>logger</code> configuration as the argument. For example</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_primary_filter/2">add_primary_filter/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add a primary filter to Logger.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#alert/1">alert(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(alert,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#alert/2">alert(Fun,FunArgs[,Metadata]) alert(Format,Args[,Metadata]) alert(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#alert/3">alert(Fun,FunArgs[,Metadata]) alert(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compare_levels/2">compare_levels/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compare the severity of two log levels. Returns <code>gt</code> if <code>Level1</code> is more severe than <code>Level2</code>, <code>lt</code> if <code>Level1</code> is less severe, and <code>eq</code> if the levels are equal.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#critical/1">critical(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(critical,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#critical/2">critical(Fun,FunArgs[,Metadata]) critical(Format,Args[,Metadata]) critical(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#critical/3">critical(Fun,FunArgs[,Metadata]) critical(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#debug/1">debug(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(debug,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#debug/2">debug(Fun,FunArgs[,Metadata]) debug(Format,Args[,Metadata]) debug(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#debug/3">debug(Fun,FunArgs[,Metadata]) debug(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#emergency/1">emergency(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(emergency,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#emergency/2">emergency(Fun,FunArgs[,Metadata]) emergency(Format,Args[,Metadata]) emergency(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#emergency/3">emergency(Fun,FunArgs[,Metadata]) emergency(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error/1">error(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(error,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error/2">error(Fun,FunArgs[,Metadata]) error(Format,Args[,Metadata]) error(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#error/3">error(Fun,FunArgs[,Metadata]) error(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_report/1">format_report/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Convert a log message on report form to <code>{Format, Args}</code>. This is the default report callback used by <a href="logger_formatter.html"><code>logger_formatter(3)</code></a> when no custom report callback is found. See section Log Message in the Kernel User's Guide for information about report callbacks and valid forms of log messages.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_config/0">get_config/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up all current Logger configuration, including primary, handler, and proxy configuration, and module level settings.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_handler_config/0">get_handler_config/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the current configuration for all handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_handler_config/1">get_handler_config/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the current configuration for the given handler.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_handler_ids/0">get_handler_ids/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the identities for all installed handlers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_module_level/0">get_module_level/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up all current module levels. Returns a list containing one <code>{Module,Level}</code> element for each module for which the module level was previously set with <a href="logger.html#set_module_level/2"><code>set_module_level/2</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_module_level/1">get_module_level/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the current level for the given modules. Returns a list containing one <code>{Module,Level}</code> element for each of the given modules for which the module level was previously set with <a href="logger.html#set_module_level/2"><code>set_module_level/2</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_primary_config/0">get_primary_config/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the current primary configuration for Logger.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_process_metadata/0">get_process_metadata/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Retrieve data set with <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code></a> or <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_proxy_config/0">get_proxy_config/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Look up the current configuration for the Logger proxy.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#i/0">i/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pretty print the Logger configuration.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#i/1">i/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(info,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/2">info(Fun,FunArgs[,Metadata]) info(Format,Args[,Metadata]) info(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/3">info(Fun,FunArgs[,Metadata]) info(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log/2">log/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Create a log event at the given log level, with the given message to be logged and <em>metadata</em>. Examples</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log/3">log/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#log/4">log/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#notice/1">notice(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(notice,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#notice/2">notice(Fun,FunArgs[,Metadata]) notice(Format,Args[,Metadata]) notice(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#notice/3">notice(Fun,FunArgs[,Metadata]) notice(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_handler/1">remove_handler/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Remove the handler identified by <code>HandlerId</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_handler_filter/2">remove_handler_filter/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Remove the filter identified by <code>FilterId</code> from the handler identified by <code>HandlerId</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove_primary_filter/1">remove_primary_filter/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Remove the primary filter identified by <code>FilterId</code> from Logger.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_application_level/2">set_application_level/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set the log level for all the modules of the specified application.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_handler_config/2">set_handler_config/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set configuration data for the specified handler. This overwrites the current handler configuration.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_handler_config/3">set_handler_config/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add or update configuration data for the specified handler. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_module_level/2">set_module_level/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set the log level for the specified modules.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_primary_config/1">set_primary_config/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set primary configuration data for Logger. This overwrites the current configuration.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_primary_config/2">set_primary_config/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add or update primary configuration data for Logger. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_process_metadata/1">set_process_metadata/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set metadata which Logger shall automatically insert in all log events produced on the current process.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_proxy_config/1">set_proxy_config/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set configuration data for the Logger proxy. This overwrites the current proxy configuration. Keys that are not specified in the <code>Config</code> map gets default values.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#timestamp/0">timestamp/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Return a timestamp that can be inserted as the <code>time</code> field in the meta data for a log event. It is produced with <a href="os.html#system_time/1"><code>os:system_time(microsecond)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unset_application_level/1">unset_application_level/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Unset the log level for all the modules of the specified application.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unset_module_level/0">unset_module_level/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Remove module specific log settings. After this, the primary log level is used for all modules.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unset_module_level/1">unset_module_level/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Remove module specific log settings. After this, the primary log level is used for the specified modules.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unset_process_metadata/0">unset_process_metadata/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Delete data set with <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code></a> or <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_formatter_config/2">update_formatter_config/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Update the formatter configuration for the specified handler.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_formatter_config/3">update_formatter_config/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Update the formatter configuration for the specified handler.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_handler_config/2">update_handler_config/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Update configuration data for the specified handler. This function behaves as if it was implemented as follows</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_handler_config/3">update_handler_config/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Add or update configuration data for the specified handler. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_primary_config/1">update_primary_config/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Update primary configuration data for Logger. This function behaves as if it was implemented as follows</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_process_metadata/1">update_process_metadata/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set or update metadata to use when logging from current process</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_proxy_config/1">update_proxy_config/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Update configuration data for the Logger proxy. This function behaves as if it was implemented as follows</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning/1">warning(StringOrReport[,Metadata])</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Equivalent to <a href="logger.html#log/2"><code>log(warning,...)</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning/2">warning(Fun,FunArgs[,Metadata]) warning(Format,Args[,Metadata]) warning(StringOrReport[,Metadata])</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#warning/3">warning(Fun,FunArgs[,Metadata]) warning(Format,Args[,Metadata])</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:filter/0">
+
+  <div class="detail-header">
+    <a href="#t:filter/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type filter() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filter() :: {fun((<a href="#t:log_event/0">log_event</a>(), <a href="#t:filter_arg/0">filter_arg</a>()) -> <a href="#t:filter_return/0">filter_return</a>()), <a href="#t:filter_arg/0">filter_arg</a>()}.</pre>
+
+      </div>
+
+<p>A filter which can be installed as a handler filter, or as a primary filter in Logger.</p>
+  </section>
+</section>
+<section class="detail" id="t:filter_arg/0">
+
+  <div class="detail-header">
+    <a href="#t:filter_arg/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type filter_arg() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filter_arg() :: term().</pre>
+
+      </div>
+
+<p>The second argument to the filter fun.</p>
+  </section>
+</section>
+<section class="detail" id="t:filter_id/0">
+
+  <div class="detail-header">
+    <a href="#t:filter_id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type filter_id() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filter_id() :: atom().</pre>
+
+      </div>
+
+<p>A unique identifier for a filter.</p>
+  </section>
+</section>
+<section class="detail" id="t:filter_return/0">
+
+  <div class="detail-header">
+    <a href="#t:filter_return/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type filter_return() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filter_return() :: stop | ignore | <a href="#t:log_event/0">log_event</a>().</pre>
+
+      </div>
+
+<p>The return value from the filter fun.</p>
+  </section>
+</section>
+<section class="detail" id="t:formatter_config/0">
+
+  <div class="detail-header">
+    <a href="#t:formatter_config/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type formatter_config() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>formatter_config() :: #{atom() => term()}.</pre>
+
+      </div>
+
+<p>Configuration data for the formatter. See <a href="logger_formatter.html"><code>logger_formatter(3)</code></a> for an example of a formatter implementation.</p>
+  </section>
+</section>
+<section class="detail" id="t:handler_config/0">
+
+  <div class="detail-header">
+    <a href="#t:handler_config/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type handler_config() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handler_config() ::
+    #{id => <a href="#t:handler_id/0">handler_id</a>(),
+      config => term(),
+      level => <a href="#t:level/0">level</a>() | all | none,
+      module => module(),
+      filter_default => log | stop,
+      filters => [{<a href="#t:filter_id/0">filter_id</a>(), <a href="#t:filter/0">filter</a>()}],
+      formatter => {module(), <a href="#t:formatter_config/0">formatter_config</a>()}}.</pre>
+
+      </div>
+
+<p>Handler configuration data for Logger. The following default values apply:</p><ul><li><code>level =&gt; all</code></li><li><code>filter_default =&gt; log</code></li><li><code>filters =&gt; []</code></li><li><code>formatter =&gt; {logger_formatter, DefaultFormatterConfig</code>}</li></ul><p>In addition to these, the following fields are automatically inserted by Logger, values taken from the two first parameters to <a href="logger.html#add_handler/3"><code>add_handler/3</code></a>:</p><ul><li><code>id =&gt; HandlerId</code></li><li><code>module =&gt; Module</code></li></ul><p>These are read-only and cannot be changed in runtime.</p><p>Handler specific configuration data is inserted by the handler callback itself, in a sub structure associated with the field named <code>config</code>. See the <a href="logger_std_h.html"><code>logger_std_h(3)</code></a> and <a href="logger_disk_log_h.html"><code>logger_disk_log_h(3)</code></a> manual pages for information about the specific configuration for these handlers.</p><p>See the <a href="logger_formatter.html#t:config/0"><code>logger_formatter(3)</code></a> manual page for information about the default configuration for this formatter.</p>
+  </section>
+</section>
+<section class="detail" id="t:handler_id/0">
+
+  <div class="detail-header">
+    <a href="#t:handler_id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type handler_id() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handler_id() :: atom().</pre>
+
+      </div>
+
+<p>A unique identifier for a handler instance.</p>
+  </section>
+</section>
+<section class="detail" id="t:level/0">
+
+  <div class="detail-header">
+    <a href="#t:level/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type level() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>level() :: emergency | alert | critical | error | warning | notice | info | debug.</pre>
+
+      </div>
+
+<p>The severity level for the message to be logged.</p>
+  </section>
+</section>
+<section class="detail" id="t:log_event/0">
+
+  <div class="detail-header">
+    <a href="#t:log_event/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type log_event() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log_event() ::
+    #{level := <a href="#t:level/0">level</a>(),
+      msg := {<a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), [term()]} | {report, <a href="#t:report/0">report</a>()} | {string, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()},
+      meta := <a href="#t:metadata/0">metadata</a>()}.</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:metadata/0">
+
+  <div class="detail-header">
+    <a href="#t:metadata/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type metadata() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>metadata() ::
+    #{pid => pid(),
+      gl => pid(),
+      time => <a href="#t:timestamp/0">timestamp</a>(),
+      mfa => {module(), atom(), non_neg_integer()},
+      file => <a href="file.html#t:filename/0">file:filename</a>(),
+      line => non_neg_integer(),
+      domain => [atom()],
+      report_cb => <a href="#t:report_cb/0">report_cb</a>(),
+      atom() => term()}.</pre>
+
+      </div>
+
+<p>Metadata for the log event.</p><p>Logger adds the following metadata to each log event:</p><ul><li><code>pid =&gt; self()</code></li><li><code>gl =&gt; group_leader()</code></li><li><code>time =&gt; logger:timestamp()</code></li></ul><p>When a log macro is used, Logger also inserts location information:</p><ul><li><code>mfa =&gt; {?MODULE, ?FUNCTION_NAME, ?FUNCTION_ARITY}</code></li><li><code>file =&gt; ?FILE</code></li><li><code>line =&gt; ?LINE</code></li></ul><p>You can add custom metadata, either by:</p><ul><li>specifying a map as the last parameter to any of the log macros or the logger API functions.</li><li>setting process metadata with <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code></a> or <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</li><li>setting primary metadata with <a href="logger.html#set_primary_config/1"><code>set_primary_config/1</code></a> or through the kernel configuration parameter logger_metadata</li></ul><div class="note"><p>When adding custom metadata, make sure not to use any of the keys mentioned above as that may cause a lot of confusion about the log events.</p></div><p>Logger merges all the metadata maps before forwarding the log event to the handlers. If the same keys occur, values from the log call overwrite process metadata, which overwrites the primary metadata, which in turn overwrite values set by Logger.</p><p>The following custom metadata keys have special meaning:</p><dl><dt><code>domain</code></dt><dd><p>The value associated with this key is used by filters for grouping log events originating from, for example, specific functional areas. See <a href="logger_filters.html#domain/2"><code>logger_filters:domain/2</code></a> for a description of how this field can be used.</p></dd><dt><code>report_cb</code></dt><dd><p>If the log message is specified as a <a href="logger.html#t:report/0"><code>report()</code></a>, the <code>report_cb</code> key can be associated with a fun (report callback) that converts the report to a format string and arguments, or directly to a string. See the type definition of <a href="logger.html#t:report_cb/0"><code>report_cb()</code></a>, and section Log Message in the User's Guide for more information about report callbacks.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="t:msg_fun/0">
+
+  <div class="detail-header">
+    <a href="#t:msg_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type msg_fun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>msg_fun() :: fun((term()) -> <a href="#t:msg_fun_return/0">msg_fun_return</a>() | {<a href="#t:msg_fun_return/0">msg_fun_return</a>(), <a href="#t:metadata/0">metadata</a>()}).</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:msg_fun_return/0">
+
+  <div class="detail-header">
+    <a href="#t:msg_fun_return/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type msg_fun_return() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>msg_fun_return() :: {<a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), [term()]} | <a href="#t:report/0">report</a>() | <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>() | ignore.</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:olp_config/0">
+
+  <div class="detail-header">
+    <a href="#t:olp_config/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type olp_config() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>olp_config() ::
+    #{sync_mode_qlen => non_neg_integer(),
+      drop_mode_qlen => pos_integer(),
+      flush_qlen => pos_integer(),
+      burst_limit_enable => boolean(),
+      burst_limit_max_count => pos_integer(),
+      burst_limit_window_time => pos_integer(),
+      overload_kill_enable => boolean(),
+      overload_kill_qlen => pos_integer(),
+      overload_kill_mem_size => pos_integer(),
+      overload_kill_restart_after => non_neg_integer() | infinity}.</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:primary_config/0">
+
+  <div class="detail-header">
+    <a href="#t:primary_config/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type primary_config() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>primary_config() ::
+    #{level => <a href="#t:level/0">level</a>() | all | none,
+      metadata => <a href="#t:metadata/0">metadata</a>(),
+      filter_default => log | stop,
+      filters => [{<a href="#t:filter_id/0">filter_id</a>(), <a href="#t:filter/0">filter</a>()}]}.</pre>
+
+      </div>
+
+<p>Primary configuration data for Logger. The following default values apply:</p><ul><li><code>level =&gt; info</code></li><li><code>filter_default =&gt; log</code></li><li><code>filters =&gt; []</code></li></ul>
+  </section>
+</section>
+<section class="detail" id="t:report/0">
+
+  <div class="detail-header">
+    <a href="#t:report/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type report() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>report() :: map() | [{atom(), term()}].</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:report_cb/0">
+
+  <div class="detail-header">
+    <a href="#t:report_cb/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type report_cb() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>report_cb() ::
+    fun((<a href="#t:report/0">report</a>()) -> {<a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), [term()]}) |
+    fun((<a href="#t:report/0">report</a>(), <a href="#t:report_cb_config/0">report_cb_config</a>()) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()).</pre>
+
+      </div>
+
+<p>A fun which converts a <a href="logger.html#t:report/0"><code>report()</code> </a>to a format string and arguments, or directly to a string. See section Log Message in the User's Guide for more information.</p>
+  </section>
+</section>
+<section class="detail" id="t:report_cb_config/0">
+
+  <div class="detail-header">
+    <a href="#t:report_cb_config/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type report_cb_config() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>report_cb_config() ::
+    #{depth := pos_integer() | unlimited,
+      chars_limit := pos_integer() | unlimited,
+      single_line := boolean()}.</pre>
+
+      </div>
+
+<p></p>
+  </section>
+</section>
+<section class="detail" id="t:timestamp/0">
+
+  <div class="detail-header">
+    <a href="#t:timestamp/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type timestamp() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>timestamp() :: integer().</pre>
+
+      </div>
+
+<p>A timestamp produced with <a href="logger.html#timestamp/0"><code>logger:timestamp()</code></a>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="add_handler/3">
+
+  <div class="detail-header">
+    <a href="#add_handler/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_handler/3</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_handler(HandlerId, Module, Config) -> ok | {error, term()}
+               when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), Module :: module(), Config :: <a href="#t:handler_config/0">handler_config</a>().</pre>
+
+      </div>
+
+<p>Add a handler with the given configuration.</p><p><code>HandlerId</code> is a unique identifier which must be used in all subsequent calls referring to this handler.</p>
+  </section>
+</section>
+<section class="detail" id="add_handler_filter/3">
+
+  <div class="detail-header">
+    <a href="#add_handler_filter/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_handler_filter/3</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_handler_filter(HandlerId, FilterId, Filter) -> ok | {error, term()}
+                      when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), FilterId :: <a href="#t:filter_id/0">filter_id</a>(), Filter :: <a href="#t:filter/0">filter</a>().</pre>
+
+      </div>
+
+<p>Add a filter to the specified handler.</p><p>The filter fun is called with the log event as the first parameter, and the specified <code>filter_args()</code> as the second parameter.</p><p>The return value of the fun specifies if a log event is to be discarded or forwarded to the handler callback:</p><dl><dt><code>log_event()</code></dt><dd><p>The filter <em>passed</em>. The next handler filter, if any, is applied. If no more filters exist for this handler, the log event is forwarded to the handler callback.</p></dd><dt><code>stop</code></dt><dd><p>The filter <em>did not pass</em>, and the log event is immediately discarded.</p></dd><dt><code>ignore</code></dt><dd><p>The filter has no knowledge of the log event. The next handler filter, if any, is applied. If no more filters exist for this handler, the value of the <code>filter_default</code> configuration parameter for the handler specifies if the log event shall be discarded or forwarded to the handler callback.</p></dd></dl><p>See section Filters in the User's Guide for more information about filters.</p><p>Some built-in filters exist. These are defined in <a href="logger_filters.html"><code>logger_filters(3)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="add_handlers/1">
+
+  <div class="detail-header">
+    <a href="#add_handlers/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_handlers/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_handlers(Application) -> ok | {error, term()} when Application :: atom();
+            (HandlerConfig) -> ok | {error, term()} when HandlerConfig :: [config_handler()].</pre>
+
+      </div>
+
+<p>Reads the application configuration parameter <code>logger</code> and calls <code>add_handlers/1</code> with its contents.</p>
+  </section>
+</section>
+<section class="detail" id="add_handlers/1">
+
+  <div class="detail-header">
+    <a href="#add_handlers/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_handlers/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_handlers(Application) -> ok | {error, term()} when Application :: atom();
+            (HandlerConfig) -> ok | {error, term()} when HandlerConfig :: [config_handler()].</pre>
+
+      </div>
+
+<ul class="types"><li name="config_handler"></li></ul><p>This function should be used by custom Logger handlers to make configuration consistent no matter which handler the system uses. Normal usage is to add a call to <code>logger:add_handlers/1</code> just after the processes that the handler needs are started, and pass the application's <code>logger</code> configuration as the argument. For example:</p><pre><code class="makeup erlang"><span class="p">-</span><span class="na">behaviour</span><span class="p" data-group-id="0605961198-1">(</span><span class="ss">application</span><span class="p" data-group-id="0605961198-1">)</span><span class="p">.</span><span class="w">
+</span><span class="nf">start</span><span class="p" data-group-id="0605961198-2">(</span><span class="p">_</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0605961198-3">[</span><span class="p" data-group-id="0605961198-3">]</span><span class="p" data-group-id="0605961198-2">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="k">case</span><span class="w"> </span><span class="nc">supervisor</span><span class="p">:</span><span class="nf">start_link</span><span class="p" data-group-id="0605961198-4">(</span><span class="p" data-group-id="0605961198-5">{</span><span class="ss">local</span><span class="p">,</span><span class="w"> </span><span class="ss">my_sup</span><span class="p" data-group-id="0605961198-5">}</span><span class="p">,</span><span class="w"> </span><span class="ss">my_sup</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0605961198-6">[</span><span class="p" data-group-id="0605961198-6">]</span><span class="p" data-group-id="0605961198-4">)</span><span class="w"> </span><span class="k">of</span><span class="w">
+        </span><span class="p" data-group-id="0605961198-7">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Pid</span><span class="p" data-group-id="0605961198-7">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">logger</span><span class="p">:</span><span class="nf">add_handlers</span><span class="p" data-group-id="0605961198-8">(</span><span class="ss">my_app</span><span class="p" data-group-id="0605961198-8">)</span><span class="p">,</span><span class="w">
+            </span><span class="p" data-group-id="0605961198-9">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Pid</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0605961198-10">[</span><span class="p" data-group-id="0605961198-10">]</span><span class="p" data-group-id="0605961198-9">}</span><span class="p">;</span><span class="w">
+        </span><span class="n">Error</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Error</span><span class="w">
+     </span><span class="k">end</span><span class="p">.</span></code></pre><p>This reads the <code>logger</code> configuration parameter from the <code>my_app</code> application and starts the configured handlers. The contents of the configuration use the same rules as the logger handler configuration.</p><p>If the handler is meant to replace the default handler, the Kernel's default handler have to be disabled before the new handler is added. A <code>sys.config</code> file that disables the Kernel handler and adds a custom handler could look like this:</p><pre><code class="makeup erlang"><span class="p" data-group-id="9288482901-1">[</span><span class="p" data-group-id="9288482901-2">{</span><span class="ss">kernel</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="9288482901-3">[</span><span class="p" data-group-id="9288482901-4">{</span><span class="ss">logger</span><span class="p">,</span><span class="w">
+    </span><span class="c1">%% Disable the default Kernel handler</span><span class="w">
+    </span><span class="p" data-group-id="9288482901-5">[</span><span class="p" data-group-id="9288482901-6">{</span><span class="ss">handler</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">,</span><span class="w"> </span><span class="ss">undefined</span><span class="p" data-group-id="9288482901-6">}</span><span class="p" data-group-id="9288482901-5">]</span><span class="p" data-group-id="9288482901-4">}</span><span class="p" data-group-id="9288482901-3">]</span><span class="p" data-group-id="9288482901-2">}</span><span class="p">,</span><span class="w">
+ </span><span class="p" data-group-id="9288482901-7">{</span><span class="ss">my_app</span><span class="p">,</span><span class="w">
+  </span><span class="p" data-group-id="9288482901-8">[</span><span class="p" data-group-id="9288482901-9">{</span><span class="ss">logger</span><span class="p">,</span><span class="w">
+    </span><span class="c1">%% Enable this handler as the default</span><span class="w">
+    </span><span class="p" data-group-id="9288482901-10">[</span><span class="p" data-group-id="9288482901-11">{</span><span class="ss">handler</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">,</span><span class="w"> </span><span class="ss">my_handler</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9288482901-12">#{</span><span class="p" data-group-id="9288482901-12">}</span><span class="p" data-group-id="9288482901-11">}</span><span class="p" data-group-id="9288482901-10">]</span><span class="p" data-group-id="9288482901-9">}</span><span class="p" data-group-id="9288482901-8">]</span><span class="p" data-group-id="9288482901-7">}</span><span class="p" data-group-id="9288482901-1">]</span><span class="p">.</span><span class="w">
+         </span></code></pre>
+  </section>
+</section>
+<section class="detail" id="add_primary_filter/2">
+
+  <div class="detail-header">
+    <a href="#add_primary_filter/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_primary_filter/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_primary_filter(FilterId, Filter) -> ok | {error, term()}
+                      when FilterId :: <a href="#t:filter_id/0">filter_id</a>(), Filter :: <a href="#t:filter/0">filter</a>().</pre>
+
+      </div>
+
+<p>Add a primary filter to Logger.</p><p>The filter fun is called with the log event as the first parameter, and the specified <code>filter_args()</code> as the second parameter.</p><p>The return value of the fun specifies if a log event is to be discarded or forwarded to the handlers:</p><dl><dt><code>log_event()</code></dt><dd><p>The filter <em>passed</em>. The next primary filter, if any, is applied. If no more primary filters exist, the log event is forwarded to the handler part of Logger, where handler filters are applied.</p></dd><dt><code>stop</code></dt><dd><p>The filter <em>did not pass</em>, and the log event is immediately discarded.</p></dd><dt><code>ignore</code></dt><dd><p>The filter has no knowledge of the log event. The next primary filter, if any, is applied. If no more primary filters exist, the value of the primary <code>filter_default</code> configuration parameter specifies if the log event shall be discarded or forwarded to the handler part.</p></dd></dl><p>See section Filters in the User's Guide for more information about filters.</p><p>Some built-in filters exist. These are defined in <a href="logger_filters.html"><code>logger_filters(3)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="alert/1">
+
+  <div class="detail-header">
+    <a href="#alert/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">alert(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(alert,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="alert/2">
+
+  <div class="detail-header">
+    <a href="#alert/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">alert(Fun,FunArgs[,Metadata]) alert(Format,Args[,Metadata]) alert(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="alert/3">
+
+  <div class="detail-header">
+    <a href="#alert/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">alert(Fun,FunArgs[,Metadata]) alert(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="compare_levels/2">
+
+  <div class="detail-header">
+    <a href="#compare_levels/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compare_levels/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compare_levels(Level1, Level2) -> eq | gt | lt
+                  when Level1 :: <a href="#t:level/0">level</a>() | all | none, Level2 :: <a href="#t:level/0">level</a>() | all | none.</pre>
+
+      </div>
+
+<p>Compare the severity of two log levels. Returns <code>gt</code> if <code>Level1</code> is more severe than <code>Level2</code>, <code>lt</code> if <code>Level1</code> is less severe, and <code>eq</code> if the levels are equal.</p>
+  </section>
+</section>
+<section class="detail" id="critical/1">
+
+  <div class="detail-header">
+    <a href="#critical/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">critical(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(critical,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="critical/2">
+
+  <div class="detail-header">
+    <a href="#critical/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">critical(Fun,FunArgs[,Metadata]) critical(Format,Args[,Metadata]) critical(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="critical/3">
+
+  <div class="detail-header">
+    <a href="#critical/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">critical(Fun,FunArgs[,Metadata]) critical(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="debug/1">
+
+  <div class="detail-header">
+    <a href="#debug/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">debug(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(debug,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="debug/2">
+
+  <div class="detail-header">
+    <a href="#debug/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">debug(Fun,FunArgs[,Metadata]) debug(Format,Args[,Metadata]) debug(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="debug/3">
+
+  <div class="detail-header">
+    <a href="#debug/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">debug(Fun,FunArgs[,Metadata]) debug(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="emergency/1">
+
+  <div class="detail-header">
+    <a href="#emergency/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">emergency(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(emergency,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="emergency/2">
+
+  <div class="detail-header">
+    <a href="#emergency/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">emergency(Fun,FunArgs[,Metadata]) emergency(Format,Args[,Metadata]) emergency(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="emergency/3">
+
+  <div class="detail-header">
+    <a href="#emergency/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">emergency(Fun,FunArgs[,Metadata]) emergency(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="error/1">
+
+  <div class="detail-header">
+    <a href="#error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(error,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="error/2">
+
+  <div class="detail-header">
+    <a href="#error/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error(Fun,FunArgs[,Metadata]) error(Format,Args[,Metadata]) error(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="error/3">
+
+  <div class="detail-header">
+    <a href="#error/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">error(Fun,FunArgs[,Metadata]) error(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="format_report/1">
+
+  <div class="detail-header">
+    <a href="#format_report/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_report/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_report(Report) -> FormatArgs when Report :: <a href="#t:report/0">report</a>(), FormatArgs :: {<a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), [term()]}.</pre>
+
+      </div>
+
+<p>Convert a log message on report form to <code>{Format, Args}</code>. This is the default report callback used by <a href="logger_formatter.html"><code>logger_formatter(3)</code></a> when no custom report callback is found. See section Log Message in the Kernel User's Guide for information about report callbacks and valid forms of log messages.</p><p>The function produces lines of <code>Key: Value</code> from key-value lists. Strings are printed with <code>~ts</code> and other terms with <code>~tp</code>.</p><p>If <code>Report</code> is a map, it is converted to a key-value list before formatting as such.</p>
+  </section>
+</section>
+<section class="detail" id="get_config/0">
+
+  <div class="detail-header">
+    <a href="#get_config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_config/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_config() ->
+              #{primary => <a href="#t:primary_config/0">primary_config</a>(),
+                handlers => [<a href="#t:handler_config/0">handler_config</a>()],
+                proxy => <a href="#t:olp_config/0">olp_config</a>(),
+                module_levels => [{module(), <a href="#t:level/0">level</a>() | all | none}]}.</pre>
+
+      </div>
+
+<p>Look up all current Logger configuration, including primary, handler, and proxy configuration, and module level settings.</p>
+  </section>
+</section>
+<section class="detail" id="get_handler_config/0">
+
+  <div class="detail-header">
+    <a href="#get_handler_config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_handler_config/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_handler_config() -> [Config] when Config :: <a href="#t:handler_config/0">handler_config</a>().</pre>
+
+      </div>
+
+<p>Look up the current configuration for all handlers.</p>
+  </section>
+</section>
+<section class="detail" id="get_handler_config/1">
+
+  <div class="detail-header">
+    <a href="#get_handler_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_handler_config/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_handler_config(HandlerId) -> {ok, Config} | {error, term()}
+                      when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), Config :: <a href="#t:handler_config/0">handler_config</a>().</pre>
+
+      </div>
+
+<p>Look up the current configuration for the given handler.</p>
+  </section>
+</section>
+<section class="detail" id="get_handler_ids/0">
+
+  <div class="detail-header">
+    <a href="#get_handler_ids/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_handler_ids/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_handler_ids() -> [HandlerId] when HandlerId :: <a href="#t:handler_id/0">handler_id</a>().</pre>
+
+      </div>
+
+<p>Look up the identities for all installed handlers.</p>
+  </section>
+</section>
+<section class="detail" id="get_module_level/0">
+
+  <div class="detail-header">
+    <a href="#get_module_level/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_module_level/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_module_level() -> [{Module, Level}] when Module :: module(), Level :: <a href="#t:level/0">level</a>() | all | none.</pre>
+
+      </div>
+
+<p>Look up all current module levels. Returns a list containing one <code>{Module,Level}</code> element for each module for which the module level was previously set with <a href="logger.html#set_module_level/2"><code>set_module_level/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_module_level/1">
+
+  <div class="detail-header">
+    <a href="#get_module_level/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_module_level/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_module_level(Modules) -> [{Module, Level}]
+                    when
+                        Modules :: [Module] | Module,
+                        Module :: module(),
+                        Level :: <a href="#t:level/0">level</a>() | all | none.</pre>
+
+      </div>
+
+<p>Look up the current level for the given modules. Returns a list containing one <code>{Module,Level}</code> element for each of the given modules for which the module level was previously set with <a href="logger.html#set_module_level/2"><code>set_module_level/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_primary_config/0">
+
+  <div class="detail-header">
+    <a href="#get_primary_config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_primary_config/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_primary_config() -> Config when Config :: <a href="#t:primary_config/0">primary_config</a>().</pre>
+
+      </div>
+
+<p>Look up the current primary configuration for Logger.</p>
+  </section>
+</section>
+<section class="detail" id="get_process_metadata/0">
+
+  <div class="detail-header">
+    <a href="#get_process_metadata/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_process_metadata/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_process_metadata() -> Meta | undefined when Meta :: <a href="#t:metadata/0">metadata</a>().</pre>
+
+      </div>
+
+<p>Retrieve data set with <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code></a> or <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_proxy_config/0">
+
+  <div class="detail-header">
+    <a href="#get_proxy_config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_proxy_config/0</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_proxy_config() -> Config when Config :: <a href="#t:olp_config/0">olp_config</a>().</pre>
+
+      </div>
+
+<p>Look up the current configuration for the Logger proxy.</p><p>For more information about the proxy, see section Logger Proxy in the Kernel User's Guide.</p>
+  </section>
+</section>
+<section class="detail" id="i/0">
+
+  <div class="detail-header">
+    <a href="#i/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">i/0</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>i() -> ok.</pre>
+
+      </div>
+
+<p>Pretty print the Logger configuration.</p>
+  </section>
+</section>
+<section class="detail" id="i/1">
+
+  <div class="detail-header">
+    <a href="#i/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">i/1</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>i(What) -> ok when What :: primary | handlers | proxy | modules | <a href="#t:handler_id/0">handler_id</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="info/1">
+
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(info,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="info/2">
+
+  <div class="detail-header">
+    <a href="#info/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(Fun,FunArgs[,Metadata]) info(Format,Args[,Metadata]) info(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="info/3">
+
+  <div class="detail-header">
+    <a href="#info/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(Fun,FunArgs[,Metadata]) info(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="log/2">
+
+  <div class="detail-header">
+    <a href="#log/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log(Level, StringOrReport) -> ok
+       when Level :: <a href="#t:level/0">level</a>(), StringOrReport :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>() | <a href="#t:report/0">report</a>().</pre>
+
+      </div>
+
+<p>Create a log event at the given log level, with the given message to be logged and <em>metadata</em>. Examples:</p><pre><code class="makeup erlang"><span class="c1">%% A plain string</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">log</span><span class="p" data-group-id="8349673309-1">(</span><span class="ss">info</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Hello World&quot;</span><span class="p" data-group-id="8349673309-1">)</span><span class="p">.</span><span class="w">
+</span><span class="c1">%% A plain string with metadata</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">log</span><span class="p" data-group-id="8349673309-2">(</span><span class="ss">debug</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Hello World&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8349673309-3">#{</span><span class="w"> </span><span class="ss">meta</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">data</span><span class="w"> </span><span class="p" data-group-id="8349673309-3">}</span><span class="p" data-group-id="8349673309-2">)</span><span class="p">.</span><span class="w">
+</span><span class="c1">%% A format string with arguments</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">log</span><span class="p" data-group-id="8349673309-4">(</span><span class="ss">warning</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;The roof is on ~ts&quot;</span><span class="p">,</span><span class="p" data-group-id="8349673309-5">[</span><span class="n">Cause</span><span class="p" data-group-id="8349673309-5">]</span><span class="p" data-group-id="8349673309-4">)</span><span class="p">.</span><span class="w">
+</span><span class="c1">%% A report</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">log</span><span class="p" data-group-id="8349673309-6">(</span><span class="ss">warning</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8349673309-7">#{</span><span class="w"> </span><span class="ss">what</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">roof</span><span class="p">,</span><span class="w"> </span><span class="ss">cause</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">Cause</span><span class="w"> </span><span class="p" data-group-id="8349673309-7">}</span><span class="p" data-group-id="8349673309-6">)</span><span class="p">.</span><span class="w">
+        </span></code></pre><p>The message and metadata can either be given directly in the arguments, or returned from a fun. Passing a fun instead of the message/metadata directly is useful in scenarios when the message/metadata is very expensive to compute. This is because the fun is only evaluted when the message/metadata is actually needed, which may be not at all if the log event is not to be logged. Examples:</p><pre><code class="makeup erlang"><span class="c1">%% A plain string with expensive metadata</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">info</span><span class="p" data-group-id="5868943812-1">(</span><span class="nf">fun</span><span class="p" data-group-id="5868943812-2">(</span><span class="p" data-group-id="5868943812-3">[</span><span class="p" data-group-id="5868943812-3">]</span><span class="p" data-group-id="5868943812-2">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5868943812-4">{</span><span class="s">&quot;Hello World&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5868943812-5">#{</span><span class="w"> </span><span class="ss">meta</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nf">expensive</span><span class="p" data-group-id="5868943812-6">(</span><span class="p" data-group-id="5868943812-6">)</span><span class="w"> </span><span class="p" data-group-id="5868943812-5">}</span><span class="p" data-group-id="5868943812-4">}</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="p" data-group-id="5868943812-7">[</span><span class="p" data-group-id="5868943812-7">]</span><span class="p" data-group-id="5868943812-1">)</span><span class="p">.</span><span class="w">
+</span><span class="c1">%% An expensive report</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">debug</span><span class="p" data-group-id="5868943812-8">(</span><span class="nf">fun</span><span class="p" data-group-id="5868943812-9">(</span><span class="n">What</span><span class="p" data-group-id="5868943812-9">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5868943812-10">#{</span><span class="w"> </span><span class="ss">what</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">What</span><span class="p">,</span><span class="w"> </span><span class="ss">cause</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nf">expensive</span><span class="p" data-group-id="5868943812-11">(</span><span class="p" data-group-id="5868943812-11">)</span><span class="w"> </span><span class="p" data-group-id="5868943812-10">}</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="ss">roof</span><span class="p" data-group-id="5868943812-8">)</span><span class="p">.</span><span class="w">
+</span><span class="c1">%% A plain string with expensive metadata and normal metadata</span><span class="w">
+</span><span class="nc">logger</span><span class="p">:</span><span class="nf">debug</span><span class="p" data-group-id="5868943812-12">(</span><span class="nf">fun</span><span class="p" data-group-id="5868943812-13">(</span><span class="p" data-group-id="5868943812-14">[</span><span class="p" data-group-id="5868943812-14">]</span><span class="p" data-group-id="5868943812-13">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p" data-group-id="5868943812-15">{</span><span class="s">&quot;Hello World&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5868943812-16">#{</span><span class="w"> </span><span class="ss">meta</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nf">expensive</span><span class="p" data-group-id="5868943812-17">(</span><span class="p" data-group-id="5868943812-17">)</span><span class="w"> </span><span class="p" data-group-id="5868943812-16">}</span><span class="p" data-group-id="5868943812-15">}</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="p" data-group-id="5868943812-18">[</span><span class="p" data-group-id="5868943812-18">]</span><span class="p">,</span><span class="w">
+             </span><span class="p" data-group-id="5868943812-19">#{</span><span class="w"> </span><span class="ss">meta</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ss">data</span><span class="w"> </span><span class="p" data-group-id="5868943812-19">}</span><span class="p" data-group-id="5868943812-12">)</span><span class="p">.</span><span class="w">
+        </span></code></pre><p>When metadata is given both as an argument and returned from the fun they are merged. If equal keys exists the values are taken from the metadata returned by the fun.</p>
+  </section>
+</section>
+<section class="detail" id="log/3">
+
+  <div class="detail-header">
+    <a href="#log/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log/3</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log(Level, StringOrReport, Metadata) -> ok
+       when
+           Level :: <a href="#t:level/0">level</a>(),
+           StringOrReport :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>() | <a href="#t:report/0">report</a>(),
+           Metadata :: <a href="#t:metadata/0">metadata</a>();
+   (Level, Format, Args) -> ok when Level :: <a href="#t:level/0">level</a>(), Format :: <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), Args :: [term()];
+   (Level, Fun, FunArgs) -> ok when Level :: <a href="#t:level/0">level</a>(), Fun :: <a href="#t:msg_fun/0">msg_fun</a>(), FunArgs :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="log/4">
+
+  <div class="detail-header">
+    <a href="#log/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">log/4</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>log(Level, Format, Args, Metadata) -> ok
+       when Level :: <a href="#t:level/0">level</a>(), Format :: <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html#t:format/0">io:format</a>(), Args :: [term()], Metadata :: <a href="#t:metadata/0">metadata</a>();
+   (Level, Fun, FunArgs, Metadata) -> ok
+       when Level :: <a href="#t:level/0">level</a>(), Fun :: <a href="#t:msg_fun/0">msg_fun</a>(), FunArgs :: term(), Metadata :: <a href="#t:metadata/0">metadata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="notice/1">
+
+  <div class="detail-header">
+    <a href="#notice/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notice(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(notice,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="notice/2">
+
+  <div class="detail-header">
+    <a href="#notice/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notice(Fun,FunArgs[,Metadata]) notice(Format,Args[,Metadata]) notice(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="notice/3">
+
+  <div class="detail-header">
+    <a href="#notice/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notice(Fun,FunArgs[,Metadata]) notice(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="remove_handler/1">
+
+  <div class="detail-header">
+    <a href="#remove_handler/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove_handler/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove_handler(HandlerId) -> ok | {error, term()} when HandlerId :: <a href="#t:handler_id/0">handler_id</a>().</pre>
+
+      </div>
+
+<p>Remove the handler identified by <code>HandlerId</code>.</p>
+  </section>
+</section>
+<section class="detail" id="remove_handler_filter/2">
+
+  <div class="detail-header">
+    <a href="#remove_handler_filter/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove_handler_filter/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove_handler_filter(HandlerId, FilterId) -> ok | {error, term()}
+                         when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), FilterId :: <a href="#t:filter_id/0">filter_id</a>().</pre>
+
+      </div>
+
+<p>Remove the filter identified by <code>FilterId</code> from the handler identified by <code>HandlerId</code>.</p>
+  </section>
+</section>
+<section class="detail" id="remove_primary_filter/1">
+
+  <div class="detail-header">
+    <a href="#remove_primary_filter/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove_primary_filter/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove_primary_filter(FilterId) -> ok | {error, term()} when FilterId :: <a href="#t:filter_id/0">filter_id</a>().</pre>
+
+      </div>
+
+<p>Remove the primary filter identified by <code>FilterId</code> from Logger.</p>
+  </section>
+</section>
+<section class="detail" id="set_application_level/2">
+
+  <div class="detail-header">
+    <a href="#set_application_level/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_application_level/2</h1>
+
+
+      <span class="note">(since OTP 21.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_application_level(Application, Level) -> ok | {error, not_loaded}
+                         when Application :: atom(), Level :: <a href="#t:level/0">level</a>() | all | none.</pre>
+
+      </div>
+
+<p>Set the log level for all the modules of the specified application.</p><p>This function is a convenience function that calls <a href="logger.html#set_module_level/2">logger:set_module_level/2</a> for each module associated with an application.</p>
+  </section>
+</section>
+<section class="detail" id="set_handler_config/2">
+
+  <div class="detail-header">
+    <a href="#set_handler_config/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_handler_config/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_handler_config(HandlerId, Config) -> ok | {error, term()}
+                      when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), Config :: <a href="#t:handler_config/0">handler_config</a>().</pre>
+
+      </div>
+
+<p>Set configuration data for the specified handler. This overwrites the current handler configuration.</p><p>To modify the existing configuration, use <a href="logger.html#update_handler_config/2"><code>update_handler_config/2</code></a>, or, if a more complex merge is needed, read the current configuration with <a href="logger.html#get_handler_config/1"><code>get_handler_config/1</code> </a>, then do the merge before writing the new configuration back with this function.</p><p>If a key is removed compared to the current configuration, and the key is known by Logger, the default value is used. If it is a custom key, then it is up to the handler implementation if the value is removed or a default value is inserted.</p>
+  </section>
+</section>
+<section class="detail" id="set_handler_config/3">
+
+  <div class="detail-header">
+    <a href="#set_handler_config/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_handler_config/3</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_handler_config(HandlerId, level, Level) -> Return
+                      when
+                          HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                          Level :: <a href="#t:level/0">level</a>() | all | none,
+                          Return :: ok | {error, term()};
+                  (HandlerId, filter_default, FilterDefault) -> Return
+                      when
+                          HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                          FilterDefault :: log | stop,
+                          Return :: ok | {error, term()};
+                  (HandlerId, filters, Filters) -> Return
+                      when
+                          HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                          Filters :: [{<a href="#t:filter_id/0">filter_id</a>(), <a href="#t:filter/0">filter</a>()}],
+                          Return :: ok | {error, term()};
+                  (HandlerId, formatter, Formatter) -> Return
+                      when
+                          HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                          Formatter :: {module(), <a href="#t:formatter_config/0">formatter_config</a>()},
+                          Return :: ok | {error, term()};
+                  (HandlerId, config, Config) -> Return
+                      when
+                          HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                          Config :: term(),
+                          Return :: ok | {error, term()}.</pre>
+
+      </div>
+
+<p>Add or update configuration data for the specified handler. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p><p>If the value is incomplete, which for example can be the case for the <code>config</code> key, it is up to the handler implementation how the unspecified parts are set. For all handlers in the Kernel application, unspecified data for the <code>config</code> key is set to default values. To update only specified data, and keep the existing configuration for the rest, use <a href="logger.html#update_handler_config/3"><code>update_handler_config/3</code></a>.</p><p>See the definition of the <a href="logger.html#t:handler_config/0"><code>handler_config()</code></a> type for more information about the different parameters.</p>
+  </section>
+</section>
+<section class="detail" id="set_module_level/2">
+
+  <div class="detail-header">
+    <a href="#set_module_level/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_module_level/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_module_level(Modules, Level) -> ok | {error, term()}
+                    when Modules :: [module()] | module(), Level :: <a href="#t:level/0">level</a>() | all | none.</pre>
+
+      </div>
+
+<p>Set the log level for the specified modules.</p><p>The log level for a module overrides the primary log level of Logger for log events originating from the module in question. Notice, however, that it does not override the level configuration for any handler.</p><p>For example: Assume that the primary log level for Logger is <code>info</code>, and there is one handler, <code>h1</code>, with level <code>info</code> and one handler, <code>h2</code>, with level <code>debug</code>.</p><p>With this configuration, no debug messages will be logged, since they are all stopped by the primary log level.</p><p>If the level for <code>mymodule</code> is now set to <code>debug</code>, then debug events from this module will be logged by the handler <code>h2</code>, but not by handler <code>h1</code>.</p><p>Debug events from other modules are still not logged.</p><p>To change the primary log level for Logger, use <a href="logger.html#set_primary_config/2"><code>set_primary_config(level, Level)</code></a>.</p><p>To change the log level for a handler, use <a href="logger.html#set_handler_config/3"><code>set_handler_config(HandlerId, level, Level)</code> </a>.</p><div class="note"><p>The originating module for a log event is only detected if the key <code>mfa</code> exists in the metadata, and is associated with <code>{Module, Function, Arity}</code>. When log macros are used, this association is automatically added to all log events. If an API function is called directly, without using a macro, the logging client must explicitly add this information if module levels shall have any effect.</p></div>
+  </section>
+</section>
+<section class="detail" id="set_primary_config/1">
+
+  <div class="detail-header">
+    <a href="#set_primary_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_primary_config/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_primary_config(Config) -> ok | {error, term()} when Config :: <a href="#t:primary_config/0">primary_config</a>().</pre>
+
+      </div>
+
+<p>Set primary configuration data for Logger. This overwrites the current configuration.</p><p>To modify the existing configuration, use <a href="logger.html#update_primary_config/1"><code>update_primary_config/1</code></a>, or, if a more complex merge is needed, read the current configuration with <a href="logger.html#get_primary_config/0"><code>get_primary_config/0</code> </a>, then do the merge before writing the new configuration back with this function.</p><p>If a key is removed compared to the current configuration, the default value is used.</p>
+  </section>
+</section>
+<section class="detail" id="set_primary_config/2">
+
+  <div class="detail-header">
+    <a href="#set_primary_config/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_primary_config/2</h1>
+
+
+      <span class="note">(since OTP 21.0,OTP 24.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_primary_config(level, Level) -> ok | {error, term()} when Level :: <a href="#t:level/0">level</a>() | all | none;
+                  (filter_default, FilterDefault) -> ok | {error, term()}
+                      when FilterDefault :: log | stop;
+                  (filters, Filters) -> ok | {error, term()}
+                      when Filters :: [{<a href="#t:filter_id/0">filter_id</a>(), <a href="#t:filter/0">filter</a>()}];
+                  (metadata, Meta) -> ok | {error, term()} when Meta :: <a href="#t:metadata/0">metadata</a>().</pre>
+
+      </div>
+
+<p>Add or update primary configuration data for Logger. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p>
+  </section>
+</section>
+<section class="detail" id="set_process_metadata/1">
+
+  <div class="detail-header">
+    <a href="#set_process_metadata/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_process_metadata/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_process_metadata(Meta) -> ok when Meta :: <a href="#t:metadata/0">metadata</a>().</pre>
+
+      </div>
+
+<p>Set metadata which Logger shall automatically insert in all log events produced on the current process.</p><p>Location data produced by the log macros, and/or metadata given as argument to the log call (API function or macro), are merged with the process metadata. If the same keys occur, values from the metadata argument to the log call overwrite values from the process metadata, which in turn overwrite values from the location data.</p><p>Subsequent calls to this function overwrites previous data set. To update existing data instead of overwriting it, see <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="set_proxy_config/1">
+
+  <div class="detail-header">
+    <a href="#set_proxy_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_proxy_config/1</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_proxy_config(Config) -> ok | {error, term()} when Config :: <a href="#t:olp_config/0">olp_config</a>().</pre>
+
+      </div>
+
+<p>Set configuration data for the Logger proxy. This overwrites the current proxy configuration. Keys that are not specified in the <code>Config</code> map gets default values.</p><p>To modify the existing configuration, use <a href="logger.html#update_proxy_config/1"><code>update_proxy_config/1</code></a>, or, if a more complex merge is needed, read the current configuration with <a href="logger.html#get_proxy_config/0"><code>get_proxy_config/0</code> </a>, then do the merge before writing the new configuration back with this function.</p><p>For more information about the proxy, see section Logger Proxy in the Kernel User's Guide.</p>
+  </section>
+</section>
+<section class="detail" id="timestamp/0">
+
+  <div class="detail-header">
+    <a href="#timestamp/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">timestamp/0</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>timestamp() -> <a href="#t:timestamp/0">timestamp</a>().</pre>
+
+      </div>
+
+<p>Return a timestamp that can be inserted as the <code>time</code> field in the meta data for a log event. It is produced with <a href="os.html#system_time/1"><code>os:system_time(microsecond)</code></a>.</p><p>Notice that Logger automatically inserts a timestamp in the meta data unless it already exists. This function is exported for the rare case when the timestamp must be taken at a different point in time than when the log event is issued.</p>
+  </section>
+</section>
+<section class="detail" id="unset_application_level/1">
+
+  <div class="detail-header">
+    <a href="#unset_application_level/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unset_application_level/1</h1>
+
+
+      <span class="note">(since OTP 21.1)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unset_application_level(Application) -> ok | {error, {not_loaded, Application}}
+                           when Application :: atom().</pre>
+
+      </div>
+
+<p>Unset the log level for all the modules of the specified application.</p><p>This function is a utility function that calls <a href="logger.html#unset_module_level/1">logger:unset_module_level/2</a> for each module associated with an application.</p>
+  </section>
+</section>
+<section class="detail" id="unset_module_level/0">
+
+  <div class="detail-header">
+    <a href="#unset_module_level/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unset_module_level/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unset_module_level() -> ok.</pre>
+
+      </div>
+
+<p>Remove module specific log settings. After this, the primary log level is used for all modules.</p>
+  </section>
+</section>
+<section class="detail" id="unset_module_level/1">
+
+  <div class="detail-header">
+    <a href="#unset_module_level/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unset_module_level/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unset_module_level(Modules) -> ok when Modules :: [module()] | module().</pre>
+
+      </div>
+
+<p>Remove module specific log settings. After this, the primary log level is used for the specified modules.</p>
+  </section>
+</section>
+<section class="detail" id="unset_process_metadata/0">
+
+  <div class="detail-header">
+    <a href="#unset_process_metadata/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unset_process_metadata/0</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unset_process_metadata() -> ok.</pre>
+
+      </div>
+
+<p>Delete data set with <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code></a> or <a href="logger.html#update_process_metadata/1"><code>update_process_metadata/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="update_formatter_config/2">
+
+  <div class="detail-header">
+    <a href="#update_formatter_config/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_formatter_config/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_formatter_config(HandlerId, FormatterConfig) -> ok | {error, term()}
+                           when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), FormatterConfig :: <a href="#t:formatter_config/0">formatter_config</a>().</pre>
+
+      </div>
+
+<p>Update the formatter configuration for the specified handler.</p><p>The new configuration is merged with the existing formatter configuration.</p><p>To overwrite the existing configuration without any merge, use</p><pre><code><a href="logger.html#set_handler_config/3">set_handler_config(HandlerId, formatter,
+	      {FormatterModule, FormatterConfig})</a>.</code></pre>
+  </section>
+</section>
+<section class="detail" id="update_formatter_config/3">
+
+  <div class="detail-header">
+    <a href="#update_formatter_config/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_formatter_config/3</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_formatter_config(HandlerId, Key, Value) -> ok | {error, term()}
+                           when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), Key :: atom(), Value :: term().</pre>
+
+      </div>
+
+<p>Update the formatter configuration for the specified handler.</p><p>This is equivalent to</p><pre><code><a href="logger.html#update_formatter_config/2">update_formatter_config(HandlerId, #{Key =&gt; Value})</a></code></pre>
+  </section>
+</section>
+<section class="detail" id="update_handler_config/2">
+
+  <div class="detail-header">
+    <a href="#update_handler_config/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_handler_config/2</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_handler_config(HandlerId, Config) -> ok | {error, term()}
+                         when HandlerId :: <a href="#t:handler_id/0">handler_id</a>(), Config :: <a href="#t:handler_config/0">handler_config</a>().</pre>
+
+      </div>
+
+<p>Update configuration data for the specified handler. This function behaves as if it was implemented as follows:</p><pre><code type="erl">{ok, {_, Old}} = logger:get_handler_config(HandlerId),
+logger:set_handler_config(HandlerId, maps:merge(Old, Config)).
+	</code></pre><p>To overwrite the existing configuration without any merge, use <a href="logger.html#set_handler_config/2"><code>set_handler_config/2</code> </a>.</p>
+  </section>
+</section>
+<section class="detail" id="update_handler_config/3">
+
+  <div class="detail-header">
+    <a href="#update_handler_config/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_handler_config/3</h1>
+
+
+      <span class="note">(since OTP 21.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_handler_config(HandlerId, level, Level) -> Return
+                         when
+                             HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                             Level :: <a href="#t:level/0">level</a>() | all | none,
+                             Return :: ok | {error, term()};
+                     (HandlerId, filter_default, FilterDefault) -> Return
+                         when
+                             HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                             FilterDefault :: log | stop,
+                             Return :: ok | {error, term()};
+                     (HandlerId, filters, Filters) -> Return
+                         when
+                             HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                             Filters :: [{<a href="#t:filter_id/0">filter_id</a>(), <a href="#t:filter/0">filter</a>()}],
+                             Return :: ok | {error, term()};
+                     (HandlerId, formatter, Formatter) -> Return
+                         when
+                             HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                             Formatter :: {module(), <a href="#t:formatter_config/0">formatter_config</a>()},
+                             Return :: ok | {error, term()};
+                     (HandlerId, config, Config) -> Return
+                         when
+                             HandlerId :: <a href="#t:handler_id/0">handler_id</a>(),
+                             Config :: term(),
+                             Return :: ok | {error, term()}.</pre>
+
+      </div>
+
+<p>Add or update configuration data for the specified handler. If the given <code>Key</code> already exists, its associated value will be changed to the given value. If it does not exist, it will be added.</p><p>If the value is incomplete, which for example can be the case for the <code>config</code> key, it is up to the handler implementation how the unspecified parts are set. For all handlers in the Kernel application, unspecified data for the <code>config</code> key is not changed. To reset unspecified data to default values, use <a href="logger.html#set_handler_config/3"><code>set_handler_config/3</code></a>.</p><p>See the definition of the <a href="logger.html#t:handler_config/0"><code>handler_config()</code></a> type for more information about the different parameters.</p>
+  </section>
+</section>
+<section class="detail" id="update_primary_config/1">
+
+  <div class="detail-header">
+    <a href="#update_primary_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_primary_config/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_primary_config(Config) -> ok | {error, term()} when Config :: <a href="#t:primary_config/0">primary_config</a>().</pre>
+
+      </div>
+
+<p>Update primary configuration data for Logger. This function behaves as if it was implemented as follows:</p><pre><code type="erl">Old = logger:get_primary_config(),
+logger:set_primary_config(maps:merge(Old, Config)).
+	</code></pre><p>To overwrite the existing configuration without any merge, use <a href="logger.html#set_primary_config/1"><code>set_primary_config/1</code> </a>.</p>
+  </section>
+</section>
+<section class="detail" id="update_process_metadata/1">
+
+  <div class="detail-header">
+    <a href="#update_process_metadata/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_process_metadata/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_process_metadata(Meta) -> ok when Meta :: <a href="#t:metadata/0">metadata</a>().</pre>
+
+      </div>
+
+<p>Set or update metadata to use when logging from current process</p><p>If process metadata exists for the current process, this function behaves as if it was implemented as follows:</p><pre><code type="erl">logger:set_process_metadata(maps:merge(logger:get_process_metadata(), Meta)).
+	</code></pre><p>If no process metadata exists, the function behaves as <a href="logger.html#set_process_metadata/1"><code>set_process_metadata/1</code> </a>.</p>
+  </section>
+</section>
+<section class="detail" id="update_proxy_config/1">
+
+  <div class="detail-header">
+    <a href="#update_proxy_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_proxy_config/1</h1>
+
+
+      <span class="note">(since OTP 21.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>update_proxy_config(Config) -> ok | {error, term()} when Config :: <a href="#t:olp_config/0">olp_config</a>().</pre>
+
+      </div>
+
+<p>Update configuration data for the Logger proxy. This function behaves as if it was implemented as follows:</p><pre><code type="erl">Old = logger:get_proxy_config(),
+logger:set_proxy_config(maps:merge(Old, Config)).
+	</code></pre><p>To overwrite the existing configuration without any merge, use <a href="logger.html#set_proxy_config/1"><code>set_proxy_config/1</code> </a>.</p><p>For more information about the proxy, see section Logger Proxy in the Kernel User's Guide.</p>
+  </section>
+</section>
+<section class="detail" id="warning/1">
+
+  <div class="detail-header">
+    <a href="#warning/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<p>Equivalent to <a href="logger.html#log/2"><code>log(warning,...)</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="warning/2">
+
+  <div class="detail-header">
+    <a href="#warning/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning(Fun,FunArgs[,Metadata]) warning(Format,Args[,Metadata]) warning(StringOrReport[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="warning/3">
+
+  <div class="detail-header">
+    <a href="#warning/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">warning(Fun,FunArgs[,Metadata]) warning(Format,Args[,Metadata])</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

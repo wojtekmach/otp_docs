@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>erl_eval — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+erl_eval <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides an interpreter for Erlang expressions. The expressions are in the abstract syntax as returned by <a href="erl_parse.html"><code>erl_parse</code></a>, the Erlang parser, or <a href="io.html"><code>io</code></a>.</p><a id="local_function_handler"></a><h2 id="module-local-function-handler" class="section-heading">
+  <a href="#module-local-function-handler" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Local Function Handler
+</h2>
+<p>During evaluation of a function, no calls can be made to local functions. An undefined function error would be generated. However, the optional argument <code>LocalFunctionHandler</code> can be used to define a function that is called when there is a call to a local function. The argument can have the following formats:</p><dl><dt><code>{value,Func}</code></dt><dd><p>This defines a local function handler that is called with:</p><pre><code type="none">Func(Name, Arguments)</code></pre><p><code>Name</code> is the name of the local function (an atom) and <code>Arguments</code> is a list of the <em>evaluated</em> arguments. The function handler returns the value of the local function. In this case, the current bindings cannot be accessed. To signal an error, the function handler calls <code>exit/1</code> with a suitable exit value.</p></dd><dt><code>{eval,Func}</code></dt><dd><p>This defines a local function handler that is called with:</p><pre><code type="none">Func(Name, Arguments, Bindings)</code></pre><p><code>Name</code> is the name of the local function (an atom), <code>Arguments</code> is a list of the <em>unevaluated</em> arguments, and <code>Bindings</code> are the current variable bindings. The function handler returns:</p><pre><code type="none">{value,Value,NewBindings}</code></pre><p><code>Value</code> is the value of the local function and <code>NewBindings</code> are the updated variable bindings. In this case, the function handler must itself evaluate all the function arguments and manage the bindings. To signal an error, the function handler calls <code>exit/1</code> with a suitable exit value.</p></dd><dt><code>none</code></dt><dd><p>There is no local function handler.</p></dd></dl><a id="non_local_function_handler"></a><h2 id="module-non-local-function-handler" class="section-heading">
+  <a href="#module-non-local-function-handler" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Non-Local Function Handler
+</h2>
+<p>The optional argument <code>NonLocalFunctionHandler</code> can be used to define a function that is called in the following cases:</p><ul><li><p>A functional object (fun) is called.</p></li><li><p>A built-in function is called.</p></li><li><p>A function is called using the <code>M:F</code> syntax, where <code>M</code> and <code>F</code> are atoms or expressions.</p></li><li><p>An operator <code>Op/A</code> is called (this is handled as a call to function <code>erlang:Op/A</code>).</p></li></ul><p>Exceptions are calls to <code>erlang:apply/2,3</code>; neither of the function handlers are called for such calls. The argument can have the following formats:</p><dl><dt><code>{value,Func}</code></dt><dd><p>This defines a non-local function handler that is called with:</p><pre><code type="none">Func(FuncSpec, Arguments)</code></pre><p><code>FuncSpec</code> is the name of the function on the form <code>{Module,Function}</code> or a fun, and <code>Arguments</code> is a list of the <em>evaluated</em> arguments. The function handler returns the value of the function. To signal an error, the function handler calls <code>exit/1</code> with a suitable exit value.</p></dd><dt><code>none</code></dt><dd><p>There is no non-local function handler.</p></dd></dl><div class="note"><p>For calls such as <code>erlang:apply(Fun, Args)</code> or <code>erlang:apply(Module, Function, Args)</code>, the call of the non-local function handler corresponding to the call to <code>erlang:apply/2,3</code> itself (<code>Func({erlang, apply}, [Fun, Args])</code> or <code>Func({erlang, apply}, [Module, Function, Args])</code>) never takes place.</p><p>The non-local function handler <em>is</em> however called with the evaluated arguments of the call to <code>erlang:apply/2,3</code>: <code>Func(Fun, Args)</code> or <code>Func({Module, Function}, Args)</code> (assuming that <code>{Module, Function}</code> is not <code>{erlang, apply}</code>).</p><p>Calls to functions defined by evaluating fun expressions <code>&quot;fun ... end&quot;</code> are also hidden from non-local function handlers.</p></div><p>The non-local function handler argument is probably not used as frequently as the local function handler argument. A possible use is to call <code>exit/1</code> on calls to functions that for some reason are not allowed to be called.</p><h2 id="module-known-limitation" class="section-heading">
+  <a href="#module-known-limitation" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Known Limitation
+</h2>
+<p>Undocumented functions in this module are not to be used.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:binding_struct/0">-type binding_struct() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A binding structure. It is either a <code>map</code> or an <code>orddict</code>. <code>erl_eval</code> will always return the same type as the one given.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:bindings/0">-type bindings() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:expression/0">-type expression() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:expression_list/0">-type expression_list() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:expressions/0">-type expressions() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>As returned by <a href="erl_parse.html#parse_exprs/1"><code>erl_parse:parse_exprs/1</code></a> or <a href="io.html#parse_erl_exprs/2"><code>io:parse_erl_exprs/2</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:func_spec/0">-type func_spec() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:lfun_eval_handler/0">-type lfun_eval_handler() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:lfun_value_handler/0">-type lfun_value_handler() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:local_function_handler/0">-type local_function_handler() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Further described in section <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> in this module</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:name/0">-type name() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:nlfun_handler/0">-type nlfun_handler() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:non_local_function_handler/0">-type non_local_function_handler() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Further described in section <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:value/0">-type value() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#add_binding/3">add_binding/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds binding <code>Name=Value</code> to <code>BindingStruct</code>. Returns an updated binding structure.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#binding/2">binding/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the binding of <code>Name</code> in <code>BindingStruct</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#bindings/1">bindings/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the list of bindings contained in the binding structure.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#del_binding/2">del_binding/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the binding of <code>Name</code> in <code>BindingStruct</code>. Returns an updated binding structure.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr/2">expr/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>Expression</code> with the set of bindings <code>Bindings</code>. <code>Expression</code> is an expression in abstract syntax. For an explanation of when and how to use arguments <code>LocalFunctionHandler</code> and <code>NonLocalFunctionHandler</code>, see sections <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> and <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr/3">expr/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr/4">expr/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr/5">expr/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr_list/2">expr_list/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates a list of expressions in parallel, using the same initial bindings for each expression. Attempts are made to merge the bindings returned from each evaluation. This function is useful in <code>LocalFunctionHandler</code>, see section <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> in this module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr_list/3">expr_list/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#expr_list/4">expr_list/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exprs/2">exprs/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Evaluates <code>Expressions</code> with the set of bindings <code>Bindings</code>, where <code>Expressions</code> is a sequence of expressions (in abstract syntax) of a type that can be returned by <a href="io.html#parse_erl_exprs/2"><code>io:parse_erl_exprs/2</code></a>. For an explanation of when and how to use arguments <code>LocalFunctionHandler</code> and <code>NonLocalFunctionHandler</code>, see sections <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> and <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exprs/3">exprs/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#exprs/4">exprs/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new_bindings/0">new_bindings/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns an empty binding structure.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:binding_struct/0">
+
+  <div class="detail-header">
+    <a href="#t:binding_struct/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type binding_struct() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>binding_struct() :: <a href="orddict.html#t:orddict/0">orddict:orddict</a>() | map().</pre>
+
+      </div>
+
+<p>A binding structure. It is either a <code>map</code> or an <code>orddict</code>. <code>erl_eval</code> will always return the same type as the one given.</p>
+  </section>
+</section>
+<section class="detail" id="t:bindings/0">
+
+  <div class="detail-header">
+    <a href="#t:bindings/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type bindings() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>bindings() :: [{<a href="#t:name/0">name</a>(), <a href="#t:value/0">value</a>()}].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:expression/0">
+
+  <div class="detail-header">
+    <a href="#t:expression/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type expression() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expression() :: <a href="erl_parse.html#t:abstract_expr/0">erl_parse:abstract_expr</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:expression_list/0">
+
+  <div class="detail-header">
+    <a href="#t:expression_list/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type expression_list() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expression_list() :: [<a href="#t:expression/0">expression</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:expressions/0">
+
+  <div class="detail-header">
+    <a href="#t:expressions/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type expressions() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expressions() :: [<a href="erl_parse.html#t:abstract_expr/0">erl_parse:abstract_expr</a>()].</pre>
+
+      </div>
+
+<p>As returned by <a href="erl_parse.html#parse_exprs/1"><code>erl_parse:parse_exprs/1</code></a> or <a href="io.html#parse_erl_exprs/2"><code>io:parse_erl_exprs/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:func_spec/0">
+
+  <div class="detail-header">
+    <a href="#t:func_spec/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type func_spec() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>func_spec() :: {Module :: module(), Function :: atom()} | function().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:lfun_eval_handler/0">
+
+  <div class="detail-header">
+    <a href="#t:lfun_eval_handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type lfun_eval_handler() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lfun_eval_handler() ::
+    fun((Name :: atom(), Arguments :: <a href="#t:expression_list/0">expression_list</a>(), Bindings :: <a href="#t:binding_struct/0">binding_struct</a>()) ->
+            {value, Value :: <a href="#t:value/0">value</a>(), NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>()}).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:lfun_value_handler/0">
+
+  <div class="detail-header">
+    <a href="#t:lfun_value_handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type lfun_value_handler() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>lfun_value_handler() :: fun((Name :: atom(), Arguments :: [term()]) -> Value :: <a href="#t:value/0">value</a>()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:local_function_handler/0">
+
+  <div class="detail-header">
+    <a href="#t:local_function_handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type local_function_handler() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>local_function_handler() :: {value, <a href="#t:lfun_value_handler/0">lfun_value_handler</a>()} | {eval, <a href="#t:lfun_eval_handler/0">lfun_eval_handler</a>()} | none.</pre>
+
+      </div>
+
+<p>Further described in section <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> in this module</p>
+  </section>
+</section>
+<section class="detail" id="t:name/0">
+
+  <div class="detail-header">
+    <a href="#t:name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>name() :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:nlfun_handler/0">
+
+  <div class="detail-header">
+    <a href="#t:nlfun_handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type nlfun_handler() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>nlfun_handler() :: fun((FuncSpec :: <a href="#t:func_spec/0">func_spec</a>(), Arguments :: [term()]) -> term()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:non_local_function_handler/0">
+
+  <div class="detail-header">
+    <a href="#t:non_local_function_handler/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type non_local_function_handler() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>non_local_function_handler() :: {value, <a href="#t:nlfun_handler/0">nlfun_handler</a>()} | none.</pre>
+
+      </div>
+
+<p>Further described in section <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p>
+  </section>
+</section>
+<section class="detail" id="t:value/0">
+
+  <div class="detail-header">
+    <a href="#t:value/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type value() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>value() :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="add_binding/3">
+
+  <div class="detail-header">
+    <a href="#add_binding/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">add_binding/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>add_binding(Name, Value, BindingStruct) -> <a href="#t:binding_struct/0">binding_struct</a>()
+               when Name :: <a href="#t:name/0">name</a>(), Value :: <a href="#t:value/0">value</a>(), BindingStruct :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Adds binding <code>Name=Value</code> to <code>BindingStruct</code>. Returns an updated binding structure.</p>
+  </section>
+</section>
+<section class="detail" id="binding/2">
+
+  <div class="detail-header">
+    <a href="#binding/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">binding/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>binding(Name, BindingStruct) -> {value, <a href="#t:value/0">value</a>()} | unbound
+           when Name :: <a href="#t:name/0">name</a>(), BindingStruct :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Returns the binding of <code>Name</code> in <code>BindingStruct</code>.</p>
+  </section>
+</section>
+<section class="detail" id="bindings/1">
+
+  <div class="detail-header">
+    <a href="#bindings/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">bindings/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>bindings(BindingStruct :: <a href="#t:binding_struct/0">binding_struct</a>()) -> <a href="#t:bindings/0">bindings</a>().</pre>
+
+      </div>
+
+<p>Returns the list of bindings contained in the binding structure.</p>
+  </section>
+</section>
+<section class="detail" id="del_binding/2">
+
+  <div class="detail-header">
+    <a href="#del_binding/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">del_binding/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>del_binding(Name, BindingStruct) -> <a href="#t:binding_struct/0">binding_struct</a>()
+               when Name :: <a href="#t:name/0">name</a>(), BindingStruct :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Removes the binding of <code>Name</code> in <code>BindingStruct</code>. Returns an updated binding structure.</p>
+  </section>
+</section>
+<section class="detail" id="expr/2">
+
+  <div class="detail-header">
+    <a href="#expr/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr(Expression, Bindings) -> {value, Value, NewBindings}
+        when
+            Expression :: <a href="#t:expression/0">expression</a>(),
+            Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+            Value :: <a href="#t:value/0">value</a>(),
+            NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Evaluates <code>Expression</code> with the set of bindings <code>Bindings</code>. <code>Expression</code> is an expression in abstract syntax. For an explanation of when and how to use arguments <code>LocalFunctionHandler</code> and <code>NonLocalFunctionHandler</code>, see sections <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> and <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p><p>Returns <code>{value, Value, NewBindings}</code> by default. If <code>ReturnFormat</code> is <code>value</code>, only <code>Value</code> is returned.</p>
+  </section>
+</section>
+<section class="detail" id="expr/3">
+
+  <div class="detail-header">
+    <a href="#expr/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr(Expression, Bindings, LocalFunctionHandler) -> {value, Value, NewBindings}
+        when
+            Expression :: <a href="#t:expression/0">expression</a>(),
+            Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+            LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+            Value :: <a href="#t:value/0">value</a>(),
+            NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="expr/4">
+
+  <div class="detail-header">
+    <a href="#expr/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr(Expression, Bindings, LocalFunctionHandler, NonLocalFunctionHandler) ->
+        {value, Value, NewBindings}
+        when
+            Expression :: <a href="#t:expression/0">expression</a>(),
+            Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+            LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+            NonLocalFunctionHandler :: <a href="#t:non_local_function_handler/0">non_local_function_handler</a>(),
+            Value :: <a href="#t:value/0">value</a>(),
+            NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="expr/5">
+
+  <div class="detail-header">
+    <a href="#expr/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr(Expression, Bindings, LocalFunctionHandler, NonLocalFunctionHandler, ReturnFormat) ->
+        {value, Value, NewBindings} | Value
+        when
+            Expression :: <a href="#t:expression/0">expression</a>(),
+            Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+            LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+            NonLocalFunctionHandler :: <a href="#t:non_local_function_handler/0">non_local_function_handler</a>(),
+            ReturnFormat :: none | value,
+            Value :: <a href="#t:value/0">value</a>(),
+            NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="expr_list/2">
+
+  <div class="detail-header">
+    <a href="#expr_list/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr_list/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr_list(ExpressionList, Bindings) -> {ValueList, NewBindings}
+             when
+                 ExpressionList :: <a href="#t:expression_list/0">expression_list</a>(),
+                 Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+                 ValueList :: [<a href="#t:value/0">value</a>()],
+                 NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Evaluates a list of expressions in parallel, using the same initial bindings for each expression. Attempts are made to merge the bindings returned from each evaluation. This function is useful in <code>LocalFunctionHandler</code>, see section <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> in this module.</p><p>Returns <code>{ValueList, NewBindings}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="expr_list/3">
+
+  <div class="detail-header">
+    <a href="#expr_list/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr_list/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr_list(ExpressionList, Bindings, LocalFunctionHandler) -> {ValueList, NewBindings}
+             when
+                 ExpressionList :: <a href="#t:expression_list/0">expression_list</a>(),
+                 Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+                 LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+                 ValueList :: [<a href="#t:value/0">value</a>()],
+                 NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="expr_list/4">
+
+  <div class="detail-header">
+    <a href="#expr_list/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">expr_list/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>expr_list(ExpressionList, Bindings, LocalFunctionHandler, NonLocalFunctionHandler) ->
+             {ValueList, NewBindings}
+             when
+                 ExpressionList :: <a href="#t:expression_list/0">expression_list</a>(),
+                 Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+                 LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+                 NonLocalFunctionHandler :: <a href="#t:non_local_function_handler/0">non_local_function_handler</a>(),
+                 ValueList :: [<a href="#t:value/0">value</a>()],
+                 NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="exprs/2">
+
+  <div class="detail-header">
+    <a href="#exprs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exprs/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>exprs(Expressions, Bindings) -> {value, Value, NewBindings}
+         when
+             Expressions :: <a href="#t:expressions/0">expressions</a>(),
+             Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+             Value :: <a href="#t:value/0">value</a>(),
+             NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Evaluates <code>Expressions</code> with the set of bindings <code>Bindings</code>, where <code>Expressions</code> is a sequence of expressions (in abstract syntax) of a type that can be returned by <a href="io.html#parse_erl_exprs/2"><code>io:parse_erl_exprs/2</code></a>. For an explanation of when and how to use arguments <code>LocalFunctionHandler</code> and <code>NonLocalFunctionHandler</code>, see sections <a href="erl_eval.html#content#local_function_handler">Local Function Handler</a> and <a href="erl_eval.html#content#non_local_function_handler">Non-Local Function Handler</a> in this module.</p><p>Returns <code>{value, Value, NewBindings}</code></p>
+  </section>
+</section>
+<section class="detail" id="exprs/3">
+
+  <div class="detail-header">
+    <a href="#exprs/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exprs/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>exprs(Expressions, Bindings, LocalFunctionHandler) -> {value, Value, NewBindings}
+         when
+             Expressions :: <a href="#t:expressions/0">expressions</a>(),
+             Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+             LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+             Value :: <a href="#t:value/0">value</a>(),
+             NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="exprs/4">
+
+  <div class="detail-header">
+    <a href="#exprs/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">exprs/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>exprs(Expressions, Bindings, LocalFunctionHandler, NonLocalFunctionHandler) ->
+         {value, Value, NewBindings}
+         when
+             Expressions :: <a href="#t:expressions/0">expressions</a>(),
+             Bindings :: <a href="#t:binding_struct/0">binding_struct</a>(),
+             LocalFunctionHandler :: <a href="#t:local_function_handler/0">local_function_handler</a>(),
+             NonLocalFunctionHandler :: <a href="#t:non_local_function_handler/0">non_local_function_handler</a>(),
+             Value :: <a href="#t:value/0">value</a>(),
+             NewBindings :: <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="new_bindings/0">
+
+  <div class="detail-header">
+    <a href="#new_bindings/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new_bindings/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new_bindings() -> <a href="#t:binding_struct/0">binding_struct</a>().</pre>
+
+      </div>
+
+<p>Returns an empty binding structure.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

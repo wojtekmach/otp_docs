@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>heart — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+heart <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This modules contains the interface to the <code>heart</code> process. <code>heart</code> sends periodic heartbeats to an external port program, which is also named <code>heart</code>. The purpose of the <code>heart</code> port program is to check that the Erlang runtime system it is supervising is still running. If the port program has not received any heartbeats within <code>HEART_BEAT_TIMEOUT</code> seconds (defaults to 60 seconds), the system can be rebooted.</p><p>An Erlang runtime system to be monitored by a heart program is to be started with command-line flag <code>-heart</code> (see also <code>erl(1)</code>). The <code>heart</code> process is then started automatically:</p><pre><code class="makeup erlang"><span class="c1">% erl -heart ...</span></code></pre><p>If the system is to be rebooted because of missing heartbeats, or a terminated Erlang runtime system, environment variable <code>HEART_COMMAND</code> must be set before the system is started. If this variable is not set, a warning text is printed but the system does not reboot.</p><p>To reboot on Windows, <code>HEART_COMMAND</code> can be set to <code>heart -shutdown</code> (included in the Erlang delivery) or to any other suitable program that can activate a reboot.</p><p>The environment variable <code>HEART_BEAT_TIMEOUT</code> can be used to configure the heart time-outs; it can be set in the operating system shell before Erlang is started or be specified at the command line:</p><pre><code class="makeup erlang"><span class="c1">% erl -heart -env HEART_BEAT_TIMEOUT 30 ...</span></code></pre><p>The value (in seconds) must be in the range 10 &lt; X &lt;= 65535.</p><p>When running on OSs lacking support for monotonic time, <code>heart</code> is susceptible to system clock adjustments of more than <code>HEART_BEAT_TIMEOUT</code> seconds. When this happens, <code>heart</code> times out and tries to reboot the system. This can occur, for example, if the system clock is adjusted automatically by use of the Network Time Protocol (NTP).</p><p>If a crash occurs, an <code>erl_crash.dump</code> is <em>not</em> written unless environment variable <code>ERL_CRASH_DUMP_SECONDS</code> is set:</p><pre><code class="makeup erlang"><span class="c1">% erl -heart -env ERL_CRASH_DUMP_SECONDS 10 ...</span></code></pre><p>If a regular core dump is wanted, let <code>heart</code> know by setting the kill signal to abort using environment variable <code>HEART_KILL_SIGNAL=SIGABRT</code>. If unset, or not set to <code>SIGABRT</code>, the default behavior is a kill signal using <code>SIGKILL</code>:</p><pre><code class="makeup erlang"><span class="c1">% erl -heart -env HEART_KILL_SIGNAL SIGABRT ...</span></code></pre><p>If heart should <em>not</em> kill the Erlang runtime system, this can be indicated using the environment variable <code>HEART_NO_KILL=TRUE</code>. This can be useful if the command executed by heart takes care of this, for example as part of a specific cleanup sequence. If unset, or not set to <code>TRUE</code>, the default behaviour will be to kill as described above.</p><pre><code class="makeup erlang"><span class="c1">% erl -heart -env HEART_NO_KILL 1 ...</span></code></pre><p>Furthermore, <code>ERL_CRASH_DUMP_SECONDS</code> has the following behavior on <code>heart</code>:</p><dl><dt><code>ERL_CRASH_DUMP_SECONDS=0</code></dt><dd><p>Suppresses the writing of a crash dump file entirely, thus rebooting the runtime system immediately. This is the same as not setting the environment variable.</p></dd><dt><code>ERL_CRASH_DUMP_SECONDS=-1</code></dt><dd><p>Setting the environment variable to a negative value does not reboot the runtime system until the crash dump file is completly written.</p></dd><dt><code>ERL_CRASH_DUMP_SECONDS=S</code></dt><dd><p><code>heart</code> waits for <code>S</code> seconds to let the crash dump file be written. After <code>S</code> seconds, <code>heart</code> reboots the runtime system, whether the crash dump file is written or not.</p></dd></dl><p>In the following descriptions, all functions fail with reason <code>badarg</code> if <code>heart</code> is not started.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:heart_option/0">-type heart_option() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear_callback/0">clear_callback/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the validation callback call before heartbeats.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear_cmd/0">clear_cmd/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Clears the temporary boot command. If the system terminates, the normal <code>HEART_COMMAND</code> is used to reboot.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_callback/0">get_callback/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Get the validation callback. If the callback is cleared, <code>none</code> will be returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_cmd/0">get_cmd/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the temporary reboot command. If the command is cleared, the empty string is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_options/0">get_options/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{ok, Options}</code> where <code>Options</code> is a list of current options enabled for heart. If the callback is cleared, <code>none</code> will be returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_callback/2">set_callback/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This validation callback will be executed before any heartbeat is sent to the port program. For the validation to succeed it needs to return with the value <code>ok</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_cmd/1">set_cmd/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets a temporary reboot command. This command is used if a <code>HEART_COMMAND</code> other than the one specified with the environment variable is to be used to reboot the system. The new Erlang runtime system uses (if it misbehaves) environment variable <code>HEART_COMMAND</code> to reboot.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_options/1">set_options/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Valid options <code>set_options</code> are</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:heart_option/0">
+
+  <div class="detail-header">
+    <a href="#t:heart_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type heart_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>heart_option() :: check_schedulers.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="clear_callback/0">
+
+  <div class="detail-header">
+    <a href="#clear_callback/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear_callback/0</h1>
+
+
+      <span class="note">(since OTP 18.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>clear_callback() -> ok.</pre>
+
+      </div>
+
+<p>Removes the validation callback call before heartbeats.</p>
+  </section>
+</section>
+<section class="detail" id="clear_cmd/0">
+
+  <div class="detail-header">
+    <a href="#clear_cmd/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear_cmd/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>clear_cmd() -> ok.</pre>
+
+      </div>
+
+<p>Clears the temporary boot command. If the system terminates, the normal <code>HEART_COMMAND</code> is used to reboot.</p>
+  </section>
+</section>
+<section class="detail" id="get_callback/0">
+
+  <div class="detail-header">
+    <a href="#get_callback/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_callback/0</h1>
+
+
+      <span class="note">(since OTP 18.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_callback() -> {ok, {Module, Function}} | none when Module :: atom(), Function :: atom().</pre>
+
+      </div>
+
+<p>Get the validation callback. If the callback is cleared, <code>none</code> will be returned.</p>
+  </section>
+</section>
+<section class="detail" id="get_cmd/0">
+
+  <div class="detail-header">
+    <a href="#get_cmd/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_cmd/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_cmd() -> {ok, Cmd} when Cmd :: string().</pre>
+
+      </div>
+
+<p>Gets the temporary reboot command. If the command is cleared, the empty string is returned.</p>
+  </section>
+</section>
+<section class="detail" id="get_options/0">
+
+  <div class="detail-header">
+    <a href="#get_options/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_options/0</h1>
+
+
+      <span class="note">(since OTP 18.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>get_options() -> {ok, Options} | none when Options :: [atom()].</pre>
+
+      </div>
+
+<p>Returns <code>{ok, Options}</code> where <code>Options</code> is a list of current options enabled for heart. If the callback is cleared, <code>none</code> will be returned.</p>
+  </section>
+</section>
+<section class="detail" id="set_callback/2">
+
+  <div class="detail-header">
+    <a href="#set_callback/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_callback/2</h1>
+
+
+      <span class="note">(since OTP 18.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_callback(Module, Function) -> ok | {error, {bad_callback, {Module, Function}}}
+                when Module :: atom(), Function :: atom().</pre>
+
+      </div>
+
+<p>This validation callback will be executed before any heartbeat is sent to the port program. For the validation to succeed it needs to return with the value <code>ok</code>.</p><p>An exception within the callback will be treated as a validation failure.</p><p>The callback will be removed if the system reboots.</p>
+  </section>
+</section>
+<section class="detail" id="set_cmd/1">
+
+  <div class="detail-header">
+    <a href="#set_cmd/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_cmd/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_cmd(Cmd) -> ok | {error, {bad_cmd, Cmd}} when Cmd :: string().</pre>
+
+      </div>
+
+<p>Sets a temporary reboot command. This command is used if a <code>HEART_COMMAND</code> other than the one specified with the environment variable is to be used to reboot the system. The new Erlang runtime system uses (if it misbehaves) environment variable <code>HEART_COMMAND</code> to reboot.</p><p>Limitations: Command string <code>Cmd</code> is sent to the <code>heart</code> program as an ISO Latin-1 or UTF-8 encoded binary, depending on the filename encoding mode of the emulator (see <a href="file.html#native_name_encoding/0"><code>file:native_name_encoding/0</code></a>). The size of the encoded binary must be less than 2047 bytes.</p>
+  </section>
+</section>
+<section class="detail" id="set_options/1">
+
+  <div class="detail-header">
+    <a href="#set_options/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_options/1</h1>
+
+
+      <span class="note">(since OTP 18.3)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_options(Options) -> ok | {error, {bad_options, Options}} when Options :: [<a href="#t:heart_option/0">heart_option</a>()].</pre>
+
+      </div>
+
+<p>Valid options <code>set_options</code> are:</p><dl><dt><code>check_schedulers</code></dt><dd><p>If enabled, a signal will be sent to each scheduler to check its responsiveness. The system check occurs before any heartbeat sent to the port program. If any scheduler is not responsive enough the heart program will not receive its heartbeat and thus eventually terminate the node.</p></dd></dl><p>Returns with the value <code>ok</code> if the options are valid.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="inets v7.4.1">
+
+    <title>httpc — inets v7.4.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-834651ac0c.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+inets
+      </a>
+      <strong class="sidebar-projectVersion">
+        v7.4.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+httpc <small class="app-vsn">(inets v7.4.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides the API to an HTTP/1.1 compatible client according to <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>. Caching is not supported.</p><div class="note"><p>When starting the <code>Inets</code> application, a manager process for the default profile is started. The functions in this API that do not explicitly use a profile accesses the default profile. A profile keeps track of proxy options, cookies, and other options that can be applied to more than one request.</p><p>If the scheme <code>https</code> is used, the <code>SSL</code> application must be started. When <code>https</code> links need to go through a proxy, the CONNECT method extension to HTTP-1.1 is used to establish a tunnel and then the connection is upgraded to TLS. However, &quot;TLS upgrade&quot; according to <a href="http://www.ietf.org/rfc/rfc2817.txt">RFC 2817</a>is not supported.</p><p>Pipelining is only used if the pipeline time-out is set, otherwise persistent connections without pipelining are used. That is, the client always waits for the previous response before sending the next request.</p></div><p>Some examples are provided in the Inets User's Guide.</p><h2 id="module-data-types" class="section-heading">
+  <a href="#module-data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  DATA TYPES
+</h2>
+<a id="DATA_TYPES"></a><p>Type definitions that are used more than once in this module:</p><p><code>boolean() = true | false</code></p><p><code>string()</code> = list of ASCII characters</p><p><code>request_id() = reference()</code></p><p><code>profile() = atom()</code></p><p><code>path() = string()</code> representing a file path or directory path</p><p><code>ip_address()</code> = See the <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html">inet(3)</a> manual page in Kernel.</p><p><code>socket_opt()</code> = See the options used by <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html">gen_tcp(3)</a> <code>gen_tcp(3)</code> and <a href="https://wojtekmach.pl/otp_docs/ssl/ssl.html">ssl(3)</a> connect(s)</p><h2 id="module-http-data-types" class="section-heading">
+  <a href="#module-http-data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  HTTP DATA TYPES
+</h2>
+<p>Type definitions related to HTTP:</p><p><code>method() = head | get | put | post | trace | options | delete | patch</code></p><dl><dt><code>request()</code></dt><dd><p>= <code>{url(), headers()}</code></p><p>| <code>{url(), headers(), content_type(), body()}</code></p></dd></dl><p><code>url() = string()</code> syntax according to the URI definition in <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>, for example <code>&quot;http://www.erlang.org&quot;</code></p><div class="warning"><p>Please note that httpc normalizes input URIs before internal processing and special care shall be taken when the URI has percent (&quot;%&quot;) characters. A percent serves as the indicator for percent-encoded octets and it must be percent-encoded as &quot;%25&quot; for that octet to be used as data within the URI.</p><p>For example, in order to send an HTTP GET request with the URI <code>http://localhost/foo%25bar</code>, the percent character must be percent-encoded when creating the request: <code>httpc:request(&quot;http://localhost/foo%2525bar&quot;).</code></p></div><p><code>status_line() = {http_version(), status_code(), reason_phrase()}</code></p><p><code>http_version() = string()</code>, for example, <code>&quot;HTTP/1.1&quot;</code></p><p><code>status_code() = integer()</code></p><p><code>reason_phrase() = string()</code></p><p><code>content_type() = string()</code></p><p><code>headers() = [header()]</code></p><p><code>header() = {field(), value()}</code></p><p><code>field() = string()</code></p><p><code>value() = string()</code></p><dl><dt><code>body()</code></dt><dd><p>= <code>string() | binary()</code></p><p>| <code>{fun(accumulator())</code></p><p><code>-&gt; body_processing_result(), accumulator()}</code></p><p>| <code>{chunkify, fun(accumulator())</code></p><p><code>-&gt; body_processing_result(), accumulator()}</code></p></dd></dl><p><code>body_processing_result() = eof | {ok, iolist(), accumulator()}</code></p><p><code>accumulator() = term()</code></p><p><code>filename() = string()</code></p><p>For more information about HTTP, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>.</p><h2 id="module-ssl-data-types" class="section-heading">
+  <a href="#module-ssl-data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  SSL DATA TYPES
+</h2>
+<p>See <a href="https://wojtekmach.pl/otp_docs/ssl/ssl.html">ssl(3)</a> for information about <code>SSL</code> options (<code>ssloptions()</code>).</p><h2 id="module-http-client-service-start-stop" class="section-heading">
+  <a href="#module-http-client-service-start-stop" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  HTTP CLIENT SERVICE START/STOP
+</h2>
+<p>An HTTP client can be configured to start when starting the <code>Inets</code> application or started dynamically in runtime by calling the <code>Inets</code> application API <code>inets:start(httpc, ServiceConfig)</code> or <code>inets:start(httpc, ServiceConfig, How)</code>, see <a href="inets.html">inets(3)</a>. The configuration options are as follows:</p><dl><dt>{profile, profile()}</dt><dd><p>Name of the profile, see <a href="httpc.html#content#DATA_TYPES">DATA TYPES</a>. This option is mandatory.</p></dd><dt>{data_dir, path()}</dt><dd><p>Directory where the profile can save persistent data. If omitted, all cookies are treated as session cookies.</p></dd></dl><p>The client can be stopped using <code>inets:stop(httpc, Pid)</code> or <code>inets:stop(httpc, Profile)</code>.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  SEE ALSO
+</h2>
+<p><a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>, <a href="inets.html">inets(3)</a>, <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html">gen_tcp(3)</a>, <a href="https://wojtekmach.pl/otp_docs/ssl/ssl.html">ssl(3)</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cancel_request/1">cancel_request(RequestId) -&gt;</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">RequestId = request_id() - A unique identifier as returned by request/4</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Cancels an asynchronous HTTP request. Notice that this does not guarantee that the request response is not delivered. Because it is asynchronous, the request can already have been completed when the cancellation arrives.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cancel_request/2">cancel_request(RequestId, Profile) -&gt; ok</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cookie_header/1">cookie_header(Url) -&gt; </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Url = url()</li><li class="type">Opts = [cookie_header_opt()]</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code>.</li><li class="type">cookie_header_opt() = {ipv6_host_with_brackets, boolean()}</li></ul><p>Returns the cookie header that would have been sent when making a request to <code>Url</code> using profile <code>Profile</code>. If no profile is specified, the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cookie_header/2">cookie_header(Url, Profile | Opts) -&gt; header() | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cookie_header/3">cookie_header(Url, Opts, Profile) -&gt; header() | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_options/1">get_options(OptionItems) -&gt; {ok, Values} | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">OptionItems = all | [option_item()]</li><li class="type">option_item() = proxy | https_proxy | max_sessions | keep_alive_timeout | max_keep_alive_length | pipeline_timeout | max_pipeline_length | cookies | ipfamily | ip | port | socket_opts | verbose | unix_socket</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can used.</li><li class="type">Values = [{option_item(), term()}]</li><li class="type">Reason = term()</li></ul><p>Retrieves the options currently used by the client.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_options/2">get_options(OptionItems, Profile) -&gt; {ok, Values} | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/0">info() -&gt; list()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Produces a list of miscellaneous information. Intended for debugging. If no profile is specified, the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info(Profile) -&gt; list()</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request/1">request(Url) -&gt; </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Url = url()</li><li class="type">Result = {status_line(), headers(), Body} | {status_code(), Body} | request_id()</li><li class="type">Body = string() | binary()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">Reason = term()</li></ul><p>Equivalent to <code>httpc:request(get, {Url, []}, [], [])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request/2">request(Url, Profile) -&gt; {ok, Result} | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request/4">request(Method, Request, HTTPOptions, Options) -&gt;</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Method = method()</li><li class="type">Request = request()</li><li class="type">HTTPOptions = http_options()</li><li class="type">http_options() = [http_option()]</li><li class="type">http_option() = {timeout, timeout()} | {connect_timeout, timeout()} | {ssl, ssloptions()} | {essl, ssloptions()} | {autoredirect, boolean()} | {proxy_auth, {userstring(), passwordstring()}} | {version, http_version()} | {relaxed, boolean()}</li><li class="type">timeout() = integer() &gt;= 0 | infinity</li><li class="type">Options = options()</li><li class="type">options() = [option()]</li><li class="type">option() = {sync, boolean()} | {stream, stream_to()} | {body_format, body_format()} | {full_result, boolean()} | {headers_as_is, boolean() | {socket_opts, socket_opts()} | {receiver, receiver()} | {ipv6_host_with_brackets, boolean()}</li><li class="type">stream_to() = none | self | {self, once} | filename()</li><li class="type">socket_opts() = [socket_opt()]</li><li class="type">receiver() = pid() | function()/1 | {Module, Function, Args}</li><li class="type">Module = atom()</li><li class="type">Function = atom()</li><li class="type">Args = list()</li><li class="type">body_format() = string | binary</li><li class="type">Result = {status_line(), headers(), Body} | {status_code(), Body} | request_id()</li><li class="type">Body = string() | binary()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">Reason = term()</li></ul><p>Sends an HTTP request. The function can be both synchronous and asynchronous. In the latter case, the function returns <code>{ok, RequestId}</code> and then the information is delivered to the <code>receiver</code> depending on that value.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#request/5">request(Method, Request, HTTPOptions, Options, Profile) -&gt; {ok, Result} | {ok, saved_to_file} | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reset_cookies/0">reset_cookies() -&gt; void()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Resets (clears) the cookie database for the specified <code>Profile</code>. If no profile is specified the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reset_cookies/1">reset_cookies(Profile) -&gt; void()</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_options/1">set_options(Options) -&gt; </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Options = [Option]</li><li class="type">Option = {proxy, {Proxy, NoProxy}}</li><li class="type">| {https_proxy, {Proxy, NoProxy}}</li><li class="type">| {max_sessions, MaxSessions}</li><li class="type">| {max_keep_alive_length, MaxKeepAlive}</li><li class="type">| {keep_alive_timeout, KeepAliveTimeout}</li><li class="type">| {max_pipeline_length, MaxPipeline}</li><li class="type">| {pipeline_timeout, PipelineTimeout}</li><li class="type">| {cookies, CookieMode}</li><li class="type">| {ipfamily, IpFamily}</li><li class="type">| {ip, IpAddress}</li><li class="type">| {port, Port}</li><li class="type">| {socket_opts, socket_opts()}</li><li class="type">| {verbose, VerboseMode}</li><li class="type">| {unix_socket, UnixSocket}</li><li class="type">Proxy = {Hostname, Port}</li><li class="type">Hostname = string()</li><li class="description">Example: &quot;localhost&quot; or &quot;foo.bar.se&quot;</li><li class="type">Port = integer()</li><li class="description">Example: 8080</li><li class="type">NoProxy = [NoProxyDesc]</li><li class="type">NoProxyDesc = DomainDesc | HostName | IPDesc</li><li class="type">DomainDesc = &quot;*.Domain&quot;</li><li class="description">Example: &quot;*.ericsson.se&quot;</li><li class="type">IpDesc = string()</li><li class="description">Example: &quot;134.138&quot; or &quot;[FEDC:BA98&quot; (all IP addresses starting with 134.138 or FEDC:BA98), &quot;66.35.250.150&quot; or &quot;[2010:836B:4179::836B:4179]&quot; (a complete IP address). <code>proxy</code> defaults to <code>{undefined, []}</code>, that is, no proxy is configured and <code>https_proxy</code> defaults to the value of <code>proxy</code>.</li><li class="type">MaxSessions = integer()</li><li class="description">Maximum number of persistent connections to a host. Default is <code>2</code>.</li><li class="type">MaxKeepAlive = integer()</li><li class="description">Maximum number of outstanding requests on the same connection to a host. Default is <code>5</code>.</li><li class="type">KeepAliveTimeout = integer()</li><li class="description">If a persistent connection is idle longer than the <code>keep_alive_timeout</code> in milliseconds, the client closes the connection. The server can also have such a time-out but do not take that for granted. Default is <code>120000</code> (= 2 min).</li><li class="type">MaxPipeline = integer()</li><li class="description">Maximum number of outstanding requests on a pipelined connection to a host. Default is <code>2</code>.</li><li class="type">PipelineTimeout = integer()</li><li class="description">If a persistent connection is idle longer than the <code>pipeline_timeout</code> in milliseconds, the client closes the connection. Default is <code>0</code>, which results in pipelining not being used.</li><li class="type">CookieMode = enabled | disabled | verify</li><li class="description">If cookies are enabled, all valid cookies are automatically saved in the cookie database of the client manager. If option <code>verify</code> is used, function <code>store_cookies/2</code> has to be called for the cookies to be saved. Default is <code>disabled</code>.</li><li class="type">IpFamily = inet | inet6 | local</li><li class="description">Default is <code>inet</code>.</li><li class="type">IpAddress = ip_address()</li><li class="description">If the host has several network interfaces, this option specifies which one to use. See <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html#connect">gen_tcp:connect/3,4</a> for details.</li><li class="type">Port = integer()</li><li class="description">Local port number to use. See <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html#connect">gen_tcp:connect/3,4</a> for details.</li><li class="type">socket_opts() = [socket_opt()]</li><li class="description">The options are appended to the socket options used by the client. These are the default values when a new request handler is started (for the initial connect). They are passed directly to the underlying transport (<code>gen_tcp</code> or <code>SSL</code>) <em>without</em> verification.</li><li class="type">VerboseMode = false | verbose | debug | trace</li><li class="description">Default is <code>false</code>. This option is used to switch on (or off) different levels of Erlang trace on the client. It is a debug feature.</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">UnixSocket = path()</li><li class="description">Experimental option for sending HTTP requests over a unix domain socket. The value of <code>unix_socket</code> shall be the full path to a unix domain socket file with read/write permissions for the erlang process. Default is <code>undefined</code>.</li></ul><p>Sets options to be used for subsequent requests.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_options/2">set_options(Options, Profile) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#store_cookies/2">store_cookies(SetCookieHeaders, Url) -&gt; </a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">SetCookieHeaders = headers() - where field = &quot;set-cookie&quot;</li><li class="type">Url = url()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Saves the cookies defined in <code>SetCookieHeaders</code> in the client profile cookie database. Call this function if option <code>cookies</code> is set to <code>verify</code>. If no profile is specified, the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#store_cookies/3">store_cookies(SetCookieHeaders, Url, Profile) -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stream_next/1">stream_next(Pid) -&gt; ok</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Pid = pid()</li><li class="description">As received in the <code>stream_start message</code></li></ul><p>Triggers the next message to be streamed, that is, the same behavior as active ones for sockets.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_cookies/0">which_cookies() -&gt; cookies()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">cookies() = [cookie_stores()]</li><li class="type">cookie_stores() = {cookies, cookies()} | {session_cookies, cookies()}</li><li class="type">cookies() = [cookie()]</li><li class="type">cookie() = term()</li></ul><p>Produces a list of the entire cookie database. Intended for debugging/testing purposes. If no profile is specified, the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_cookies/1">which_cookies(Profile) -&gt; cookies()</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_sessions/0">which_sessions() -&gt; session_info()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">session_info() = {[session()], [term()], [term()]}</li><li class="type">session() = term() - Internal representation of a session</li></ul><p>This function is intended for debugging only. It produces a slightly processed dump of the session database. The first list of the session information tuple will contain session information on an internal format. The last two lists of the session information tuple should always be empty if the code is working as intended. If no profile is specified, the default profile is used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_sessions/1">which_sessions(Profile) -&gt; session_info()</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="cancel_request/1">
+
+  <div class="detail-header">
+    <a href="#cancel_request/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cancel_request(RequestId) -&gt;</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">RequestId = request_id() - A unique identifier as returned by request/4</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Cancels an asynchronous HTTP request. Notice that this does not guarantee that the request response is not delivered. Because it is asynchronous, the request can already have been completed when the cancellation arrives.</p>
+  </section>
+</section>
+<section class="detail" id="cancel_request/2">
+
+  <div class="detail-header">
+    <a href="#cancel_request/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cancel_request(RequestId, Profile) -&gt; ok</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="cookie_header/1">
+
+  <div class="detail-header">
+    <a href="#cookie_header/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cookie_header(Url) -&gt; </h1>
+
+
+      <span class="note">(since OTP R13B04,OTP R15B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Url = url()</li><li class="type">Opts = [cookie_header_opt()]</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code>.</li><li class="type">cookie_header_opt() = {ipv6_host_with_brackets, boolean()}</li></ul><p>Returns the cookie header that would have been sent when making a request to <code>Url</code> using profile <code>Profile</code>. If no profile is specified, the default profile is used.</p><p>Option <code>ipv6_host_with_bracket</code> deals with how to parse IPv6 addresses. For details, see argument <code>Options</code> of <a href="httpc.html#request/4">request/[4,5]</a>.</p>
+  </section>
+</section>
+<section class="detail" id="cookie_header/2">
+
+  <div class="detail-header">
+    <a href="#cookie_header/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cookie_header(Url, Profile | Opts) -&gt; header() | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R13B04,OTP R15B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="cookie_header/3">
+
+  <div class="detail-header">
+    <a href="#cookie_header/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cookie_header(Url, Opts, Profile) -&gt; header() | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R13B04,OTP R15B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="get_options/1">
+
+  <div class="detail-header">
+    <a href="#get_options/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_options(OptionItems) -&gt; {ok, Values} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R15B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">OptionItems = all | [option_item()]</li><li class="type">option_item() = proxy | https_proxy | max_sessions | keep_alive_timeout | max_keep_alive_length | pipeline_timeout | max_pipeline_length | cookies | ipfamily | ip | port | socket_opts | verbose | unix_socket</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can used.</li><li class="type">Values = [{option_item(), term()}]</li><li class="type">Reason = term()</li></ul><p>Retrieves the options currently used by the client.</p>
+  </section>
+</section>
+<section class="detail" id="get_options/2">
+
+  <div class="detail-header">
+    <a href="#get_options/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_options(OptionItems, Profile) -&gt; {ok, Values} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R15B01)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="info/0">
+
+  <div class="detail-header">
+    <a href="#info/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info() -&gt; list()</h1>
+
+
+      <span class="note">(since OTP R15B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Produces a list of miscellaneous information. Intended for debugging. If no profile is specified, the default profile is used.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info(Profile) -&gt; list()</h1>
+
+
+      <span class="note">(since OTP R15B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="request/1">
+
+  <div class="detail-header">
+    <a href="#request/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">request(Url) -&gt; </h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Url = url()</li><li class="type">Result = {status_line(), headers(), Body} | {status_code(), Body} | request_id()</li><li class="type">Body = string() | binary()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">Reason = term()</li></ul><p>Equivalent to <code>httpc:request(get, {Url, []}, [], [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="request/2">
+
+  <div class="detail-header">
+    <a href="#request/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">request(Url, Profile) -&gt; {ok, Result} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="request/4">
+
+  <div class="detail-header">
+    <a href="#request/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">request(Method, Request, HTTPOptions, Options) -&gt;</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Method = method()</li><li class="type">Request = request()</li><li class="type">HTTPOptions = http_options()</li><li class="type">http_options() = [http_option()]</li><li class="type">http_option() = {timeout, timeout()} | {connect_timeout, timeout()} | {ssl, ssloptions()} | {essl, ssloptions()} | {autoredirect, boolean()} | {proxy_auth, {userstring(), passwordstring()}} | {version, http_version()} | {relaxed, boolean()}</li><li class="type">timeout() = integer() &gt;= 0 | infinity</li><li class="type">Options = options()</li><li class="type">options() = [option()]</li><li class="type">option() = {sync, boolean()} | {stream, stream_to()} | {body_format, body_format()} | {full_result, boolean()} | {headers_as_is, boolean() | {socket_opts, socket_opts()} | {receiver, receiver()} | {ipv6_host_with_brackets, boolean()}</li><li class="type">stream_to() = none | self | {self, once} | filename()</li><li class="type">socket_opts() = [socket_opt()]</li><li class="type">receiver() = pid() | function()/1 | {Module, Function, Args}</li><li class="type">Module = atom()</li><li class="type">Function = atom()</li><li class="type">Args = list()</li><li class="type">body_format() = string | binary</li><li class="type">Result = {status_line(), headers(), Body} | {status_code(), Body} | request_id()</li><li class="type">Body = string() | binary()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">Reason = term()</li></ul><p>Sends an HTTP request. The function can be both synchronous and asynchronous. In the latter case, the function returns <code>{ok, RequestId}</code> and then the information is delivered to the <code>receiver</code> depending on that value.</p><p>HTTP option (<code>http_option()</code>) details:</p><a id="request2_http_options"></a><dl><dt><code>timeout</code></dt><dd><p>Time-out time for the request.</p><p>The clock starts ticking when the request is sent.</p><p>Time is in milliseconds.</p><p>Default is <code>infinity</code>.</p></dd><dt><code>connect_timeout</code></dt><dd><p>Connection time-out time, used during the initial request, when the client is <em>connecting</em> to the server.</p><p>Time is in milliseconds.</p><p>Default is the value of option <code>timeout</code>.</p></dd><dt><code>ssl</code></dt><dd><p>This is the <code>SSL/TLS</code> connectin configuration option.</p><p>Defaults to <code>[]</code>. See <a href="https://wojtekmach.pl/otp_docs/ssl/ssl.html">ssl:connect/[2,3,4]</a> for available options.</p></dd><dt><code>autoredirect</code></dt><dd><p>The client automatically retrieves the information from the new URI and returns that as the result, instead of a 30X-result code.</p><p>For some 30X-result codes, automatic redirect is not allowed. In these cases the 30X-result is always returned.</p><p>Default is <code>true</code>.</p></dd><dt><code>proxy_auth</code></dt><dd><p>A proxy-authorization header using the provided username and password is added to the request.</p></dd><dt><code>version</code></dt><dd><p>Can be used to make the client act as an <code>HTTP/1.0</code> client. By default this is an <code>HTTP/1.1</code> client. When using <code>HTTP/1.0</code> persistent connections are not used.</p><p>Default is the string <code>&quot;HTTP/1.1&quot;</code>.</p></dd><dt><code>relaxed</code></dt><dd><p>If set to <code>true</code>, workarounds for known server deviations from the HTTP-standard are enabled.</p><p>Default is <code>false</code>.</p></dd></dl><p>Option (<code>option()</code>) details:</p><dl><dt><code>sync</code></dt><dd><p>Option for the request to be synchronous or asynchronous.</p><p>Default is <code>true</code>.</p></dd><dt><code>stream</code></dt><dd><p>Streams the body of a 200 or 206 response to the calling process or to a file. When streaming to the calling process using option <code>self</code>, the following stream messages are sent to that process: <code>{http, {RequestId, stream_start, Headers}}, {http, {RequestId, stream, BinBodyPart}}, and {http, {RequestId, stream_end, Headers}}</code>.</p><p>When streaming to the calling processes using option <code>{self, once}</code>, the first message has an extra element, that is, <code>{http, {RequestId, stream_start, Headers, Pid}}</code>. This is the process id to be used as an argument to <code>httpc:stream_next/1</code> to trigger the next message to be sent to the calling process.</p><p>Notice that chunked encoding can add headers so that there are more headers in the <code>stream_end</code> message than in <code>stream_start</code>. When streaming to a file and the request is asynchronous, the message <code>{http, {RequestId, saved_to_file}}</code> is sent.</p><p>Default is <code>none</code>.</p></dd><dt><code>body_format</code></dt><dd><p>Defines if the body is to be delivered as a string or binary. This option is only valid for the synchronous request.</p><p>Default is <code>string</code>.</p></dd><dt><code>full_result</code></dt><dd><p>Defines if a &quot;full result&quot; is to be returned to the caller (that is, the body, the headers, and the entire status line) or not (the body and the status code).</p><p>Default is <code>true</code>.</p></dd><dt><code>headers_as_is</code></dt><dd><p>Defines if the headers provided by the user are to be made lower case or to be regarded as case sensitive.</p><p>The HTTP standard requires them to be case insensitive. Use this feature only if there is no other way to communicate with the server or for testing purpose. When this option is used, no headers are automatically added. All necessary headers must be provided by the user.</p><p>Default is <code>false</code>.</p></dd><dt><code>socket_opts</code></dt><dd><p>Socket options to be used for this request.</p><p>Overrides any value set by function <a href="httpc.html#set_options/1">set_options</a>.</p><p>The validity of the options is <em>not</em> checked by the HTTP client they are assumed to be correct and passed on to ssl application and inet driver, which may reject them if they are not correct.</p><div class="note"><p>Persistent connections are not supported when setting the <code>socket_opts</code> option. When <code>socket_opts</code> is not set the current implementation assumes the requests to the same host, port combination will use the same socket options.</p></div><p>By default the socket options set by function <a href="httpc.html#set_options/1">set_options/[1,2]</a> are used when establishing a connection.</p></dd><dt><code>receiver</code></dt><dd><p>Defines how the client delivers the result of an asynchronous request (<code>sync</code> has the value <code>false</code>).</p><dl><dt><code>pid()</code></dt><dd><p>Messages are sent to this process in the format <code>{http, ReplyInfo}</code>.</p></dd><dt><code>function/1</code></dt><dd><p>Information is delivered to the receiver through calls to the provided fun <code>Receiver(ReplyInfo)</code>.</p></dd><dt><code>{Module, Function, Args}</code></dt><dd><p>Information is delivered to the receiver through calls to the callback function <code>apply(Module, Function, [ReplyInfo | Args])</code>.</p></dd></dl><p>In all of these cases, <code>ReplyInfo</code> has the following structure:</p><pre><code class="makeup erlang"><span class="p" data-group-id="9256236147-1">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="ss">saved_to_file</span><span class="p" data-group-id="9256236147-1">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-2">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9256236147-3">{</span><span class="ss">error</span><span class="p">,</span><span class="w"> </span><span class="n">Reason</span><span class="p" data-group-id="9256236147-3">}</span><span class="p" data-group-id="9256236147-2">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-4">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="n">Result</span><span class="p" data-group-id="9256236147-4">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-5">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="ss">stream_start</span><span class="p">,</span><span class="w"> </span><span class="n">Headers</span><span class="p" data-group-id="9256236147-5">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-6">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="ss">stream_start</span><span class="p">,</span><span class="w"> </span><span class="n">Headers</span><span class="p">,</span><span class="w"> </span><span class="n">HandlerPid</span><span class="p" data-group-id="9256236147-6">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-7">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="ss">stream</span><span class="p">,</span><span class="w"> </span><span class="n">BinBodyPart</span><span class="p" data-group-id="9256236147-7">}</span><span class="w">
+</span><span class="p" data-group-id="9256236147-8">{</span><span class="n">RequestId</span><span class="p">,</span><span class="w"> </span><span class="ss">stream_end</span><span class="p">,</span><span class="w"> </span><span class="n">Headers</span><span class="p" data-group-id="9256236147-8">}</span></code></pre><p>Default is the <code>pid</code> of the process calling the request function (<code>self()</code>).</p><a id="ipv6_host_with_brackets"></a></dd><dt><code>ipv6_host_with_brackets</code></dt><dd><p>Defines when parsing the Host-Port part of an URI with an IPv6 address with brackets, if those brackets are to be retained (<code>true</code>) or stripped (<code>false</code>).</p><p>Default is <code>false</code>.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="request/5">
+
+  <div class="detail-header">
+    <a href="#request/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">request(Method, Request, HTTPOptions, Options, Profile) -&gt; {ok, Result} | {ok, saved_to_file} | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="reset_cookies/0">
+
+  <div class="detail-header">
+    <a href="#reset_cookies/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reset_cookies() -&gt; void()</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Resets (clears) the cookie database for the specified <code>Profile</code>. If no profile is specified the default profile is used.</p>
+  </section>
+</section>
+<section class="detail" id="reset_cookies/1">
+
+  <div class="detail-header">
+    <a href="#reset_cookies/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reset_cookies(Profile) -&gt; void()</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="set_options/1">
+
+  <div class="detail-header">
+    <a href="#set_options/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_options(Options) -&gt; </h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Options = [Option]</li><li class="type">Option = {proxy, {Proxy, NoProxy}}</li><li class="type">| {https_proxy, {Proxy, NoProxy}}</li><li class="type">| {max_sessions, MaxSessions}</li><li class="type">| {max_keep_alive_length, MaxKeepAlive}</li><li class="type">| {keep_alive_timeout, KeepAliveTimeout}</li><li class="type">| {max_pipeline_length, MaxPipeline}</li><li class="type">| {pipeline_timeout, PipelineTimeout}</li><li class="type">| {cookies, CookieMode}</li><li class="type">| {ipfamily, IpFamily}</li><li class="type">| {ip, IpAddress}</li><li class="type">| {port, Port}</li><li class="type">| {socket_opts, socket_opts()}</li><li class="type">| {verbose, VerboseMode}</li><li class="type">| {unix_socket, UnixSocket}</li><li class="type">Proxy = {Hostname, Port}</li><li class="type">Hostname = string()</li><li class="description">Example: &quot;localhost&quot; or &quot;foo.bar.se&quot;</li><li class="type">Port = integer()</li><li class="description">Example: 8080</li><li class="type">NoProxy = [NoProxyDesc]</li><li class="type">NoProxyDesc = DomainDesc | HostName | IPDesc</li><li class="type">DomainDesc = &quot;*.Domain&quot;</li><li class="description">Example: &quot;*.ericsson.se&quot;</li><li class="type">IpDesc = string()</li><li class="description">Example: &quot;134.138&quot; or &quot;[FEDC:BA98&quot; (all IP addresses starting with 134.138 or FEDC:BA98), &quot;66.35.250.150&quot; or &quot;[2010:836B:4179::836B:4179]&quot; (a complete IP address). <code>proxy</code> defaults to <code>{undefined, []}</code>, that is, no proxy is configured and <code>https_proxy</code> defaults to the value of <code>proxy</code>.</li><li class="type">MaxSessions = integer()</li><li class="description">Maximum number of persistent connections to a host. Default is <code>2</code>.</li><li class="type">MaxKeepAlive = integer()</li><li class="description">Maximum number of outstanding requests on the same connection to a host. Default is <code>5</code>.</li><li class="type">KeepAliveTimeout = integer()</li><li class="description">If a persistent connection is idle longer than the <code>keep_alive_timeout</code> in milliseconds, the client closes the connection. The server can also have such a time-out but do not take that for granted. Default is <code>120000</code> (= 2 min).</li><li class="type">MaxPipeline = integer()</li><li class="description">Maximum number of outstanding requests on a pipelined connection to a host. Default is <code>2</code>.</li><li class="type">PipelineTimeout = integer()</li><li class="description">If a persistent connection is idle longer than the <code>pipeline_timeout</code> in milliseconds, the client closes the connection. Default is <code>0</code>, which results in pipelining not being used.</li><li class="type">CookieMode = enabled | disabled | verify</li><li class="description">If cookies are enabled, all valid cookies are automatically saved in the cookie database of the client manager. If option <code>verify</code> is used, function <code>store_cookies/2</code> has to be called for the cookies to be saved. Default is <code>disabled</code>.</li><li class="type">IpFamily = inet | inet6 | local</li><li class="description">Default is <code>inet</code>.</li><li class="type">IpAddress = ip_address()</li><li class="description">If the host has several network interfaces, this option specifies which one to use. See <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html#connect">gen_tcp:connect/3,4</a> for details.</li><li class="type">Port = integer()</li><li class="description">Local port number to use. See <a href="https://wojtekmach.pl/otp_docs/kernel/gen_tcp.html#connect">gen_tcp:connect/3,4</a> for details.</li><li class="type">socket_opts() = [socket_opt()]</li><li class="description">The options are appended to the socket options used by the client. These are the default values when a new request handler is started (for the initial connect). They are passed directly to the underlying transport (<code>gen_tcp</code> or <code>SSL</code>) <em>without</em> verification.</li><li class="type">VerboseMode = false | verbose | debug | trace</li><li class="description">Default is <code>false</code>. This option is used to switch on (or off) different levels of Erlang trace on the client. It is a debug feature.</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">UnixSocket = path()</li><li class="description">Experimental option for sending HTTP requests over a unix domain socket. The value of <code>unix_socket</code> shall be the full path to a unix domain socket file with read/write permissions for the erlang process. Default is <code>undefined</code>.</li></ul><p>Sets options to be used for subsequent requests.</p><div class="note"><p>If possible, the client keeps its connections alive and uses persistent connections with or without pipeline depending on configuration and current circumstances. The HTTP/1.1 specification does not provide a guideline for how many requests that are ideal to be sent on a persistent connection. This depends much on the application.</p><p>A long queue of requests can cause a user-perceived delay, as earlier requests can take a long time to complete. The HTTP/1.1 specification suggests a limit of two persistent connections per server, which is the default value of option <code>max_sessions</code>.</p><p>The current implementation assumes the requests to the same host, port combination will use the same socket options.</p></div><a id="get_options"></a>
+  </section>
+</section>
+<section class="detail" id="set_options/2">
+
+  <div class="detail-header">
+    <a href="#set_options/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_options(Options, Profile) -&gt; ok | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="store_cookies/2">
+
+  <div class="detail-header">
+    <a href="#store_cookies/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">store_cookies(SetCookieHeaders, Url) -&gt; </h1>
+
+
+      <span class="note">(since OTP R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">SetCookieHeaders = headers() - where field = &quot;set-cookie&quot;</li><li class="type">Url = url()</li><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li></ul><p>Saves the cookies defined in <code>SetCookieHeaders</code> in the client profile cookie database. Call this function if option <code>cookies</code> is set to <code>verify</code>. If no profile is specified, the default profile is used.</p>
+  </section>
+</section>
+<section class="detail" id="store_cookies/3">
+
+  <div class="detail-header">
+    <a href="#store_cookies/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">store_cookies(SetCookieHeaders, Url, Profile) -&gt; ok | {error, Reason}</h1>
+
+
+      <span class="note">(since OTP R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="stream_next/1">
+
+  <div class="detail-header">
+    <a href="#stream_next/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stream_next(Pid) -&gt; ok</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Pid = pid()</li><li class="description">As received in the <code>stream_start message</code></li></ul><p>Triggers the next message to be streamed, that is, the same behavior as active ones for sockets.</p><a id="verify_cookies"></a><a id="store_cookies"></a>
+  </section>
+</section>
+<section class="detail" id="which_cookies/0">
+
+  <div class="detail-header">
+    <a href="#which_cookies/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_cookies() -&gt; cookies()</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">cookies() = [cookie_stores()]</li><li class="type">cookie_stores() = {cookies, cookies()} | {session_cookies, cookies()}</li><li class="type">cookies() = [cookie()]</li><li class="type">cookie() = term()</li></ul><p>Produces a list of the entire cookie database. Intended for debugging/testing purposes. If no profile is specified, the default profile is used.</p>
+  </section>
+</section>
+<section class="detail" id="which_cookies/1">
+
+  <div class="detail-header">
+    <a href="#which_cookies/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_cookies(Profile) -&gt; cookies()</h1>
+
+
+      <span class="note">(since OTP R13B04)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="which_sessions/0">
+
+  <div class="detail-header">
+    <a href="#which_sessions/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_sessions() -&gt; session_info()</h1>
+
+
+      <span class="note">(since OTP R15B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Profile = profile() | pid()</li><li class="description">When started <code>stand_alone</code> only the pid can be used.</li><li class="type">session_info() = {[session()], [term()], [term()]}</li><li class="type">session() = term() - Internal representation of a session</li></ul><p>This function is intended for debugging only. It produces a slightly processed dump of the session database. The first list of the session information tuple will contain session information on an internal format. The last two lists of the session information tuple should always be empty if the code is working as intended. If no profile is specified, the default profile is used.</p>
+  </section>
+</section>
+<section class="detail" id="which_sessions/1">
+
+  <div class="detail-header">
+    <a href="#which_sessions/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_sessions(Profile) -&gt; session_info()</h1>
+
+
+      <span class="note">(since OTP R15B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

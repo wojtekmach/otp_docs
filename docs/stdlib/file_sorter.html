@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>file_sorter — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+file_sorter <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module contains functions for sorting terms on files, merging already sorted files, and checking files for sortedness. Chunks containing binary terms are read from a sequence of files, sorted internally in memory and written on temporary files, which are merged producing one sorted file as output. Merging is provided as an optimization; it is faster when the files are already sorted, but it always works to sort instead of merge.</p><p>On a file, a term is represented by a header and a binary. Two options define the format of terms on files:</p><dl><dt><code>{header, HeaderLength}</code></dt><dd><p><code>HeaderLength</code> determines the number of bytes preceding each binary and containing the length of the binary in bytes. Defaults to 4. The order of the header bytes is defined as follows: if <code>B</code> is a binary containing a header only, size <code>Size</code> of the binary is calculated as <code>&lt;&lt;Size:HeaderLength/unit:8&gt;&gt; = B</code>.</p></dd><dt><code>{format, Format}</code></dt><dd><p>Option <code>Format</code> determines the function that is applied to binaries to create the terms to be sorted. Defaults to <code>binary_term</code>, which is equivalent to <code>fun binary_to_term/1</code>. Value <code>binary</code> is equivalent to <code>fun(X) -&gt; X end</code>, which means that the binaries are sorted as they are. This is the fastest format. If <code>Format</code> is <code>term</code>, <code>io:read/2</code> is called to read terms. In that case, only the default value of option <code>header</code> is allowed.</p><p>Option <code>format</code> also determines what is written to the sorted output file: if <code>Format</code> is <code>term</code>, then <code>io:format/3</code> is called to write each term, otherwise the binary prefixed by a header is written. Notice that the binary written is the same binary that was read; the results of applying function <code>Format</code> are thrown away when the terms have been sorted. Reading and writing terms using the <code>io</code> module is much slower than reading and writing binaries.</p></dd></dl><p>Other options are:</p><dl><dt><code>{order, Order}</code></dt><dd><p>The default is to sort terms in ascending order, but that can be changed by value <code>descending</code> or by specifying an ordering function <code>Fun</code>. An ordering function is antisymmetric, transitive, and total. <code>Fun(A, B)</code> is to return <code>true</code> if <code>A</code> comes before <code>B</code> in the ordering, otherwise <code>false</code>. An example of a typical ordering function is less than or equal to, <code>=&lt;/2</code>. Using an ordering function slows down the sort considerably. Functions <code>keysort</code>, <code>keymerge</code> and <code>keycheck</code> do not accept ordering functions.</p></dd><dt><code>{unique, boolean()}</code></dt><dd><p>When sorting or merging files, only the first of a sequence of terms that compare equal (<code>==</code>) is output if this option is set to <code>true</code>. Defaults to <code>false</code>, which implies that all terms that compare equal are output. When checking files for sortedness, a check that no pair of consecutive terms compares equal is done if this option is set to <code>true</code>.</p></dd><dt><code>{tmpdir, TempDirectory}</code></dt><dd><p>The directory where temporary files are put can be chosen explicitly. The default, implied by value <code>&quot;&quot;</code>, is to put temporary files on the same directory as the sorted output file. If output is a function (see below), the directory returned by <code>file:get_cwd()</code> is used instead. The names of temporary files are derived from the Erlang nodename (<code>node()</code>), the process identifier of the current Erlang emulator (<code>os:getpid()</code>), and a unique integer (<code>erlang:unique_integer([positive])</code>). A typical name is <code>fs_mynode@myhost_1763_4711.17</code>, where <code>17</code> is a sequence number. Existing files are overwritten. Temporary files are deleted unless some uncaught <code>EXIT</code> signal occurs.</p></dd><dt><code>{compressed, boolean()}</code></dt><dd><p>Temporary files and the output file can be compressed. Defaults <code>false</code>, which implies that written files are not compressed. Regardless of the value of option <code>compressed</code>, compressed files can always be read. Notice that reading and writing compressed files are significantly slower than reading and writing uncompressed files.</p></dd><dt><code>{size, Size}</code></dt><dd><p>By default about 512*1024 bytes read from files are sorted internally. This option is rarely needed.</p></dd><dt><code>{no_files, NoFiles}</code></dt><dd><p>By default 16 files are merged at a time. This option is rarely needed.</p></dd></dl><p>As an alternative to sorting files, a function of one argument can be specified as input. When called with argument <code>read</code>, the function is assumed to return either of the following:</p><ul><li><p><code>end_of_input</code> or <code>{end_of_input, Value}}</code> when there is no more input (<code>Value</code> is explained below).</p></li><li><p><code>{Objects, Fun}</code>, where <code>Objects</code> is a list of binaries or terms depending on the format, and <code>Fun</code> is a new input function.</p></li></ul><p>Any other value is immediately returned as value of the current call to <code>sort</code> or <code>keysort</code>. Each input function is called exactly once. If an error occurs, the last function is called with argument <code>close</code>, the reply of which is ignored.</p><p>A function of one argument can be specified as output. The results of sorting or merging the input is collected in a non-empty sequence of variable length lists of binaries or terms depending on the format. The output function is called with one list at a time, and is assumed to return a new output function. Any other return value is immediately returned as value of the current call to the sort or merge function. Each output function is called exactly once. When some output function has been applied to all of the results or an error occurs, the last function is called with argument <code>close</code>, and the reply is returned as value of the current call to the sort or merge function.</p><p>If a function is specified as input and the last input function returns <code>{end_of_input, Value}</code>, the function specified as output is called with argument <code>{value, Value}</code>. This makes it easy to initiate the sequence of output functions with a value calculated by the input functions.</p><p>As an example, consider sorting the terms on a disk log file. A function that reads chunks from the disk log and returns a list of binaries is used as input. The results are collected in a list of terms.</p><pre><code class="makeup erlang"><span class="nf">sort</span><span class="p" data-group-id="4949637976-1">(</span><span class="n">Log</span><span class="p" data-group-id="4949637976-1">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="p" data-group-id="4949637976-2">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="p" data-group-id="4949637976-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">disk_log</span><span class="p">:</span><span class="nf">open</span><span class="p" data-group-id="4949637976-3">(</span><span class="p" data-group-id="4949637976-4">[</span><span class="p" data-group-id="4949637976-5">{</span><span class="ss">name</span><span class="p">,</span><span class="n">Log</span><span class="p" data-group-id="4949637976-5">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4949637976-6">{</span><span class="ss">mode</span><span class="p">,</span><span class="ss">read_only</span><span class="p" data-group-id="4949637976-6">}</span><span class="p" data-group-id="4949637976-4">]</span><span class="p" data-group-id="4949637976-3">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">Input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">input</span><span class="p" data-group-id="4949637976-7">(</span><span class="n">Log</span><span class="p">,</span><span class="w"> </span><span class="ss">start</span><span class="p" data-group-id="4949637976-7">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">output</span><span class="p" data-group-id="4949637976-8">(</span><span class="p" data-group-id="4949637976-9">[</span><span class="p" data-group-id="4949637976-9">]</span><span class="p" data-group-id="4949637976-8">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">Reply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">file_sorter</span><span class="p">:</span><span class="nf">sort</span><span class="p" data-group-id="4949637976-10">(</span><span class="n">Input</span><span class="p">,</span><span class="w"> </span><span class="n">Output</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4949637976-11">{</span><span class="ss">format</span><span class="p">,</span><span class="ss">term</span><span class="p" data-group-id="4949637976-11">}</span><span class="p" data-group-id="4949637976-10">)</span><span class="p">,</span><span class="w">
+    </span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">disk_log</span><span class="p">:</span><span class="nf">close</span><span class="p" data-group-id="4949637976-12">(</span><span class="n">Log</span><span class="p" data-group-id="4949637976-12">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">Reply</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">input</span><span class="p" data-group-id="4949637976-13">(</span><span class="n">Log</span><span class="p">,</span><span class="w"> </span><span class="n">Cont</span><span class="p" data-group-id="4949637976-13">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="nf">fun</span><span class="p" data-group-id="4949637976-14">(</span><span class="ss">close</span><span class="p" data-group-id="4949637976-14">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="ss">ok</span><span class="p">;</span><span class="w">
+       </span><span class="p" data-group-id="4949637976-15">(</span><span class="ss">read</span><span class="p" data-group-id="4949637976-15">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="k">case</span><span class="w"> </span><span class="nc">disk_log</span><span class="p">:</span><span class="nf">chunk</span><span class="p" data-group-id="4949637976-16">(</span><span class="n">Log</span><span class="p">,</span><span class="w"> </span><span class="n">Cont</span><span class="p" data-group-id="4949637976-16">)</span><span class="w"> </span><span class="k">of</span><span class="w">
+                </span><span class="p" data-group-id="4949637976-17">{</span><span class="ss">error</span><span class="p">,</span><span class="w"> </span><span class="n">Reason</span><span class="p" data-group-id="4949637976-17">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                    </span><span class="p" data-group-id="4949637976-18">{</span><span class="ss">error</span><span class="p">,</span><span class="w"> </span><span class="n">Reason</span><span class="p" data-group-id="4949637976-18">}</span><span class="p">;</span><span class="w">
+                </span><span class="p" data-group-id="4949637976-19">{</span><span class="n">Cont2</span><span class="p">,</span><span class="w"> </span><span class="n">Terms</span><span class="p" data-group-id="4949637976-19">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                    </span><span class="p" data-group-id="4949637976-20">{</span><span class="n">Terms</span><span class="p">,</span><span class="w"> </span><span class="nf">input</span><span class="p" data-group-id="4949637976-21">(</span><span class="n">Log</span><span class="p">,</span><span class="w"> </span><span class="n">Cont2</span><span class="p" data-group-id="4949637976-21">)</span><span class="p" data-group-id="4949637976-20">}</span><span class="p">;</span><span class="w">
+                </span><span class="p" data-group-id="4949637976-22">{</span><span class="n">Cont2</span><span class="p">,</span><span class="w"> </span><span class="n">Terms</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">Badbytes</span><span class="p" data-group-id="4949637976-22">}</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                    </span><span class="p" data-group-id="4949637976-23">{</span><span class="n">Terms</span><span class="p">,</span><span class="w"> </span><span class="nf">input</span><span class="p" data-group-id="4949637976-24">(</span><span class="n">Log</span><span class="p">,</span><span class="w"> </span><span class="n">Cont2</span><span class="p" data-group-id="4949637976-24">)</span><span class="p" data-group-id="4949637976-23">}</span><span class="p">;</span><span class="w">
+                </span><span class="ss">eof</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+                    </span><span class="ss">end_of_input</span><span class="w">
+            </span><span class="k">end</span><span class="w">
+    </span><span class="k">end</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">output</span><span class="p" data-group-id="4949637976-25">(</span><span class="n">L</span><span class="p" data-group-id="4949637976-25">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="nf">fun</span><span class="p" data-group-id="4949637976-26">(</span><span class="ss">close</span><span class="p" data-group-id="4949637976-26">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="nc">lists</span><span class="p">:</span><span class="nf">append</span><span class="p" data-group-id="4949637976-27">(</span><span class="nc">lists</span><span class="p">:</span><span class="nf">reverse</span><span class="p" data-group-id="4949637976-28">(</span><span class="n">L</span><span class="p" data-group-id="4949637976-28">)</span><span class="p" data-group-id="4949637976-27">)</span><span class="p">;</span><span class="w">
+       </span><span class="p" data-group-id="4949637976-29">(</span><span class="n">Terms</span><span class="p" data-group-id="4949637976-29">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+            </span><span class="nf">output</span><span class="p" data-group-id="4949637976-30">(</span><span class="p" data-group-id="4949637976-31">[</span><span class="n">Terms</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="n">L</span><span class="p" data-group-id="4949637976-31">]</span><span class="p" data-group-id="4949637976-30">)</span><span class="w">
+    </span><span class="k">end</span><span class="p">.</span></code></pre><p>For more examples of functions as input and output, see the end of the <code>file_sorter</code> module; the <code>term</code> format is implemented with functions.</p><p>The possible values of <code>Reason</code> returned when an error occurs are:</p><ul><li><p><code>bad_object</code>, <code>{bad_object, FileName}</code> - Applying the format function failed for some binary, or the key(s) could not be extracted from some term.</p></li><li><p><code>{bad_term, FileName}</code> - <code>io:read/2</code> failed to read some term.</p></li><li><p><code>{file_error, FileName, file:posix()}</code> - For an explanation of <code>file:posix()</code>, see <a href="https://wojtekmach.pl/otp_docs/kernel/file.html"><code>file(3)</code></a>.</p></li><li><p><code>{premature_eof, FileName}</code> - End-of-file was encountered inside some binary term.</p></li></ul>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:file_name/0">-type file_name() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:file_names/0">-type file_names() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:format/0">-type format() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:format_fun/0">-type format_fun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:header_length/0">-type header_length() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:i_command/0">-type i_command() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:i_reply/0">-type i_reply() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:infun/0">-type infun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:input/0">-type input() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:input_reply/0">-type input_reply() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:key_pos/0">-type key_pos() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:no_files/0">-type no_files() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:o_command/0">-type o_command() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:o_reply/0">-type o_reply() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:object/0">-type object() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:option/0">-type option() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:options/0">-type options() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:order/0">-type order() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:order_fun/0">-type order_fun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:outfun/0">-type outfun() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:output/0">-type output() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:output_reply/0">-type output_reply() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:reason/0">-type reason() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:size/0">-type size() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:tmp_directory/0">-type tmp_directory() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:value/0">-type value() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check/1">check/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Checks files for sortedness. If a file is not sorted, the first out-of-order element is returned. The first term on a file has position 1.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check/2">check/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keycheck/2">keycheck/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Checks files for sortedness. If a file is not sorted, the first out-of-order element is returned. The first term on a file has position 1.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keycheck/3">keycheck/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keymerge/3">keymerge/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Merges tuples on files. Each input file is assumed to be sorted on key(s).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keymerge/4">keymerge/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keysort/2">keysort/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sorts tuples on files.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keysort/3">keysort/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sorts tuples on files. The sort is performed on the element(s) mentioned in <code>KeyPos</code>. If two tuples compare equal (<code>==</code>) on one element, the next element according to <code>KeyPos</code> is compared. The sort is stable.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#keysort/4">keysort/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#merge/2">merge/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Merges terms on files. Each input file is assumed to be sorted.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#merge/3">merge/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sort/1">sort/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sorts terms on files.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sort/2">sort/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sorts terms on files.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sort/3">sort/3</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:file_name/0">
+
+  <div class="detail-header">
+    <a href="#t:file_name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type file_name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>file_name() :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:file_names/0">
+
+  <div class="detail-header">
+    <a href="#t:file_names/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type file_names() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>file_names() :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:format/0">
+
+  <div class="detail-header">
+    <a href="#t:format/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type format() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format() :: binary_term | term | binary | <a href="#t:format_fun/0">format_fun</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:format_fun/0">
+
+  <div class="detail-header">
+    <a href="#t:format_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type format_fun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_fun() :: fun((binary()) -> term()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:header_length/0">
+
+  <div class="detail-header">
+    <a href="#t:header_length/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type header_length() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>header_length() :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:i_command/0">
+
+  <div class="detail-header">
+    <a href="#t:i_command/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type i_command() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>i_command() :: read | close.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:i_reply/0">
+
+  <div class="detail-header">
+    <a href="#t:i_reply/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type i_reply() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>i_reply() :: end_of_input | {end_of_input, <a href="#t:value/0">value</a>()} | {[<a href="#t:object/0">object</a>()], <a href="#t:infun/0">infun</a>()} | <a href="#t:input_reply/0">input_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:infun/0">
+
+  <div class="detail-header">
+    <a href="#t:infun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type infun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>infun() :: fun((<a href="#t:i_command/0">i_command</a>()) -> <a href="#t:i_reply/0">i_reply</a>()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:input/0">
+
+  <div class="detail-header">
+    <a href="#t:input/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type input() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>input() :: <a href="#t:file_names/0">file_names</a>() | <a href="#t:infun/0">infun</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:input_reply/0">
+
+  <div class="detail-header">
+    <a href="#t:input_reply/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type input_reply() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>input_reply() :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:key_pos/0">
+
+  <div class="detail-header">
+    <a href="#t:key_pos/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type key_pos() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>key_pos() :: pos_integer() | [pos_integer()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:no_files/0">
+
+  <div class="detail-header">
+    <a href="#t:no_files/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type no_files() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>no_files() :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:o_command/0">
+
+  <div class="detail-header">
+    <a href="#t:o_command/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type o_command() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>o_command() :: {value, <a href="#t:value/0">value</a>()} | [<a href="#t:object/0">object</a>()] | close.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:o_reply/0">
+
+  <div class="detail-header">
+    <a href="#t:o_reply/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type o_reply() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>o_reply() :: <a href="#t:outfun/0">outfun</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:object/0">
+
+  <div class="detail-header">
+    <a href="#t:object/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type object() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>object() :: term() | binary().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:option/0">
+
+  <div class="detail-header">
+    <a href="#t:option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>option() ::
+    {compressed, boolean()} |
+    {header, <a href="#t:header_length/0">header_length</a>()} |
+    {format, <a href="#t:format/0">format</a>()} |
+    {no_files, <a href="#t:no_files/0">no_files</a>()} |
+    {order, <a href="#t:order/0">order</a>()} |
+    {size, <a href="#t:size/0">size</a>()} |
+    {tmpdir, <a href="#t:tmp_directory/0">tmp_directory</a>()} |
+    {unique, boolean()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:options/0">
+
+  <div class="detail-header">
+    <a href="#t:options/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type options() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>options() :: [<a href="#t:option/0">option</a>()] | <a href="#t:option/0">option</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:order/0">
+
+  <div class="detail-header">
+    <a href="#t:order/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type order() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>order() :: ascending | descending | <a href="#t:order_fun/0">order_fun</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:order_fun/0">
+
+  <div class="detail-header">
+    <a href="#t:order_fun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type order_fun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>order_fun() :: fun((term(), term()) -> boolean()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:outfun/0">
+
+  <div class="detail-header">
+    <a href="#t:outfun/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type outfun() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>outfun() :: fun((<a href="#t:o_command/0">o_command</a>()) -> <a href="#t:o_reply/0">o_reply</a>()).</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:output/0">
+
+  <div class="detail-header">
+    <a href="#t:output/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type output() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>output() :: <a href="#t:file_name/0">file_name</a>() | <a href="#t:outfun/0">outfun</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:output_reply/0">
+
+  <div class="detail-header">
+    <a href="#t:output_reply/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type output_reply() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>output_reply() :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:reason/0">
+
+  <div class="detail-header">
+    <a href="#t:reason/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type reason() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>reason() ::
+    bad_object |
+    {bad_object, <a href="#t:file_name/0">file_name</a>()} |
+    {bad_term, <a href="#t:file_name/0">file_name</a>()} |
+    {file_error, <a href="#t:file_name/0">file_name</a>(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:posix/0">file:posix</a>() | badarg | system_limit} |
+    {premature_eof, <a href="#t:file_name/0">file_name</a>()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:size/0">
+
+  <div class="detail-header">
+    <a href="#t:size/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type size() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>size() :: non_neg_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:tmp_directory/0">
+
+  <div class="detail-header">
+    <a href="#t:tmp_directory/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type tmp_directory() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tmp_directory() :: [] | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:value/0">
+
+  <div class="detail-header">
+    <a href="#t:value/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type value() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>value() :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="check/1">
+
+  <div class="detail-header">
+    <a href="#check/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>check(FileName) -> Reply
+         when
+             FileName :: <a href="#t:file_name/0">file_name</a>(),
+             Reply :: {ok, [Result]} | {error, <a href="#t:reason/0">reason</a>()},
+             Result :: {FileName, TermPosition, term()},
+             TermPosition :: pos_integer().</pre>
+
+      </div>
+
+<p>Checks files for sortedness. If a file is not sorted, the first out-of-order element is returned. The first term on a file has position 1.</p><p><code>check(FileName)</code> is equivalent to <code>check([FileName], [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="check/2">
+
+  <div class="detail-header">
+    <a href="#check/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>check(FileNames, Options) -> Reply
+         when
+             FileNames :: <a href="#t:file_names/0">file_names</a>(),
+             Options :: <a href="#t:options/0">options</a>(),
+             Reply :: {ok, [Result]} | {error, <a href="#t:reason/0">reason</a>()},
+             Result :: {FileName, TermPosition, term()},
+             FileName :: <a href="#t:file_name/0">file_name</a>(),
+             TermPosition :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="keycheck/2">
+
+  <div class="detail-header">
+    <a href="#keycheck/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keycheck/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keycheck(KeyPos, FileName) -> Reply
+            when
+                KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+                FileName :: <a href="#t:file_name/0">file_name</a>(),
+                Reply :: {ok, [Result]} | {error, <a href="#t:reason/0">reason</a>()},
+                Result :: {FileName, TermPosition, term()},
+                TermPosition :: pos_integer().</pre>
+
+      </div>
+
+<p>Checks files for sortedness. If a file is not sorted, the first out-of-order element is returned. The first term on a file has position 1.</p><p><code>keycheck(KeyPos, FileName)</code> is equivalent to <code>keycheck(KeyPos, [FileName], [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="keycheck/3">
+
+  <div class="detail-header">
+    <a href="#keycheck/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keycheck/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keycheck(KeyPos, FileNames, Options) -> Reply
+            when
+                KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+                FileNames :: <a href="#t:file_names/0">file_names</a>(),
+                Options :: <a href="#t:options/0">options</a>(),
+                Reply :: {ok, [Result]} | {error, <a href="#t:reason/0">reason</a>()},
+                Result :: {FileName, TermPosition, term()},
+                FileName :: <a href="#t:file_name/0">file_name</a>(),
+                TermPosition :: pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="keymerge/3">
+
+  <div class="detail-header">
+    <a href="#keymerge/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keymerge/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keymerge(KeyPos, FileNames, Output) -> Reply
+            when
+                KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+                FileNames :: <a href="#t:file_names/0">file_names</a>(),
+                Output :: <a href="#t:output/0">output</a>(),
+                Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Merges tuples on files. Each input file is assumed to be sorted on key(s).</p><p><code>keymerge(KeyPos, FileNames, Output)</code> is equivalent to <code>keymerge(KeyPos, FileNames, Output, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="keymerge/4">
+
+  <div class="detail-header">
+    <a href="#keymerge/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keymerge/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keymerge(KeyPos, FileNames, Output, Options) -> Reply
+            when
+                KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+                FileNames :: <a href="#t:file_names/0">file_names</a>(),
+                Output :: <a href="#t:output/0">output</a>(),
+                Options :: <a href="#t:options/0">options</a>(),
+                Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="keysort/2">
+
+  <div class="detail-header">
+    <a href="#keysort/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keysort/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keysort(KeyPos, FileName) -> Reply
+           when
+               KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+               FileName :: <a href="#t:file_name/0">file_name</a>(),
+               Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Sorts tuples on files.</p><p><code>keysort(N, FileName)</code> is equivalent to <code>keysort(N, [FileName], FileName)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="keysort/3">
+
+  <div class="detail-header">
+    <a href="#keysort/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keysort/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keysort(KeyPos, Input, Output) -> Reply
+           when
+               KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+               Input :: <a href="#t:input/0">input</a>(),
+               Output :: <a href="#t:output/0">output</a>(),
+               Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Sorts tuples on files. The sort is performed on the element(s) mentioned in <code>KeyPos</code>. If two tuples compare equal (<code>==</code>) on one element, the next element according to <code>KeyPos</code> is compared. The sort is stable.</p><p><code>keysort(N, Input, Output)</code> is equivalent to <code>keysort(N, Input, Output, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="keysort/4">
+
+  <div class="detail-header">
+    <a href="#keysort/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">keysort/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>keysort(KeyPos, Input, Output, Options) -> Reply
+           when
+               KeyPos :: <a href="#t:key_pos/0">key_pos</a>(),
+               Input :: <a href="#t:input/0">input</a>(),
+               Output :: <a href="#t:output/0">output</a>(),
+               Options :: <a href="#t:options/0">options</a>(),
+               Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="merge/2">
+
+  <div class="detail-header">
+    <a href="#merge/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">merge/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>merge(FileNames, Output) -> Reply
+         when
+             FileNames :: <a href="#t:file_names/0">file_names</a>(),
+             Output :: <a href="#t:output/0">output</a>(),
+             Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Merges terms on files. Each input file is assumed to be sorted.</p><p><code>merge(FileNames, Output)</code> is equivalent to <code>merge(FileNames, Output, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="merge/3">
+
+  <div class="detail-header">
+    <a href="#merge/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">merge/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>merge(FileNames, Output, Options) -> Reply
+         when
+             FileNames :: <a href="#t:file_names/0">file_names</a>(),
+             Output :: <a href="#t:output/0">output</a>(),
+             Options :: <a href="#t:options/0">options</a>(),
+             Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sort/1">
+
+  <div class="detail-header">
+    <a href="#sort/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sort/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sort(FileName) -> Reply
+        when
+            FileName :: <a href="#t:file_name/0">file_name</a>(),
+            Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Sorts terms on files.</p><p><code>sort(FileName)</code> is equivalent to <code>sort([FileName], FileName)</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sort/2">
+
+  <div class="detail-header">
+    <a href="#sort/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sort/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sort(Input, Output) -> Reply
+        when
+            Input :: <a href="#t:input/0">input</a>(),
+            Output :: <a href="#t:output/0">output</a>(),
+            Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+<p>Sorts terms on files.</p><p><code>sort(Input, Output)</code> is equivalent to <code>sort(Input, Output, [])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="sort/3">
+
+  <div class="detail-header">
+    <a href="#sort/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sort/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sort(Input, Output, Options) -> Reply
+        when
+            Input :: <a href="#t:input/0">input</a>(),
+            Output :: <a href="#t:output/0">output</a>(),
+            Options :: <a href="#t:options/0">options</a>(),
+            Reply :: ok | {error, <a href="#t:reason/0">reason</a>()} | <a href="#t:input_reply/0">input_reply</a>() | <a href="#t:output_reply/0">output_reply</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

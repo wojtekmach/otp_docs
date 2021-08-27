@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>wrap_log_reader — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wrap_log_reader <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module makes it possible to read internally formatted wrap disk logs, see <a href="disk_log.html"><code>disk_log(3)</code></a>. <code>wrap_log_reader</code> does not interfere with <code>disk_log</code> activities; there is however a bug in this version of the <code>wrap_log_reader</code>, see section <a href="wrap_log_reader.html#content#bugs">Known Limitations</a>.</p><p>A wrap disk log file consists of many files, called index files. A log file can be opened and closed. Also, a single index file can be opened separately. If a non-existent or non-internally formatted file is opened, an error message is returned. If the file is corrupt, no attempt is made to repair it, but an error message is returned.</p><p>If a log is configured to be distributed, it is possible that all items are not logged on all nodes. <code>wrap_log_reader</code> only reads the log on the called node; it is up to the user to be sure that all items are read.</p><h2 id="module-known-limitations" class="section-heading">
+  <a href="#module-known-limitations" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Known Limitations
+</h2>
+<a id="bugs"></a><p>This version of <code>wrap_log_reader</code> does not detect if <code>disk_log</code> wraps to a new index file between a call to <code>wrap_log_reader:open()</code> and the first call to <code>wrap_log_reader:chunk()</code>. If this occurs, the call to <code>chunk()</code> reads the last logged items in the log file, as the opened index file was truncated by <code>disk_log</code>.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="disk_log.html"><code>disk_log(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:continuation/0">-type continuation() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Continuation returned by <code>open/1,2</code> or <code>chunk/1,2</code>.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunk/1">chunk/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="chunk_ret"></li></ul><p>Enables to efficiently read the terms that are appended to a log. Minimises disk I/O by reading 64 kilobyte chunks from the file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunk/2">chunk/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#close/1">close/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Closes a log file properly.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/1">open/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="open_ret"></li></ul><p><code>Filename</code> specifies the name of the file to be read.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#open/2">open/2</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:continuation/0">
+
+  <div class="detail-header">
+    <a href="#t:continuation/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type continuation() :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>continuation()</pre>
+
+      </div>
+
+<p>Continuation returned by <code>open/1,2</code> or <code>chunk/1,2</code>.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="chunk/1">
+
+  <div class="detail-header">
+    <a href="#chunk/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunk/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunk(Continuation) -> <a href="#t:chunk_ret/0">chunk_ret</a>() when Continuation :: <a href="#t:continuation/0">continuation</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="chunk_ret"></li></ul><p>Enables to efficiently read the terms that are appended to a log. Minimises disk I/O by reading 64 kilobyte chunks from the file.</p><p>The first time <code>chunk()</code> is called, an initial continuation returned from <code>open/1</code> or <code>open/2</code> must be provided.</p><p>When <code>chunk/3</code> is called, <code>N</code> controls the maximum number of terms that are read from the log in each chunk. Defaults to <code>infinity</code>, which means that all the terms contained in the 8K chunk are read. If less than <code>N</code> terms are returned, this does not necessarily mean that end of file is reached.</p><p>Returns a tuple <code>{Continuation2, Terms}</code>, where <code>Terms</code> is a list of terms found in the log. <code>Continuation2</code> is yet another continuation that must be passed on to any subsequent calls to <code>chunk()</code>. With a series of calls to <code>chunk()</code>, it is then possible to extract all terms from a log.</p><p>Returns a tuple <code>{Continuation2, Terms, Badbytes}</code> if the log is opened in read only mode and the read chunk is corrupt. <code>Badbytes</code> indicates the number of non-Erlang terms found in the chunk. Notice that the log is not repaired.</p><p>Returns <code>{Continuation2, eof}</code> when the end of the log is reached, and <code>{error, Reason}</code> if an error occurs.</p><p>The returned continuation either is or is not valid in the next call to this function. This is because the log can wrap and delete the file into which the continuation points. To ensure this does not occur, the log can be blocked during the search.</p>
+  </section>
+</section>
+<section class="detail" id="chunk/2">
+
+  <div class="detail-header">
+    <a href="#chunk/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunk/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunk(Continuation, N) -> <a href="#t:chunk_ret/0">chunk_ret</a>()
+         when Continuation :: <a href="#t:continuation/0">continuation</a>(), N :: infinity | pos_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="close/1">
+
+  <div class="detail-header">
+    <a href="#close/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">close/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>close(Continuation) -> ok | {error, Reason}
+         when Continuation :: <a href="#t:continuation/0">continuation</a>(), Reason :: <a href="file.html#t:posix/0">file:posix</a>().</pre>
+
+      </div>
+
+<p>Closes a log file properly.</p>
+  </section>
+</section>
+<section class="detail" id="open/1">
+
+  <div class="detail-header">
+    <a href="#open/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>open(Filename) -> <a href="#t:open_ret/0">open_ret</a>() when Filename :: string() | atom().</pre>
+
+      </div>
+
+<ul class="types"><li name="open_ret"></li></ul><p><code>Filename</code> specifies the name of the file to be read.</p><p><code>N</code> specifies the index of the file to be read. If <code>N</code> is omitted, the whole wrap log file is read; if it is specified, only the specified index file is read.</p><p>Returns <code>{ok, Continuation}</code> if the log/index file is opened successfully. <code>Continuation</code> is to be used when chunking or closing the file.</p><p>Returns <code>{error, Reason}</code> for all errors.</p>
+  </section>
+</section>
+<section class="detail" id="open/2">
+
+  <div class="detail-header">
+    <a href="#open/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">open/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>open(Filename, N) -> <a href="#t:open_ret/0">open_ret</a>() when Filename :: string() | atom(), N :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

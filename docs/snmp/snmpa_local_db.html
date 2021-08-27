@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="snmp v5.9.1">
+
+    <title>snmpa_local_db — snmp v5.9.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-437f015f53.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+snmp
+      </a>
+      <strong class="sidebar-projectVersion">
+        v5.9.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+snmpa_local_db <small class="app-vsn">(snmp v5.9.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The module <code>snmpa_local_db</code> contains functions for implementing tables (and variables) using the SNMP built-in database. The database exists in two instances, one volatile and one persistent. The volatile database is implemented with ets. The persistent database is implemented with dets.</p><p>There is a scaling problem with this database.</p><ul><li>Insertions and deletions are inefficient for large tables.</li></ul><p>This problem is best solved by using Mnesia instead.</p><p>The following functions describe the interface to <code>snmpa_local_db</code>. Each function has a Mnesia equivalent. The argument <code>NameDb</code> is a tuple <code>{Name, Db}</code> where <code>Name</code> is the symbolic name of the managed object (as defined in the MIB), and <code>Db</code> is either <code>volatile</code> or <code>persistent</code>. <code>mnesia</code> is not possible since all these functions are <code>snmpa_local_db</code> specific.</p><h2 id="module-common-data-types" class="section-heading">
+  <a href="#module-common-data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Common Data Types
+</h2>
+<p>In the functions defined below, the following types are used:</p><ul><li><p><code>NameDb = {Name, Db}</code></p></li><li><p><code>Name = atom(), Db = volatile | persistent</code></p></li><li><p><code>RowIndex = [int()]</code></p></li><li><p><code>Cols = [Col] | [{Col, Value}], Col = int(), Value = term()</code></p></li></ul><p>where <code>RowIndex</code> denotes the last part of the OID, that specifies the index of the row in the table. <code>Cols</code> is a list of column numbers in case of a get operation, and a list of column numbers and values in case of a set operation.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p>ets(3), dets(3), snmp_generic(3)</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#dump/0">dump() -&gt; ok | {error, Reason}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Reason = term()</li></ul><p>This function can be used to manually dump the database to file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#match/2">match(NameDb, Pattern)</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Performs an ets/dets matching on the table. See Stdlib documentation, module ets, for a description of <code>Pattern</code> and the return values.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#print/0">print()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">TableName = atom()</li></ul><p>Prints the contents of the database on screen. This is useful for debugging since the <code>STANDARD-MIB</code> and <code>OTP-SNMPEA-MIB</code> (and maybe your own MIBs) are stored in <code>snmpa_local_db</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#print/1">print(TableName)</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#print/2">print(TableName, Db)</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_create/1">table_create(NameDb) -&gt; bool()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates a table. If the table already exist, the old copy is destroyed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_create_row/3">table_create_row(NameDb, RowIndex, Row) -&gt; bool()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Row = {Val1, Val2, ..., ValN}</li><li class="type">Val1 = Val2 = ... = ValN = term()</li></ul><p>Creates a row in a table. <code>Row</code> is a tuple with values for all columns, including the index columns.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_delete/1">table_delete(NameDb) -&gt; void()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes a table.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_delete_row/2">table_delete_row(NameDb, RowIndex) -&gt; bool()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes the row in the table.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_exists/1">table_exists(NameDb) -&gt; bool()</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Checks if a table exists.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table_get_row/2">table_get_row(NameDb, RowIndex) -&gt; Row | undefined</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Row = {Val1, Val2, ..., ValN}</li><li class="type">Val1 = Val2 = ... = ValN = term()</li></ul><p><code>Row</code> is a tuple with values for all columns, including the index columns.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="dump/0">
+
+  <div class="detail-header">
+    <a href="#dump/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">dump() -&gt; ok | {error, Reason}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Reason = term()</li></ul><p>This function can be used to manually dump the database to file.</p>
+  </section>
+</section>
+<section class="detail" id="match/2">
+
+  <div class="detail-header">
+    <a href="#match/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">match(NameDb, Pattern)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<p>Performs an ets/dets matching on the table. See Stdlib documentation, module ets, for a description of <code>Pattern</code> and the return values.</p>
+  </section>
+</section>
+<section class="detail" id="print/0">
+
+  <div class="detail-header">
+    <a href="#print/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">print()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">TableName = atom()</li></ul><p>Prints the contents of the database on screen. This is useful for debugging since the <code>STANDARD-MIB</code> and <code>OTP-SNMPEA-MIB</code> (and maybe your own MIBs) are stored in <code>snmpa_local_db</code>.</p><p><code>TableName</code> is an atom for a table in the database. When no name is supplied, the whole database is shown.</p>
+  </section>
+</section>
+<section class="detail" id="print/1">
+
+  <div class="detail-header">
+    <a href="#print/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">print(TableName)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="print/2">
+
+  <div class="detail-header">
+    <a href="#print/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">print(TableName, Db)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="table_create/1">
+
+  <div class="detail-header">
+    <a href="#table_create/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_create(NameDb) -&gt; bool()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<p>Creates a table. If the table already exist, the old copy is destroyed.</p><p>Returns <code>false</code> if the <code>NameDb</code> argument is incorrectly specified, <code>true</code> otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="table_create_row/3">
+
+  <div class="detail-header">
+    <a href="#table_create_row/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_create_row(NameDb, RowIndex, Row) -&gt; bool()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Row = {Val1, Val2, ..., ValN}</li><li class="type">Val1 = Val2 = ... = ValN = term()</li></ul><p>Creates a row in a table. <code>Row</code> is a tuple with values for all columns, including the index columns.</p>
+  </section>
+</section>
+<section class="detail" id="table_delete/1">
+
+  <div class="detail-header">
+    <a href="#table_delete/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_delete(NameDb) -&gt; void()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<p>Deletes a table.</p>
+  </section>
+</section>
+<section class="detail" id="table_delete_row/2">
+
+  <div class="detail-header">
+    <a href="#table_delete_row/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_delete_row(NameDb, RowIndex) -&gt; bool()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<p>Deletes the row in the table.</p>
+  </section>
+</section>
+<section class="detail" id="table_exists/1">
+
+  <div class="detail-header">
+    <a href="#table_exists/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_exists(NameDb) -&gt; bool()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<p>Checks if a table exists.</p>
+  </section>
+</section>
+<section class="detail" id="table_get_row/2">
+
+  <div class="detail-header">
+    <a href="#table_get_row/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table_get_row(NameDb, RowIndex) -&gt; Row | undefined</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Row = {Val1, Val2, ..., ValN}</li><li class="type">Val1 = Val2 = ... = ValN = term()</li></ul><p><code>Row</code> is a tuple with values for all columns, including the index columns.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

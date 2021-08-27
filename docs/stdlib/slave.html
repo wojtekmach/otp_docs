@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>slave — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+slave <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for starting Erlang slave nodes. All slave nodes that are started by a master terminate automatically when the master terminates. All terminal output produced at the slave is sent back to the master node. File I/O is done through the master.</p><p>Slave nodes on other hosts than the current one are started with the <code>ssh</code> program. The user must be allowed to <code>ssh</code> to the remote hosts without being prompted for a password. This can be arranged in a number of ways (for details, see the <code>ssh</code> documentation). A slave node started on the same host as the master inherits certain environment values from the master, such as the current directory and the environment variables. For what can be assumed about the environment when a slave is started on another host, see the documentation for the <code>ssh</code> program.</p><p>An alternative to the <code>ssh</code> program can be specified on the command line to <code>erl(1)</code> as follows:</p><pre><code class="makeup erlang"><span class="p">-</span><span class="na">rsh</span><span class="w"> </span><span class="n">Program</span></code></pre><p>Note that the command specified with the <code>-rsh</code> flag is treated as a file name which may contain spaces. It is thus not possible to include any command line options. The remote node will be launched as <code>&quot;$RSH&quot; &quot;$REMOTE_HOSTNAME&quot; erl -detached -noinput ...</code>, so the <code>erl</code> command must be found in the path on the remote host.</p><p>The slave node is to use the same file system at the master. At least, Erlang/OTP is to be installed in the same place on both computers and the same version of Erlang is to be used.</p><p>A node running on Windows can only start slave nodes on the host on which it is running.</p><p>The master node must be alive.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pseudo/1">pseudo([Master | ServerList]) -&gt; ok</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Master = node()</li><li class="type">ServerList = [atom()]</li></ul><p>Calls <code>pseudo(Master, ServerList)</code>. If you want to start a node from the command line and set up a number of pseudo servers, an Erlang runtime system can be started as follows</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pseudo/2">pseudo/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a number of pseudo servers. A pseudo server is a server with a registered name that does nothing but pass on all message to the real server that executes at a master node. A pseudo server is an intermediary that only has the same registered name as the real server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#relay/1">relay/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Runs a pseudo server. This function never returns any value and the process that executes the function receives messages. All messages received are simply passed on to <code>Pid</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/1">start/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a slave node on host <code>Host</code>. Host names need not necessarily be specified as fully qualified names; short names can also be used. This is the same condition that applies to names of distributed Erlang nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/2">start/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/3">start/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/1">start_link/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a slave node in the same way as <code>start/1,2,3</code>, except that the slave node is linked to the currently executing process. If that process terminates, the slave node also terminates.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/2">start_link/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/3">start_link/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stops (kills) a node.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="pseudo/1">
+
+  <div class="detail-header">
+    <a href="#pseudo/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pseudo([Master | ServerList]) -&gt; ok</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Master = node()</li><li class="type">ServerList = [atom()]</li></ul><p>Calls <code>pseudo(Master, ServerList)</code>. If you want to start a node from the command line and set up a number of pseudo servers, an Erlang runtime system can be started as follows:</p><pre><code class="makeup erlang"><span class="c1">% erl -name abc -s slave pseudo klacke@super x --</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pseudo/2">
+
+  <div class="detail-header">
+    <a href="#pseudo/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pseudo/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pseudo(Master, ServerList) -> ok when Master :: node(), ServerList :: [atom()].</pre>
+
+      </div>
+
+<p>Starts a number of pseudo servers. A pseudo server is a server with a registered name that does nothing but pass on all message to the real server that executes at a master node. A pseudo server is an intermediary that only has the same registered name as the real server.</p><p>For example, if you have started a slave node <code>N</code> and want to execute <code>pxw</code> graphics code on this node, you can start server <code>pxw_server</code> as a pseudo server at the slave node. This is illustrated as follows:</p><pre><code type="none">rpc:call(N, slave, pseudo, [node(), [pxw_server]]).</code></pre>
+  </section>
+</section>
+<section class="detail" id="relay/1">
+
+  <div class="detail-header">
+    <a href="#relay/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">relay/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>relay(Pid) -> no_return() when Pid :: pid().</pre>
+
+      </div>
+
+<p>Runs a pseudo server. This function never returns any value and the process that executes the function receives messages. All messages received are simply passed on to <code>Pid</code>.</p>
+  </section>
+</section>
+<section class="detail" id="start/1">
+
+  <div class="detail-header">
+    <a href="#start/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Host) -> {ok, Node} | {error, Reason}
+         when
+             Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+             Node :: node(),
+             Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+<p>Starts a slave node on host <code>Host</code>. Host names need not necessarily be specified as fully qualified names; short names can also be used. This is the same condition that applies to names of distributed Erlang nodes.</p><p>The name of the started node becomes <code>Name@Host</code>. If no name is provided, the name becomes the same as the node that executes the call (except the host name part of the node name).</p><p>The slave node resets its <code>user</code> process so that all terminal I/O that is produced at the slave is automatically relayed to the master. Also, the file process is relayed to the master.</p><p>Argument <code>Args</code> is used to set <code>erl</code> command-line arguments. If provided, it is passed to the new node and can be used for a variety of purposes; see <code>erl(1)</code>.</p><p>As an example, suppose that you want to start a slave node at host <code>H</code> with node name <code>Name@H</code> and want the slave node to have the following properties:</p><ul><li>Directory <code>Dir</code> is to be added to the code path.</li><li>The Mnesia directory is to be set to <code>M</code>.</li><li>The Unix <code>DISPLAY</code> environment variable is to be set to the display of the master node.</li></ul><p>The following code is executed to achieve this:</p><pre><code type="none">E = &quot; -env DISPLAY &quot; ++ net_adm:localhost() ++ &quot;:0 &quot;,
+Arg = &quot;-mnesia_dir &quot; ++ M ++ &quot; -pa &quot; ++ Dir ++ E,
+slave:start(H, Name, Arg).</code></pre><p>The function returns <code>{ok, Node}</code>, where <code>Node</code> is the name of the new node, otherwise <code>{error, Reason}</code>, where <code>Reason</code> can be one of:</p><dl><dt><code>timeout</code></dt><dd><p>The master node failed to get in contact with the slave node. This can occur in a number of circumstances:</p><ul><li>Erlang/OTP is not installed on the remote host.</li><li>The file system on the other host has a different structure to the the master.</li><li>The Erlang nodes have different cookies.</li></ul></dd><dt><code>no_rsh</code></dt><dd><p>No remote shell program was found on the computer. Note that <code>ssh</code> is used by default, but this can be overridden with the <code>-rsh</code> flag.</p></dd><dt><code>{already_running, Node}</code></dt><dd><p>A node with name <code>Name@Host</code> already exists.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="start/2">
+
+  <div class="detail-header">
+    <a href="#start/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Host, Name) -> {ok, Node} | {error, Reason}
+         when
+             Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+             Name :: atom() | string(),
+             Node :: node(),
+             Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/3">
+
+  <div class="detail-header">
+    <a href="#start/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Host, Name, Args) -> {ok, Node} | {error, Reason}
+         when
+             Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+             Name :: atom() | string(),
+             Args :: string(),
+             Node :: node(),
+             Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_link/1">
+
+  <div class="detail-header">
+    <a href="#start_link/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Host) -> {ok, Node} | {error, Reason}
+              when
+                  Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+                  Node :: node(),
+                  Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+<p>Starts a slave node in the same way as <code>start/1,2,3</code>, except that the slave node is linked to the currently executing process. If that process terminates, the slave node also terminates.</p><p>For a description of arguments and return values, see <a href="slave.html#start/1"><code>start/1,2,3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="start_link/2">
+
+  <div class="detail-header">
+    <a href="#start_link/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Host, Name) -> {ok, Node} | {error, Reason}
+              when
+                  Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+                  Name :: atom() | string(),
+                  Node :: node(),
+                  Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start_link/3">
+
+  <div class="detail-header">
+    <a href="#start_link/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start_link/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start_link(Host, Name, Args) -> {ok, Node} | {error, Reason}
+              when
+                  Host :: <a href="https://wojtekmach.pl/otp_docs/kernel/inet.html#t:hostname/0">inet:hostname</a>(),
+                  Name :: atom() | string(),
+                  Args :: string(),
+                  Node :: node(),
+                  Reason :: timeout | no_rsh | {already_running, Node}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="stop/1">
+
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Node) -> ok when Node :: node().</pre>
+
+      </div>
+
+<p>Stops (kills) a node.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

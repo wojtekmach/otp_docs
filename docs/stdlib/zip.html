@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>zip — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+zip <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module archives and extracts files to and from a zip archive. The zip format is specified by the &quot;ZIP Appnote.txt&quot; file, available on the PKWARE web site <a href="http://www.pkware.com">www.pkware.com</a>.</p><p>The zip module supports zip archive versions up to 6.1. However, password-protection and Zip64 are not supported.</p><p>By convention, the name of a zip file is to end with <code>.zip</code>. To abide to the convention, add <code>.zip</code> to the filename.</p><ul><li><p>To create zip archives, use function <a href="zip.html#zip/2"><code>zip/2</code></a> or <a href="zip.html#zip/2"><code>zip/3</code></a>. They are also available as <code>create/2,3</code>, to resemble the <a href="erl_tar.html"><code>erl_tar</code></a> module.</p></li><li><p>To extract files from a zip archive, use function <a href="zip.html#unzip/1"><code>unzip/1</code></a> or <a href="zip.html#unzip/2"><code>unzip/2</code></a>. They are also available as <code>extract/1,2</code>, to resemble the <a href="erl_tar.html"><code>erl_tar</code></a> module.</p></li><li><p>To fold a function over all files in a zip archive, use function <a href="zip.html#foldl/3"><code>foldl/3</code></a>.</p></li><li><p>To return a list of the files in a zip archive, use function <a href="zip.html#list_dir/1"><code>list_dir/1</code></a> or <a href="zip.html#list_dir/2"><code>list_dir/2</code></a>. They are also available as <code>table/1,2</code>, to resemble the <a href="erl_tar.html"><code>erl_tar</code></a> module.</p></li><li><p>To print a list of files to the Erlang shell, use function <a href="zip.html#t/1"><code>t/1</code></a> or <a href="zip.html#tt/1"><code>tt/1</code></a>.</p></li><li><p>Sometimes it is desirable to open a zip archive, and to unzip files from it file by file, without having to reopen the archive. This can be done by functions <a href="zip.html#zip_open/1"><code>zip_open/1,2</code></a>, <a href="zip.html#zip_get/1"><code>zip_get/1,2</code></a>, <a href="zip.html#zip_list_dir/1"><code>zip_list_dir/1</code></a>, and <a href="zip.html#zip_close/1"><code>zip_close/1</code></a>.</p></li></ul><h2 id="module-limitations" class="section-heading">
+  <a href="#module-limitations" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Limitations
+</h2>
+<ul><li><p>Zip64 archives are not supported.</p></li><li><p>Password-protected and encrypted archives are not supported.</p></li><li><p>Only the DEFLATE (zlib-compression) and the STORE (uncompressed data) zip methods are supported.</p></li><li><p>The archive size is limited to 2 GB (32 bits).</p></li><li><p>Comments for individual files are not supported when creating zip archives. The zip archive comment for the whole zip archive is supported.</p></li><li><p>Changing a zip archive is not supported. To add or remove a file from an archive, the whole archive must be recreated.</p></li></ul>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:create_option/0">-type create_option() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>These options are described in <a href="zip.html#content#zip_options"><code>create/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:extension/0">-type extension() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:extension_spec/0">-type extension_spec() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:filename/0">-type filename() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The name of a zip file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handle/0">-type handle() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>As returned by <a href="zip.html#zip_open/2"><code>zip_open/2</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zip_comment/0">-type zip_comment() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The record <code>zip_comment</code> only contains the archive comment for a zip archive.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:zip_file/0">-type zip_file() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The record <code>zip_file</code> contains the following fields</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/2">create/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="create_option"></li><li name="extension_spec"></li></ul><p>Creates a zip archive containing the files specified in <code>FileList</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/3">create/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#extract/1">extract/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code>unzip/1</code> extracts all files from a zip archive.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#extract/2">extract/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#foldl/3">foldl/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calls <code>Fun(FileInArchive, GetInfo , GetBin, AccIn)</code> on successive files in the <code>Archive</code>, starting with <code>AccIn == Acc0</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_dir/1">list_dir/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code>list_dir/1</code> retrieves all filenames in the zip archive <code>Archive</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_dir/2">list_dir/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t/1">t/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Prints all filenames in the zip archive <code>Archive</code> to the Erlang shell. (Similar to <code>tar t</code>.)</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table/1">table/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#table/2">table/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#tt/1">tt/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Prints filenames and information about all files in the zip archive <code>Archive</code> to the Erlang shell. (Similar to <code>tar tv</code>.)</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unzip/1">unzip/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unzip/2">unzip/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip/2">zip/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip/3">zip/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_close/1">zip_close/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Closes a zip archive, previously opened with <a href="zip.html#zip_open/1"><code>zip_open/1,2</code></a>. All resources are closed, and the handle is not to be used after closing.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_get/1">zip_get/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Extracts one or all files from an open archive.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_get/2">zip_get/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_list_dir/1">zip_list_dir/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the file list of an open zip archive. The first returned element is the zip archive comment.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_open/1">zip_open/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Opens a zip archive, and reads and saves its directory. This means that later reading files from the archive is faster than unzipping files one at a time with <a href="zip.html#unzip/1"><code>unzip/1,2</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#zip_open/2">zip_open/2</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:create_option/0">
+
+  <div class="detail-header">
+    <a href="#t:create_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type create_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create_option() ::
+    memory | cooked | verbose |
+    {comment, Comment :: string()} |
+    {cwd, CWD :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+    {compress, What :: <a href="#t:extension_spec/0">extension_spec</a>()} |
+    {uncompress, What :: <a href="#t:extension_spec/0">extension_spec</a>()}.</pre>
+
+      </div>
+
+<p>These options are described in <a href="zip.html#content#zip_options"><code>create/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:extension/0">
+
+  <div class="detail-header">
+    <a href="#t:extension/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type extension() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>extension() :: string().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:extension_spec/0">
+
+  <div class="detail-header">
+    <a href="#t:extension_spec/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type extension_spec() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>extension_spec() ::
+    all |
+    [Extension :: <a href="#t:extension/0">extension</a>()] |
+    {add, [Extension :: <a href="#t:extension/0">extension</a>()]} |
+    {del, [Extension :: <a href="#t:extension/0">extension</a>()]}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:filename/0">
+
+  <div class="detail-header">
+    <a href="#t:filename/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type filename() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filename() :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>().</pre>
+
+      </div>
+
+<p>The name of a zip file.</p>
+  </section>
+</section>
+<section class="detail" id="t:handle/0">
+
+  <div class="detail-header">
+    <a href="#t:handle/0" class="detail-link" title="Link to this opaque">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this opaque</span>
+    </a>
+    <h1 class="signature">-type handle() :: term().</h1>
+
+
+      <span class="note">(opaque)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>handle()</pre>
+
+      </div>
+
+<p>As returned by <a href="zip.html#zip_open/2"><code>zip_open/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="t:zip_comment/0">
+
+  <div class="detail-header">
+    <a href="#t:zip_comment/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zip_comment() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_comment() :: #zip_comment{}.</pre>
+
+      </div>
+
+<p>The record <code>zip_comment</code> only contains the archive comment for a zip archive.</p>
+  </section>
+</section>
+<section class="detail" id="t:zip_file/0">
+
+  <div class="detail-header">
+    <a href="#t:zip_file/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type zip_file() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_file() :: #zip_file{}.</pre>
+
+      </div>
+
+<p>The record <code>zip_file</code> contains the following fields:</p><dl><dt><code>name</code></dt><dd><p>The filename</p></dd><dt><code>info</code></dt><dd><p>File information as in <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#read_file_info/1"><code>file:read_file_info/1</code></a> in Kernel</p></dd><dt><code>comment</code></dt><dd><p>The comment for the file in the zip archive</p></dd><dt><code>offset</code></dt><dd><p>The file offset in the zip archive (used internally)</p></dd><dt><code>comp_size</code></dt><dd><p>The size of the compressed file (the size of the uncompressed file is found in <code>info</code>)</p></dd></dl>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="create/2">
+
+  <div class="detail-header">
+    <a href="#create/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(Name, FileList) -> RetValue
+          when
+              Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+              FileList :: [FileSpec],
+              FileSpec ::
+                  <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() |
+                  {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()} |
+                  {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:file_info/0">file:file_info</a>()},
+              RetValue ::
+                  {ok, FileName :: <a href="#t:filename/0">filename</a>()} |
+                  {ok, {FileName :: <a href="#t:filename/0">filename</a>(), binary()}} |
+                  {error, Reason :: term()}.</pre>
+
+      </div>
+
+<ul class="types"><li name="create_option"></li><li name="extension_spec"></li></ul><p>Creates a zip archive containing the files specified in <code>FileList</code>.</p><p><code>create/2</code> and <code>create/3</code> are provided as synonyms to resemble module <a href="erl_tar.html"><code>erl_tar</code></a>.</p><p><code>FileList</code> is a list of files, with paths relative to the current directory, which are stored with this path in the archive. Files can also be specified with data in binaries to create an archive directly from data.</p><p>Files are compressed using the DEFLATE compression, as described in the &quot;Appnote.txt&quot; file. However, files are stored without compression if they are already compressed. <code>zip/2</code> and <code>zip/3</code> check the file extension to determine if the file is to be stored without compression. Files with the following extensions are not compressed: <code>.Z</code>, <code>.zip</code>, <code>.zoo</code>, <code>.arc</code>, <code>.lzh</code>, <code>.arj</code>.</p><p>It is possible to override the default behavior and control what types of files that are to be compressed by using options <code>{compress, What}</code> and <code>{uncompress, What}</code>. It is also possible to use many <code>compress</code> and <code>uncompress</code> options.</p><p>To trigger file compression, its extension must match with the <code>compress</code> condition and must not match the <code>uncompress</code> condition. For example, if <code>compress</code> is set to <code>[&quot;gif&quot;, &quot;jpg&quot;]</code> and <code>uncompress</code> is set to <code>[&quot;jpg&quot;]</code>, only files with extension <code>&quot;gif&quot;</code> are compressed.</p><a id="zip_options"></a><p>Options:</p><dl><dt><code>cooked</code></dt><dd><p>By default, this function opens the zip file in mode <code>raw</code>, which is faster but does not allow a remote (Erlang) file server to be used. Adding <code>cooked</code> to the mode list overrides the default and opens the zip file without the <code>raw</code> option. The same applies for the files added.</p></dd><dt><code>verbose</code></dt><dd><p>Prints an informational message about each added file.</p></dd><dt><code>memory</code></dt><dd><p>The output is not to a file, but instead as a tuple <code>{FileName, binary()}</code>. The binary is a full zip archive with header and can be extracted with, for example, <a href="zip.html#unzip/2"><code>unzip/2</code></a>.</p></dd><dt><code>{comment, Comment}</code></dt><dd><p>Adds a comment to the zip archive.</p></dd><dt><code>{cwd, CWD}</code></dt><dd><p>Uses the specified directory as current work directory (<code>cwd</code>). This is prepended to filenames when adding them, although not in the zip archive (acting like <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#set_cwd/1"><code>file:set_cwd/1</code></a> in Kernel, but without changing the global <code>cwd</code> property.).</p></dd><dt><code>{compress, What}</code></dt><dd><p>Controls what types of files to be compressed. Defaults to <code>all</code>. The following values of <code>What</code> are allowed:</p><dl><dt><code>all</code></dt><dd><p>All files are compressed (as long as they pass the <code>uncompress</code> condition).</p></dd><dt><code>[Extension]</code></dt><dd><p>Only files with exactly these extensions are compressed.</p></dd><dt><code>{add,[Extension]}</code></dt><dd><p>Adds these extensions to the list of compress extensions.</p></dd><dt><code>{del,[Extension]}</code></dt><dd><p>Deletes these extensions from the list of compress extensions.</p></dd></dl></dd><dt><code>{uncompress, What}</code></dt><dd><p>Controls what types of files to be uncompressed. Defaults to <code>[&quot;.Z&quot;, &quot;.zip&quot;, &quot;.zoo&quot;, &quot;.arc&quot;, &quot;.lzh&quot;, &quot;.arj&quot;]</code>. The following values of <code>What</code> are allowed:</p><dl><dt><code>all</code></dt><dd><p>No files are compressed.</p></dd><dt><code>[Extension]</code></dt><dd><p>Files with these extensions are uncompressed.</p></dd><dt><code>{add,[Extension]}</code></dt><dd><p>Adds these extensions to the list of uncompress extensions.</p></dd><dt><code>{del,[Extension]}</code></dt><dd><p>Deletes these extensions from the list of uncompress extensions.</p></dd></dl></dd></dl>
+  </section>
+</section>
+<section class="detail" id="create/3">
+
+  <div class="detail-header">
+    <a href="#create/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(Name, FileList, Options) -> RetValue
+          when
+              Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+              FileList :: [FileSpec],
+              FileSpec ::
+                  <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() |
+                  {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()} |
+                  {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:file_info/0">file:file_info</a>()},
+              Options :: [Option],
+              Option :: <a href="#t:create_option/0">create_option</a>(),
+              RetValue ::
+                  {ok, FileName :: <a href="#t:filename/0">filename</a>()} |
+                  {ok, {FileName :: <a href="#t:filename/0">filename</a>(), binary()}} |
+                  {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="extract/1">
+
+  <div class="detail-header">
+    <a href="#extract/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">extract/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>extract(Archive) -> RetValue
+           when
+               Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+               RetValue ::
+                   {ok, FileList} |
+                   {ok, FileBinList} |
+                   {error, Reason :: term()} |
+                   {error, {Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), Reason :: term()}},
+               FileList :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()],
+               FileBinList :: [{<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}].</pre>
+
+      </div>
+
+<p><code>unzip/1</code> extracts all files from a zip archive.</p><p><code>unzip/2</code> provides options to extract some files, and more.</p><p><code>extract/1</code> and <code>extract/2</code> are provided as synonyms to resemble module <a href="erl_tar.html"><code>erl_tar</code></a>.</p><p>If argument <code>Archive</code> is specified as a binary, the contents of the binary is assumed to be a zip archive, otherwise a filename.</p><p>Options:</p><dl><dt><code>{file_list, FileList}</code></dt><dd><p>By default, all files are extracted from the zip archive. With option <code>{file_list, FileList}</code>, function <code>unzip/2</code> only extracts the files whose names are included in <code>FileList</code>. The full paths, including the names of all subdirectories within the zip archive, must be specified.</p></dd><dt><code>cooked</code></dt><dd><p>By default, this function opens the zip file in <code>raw</code> mode, which is faster but does not allow a remote (Erlang) file server to be used. Adding <code>cooked</code> to the mode list overrides the default and opens the zip file without option <code>raw</code>. The same applies for the files extracted.</p></dd><dt><code>keep_old_files</code></dt><dd><p>By default, all files with the same name as files in the zip archive are overwritten. With option <code>keep_old_files</code> set, function <code>unzip/2</code> does not overwrite existing files. Notice that even with option <code>memory</code> specified, which means that no files are overwritten, existing files are excluded from the result.</p></dd><dt><code>verbose</code></dt><dd><p>Prints an informational message for each extracted file.</p></dd><dt><code>memory</code></dt><dd><p>Instead of extracting to the current directory, the result is given as a list of tuples <code>{Filename, Binary}</code>, where <code>Binary</code> is a binary containing the extracted data of file <code>Filename</code> in the zip archive.</p></dd><dt><code>{cwd, CWD}</code></dt><dd><p>Uses the specified directory as current directory. It is prepended to filenames when extracting them from the zip archive. (Acting like <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#set_cwd/1"><code>file:set_cwd/1</code></a> in Kernel, but without changing the global <code>cwd</code> property.)</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="extract/2">
+
+  <div class="detail-header">
+    <a href="#extract/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">extract/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>extract(Archive, Options) -> RetValue
+           when
+               Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+               Options :: [Option],
+               Option ::
+                   {file_list, FileList} |
+                   keep_old_files | verbose | memory |
+                   {file_filter, FileFilter} |
+                   {cwd, CWD},
+               FileList :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()],
+               FileBinList :: [{<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}],
+               FileFilter :: fun((ZipFile) -> boolean()),
+               CWD :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+               ZipFile :: <a href="#t:zip_file/0">zip_file</a>(),
+               RetValue ::
+                   {ok, FileList} |
+                   {ok, FileBinList} |
+                   {error, Reason :: term()} |
+                   {error, {Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), Reason :: term()}}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="foldl/3">
+
+  <div class="detail-header">
+    <a href="#foldl/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">foldl/3</h1>
+
+
+      <span class="note">(since OTP R14B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>foldl(Fun, Acc0, Archive) -> {ok, Acc1} | {error, Reason}
+         when
+             Fun :: fun((FileInArchive, GetInfo, GetBin, AccIn) -> AccOut),
+             FileInArchive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+             GetInfo :: fun(() -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:file_info/0">file:file_info</a>()),
+             GetBin :: fun(() -> binary()),
+             Acc0 :: term(),
+             Acc1 :: term(),
+             AccIn :: term(),
+             AccOut :: term(),
+             Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()},
+             Reason :: term().</pre>
+
+      </div>
+
+<p>Calls <code>Fun(FileInArchive, GetInfo , GetBin, AccIn)</code> on successive files in the <code>Archive</code>, starting with <code>AccIn == Acc0</code>.</p><p><code>FileInArchive</code> is the name that the file has in the archive.</p><p><code>GetInfo</code> is a fun that returns information about the file.</p><p><code>GetBin</code> returns the file contents.</p><p>Both <code>GetInfo</code> and <code>GetBin</code> must be called within the <code>Fun</code>. Their behavior is undefined if they are called outside the context of <code>Fun</code>.</p><p>The <code>Fun</code> must return a new accumulator, which is passed to the next call. <code>foldl/3</code> returns the final accumulator value. <code>Acc0</code> is returned if the archive is empty. It is not necessary to iterate over all files in the archive. The iteration can be ended prematurely in a controlled manner by throwing an exception.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="o">&gt;</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;dummy.zip&quot;</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;dummy.zip&quot;</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="3983347347-1">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-2">{</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">Bin</span><span class="p" data-group-id="3983347347-2">}</span><span class="p" data-group-id="3983347347-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zip</span><span class="p">:</span><span class="nf">create</span><span class="p" data-group-id="3983347347-3">(</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-4">[</span><span class="p" data-group-id="3983347347-5">{</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;FOO&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3983347347-5">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-6">{</span><span class="s">&quot;bar&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">&lt;&lt;</span><span class="s">&quot;BAR&quot;</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3983347347-6">}</span><span class="p" data-group-id="3983347347-4">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-7">[</span><span class="nb">memory</span><span class="p" data-group-id="3983347347-7">]</span><span class="p" data-group-id="3983347347-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3983347347-8">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="3983347347-9">{</span><span class="s">&quot;dummy.zip&quot;</span><span class="p">,</span><span class="w">
+     </span><span class="p">&lt;&lt;</span><span class="mi">80</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">74</span><span class="p">,</span><span class="mi">152</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">171</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">212</span><span class="p">,</span><span class="mi">26</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="w">
+       </span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="p">.</span><span class="p">.</span><span class="p">.</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3983347347-9">}</span><span class="p" data-group-id="3983347347-8">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="3983347347-10">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">FileSpec</span><span class="p" data-group-id="3983347347-10">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zip</span><span class="p">:</span><span class="nf">foldl</span><span class="p" data-group-id="3983347347-11">(</span><span class="nf">fun</span><span class="p" data-group-id="3983347347-12">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">Acc</span><span class="p" data-group-id="3983347347-12">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p" data-group-id="3983347347-13">[</span><span class="p" data-group-id="3983347347-14">{</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p" data-group-id="3983347347-15">(</span><span class="p" data-group-id="3983347347-15">)</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="p" data-group-id="3983347347-16">(</span><span class="p" data-group-id="3983347347-16">)</span><span class="p" data-group-id="3983347347-14">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="n">Acc</span><span class="p" data-group-id="3983347347-13">]</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-17">[</span><span class="p" data-group-id="3983347347-17">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-18">{</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">Bin</span><span class="p" data-group-id="3983347347-18">}</span><span class="p" data-group-id="3983347347-11">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3983347347-19">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="3983347347-20">[</span><span class="p" data-group-id="3983347347-21">{</span><span class="s">&quot;bar&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;BAR&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w">
+      </span><span class="p" data-group-id="3983347347-22">{</span><span class="ss">file_info</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="ss">regular</span><span class="p">,</span><span class="ss">read_write</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-23">{</span><span class="p" data-group-id="3983347347-24">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-24">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-25">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-25">}</span><span class="p" data-group-id="3983347347-23">}</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-26">{</span><span class="p" data-group-id="3983347347-27">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-27">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-28">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-28">}</span><span class="p" data-group-id="3983347347-26">}</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-29">{</span><span class="p" data-group-id="3983347347-30">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-30">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-31">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-31">}</span><span class="p" data-group-id="3983347347-29">}</span><span class="p">,</span><span class="w">
+                 </span><span class="mi">54</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="3983347347-22">}</span><span class="p" data-group-id="3983347347-21">}</span><span class="p">,</span><span class="w">
+     </span><span class="p" data-group-id="3983347347-32">{</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="p">&lt;&lt;</span><span class="s">&quot;FOO&quot;</span><span class="p">&gt;&gt;</span><span class="p">,</span><span class="w">
+      </span><span class="p" data-group-id="3983347347-33">{</span><span class="ss">file_info</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="ss">regular</span><span class="p">,</span><span class="ss">read_write</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-34">{</span><span class="p" data-group-id="3983347347-35">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-35">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-36">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-36">}</span><span class="p" data-group-id="3983347347-34">}</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-37">{</span><span class="p" data-group-id="3983347347-38">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-38">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-39">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-39">}</span><span class="p" data-group-id="3983347347-37">}</span><span class="p">,</span><span class="w">
+                 </span><span class="p" data-group-id="3983347347-40">{</span><span class="p" data-group-id="3983347347-41">{</span><span class="mi">2010</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p" data-group-id="3983347347-41">}</span><span class="p">,</span><span class="p" data-group-id="3983347347-42">{</span><span class="mi">19</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="3983347347-42">}</span><span class="p" data-group-id="3983347347-40">}</span><span class="p">,</span><span class="w">
+                 </span><span class="mi">54</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="3983347347-33">}</span><span class="p" data-group-id="3983347347-32">}</span><span class="p" data-group-id="3983347347-20">]</span><span class="p" data-group-id="3983347347-19">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="3983347347-43">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-44">{</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">Bin</span><span class="p" data-group-id="3983347347-44">}</span><span class="p" data-group-id="3983347347-43">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">zip</span><span class="p">:</span><span class="nf">create</span><span class="p" data-group-id="3983347347-45">(</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="nc">lists</span><span class="p">:</span><span class="nf">reverse</span><span class="p" data-group-id="3983347347-46">(</span><span class="n">FileSpec</span><span class="p" data-group-id="3983347347-46">)</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-47">[</span><span class="nb">memory</span><span class="p" data-group-id="3983347347-47">]</span><span class="p" data-group-id="3983347347-45">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3983347347-48">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="3983347347-49">{</span><span class="s">&quot;dummy.zip&quot;</span><span class="p">,</span><span class="w">
+     </span><span class="p">&lt;&lt;</span><span class="mi">80</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">74</span><span class="p">,</span><span class="mi">152</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">171</span><span class="p">,</span><span class="mi">39</span><span class="p">,</span><span class="mi">212</span><span class="p">,</span><span class="mi">26</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="w">
+       </span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="p">.</span><span class="p">.</span><span class="p">.</span><span class="p">&gt;&gt;</span><span class="p" data-group-id="3983347347-49">}</span><span class="p" data-group-id="3983347347-48">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="nc">zip</span><span class="p">:</span><span class="nf">foldl</span><span class="p" data-group-id="3983347347-50">(</span><span class="nf">fun</span><span class="p" data-group-id="3983347347-51">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="p" data-group-id="3983347347-51">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nf">throw</span><span class="p" data-group-id="3983347347-52">(</span><span class="n">B</span><span class="p" data-group-id="3983347347-53">(</span><span class="p" data-group-id="3983347347-53">)</span><span class="p" data-group-id="3983347347-52">)</span><span class="p">;</span><span class="w"> </span><span class="p" data-group-id="3983347347-54">(</span><span class="p">_</span><span class="p">,</span><span class="p">_</span><span class="p">,</span><span class="p">_</span><span class="p">,</span><span class="n">Acc</span><span class="p" data-group-id="3983347347-54">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">Acc</span><span class="w"> </span><span class="k">end</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-55">[</span><span class="p" data-group-id="3983347347-55">]</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3983347347-56">{</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">Bin</span><span class="p" data-group-id="3983347347-56">}</span><span class="p" data-group-id="3983347347-50">)</span><span class="p">.</span><span class="w"> 
+</span><span class="p">&lt;&lt;</span><span class="s">&quot;FOO&quot;</span><span class="p">&gt;&gt;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="list_dir/1">
+
+  <div class="detail-header">
+    <a href="#list_dir/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_dir/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>list_dir(Archive) -> RetValue
+            when
+                Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+                RetValue :: {ok, CommentAndFiles} | {error, Reason :: term()},
+                CommentAndFiles :: [<a href="#t:zip_comment/0">zip_comment</a>() | <a href="#t:zip_file/0">zip_file</a>()].</pre>
+
+      </div>
+
+<p><code>list_dir/1</code> retrieves all filenames in the zip archive <code>Archive</code>.</p><p><code>list_dir/2</code> provides options.</p><p><code>table/1</code> and <code>table/2</code> are provided as synonyms to resemble the <a href="erl_tar.html"><code>erl_tar</code></a> module.</p><p>The result value is the tuple <code>{ok, List}</code>, where <code>List</code> contains the zip archive comment as the first element.</p><p>One option is available:</p><dl><dt><code>cooked</code></dt><dd><p>By default, this function opens the zip file in <code>raw</code> mode, which is faster but does not allow a remote (Erlang) file server to be used. Adding <code>cooked</code> to the mode list overrides the default and opens the zip file without option <code>raw</code>.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="list_dir/2">
+
+  <div class="detail-header">
+    <a href="#list_dir/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_dir/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>list_dir(Archive, Options) -> RetValue
+            when
+                Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+                RetValue :: {ok, CommentAndFiles} | {error, Reason :: term()},
+                CommentAndFiles :: [<a href="#t:zip_comment/0">zip_comment</a>() | <a href="#t:zip_file/0">zip_file</a>()],
+                Options :: [Option],
+                Option :: cooked.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t/1">
+
+  <div class="detail-header">
+    <a href="#t/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">t/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>t(Archive) -> ok when Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary() | ZipHandle, ZipHandle :: <a href="#t:handle/0">handle</a>().</pre>
+
+      </div>
+
+<p>Prints all filenames in the zip archive <code>Archive</code> to the Erlang shell. (Similar to <code>tar t</code>.)</p>
+  </section>
+</section>
+<section class="detail" id="table/1">
+
+  <div class="detail-header">
+    <a href="#table/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>table(Archive) -> RetValue
+         when
+             Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+             RetValue :: {ok, CommentAndFiles} | {error, Reason :: term()},
+             CommentAndFiles :: [<a href="#t:zip_comment/0">zip_comment</a>() | <a href="#t:zip_file/0">zip_file</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="table/2">
+
+  <div class="detail-header">
+    <a href="#table/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">table/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>table(Archive, Options) -> RetValue
+         when
+             Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+             RetValue :: {ok, CommentAndFiles} | {error, Reason :: term()},
+             CommentAndFiles :: [<a href="#t:zip_comment/0">zip_comment</a>() | <a href="#t:zip_file/0">zip_file</a>()],
+             Options :: [Option],
+             Option :: cooked.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="tt/1">
+
+  <div class="detail-header">
+    <a href="#tt/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">tt/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>tt(Archive) -> ok when Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary() | ZipHandle, ZipHandle :: <a href="#t:handle/0">handle</a>().</pre>
+
+      </div>
+
+<p>Prints filenames and information about all files in the zip archive <code>Archive</code> to the Erlang shell. (Similar to <code>tar tv</code>.)</p>
+  </section>
+</section>
+<section class="detail" id="unzip/1">
+
+  <div class="detail-header">
+    <a href="#unzip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unzip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unzip(Archive) -> RetValue
+         when
+             Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+             RetValue ::
+                 {ok, FileList} |
+                 {ok, FileBinList} |
+                 {error, Reason :: term()} |
+                 {error, {Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), Reason :: term()}},
+             FileList :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()],
+             FileBinList :: [{<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="unzip/2">
+
+  <div class="detail-header">
+    <a href="#unzip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unzip/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unzip(Archive, Options) -> RetValue
+         when
+             Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+             Options :: [Option],
+             Option ::
+                 {file_list, FileList} |
+                 cooked | keep_old_files | verbose | memory |
+                 {file_filter, FileFilter} |
+                 {cwd, CWD},
+             FileList :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()],
+             FileBinList :: [{<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}],
+             FileFilter :: fun((ZipFile) -> boolean()),
+             CWD :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+             ZipFile :: <a href="#t:zip_file/0">zip_file</a>(),
+             RetValue ::
+                 {ok, FileList} |
+                 {ok, FileBinList} |
+                 {error, Reason :: term()} |
+                 {error, {Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), Reason :: term()}}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="zip/2">
+
+  <div class="detail-header">
+    <a href="#zip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip(Name, FileList) -> RetValue
+       when
+           Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+           FileList :: [FileSpec],
+           FileSpec ::
+               <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()} | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:file_info/0">file:file_info</a>()},
+           RetValue ::
+               {ok, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()} |
+               {ok, {FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}} |
+               {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="zip/3">
+
+  <div class="detail-header">
+    <a href="#zip/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip(Name, FileList, Options) -> RetValue
+       when
+           Name :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+           FileList :: [FileSpec],
+           FileSpec ::
+               <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()} | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:file_info/0">file:file_info</a>()},
+           Options :: [Option],
+           Option :: <a href="#t:create_option/0">create_option</a>(),
+           RetValue ::
+               {ok, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>()} |
+               {ok, {FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()}} |
+               {error, Reason :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="zip_close/1">
+
+  <div class="detail-header">
+    <a href="#zip_close/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_close/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_close(ZipHandle) -> ok | {error, einval} when ZipHandle :: <a href="#t:handle/0">handle</a>().</pre>
+
+      </div>
+
+<p>Closes a zip archive, previously opened with <a href="zip.html#zip_open/1"><code>zip_open/1,2</code></a>. All resources are closed, and the handle is not to be used after closing.</p>
+  </section>
+</section>
+<section class="detail" id="zip_get/1">
+
+  <div class="detail-header">
+    <a href="#zip_get/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_get/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_get(ZipHandle) -> {ok, [Result]} | {error, Reason}
+           when
+               ZipHandle :: <a href="#t:handle/0">handle</a>(),
+               Result :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()},
+               Reason :: term().</pre>
+
+      </div>
+
+<p>Extracts one or all files from an open archive.</p><p>The files are unzipped to memory or to file, depending on the options specified to function <a href="zip.html#zip_open/1"><code>zip_open/1,2</code></a> when opening the archive.</p>
+  </section>
+</section>
+<section class="detail" id="zip_get/2">
+
+  <div class="detail-header">
+    <a href="#zip_get/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_get/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_get(FileName, ZipHandle) -> {ok, Result} | {error, Reason}
+           when
+               FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(),
+               ZipHandle :: <a href="#t:handle/0">handle</a>(),
+               Result :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | {<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>(), binary()},
+               Reason :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="zip_list_dir/1">
+
+  <div class="detail-header">
+    <a href="#zip_list_dir/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_list_dir/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_list_dir(ZipHandle) -> {ok, Result} | {error, Reason}
+                when
+                    Result :: [<a href="#t:zip_comment/0">zip_comment</a>() | <a href="#t:zip_file/0">zip_file</a>()],
+                    ZipHandle :: <a href="#t:handle/0">handle</a>(),
+                    Reason :: term().</pre>
+
+      </div>
+
+<p>Returns the file list of an open zip archive. The first returned element is the zip archive comment.</p>
+  </section>
+</section>
+<section class="detail" id="zip_open/1">
+
+  <div class="detail-header">
+    <a href="#zip_open/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_open/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_open(Archive) -> {ok, ZipHandle} | {error, Reason}
+            when Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(), ZipHandle :: <a href="#t:handle/0">handle</a>(), Reason :: term().</pre>
+
+      </div>
+
+<p>Opens a zip archive, and reads and saves its directory. This means that later reading files from the archive is faster than unzipping files one at a time with <a href="zip.html#unzip/1"><code>unzip/1,2</code></a>.</p><p>The archive must be closed with <a href="zip.html#zip_close/1"><code>zip_close/1</code></a>.</p><p>The <code>ZipHandle</code> is closed if the process that originally opened the archive dies.</p>
+  </section>
+</section>
+<section class="detail" id="zip_open/2">
+
+  <div class="detail-header">
+    <a href="#zip_open/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">zip_open/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>zip_open(Archive, Options) -> {ok, ZipHandle} | {error, Reason}
+            when
+                Archive :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name/0">file:name</a>() | binary(),
+                ZipHandle :: <a href="#t:handle/0">handle</a>(),
+                Options :: [Option],
+                Option :: cooked | memory | {cwd, CWD :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()},
+                Reason :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

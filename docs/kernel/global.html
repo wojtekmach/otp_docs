@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>global — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+global <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module consists of the following services:</p><ul><li>Registration of global names</li><li>Global locks</li><li>Maintenance of the fully connected network</li></ul><p>These services are controlled through the process <code>global_name_server</code> that exists on every node. The global name server starts automatically when a node is started. With the term <em>global</em> is meant over a system consisting of many Erlang nodes.</p><p>The ability to globally register names is a central concept in the programming of distributed Erlang systems. In this module, the equivalent of the <code>register/2</code> and <code>whereis/1</code> BIFs (for local name registration) are provided, but for a network of Erlang nodes. A registered name is an alias for a process identifier (pid). The global name server monitors globally registered pids. If a process terminates, the name is also globally unregistered.</p><p>The registered names are stored in replica global name tables on every node. There is no central storage point. Thus, the translation of a name to a pid is fast, as it is always done locally. For any action resulting in a change to the global name table, all tables on other nodes are automatically updated.</p><p>Global locks have lock identities and are set on a specific resource. For example, the specified resource can be a pid. When a global lock is set, access to the locked resource is denied for all resources other than the lock requester.</p><p>Both the registration and lock services are atomic. All nodes involved in these actions have the same view of the information.</p><p>The global name server also performs the critical task of continuously monitoring changes in node configuration. If a node that runs a globally registered process goes down, the name is globally unregistered. To this end, the global name server subscribes to <code>nodeup</code> and <code>nodedown</code> messages sent from module <code>net_kernel</code>. Relevant Kernel application variables in this context are <code>net_setuptime</code>, <code>net_ticktime</code>, and <code>dist_auto_connect</code>. See also <code>kernel(6)</code>.</p><p>The name server also maintains a fully connected network. For example, if node <code>N1</code> connects to node <code>N2</code> (which is already connected to <code>N3</code>), the global name servers on the nodes <code>N1</code> and <code>N3</code> ensure that also <code>N1</code> and <code>N3</code> are connected. If this is not desired, command-line flag <code>-connect_all false</code> can be used (see also <code>erl(1)</code>). In this case, the name registration service cannot be used, but the lock mechanism still works.</p><p>If the global name server fails to connect nodes (<code>N1</code> and <code>N3</code> in the example), a warning event is sent to the error logger. The presence of such an event does not exclude the nodes to connect later (you can, for example, try command <code>rpc:call(N1, net_adm, ping, [N2])</code> in the Erlang shell), but it indicates a network problem.</p><div class="note"><p>If the fully connected network is not set up properly, try first to increase the value of <code>net_setuptime</code>.</p></div><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="global_group.html"><code>global_group(3)</code></a>, <a href="net_kernel.html"><code>net_kernel(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:id/0">-type id() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#del_lock/1">del_lock/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes the lock <code>Id</code> synchronously.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#del_lock/2">del_lock/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#notify_all_name/3">notify_all_name/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#random_exit_name/3">random_exit_name/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#random_notify_name/3">random_notify_name/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#re_register_name/2">re_register_name/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="method"></li><li name="method" class="description">{<code>Module</code>, <code>Function</code>} is also allowed.</li></ul><p>Atomically changes the registered name <code>Name</code> on all nodes to refer to <code>Pid</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#re_register_name/3">re_register_name/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_name/2">register_name/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="method"></li><li name="method" class="description">{<code>Module</code>, <code>Function</code>} is also allowed for backward compatibility, but its use is deprecated.</li></ul><p>Globally associates name <code>Name</code> with a pid, that is, globally notifies all nodes of a new global name in a network of Erlang nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#register_name/3">register_name/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#registered_names/0">registered_names/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list of all globally registered names.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/2">send/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sends message <code>Msg</code> to the pid globally registered as <code>Name</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_lock/1">set_lock/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="id"></li><li name="retries"></li></ul><p>Sets a lock on the specified nodes (or on all nodes if none are specified) on <code>ResourceId</code> for <code>LockRequesterId</code>. If a lock already exists on <code>ResourceId</code> for another requester than <code>LockRequesterId</code>, and <code>Retries</code> is not equal to <code>0</code>, the process sleeps for a while and tries to execute the action later. When <code>Retries</code> attempts have been made, <code>false</code> is returned, otherwise <code>true</code>. If <code>Retries</code> is <code>infinity</code>, <code>true</code> is eventually returned (unless the lock is never released).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_lock/2">set_lock/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_lock/3">set_lock/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sync/0">sync/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Synchronizes the global name server with all nodes known to this node. These are the nodes that are returned from <code>erlang:nodes()</code>. When this function returns, the global name server receives global information from all nodes. This function can be called when new nodes are added to the network.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trans/2">trans/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="retries"></li><li name="trans_fun"></li></ul><p>Sets a lock on <code>Id</code> (using <a href="global.html#set_lock/3"><code>set_lock/3</code></a>). If this succeeds, <code>Fun()</code> is evaluated and the result <code>Res</code> is returned. Returns <code>aborted</code> if the lock attempt fails. If <code>Retries</code> is set to <code>infinity</code>, the transaction does not abort.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trans/3">trans/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trans/4">trans/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#unregister_name/1">unregister_name/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the globally registered name <code>Name</code> from the network of Erlang nodes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#whereis_name/1">whereis_name/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the pid with the globally registered name <code>Name</code>. Returns <code>undefined</code> if the name is not globally registered.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:id/0">
+
+  <div class="detail-header">
+    <a href="#t:id/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type id() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>id() :: {ResourceId :: term(), LockRequesterId :: term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="del_lock/1">
+
+  <div class="detail-header">
+    <a href="#del_lock/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">del_lock/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>del_lock(Id) -> true when Id :: <a href="#t:id/0">id</a>().</pre>
+
+      </div>
+
+<p>Deletes the lock <code>Id</code> synchronously.</p>
+  </section>
+</section>
+<section class="detail" id="del_lock/2">
+
+  <div class="detail-header">
+    <a href="#del_lock/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">del_lock/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>del_lock(Id, Nodes) -> true when Id :: <a href="#t:id/0">id</a>(), Nodes :: [node()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="notify_all_name/3">
+
+  <div class="detail-header">
+    <a href="#notify_all_name/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">notify_all_name/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>notify_all_name(Name, Pid1, Pid2) -> none when Name :: term(), Pid1 :: pid(), Pid2 :: pid().</pre>
+
+      </div>
+
+<p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p><p>The function unregisters both pids and sends the message <code>{global_name_conflict, Name, OtherPid}</code> to both processes.</p>
+  </section>
+</section>
+<section class="detail" id="random_exit_name/3">
+
+  <div class="detail-header">
+    <a href="#random_exit_name/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">random_exit_name/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>random_exit_name(Name, Pid1, Pid2) -> pid() when Name :: term(), Pid1 :: pid(), Pid2 :: pid().</pre>
+
+      </div>
+
+<p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p><p>The function randomly selects one of the pids for registration and kills the other one.</p>
+  </section>
+</section>
+<section class="detail" id="random_notify_name/3">
+
+  <div class="detail-header">
+    <a href="#random_notify_name/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">random_notify_name/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>random_notify_name(Name, Pid1, Pid2) -> pid() when Name :: term(), Pid1 :: pid(), Pid2 :: pid().</pre>
+
+      </div>
+
+<p>Can be used as a name resolving function for <a href="global.html#register_name/3"><code>register_name/3</code></a> and <a href="global.html#re_register_name/3"><code>re_register_name/3</code></a>.</p><p>The function randomly selects one of the pids for registration, and sends the message <code>{global_name_conflict, Name}</code> to the other pid.</p>
+  </section>
+</section>
+<section class="detail" id="re_register_name/2">
+
+  <div class="detail-header">
+    <a href="#re_register_name/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">re_register_name/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>re_register_name(Name, Pid) -> yes when Name :: term(), Pid :: pid().</pre>
+
+      </div>
+
+<ul class="types"><li name="method"></li><li name="method" class="description">{<code>Module</code>, <code>Function</code>} is also allowed.</li></ul><p>Atomically changes the registered name <code>Name</code> on all nodes to refer to <code>Pid</code>.</p><p>Function <code>Resolve</code> has the same behavior as in <a href="global.html#register_name/2"><code>register_name/2,3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="re_register_name/3">
+
+  <div class="detail-header">
+    <a href="#re_register_name/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">re_register_name/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>re_register_name(Name, Pid, Resolve) -> yes when Name :: term(), Pid :: pid(), Resolve :: <a href="#t:method/0">method</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="register_name/2">
+
+  <div class="detail-header">
+    <a href="#register_name/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_name/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>register_name(Name, Pid) -> yes | no when Name :: term(), Pid :: pid().</pre>
+
+      </div>
+
+<ul class="types"><li name="method"></li><li name="method" class="description">{<code>Module</code>, <code>Function</code>} is also allowed for backward compatibility, but its use is deprecated.</li></ul><p>Globally associates name <code>Name</code> with a pid, that is, globally notifies all nodes of a new global name in a network of Erlang nodes.</p><p>When new nodes are added to the network, they are informed of the globally registered names that already exist. The network is also informed of any global names in newly connected nodes. If any name clashes are discovered, function <code>Resolve</code> is called. Its purpose is to decide which pid is correct. If the function crashes, or returns anything other than one of the pids, the name is unregistered. This function is called once for each name clash.</p><div class="warning"><p>If you plan to change code without restarting your system, you must use an external fun (<code>fun Module:Function/Arity</code>) as function <code>Resolve</code>. If you use a local fun, you can never replace the code for the module that the fun belongs to.</p></div><p>Three predefined resolve functions exist: <code>random_exit_name/3</code>, <code>random_notify_name/3</code>, and <code>notify_all_name/3</code>. If no <code>Resolve</code> function is defined, <code>random_exit_name</code> is used. This means that one of the two registered processes is selected as correct while the other is killed.</p><p>This function is completely synchronous, that is, when this function returns, the name is either registered on all nodes or none.</p><p>The function returns <code>yes</code> if successful, <code>no</code> if it fails. For example, <code>no</code> is returned if an attempt is made to register an already registered process or to register a process with a name that is already in use.</p><div class="note"><p>Releases up to and including Erlang/OTP R10 did not check if the process was already registered. The global name table could therefore become inconsistent. The old (buggy) behavior can be chosen by giving the Kernel application variable <code>global_multi_name_action</code> the value <code>allow</code>.</p></div><p>If a process with a registered name dies, or the node goes down, the name is unregistered on all nodes.</p>
+  </section>
+</section>
+<section class="detail" id="register_name/3">
+
+  <div class="detail-header">
+    <a href="#register_name/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">register_name/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>register_name(Name, Pid, Resolve) -> yes | no
+                 when Name :: term(), Pid :: pid(), Resolve :: <a href="#t:method/0">method</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="registered_names/0">
+
+  <div class="detail-header">
+    <a href="#registered_names/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">registered_names/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>registered_names() -> [Name] when Name :: term().</pre>
+
+      </div>
+
+<p>Returns a list of all globally registered names.</p>
+  </section>
+</section>
+<section class="detail" id="send/2">
+
+  <div class="detail-header">
+    <a href="#send/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>send(Name, Msg) -> Pid when Name :: term(), Msg :: term(), Pid :: pid().</pre>
+
+      </div>
+
+<p>Sends message <code>Msg</code> to the pid globally registered as <code>Name</code>.</p><p>If <code>Name</code> is not a globally registered name, the calling function exits with reason <code>{badarg, {Name, Msg}}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="set_lock/1">
+
+  <div class="detail-header">
+    <a href="#set_lock/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_lock/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_lock(Id) -> boolean() when Id :: <a href="#t:id/0">id</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="id"></li><li name="retries"></li></ul><p>Sets a lock on the specified nodes (or on all nodes if none are specified) on <code>ResourceId</code> for <code>LockRequesterId</code>. If a lock already exists on <code>ResourceId</code> for another requester than <code>LockRequesterId</code>, and <code>Retries</code> is not equal to <code>0</code>, the process sleeps for a while and tries to execute the action later. When <code>Retries</code> attempts have been made, <code>false</code> is returned, otherwise <code>true</code>. If <code>Retries</code> is <code>infinity</code>, <code>true</code> is eventually returned (unless the lock is never released).</p><p>If no value for <code>Retries</code> is specified, <code>infinity</code> is used.</p><p>This function is completely synchronous.</p><p>If a process that holds a lock dies, or the node goes down, the locks held by the process are deleted.</p><p>The global name server keeps track of all processes sharing the same lock, that is, if two processes set the same lock, both processes must delete the lock.</p><p>This function does not address the problem of a deadlock. A deadlock can never occur as long as processes only lock one resource at a time. A deadlock can occur if some processes try to lock two or more resources. It is up to the application to detect and rectify a deadlock.</p><div class="note"><p>Avoid the following values of <code>ResourceId</code>, otherwise Erlang/OTP does not work properly:</p><ul><li><code>dist_ac</code></li><li><code>global</code></li><li><code>mnesia_adjust_log_writes</code></li><li><code>mnesia_table_lock</code></li></ul></div>
+  </section>
+</section>
+<section class="detail" id="set_lock/2">
+
+  <div class="detail-header">
+    <a href="#set_lock/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_lock/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_lock(Id, Nodes) -> boolean() when Id :: <a href="#t:id/0">id</a>(), Nodes :: [node()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="set_lock/3">
+
+  <div class="detail-header">
+    <a href="#set_lock/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_lock/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>set_lock(Id, Nodes, Retries) -> boolean() when Id :: <a href="#t:id/0">id</a>(), Nodes :: [node()], Retries :: <a href="#t:retries/0">retries</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sync/0">
+
+  <div class="detail-header">
+    <a href="#sync/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sync/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sync() -> ok | {error, Reason :: term()}.</pre>
+
+      </div>
+
+<p>Synchronizes the global name server with all nodes known to this node. These are the nodes that are returned from <code>erlang:nodes()</code>. When this function returns, the global name server receives global information from all nodes. This function can be called when new nodes are added to the network.</p><p>The only possible error reason <code>Reason</code> is <code>{&quot;global_groups definition error&quot;, Error}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trans/2">
+
+  <div class="detail-header">
+    <a href="#trans/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trans/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trans(Id, Fun) -> Res | aborted when Id :: <a href="#t:id/0">id</a>(), Fun :: <a href="#t:trans_fun/0">trans_fun</a>(), Res :: term().</pre>
+
+      </div>
+
+<ul class="types"><li name="retries"></li><li name="trans_fun"></li></ul><p>Sets a lock on <code>Id</code> (using <a href="global.html#set_lock/3"><code>set_lock/3</code></a>). If this succeeds, <code>Fun()</code> is evaluated and the result <code>Res</code> is returned. Returns <code>aborted</code> if the lock attempt fails. If <code>Retries</code> is set to <code>infinity</code>, the transaction does not abort.</p><p><code>infinity</code> is the default setting and is used if no value is specified for <code>Retries</code>.</p>
+  </section>
+</section>
+<section class="detail" id="trans/3">
+
+  <div class="detail-header">
+    <a href="#trans/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trans/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trans(Id, Fun, Nodes) -> Res | aborted
+         when Id :: <a href="#t:id/0">id</a>(), Fun :: <a href="#t:trans_fun/0">trans_fun</a>(), Nodes :: [node()], Res :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="trans/4">
+
+  <div class="detail-header">
+    <a href="#trans/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trans/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>trans(Id, Fun, Nodes, Retries) -> Res | aborted
+         when
+             Id :: <a href="#t:id/0">id</a>(),
+             Fun :: <a href="#t:trans_fun/0">trans_fun</a>(),
+             Nodes :: [node()],
+             Retries :: <a href="#t:retries/0">retries</a>(),
+             Res :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="unregister_name/1">
+
+  <div class="detail-header">
+    <a href="#unregister_name/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">unregister_name/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>unregister_name(Name) -> _ when Name :: term().</pre>
+
+      </div>
+
+<p>Removes the globally registered name <code>Name</code> from the network of Erlang nodes.</p>
+  </section>
+</section>
+<section class="detail" id="whereis_name/1">
+
+  <div class="detail-header">
+    <a href="#whereis_name/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">whereis_name/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>whereis_name(Name) -> pid() | undefined when Name :: term().</pre>
+
+      </div>
+
+<p>Returns the pid with the globally registered name <code>Name</code>. Returns <code>undefined</code> if the name is not globally registered.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

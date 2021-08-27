@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="xmerl v1.3.28">
+
+    <title>xmerl_sax_parser — xmerl v1.3.28</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-5a6f3d1e1b.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+xmerl
+      </a>
+      <strong class="sidebar-projectVersion">
+        v1.3.28
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+xmerl_sax_parser <small class="app-vsn">(xmerl v1.3.28)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>A SAX parser for XML that sends the events through a callback interface. SAX is the <em>Simple API for XML</em>, originally a Java-only API. SAX was the first widely adopted API for XML in Java, and is a <em>de facto</em> standard where there are versions for several programming language environments other than Java.</p><h2 id="module-data-types" class="section-heading">
+  <a href="#module-data-types" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  DATA TYPES
+</h2>
+<dl><dt><code>option()</code></dt><dd><p>Options used to customize the behaviour of the parser. Possible options are:</p><p></p><dl><dt><code>{continuation_fun, ContinuationFun}</code></dt><dd><a href="xmerl_sax_parser.html#c:ContinuationFun/1">ContinuationFun</a> is a call back function to decide what to do if the parser runs into EOF before the document is complete.</dd><dt><code>{continuation_state, term()}</code></dt><dd>State that is accessible in the continuation call back function.</dd><dt><code>{event_fun, EventFun}</code></dt><dd><a href="xmerl_sax_parser.html#c:EventFun/3">EventFun</a> is the call back function for parser events.</dd><dt><code>{event_state, term()}</code></dt><dd>State that is accessible in the event call back function.</dd><dt><code>{file_type, FileType}</code></dt><dd>Flag that tells the parser if it's parsing a DTD or a normal XML file (default normal).<ul><li><code>FileType = normal | dtd</code></li></ul></dd><dt><code>{encoding, Encoding}</code></dt><dd>Set default character set used (default UTF-8). This character set is used only if not explicitly given by the XML document.<ul><li><code>Encoding = utf8 | {utf16,big} | {utf16,little} | latin1 | list</code></li></ul></dd><dt><code>skip_external_dtd</code></dt><dd>Skips the external DTD during parsing.</dd></dl></dd><dt></dt><dd><p></p></dd><dt><code>event()</code></dt><dd><p>The SAX events that are sent to the user via the callback.</p><p></p><dl><dt><code>startDocument</code></dt><dd>Receive notification of the beginning of a document. The SAX parser will send this event only once before any other event callbacks.</dd><dt><code>endDocument</code></dt><dd>Receive notification of the end of a document. The SAX parser will send this event only once, and it will be the last event during the parse.</dd><dt><code>{startPrefixMapping, Prefix, Uri}</code></dt><dd>Begin the scope of a prefix-URI Namespace mapping. Note that start/endPrefixMapping events are not guaranteed to be properly nested relative to each other: all startPrefixMapping events will occur immediately before the corresponding startElement event, and all endPrefixMapping events will occur immediately after the corresponding endElement event, but their order is not otherwise guaranteed. There will not be start/endPrefixMapping events for the &quot;xml&quot; prefix, since it is predeclared and immutable.<ul><li><code>Prefix = string()</code></li><li><code>Uri = string()</code></li></ul></dd><dt><code>{endPrefixMapping, Prefix}</code></dt><dd>End the scope of a prefix-URI mapping.<ul><li><code>Prefix = string()</code></li></ul></dd><dt><code>{startElement, Uri, LocalName, QualifiedName, Attributes}</code></dt><dd>Receive notification of the beginning of an element. The Parser will send this event at the beginning of every element in the XML document; there will be a corresponding endElement event for every startElement event (even when the element is empty). All of the element's content will be reported, in order, before the corresponding endElement event.<ul><li><code>Uri = string()</code></li><li><code>LocalName = string()</code></li><li><code>QualifiedName = {Prefix, LocalName}</code></li><li><code>Prefix = string()</code></li><li><code>Attributes = [{Uri, Prefix, AttributeName, Value}]</code></li><li><code>AttributeName = string()</code></li><li><code>Value = string()</code></li></ul></dd><dt><code>{endElement, Uri, LocalName, QualifiedName}</code></dt><dd>Receive notification of the end of an element. The SAX parser will send this event at the end of every element in the XML document; there will be a corresponding startElement event for every endElement event (even when the element is empty).<ul><li><code>Uri = string()</code></li><li><code>LocalName = string()</code></li><li><code>QualifiedName = {Prefix, LocalName}</code></li><li><code>Prefix = string()</code></li></ul></dd><dt><code>{characters, string()}</code></dt><dd>Receive notification of character data.</dd><dt><code>{ignorableWhitespace, string()}</code></dt><dd>Receive notification of ignorable whitespace in element content.</dd><dt><code>{processingInstruction, Target, Data}</code></dt><dd>Receive notification of a processing instruction. The Parser will send this event once for each processing instruction found: note that processing instructions may occur before or after the main document element.<ul><li><code>Target = string()</code></li><li><code>Data = string()</code></li></ul></dd><dt><code>{comment, string()}</code></dt><dd>Report an XML comment anywhere in the document (both inside and outside of the document element).</dd><dt><code>startCDATA</code></dt><dd>Report the start of a CDATA section. The contents of the CDATA section will be reported through the regular characters event.</dd><dt><code>endCDATA</code></dt><dd>Report the end of a CDATA section.</dd><dt><code>{startDTD, Name, PublicId, SystemId}</code></dt><dd>Report the start of DTD declarations, it's reporting the start of the DOCTYPE declaration. If the document has no DOCTYPE declaration, this event will not be sent.<ul><li><code>Name = string()</code></li><li><code>PublicId = string()</code></li><li><code>SystemId = string()</code></li></ul></dd><dt><code>endDTD</code></dt><dd>Report the end of DTD declarations, it's reporting the end of the DOCTYPE declaration.</dd><dt><code>{startEntity, SysId}</code></dt><dd>Report the beginning of some internal and external XML entities. ???</dd><dt><code>{endEntity, SysId}</code></dt><dd>Report the end of an entity. ???</dd><dt><code>{elementDecl, Name, Model}</code></dt><dd>Report an element type declaration. The content model will consist of the string &quot;EMPTY&quot;, the string &quot;ANY&quot;, or a parenthesised group, optionally followed by an occurrence indicator. The model will be normalized so that all parameter entities are fully resolved and all whitespace is removed,and will include the enclosing parentheses. Other normalization (such as removing redundant parentheses or simplifying occurrence indicators) is at the discretion of the parser.<ul><li><code>Name = string()</code></li><li><code>Model = string()</code></li></ul></dd><dt><code>{attributeDecl, ElementName, AttributeName, Type, Mode, Value}</code></dt><dd>Report an attribute type declaration.<ul><li><code>ElementName = string()</code></li><li><code>AttributeName = string()</code></li><li><code>Type = string()</code></li><li><code>Mode = string()</code></li><li><code>Value = string()</code></li></ul></dd><dt><code>{internalEntityDecl, Name, Value}</code></dt><dd>Report an internal entity declaration.<ul><li><code>Name = string()</code></li><li><code>Value = string()</code></li></ul></dd><dt><code>{externalEntityDecl, Name, PublicId, SystemId}</code></dt><dd>Report a parsed external entity declaration.<ul><li><code>Name = string()</code></li><li><code>PublicId = string()</code></li><li><code>SystemId = string()</code></li></ul></dd><dt><code>{unparsedEntityDecl, Name, PublicId, SystemId, Ndata}</code></dt><dd>Receive notification of an unparsed entity declaration event.<ul><li><code>Name = string()</code></li><li><code>PublicId = string()</code></li><li><code>SystemId = string()</code></li><li><code>Ndata = string()</code></li></ul></dd><dt><code>{notationDecl, Name, PublicId, SystemId}</code></dt><dd>Receive notification of a notation declaration event.<ul><li><code>Name = string()</code></li><li><code>PublicId = string()</code></li><li><code>SystemId = string()</code></li></ul></dd></dl></dd><dt><code>unicode_char()</code></dt><dd>Integer representing valid unicode codepoint.</dd><dt><code>unicode_binary()</code></dt><dd>Binary with characters encoded in UTF-8 or UTF-16.</dd><dt><code>latin1_binary()</code></dt><dd>Binary with characters encoded in iso-latin-1.</dd></dl>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#file/2">file(Filename, Options) -&gt; Result</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Filename = string()</li><li class="type">Options = [option()]</li><li class="type">Result = {ok, EventState, Rest} |</li><li class="type">   {Tag, Location, Reason, EndTags, EventState}</li><li class="type">Rest = unicode_binary() | latin1_binary()</li><li class="type">Tag = atom() (fatal_error, or user defined tag)</li><li class="type">Location = {CurrentLocation, EntityName, LineNo}</li><li class="type">CurrentLocation = string()</li><li class="type">EntityName = string()</li><li class="type">LineNo = integer()</li><li class="type">EventState = term()</li><li class="type">Reason = term()</li></ul><p>Parse file containing an XML document. This functions uses a default continuation function to read the file in blocks.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stream/2">stream(Xml, Options) -&gt; Result</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Xml = unicode_binary() | latin1_binary() | [unicode_char()]</li><li class="type">Options = [option()]</li><li class="type">Result = {ok, EventState, Rest} |</li><li class="type">   {Tag, Location, Reason, EndTags, EventState}</li><li class="type">Rest = unicode_binary() | latin1_binary() | [unicode_char()]</li><li class="type">Tag = atom() (fatal_error or user defined tag)</li><li class="type">Location = {CurrentLocation, EntityName, LineNo}</li><li class="type">CurrentLocation = string()</li><li class="type">EntityName = string()</li><li class="type">LineNo = integer()</li><li class="type">EventState = term()</li><li class="type">Reason = term()</li></ul><p>Parse a stream containing an XML document.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="file/2">
+
+  <div class="detail-header">
+    <a href="#file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">file(Filename, Options) -&gt; Result</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Filename = string()</li><li class="type">Options = [option()]</li><li class="type">Result = {ok, EventState, Rest} |</li><li class="type">   {Tag, Location, Reason, EndTags, EventState}</li><li class="type">Rest = unicode_binary() | latin1_binary()</li><li class="type">Tag = atom() (fatal_error, or user defined tag)</li><li class="type">Location = {CurrentLocation, EntityName, LineNo}</li><li class="type">CurrentLocation = string()</li><li class="type">EntityName = string()</li><li class="type">LineNo = integer()</li><li class="type">EventState = term()</li><li class="type">Reason = term()</li></ul><p>Parse file containing an XML document. This functions uses a default continuation function to read the file in blocks.</p>
+  </section>
+</section>
+<section class="detail" id="stream/2">
+
+  <div class="detail-header">
+    <a href="#stream/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stream(Xml, Options) -&gt; Result</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Xml = unicode_binary() | latin1_binary() | [unicode_char()]</li><li class="type">Options = [option()]</li><li class="type">Result = {ok, EventState, Rest} |</li><li class="type">   {Tag, Location, Reason, EndTags, EventState}</li><li class="type">Rest = unicode_binary() | latin1_binary() | [unicode_char()]</li><li class="type">Tag = atom() (fatal_error or user defined tag)</li><li class="type">Location = {CurrentLocation, EntityName, LineNo}</li><li class="type">CurrentLocation = string()</li><li class="type">EntityName = string()</li><li class="type">LineNo = integer()</li><li class="type">EventState = term()</li><li class="type">Reason = term()</li></ul><p>Parse a stream containing an XML document.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

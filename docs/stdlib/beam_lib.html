@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>beam_lib — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+beam_lib <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides an interface to files created by the BEAM Compiler (&quot;BEAM files&quot;). The format used, a variant of &quot;EA IFF 1985&quot; Standard for Interchange Format Files, divides data into chunks.</p><p>Chunk data can be returned as binaries or as compound terms. Compound terms are returned when chunks are referenced by names (atoms) rather than identifiers (strings). The recognized names and the corresponding identifiers are as follows:</p><ul><li><code>atoms (&quot;Atom&quot;)</code></li><li><code>attributes (&quot;Attr&quot;)</code></li><li><code>compile_info (&quot;CInf&quot;)</code></li><li><code>debug_info (&quot;Dbgi&quot;)</code></li><li><code>exports (&quot;ExpT&quot;)</code></li><li><code>imports (&quot;ImpT&quot;)</code></li><li><code>indexed_imports (&quot;ImpT&quot;)</code></li><li><code>labeled_exports (&quot;ExpT&quot;)</code></li><li><code>labeled_locals (&quot;LocT&quot;)</code></li><li><code>locals (&quot;LocT&quot;)</code></li></ul><a id="debug_info"></a><h2 id="module-debug-information-abstract-code" class="section-heading">
+  <a href="#module-debug-information-abstract-code" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Debug Information/Abstract Code
+</h2>
+<p>Option <code>debug_info</code> can be specified to the Compiler (see <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#debug_info"><code>compile(3)</code></a>) to have debug information, such as Erlang Abstract Format, stored in the <code>debug_info</code> chunk. Tools such as Debugger and Xref require the debug information to be included.</p><div class="warning"><p>Source code can be reconstructed from the debug information. To prevent this, use encrypted debug information (see below).</p></div><p>The debug information can also be removed from BEAM files using <a href="beam_lib.html#strip/1"><code>strip/1</code></a>, <a href="beam_lib.html#strip_files/1"><code>strip_files/1</code></a>, and/or <a href="beam_lib.html#strip_release/1"><code>strip_release/1</code></a>.</p><h2 id="module-reconstruct-source-code" class="section-heading">
+  <a href="#module-reconstruct-source-code" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Reconstruct Source Code
+</h2>
+<p>The following example shows how to reconstruct Erlang source code from the debug information in a BEAM file <code>Beam</code>:</p><pre><code type="none">{ok,{_,[{abstract_code,{_,AC}}]}} = beam_lib:chunks(Beam,[abstract_code]).
+io:fwrite(&quot;~s~n&quot;, [erl_prettypr:format(erl_syntax:form_list(AC))]).</code></pre><h2 id="module-encrypted-debug-information" class="section-heading">
+  <a href="#module-encrypted-debug-information" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Encrypted Debug Information
+</h2>
+<p>The debug information can be encrypted to keep the source code secret, but still be able to use tools such as Debugger or Xref.</p><p>To use encrypted debug information, a key must be provided to the compiler and <code>beam_lib</code>. The key is specified as a string. It is recommended that the string contains at least 32 characters and that both upper and lower case letters as well as digits and special characters are used.</p><p>The default type (and currently the only type) of crypto algorithm is <code>des3_cbc</code>, three rounds of DES. The key string is scrambled using <a href="https://wojtekmach.pl/otp_docs/erts/erlang.html#md5/1"><code>erlang:md5/1</code></a> to generate the keys used for <code>des3_cbc</code>.</p><div class="note"><p>As far as we know by the time of writing, it is infeasible to break <code>des3_cbc</code> encryption without any knowledge of the key. Therefore, as long as the key is kept safe and is unguessable, the encrypted debug information <em>should</em> be safe from intruders.</p></div><p>The key can be provided in the following two ways:</p><ol><li><p>Use Compiler option <code>{debug_info_key,Key}</code>, see <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#debug_info_key"><code>compile(3)</code></a> and function <a href="beam_lib.html#crypto_key_fun/1"><code>crypto_key_fun/1</code></a> to register a fun that returns the key whenever <code>beam_lib</code> must decrypt the debug information.</p><p>If no such fun is registered, <code>beam_lib</code> instead searches for an <code>.erlang.crypt</code> file, see the next section.</p></li><li><p>Store the key in a text file named <code>.erlang.crypt</code>.</p><p>In this case, Compiler option <code>encrypt_debug_info</code> can be used, see <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#encrypt_debug_info"><code>compile(3)</code></a>.</p></li></ol><h2 id="module-erlang-crypt" class="section-heading">
+  <a href="#module-erlang-crypt" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  .erlang.crypt
+</h2>
+<p><code>beam_lib</code> searches for <code>.erlang.crypt</code> in the current directory and then the home directory for the current user. If the file is found and contains a key, <code>beam_lib</code> implicitly creates a crypto key fun and registers it.</p><p>File <code>.erlang.crypt</code> is to contain a single list of tuples:</p><pre><code type="none">{debug_info, Mode, Module, Key}</code></pre><p><code>Mode</code> is the type of crypto algorithm; currently, the only allowed value is <code>des3_cbc</code>. <code>Module</code> is either an atom, in which case <code>Key</code> is only used for the module <code>Module</code>, or <code>[]</code>, in which case <code>Key</code> is used for all modules. <code>Key</code> is the non-empty key string.</p><p><code>Key</code> in the first tuple where both <code>Mode</code> and <code>Module</code> match is used.</p><p>The following is an example of an <code>.erlang.crypt</code> file that returns the same key for all modules:</p><pre><code type="none">[{debug_info, des3_cbc, [], &quot;%&gt;7}|pc/DM6Cga*68$Mw]L#&amp;_Gejr]G^&quot;}].</code></pre><p>The following is a slightly more complicated example of an <code>.erlang.crypt</code> providing one key for module <code>t</code> and another key for all other modules:</p><pre><code type="none">[{debug_info, des3_cbc, t, &quot;My KEY&quot;},
+ {debug_info, des3_cbc, [], &quot;%&gt;7}|pc/DM6Cga*68$Mw]L#&amp;_Gejr]G^&quot;}].</code></pre><div class="note"><p>Do not use any of the keys in these examples. Use your own keys.</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:abst_code/0">-type abst_code() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>It is not checked that the forms conform to the abstract format indicated by <code>AbstVersion</code>. <code>no_abstract_code</code> means that chunk <code>&quot;Abst&quot;</code> is present, but empty.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:attrib_entry/0">-type attrib_entry() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:beam/0">-type beam() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Each of the functions described below accept either the filename (as a string) or a binary containing the BEAM module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chnk_rsn/0">-type chnk_rsn() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkdata/0">-type chunkdata() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The list of attributes is sorted on <code>Attribute</code> (in <code>attrib_entry()</code>) and each attribute name occurs once in the list. The attribute values occur in the same order as in the file. The lists of functions are also sorted.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkid/0">-type chunkid() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>&quot;Attr&quot; | &quot;CInf&quot; | &quot;Dbgi&quot; | &quot;ExpT&quot; | &quot;ImpT&quot; | &quot;LocT&quot; | &quot;AtU8&quot;</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkname/0">-type chunkname() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:chunkref/0">-type chunkref() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:compinfo_entry/0">-type compinfo_entry() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dataB/0">-type dataB() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:debug_info/0">-type debug_info() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The format stored in the <code>debug_info</code> chunk. To retrieve particular code representation from the backend, <code>Backend:debug_info(Format, Module, Data, Opts)</code> must be invoked. <code>Format</code> is an atom, such as <code>erlang_v1</code> for the Erlang Abstract Format or <code>core_v1</code> for Core Erlang. <code>Module</code> is the module represented by the beam file and <code>Data</code> is the value stored in the debug info chunk. <code>Opts</code> is any list of values supported by the <code>Backend</code>. <code>Backend:debug_info/4</code> must return <code>{ok, Code}</code> or <code>{error, Term}</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:forms/0">-type forms() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:index/0">-type index() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:info_rsn/0">-type info_rsn() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:label/0">-type label() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:labeled_entry/0">-type labeled_entry() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all_chunks/1">all_chunks/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Reads chunk data for all chunks.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#build_module/1">build_module/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Builds a BEAM module (as a binary) from a list of chunks.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunks/2">chunks/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#chunks/3">chunks/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#clear_crypto_key_fun/0">clear_crypto_key_fun/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Unregisters the crypto key fun and terminates the process holding it, started by <a href="beam_lib.html#crypto_key_fun/1"><code>crypto_key_fun/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmp/2">cmp/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="cmp_rsn"></li></ul><p>Compares the contents of two BEAM files. If the module names are the same, and all chunks except for chunk <code>&quot;CInf&quot;</code> (the chunk containing the compilation information that is returned by <code>Module:module_info(compile)</code>) have the same contents in both files, <code>ok</code> is returned. Otherwise an error message is returned.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#cmp_dirs/2">cmp_dirs/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compares the BEAM files in two directories. Only files with extension <code>&quot;.beam&quot;</code> are compared. BEAM files that exist only in directory <code>Dir1</code> (<code>Dir2</code>) are returned in <code>Only1</code> (<code>Only2</code>). BEAM files that exist in both directories but are considered different by <code>cmp/2</code> are returned as pairs {<code>Filename1</code>, <code>Filename2</code>}, where <code>Filename1</code> (<code>Filename2</code>) exists in directory <code>Dir1</code> (<code>Dir2</code>).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#crypto_key_fun/1">crypto_key_fun/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="crypto_fun"></li><li name="crypto_fun_arg"></li><li name="mode"></li></ul><p>Registers an unary fun that is called if <code>beam_lib</code> must read an <code>debug_info</code> chunk that has been encrypted. The fun is held in a process that is started by the function.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#diff_dirs/2">diff_dirs/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Compares the BEAM files in two directories as <a href="beam_lib.html#cmp_dirs/2"><code>cmp_dirs/2</code></a>, but the names of files that exist in only one directory or are different are presented on standard output.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_error/1">format_error/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>For a specified error returned by any function in this module, this function returns a descriptive string of the error in English. For file errors, function <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#format_error/1"><code>file:format_error(Posix)</code></a> is to be called.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/1">info/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list containing some information about a BEAM file as tuples <code>{Item, Info}</code></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#md5/1">md5/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Calculates an MD5 redundancy check for the code of the module (compilation date and other attributes are not included).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/1">strip/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks from a BEAM file except those needed by the loader. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip/2">strip/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks from a BEAM file except those needed by the loader or passed in. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_files/1">strip_files/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader from BEAM files. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code>Files</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_files/2">strip_files/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader or passed in from BEAM files. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code>Files</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_release/1">strip_release/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader from the BEAM files of a release. <code>Dir</code> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code>beam_lib:strip_release(code:root_dir())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#strip_release/2">strip_release/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes all chunks except those needed by the loader or passed in from the BEAM files of a release. <code>Dir</code> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code>beam_lib:strip_release(code:root_dir())</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#version/1">version/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the module version or versions. A version is defined by module attribute <code>-vsn(Vsn)</code>. If this attribute is not specified, the version defaults to the checksum of the module. Notice that if version <code>Vsn</code> is not a list, it is made into one, that is <code>{ok,{Module,[Vsn]}}</code> is returned. If there are many <code>-vsn</code> module attributes, the result is the concatenated list of versions.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:abst_code/0">
+
+  <div class="detail-header">
+    <a href="#t:abst_code/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type abst_code() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>abst_code() :: {AbstVersion :: atom(), <a href="#t:forms/0">forms</a>()} | no_abstract_code.</pre>
+
+      </div>
+
+<p>It is not checked that the forms conform to the abstract format indicated by <code>AbstVersion</code>. <code>no_abstract_code</code> means that chunk <code>&quot;Abst&quot;</code> is present, but empty.</p><p>For modules compiled with OTP 20 onwards, the <code>abst_code</code> chunk is automatically computed from the <code>debug_info</code> chunk.</p>
+  </section>
+</section>
+<section class="detail" id="t:attrib_entry/0">
+
+  <div class="detail-header">
+    <a href="#t:attrib_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type attrib_entry() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>attrib_entry() :: {Attribute :: atom(), [AttributeValue :: term()]}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:beam/0">
+
+  <div class="detail-header">
+    <a href="#t:beam/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type beam() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>beam() :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>() | binary().</pre>
+
+      </div>
+
+<p>Each of the functions described below accept either the filename (as a string) or a binary containing the BEAM module.</p>
+  </section>
+</section>
+<section class="detail" id="t:chnk_rsn/0">
+
+  <div class="detail-header">
+    <a href="#t:chnk_rsn/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type chnk_rsn() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chnk_rsn() ::
+    {unknown_chunk, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), atom()} |
+    {key_missing_or_invalid, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), abstract_code | debug_info} |
+    {missing_backend, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), module()} |
+    <a href="#t:info_rsn/0">info_rsn</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:chunkdata/0">
+
+  <div class="detail-header">
+    <a href="#t:chunkdata/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type chunkdata() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunkdata() ::
+    {<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()} |
+    {abstract_code, <a href="#t:abst_code/0">abst_code</a>()} |
+    {debug_info, <a href="#t:debug_info/0">debug_info</a>()} |
+    {attributes, [<a href="#t:attrib_entry/0">attrib_entry</a>()]} |
+    {compile_info, [<a href="#t:compinfo_entry/0">compinfo_entry</a>()]} |
+    {exports, [{atom(), arity()}]} |
+    {labeled_exports, [<a href="#t:labeled_entry/0">labeled_entry</a>()]} |
+    {imports, [mfa()]} |
+    {indexed_imports, [{<a href="#t:index/0">index</a>(), module(), Function :: atom(), arity()}]} |
+    {locals, [{atom(), arity()}]} |
+    {labeled_locals, [<a href="#t:labeled_entry/0">labeled_entry</a>()]} |
+    {atoms, [{integer(), atom()}]}.</pre>
+
+      </div>
+
+<p>The list of attributes is sorted on <code>Attribute</code> (in <code>attrib_entry()</code>) and each attribute name occurs once in the list. The attribute values occur in the same order as in the file. The lists of functions are also sorted.</p>
+  </section>
+</section>
+<section class="detail" id="t:chunkid/0">
+
+  <div class="detail-header">
+    <a href="#t:chunkid/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type chunkid() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunkid() :: nonempty_string().</pre>
+
+      </div>
+
+<p>&quot;Attr&quot; | &quot;CInf&quot; | &quot;Dbgi&quot; | &quot;ExpT&quot; | &quot;ImpT&quot; | &quot;LocT&quot; | &quot;AtU8&quot;</p>
+  </section>
+</section>
+<section class="detail" id="t:chunkname/0">
+
+  <div class="detail-header">
+    <a href="#t:chunkname/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type chunkname() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunkname() ::
+    abstract_code | debug_info | attributes | compile_info | exports | labeled_exports | imports |
+    indexed_imports | locals | labeled_locals | atoms.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:chunkref/0">
+
+  <div class="detail-header">
+    <a href="#t:chunkref/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type chunkref() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunkref() :: <a href="#t:chunkname/0">chunkname</a>() | <a href="#t:chunkid/0">chunkid</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:compinfo_entry/0">
+
+  <div class="detail-header">
+    <a href="#t:compinfo_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type compinfo_entry() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compinfo_entry() :: {InfoKey :: atom(), term()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:dataB/0">
+
+  <div class="detail-header">
+    <a href="#t:dataB/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dataB() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dataB() :: binary().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:debug_info/0">
+
+  <div class="detail-header">
+    <a href="#t:debug_info/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type debug_info() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>debug_info() :: {DbgiVersion :: atom(), Backend :: module(), Data :: term()} | no_debug_info.</pre>
+
+      </div>
+
+<p>The format stored in the <code>debug_info</code> chunk. To retrieve particular code representation from the backend, <code>Backend:debug_info(Format, Module, Data, Opts)</code> must be invoked. <code>Format</code> is an atom, such as <code>erlang_v1</code> for the Erlang Abstract Format or <code>core_v1</code> for Core Erlang. <code>Module</code> is the module represented by the beam file and <code>Data</code> is the value stored in the debug info chunk. <code>Opts</code> is any list of values supported by the <code>Backend</code>. <code>Backend:debug_info/4</code> must return <code>{ok, Code}</code> or <code>{error, Term}</code>.</p><p>Developers must always invoke the <code>debug_info/4</code> function and never rely on the <code>Data</code> stored in the <code>debug_info</code> chunk, as it is opaque and may change at any moment. <code>no_debug_info</code> means that chunk <code>&quot;Dbgi&quot;</code> is present, but empty.</p>
+  </section>
+</section>
+<section class="detail" id="t:forms/0">
+
+  <div class="detail-header">
+    <a href="#t:forms/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type forms() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>forms() :: [<a href="erl_parse.html#t:abstract_form/0">erl_parse:abstract_form</a>() | <a href="erl_parse.html#t:form_info/0">erl_parse:form_info</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:index/0">
+
+  <div class="detail-header">
+    <a href="#t:index/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type index() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>index() :: non_neg_integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:info_rsn/0">
+
+  <div class="detail-header">
+    <a href="#t:info_rsn/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type info_rsn() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info_rsn() ::
+    {chunk_too_big,
+     <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+     <a href="#t:chunkid/0">chunkid</a>(),
+     ChunkSize :: non_neg_integer(),
+     FileSize :: non_neg_integer()} |
+    {invalid_beam_file, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), Position :: non_neg_integer()} |
+    {invalid_chunk, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), <a href="#t:chunkid/0">chunkid</a>()} |
+    {missing_chunk, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), <a href="#t:chunkid/0">chunkid</a>()} |
+    {not_a_beam_file, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+    {file_error, <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:posix/0">file:posix</a>()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:label/0">
+
+  <div class="detail-header">
+    <a href="#t:label/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type label() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>label() :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:labeled_entry/0">
+
+  <div class="detail-header">
+    <a href="#t:labeled_entry/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type labeled_entry() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>labeled_entry() :: {Function :: atom(), arity(), <a href="#t:label/0">label</a>()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="all_chunks/1">
+
+  <div class="detail-header">
+    <a href="#all_chunks/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all_chunks/1</h1>
+
+
+      <span class="note">(since OTP 18.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>all_chunks(<a href="#t:beam/0">beam</a>()) -> {ok, beam_lib, [{<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()}]} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}.</pre>
+
+      </div>
+
+<p>Reads chunk data for all chunks.</p>
+  </section>
+</section>
+<section class="detail" id="build_module/1">
+
+  <div class="detail-header">
+    <a href="#build_module/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">build_module/1</h1>
+
+
+      <span class="note">(since OTP 18.2)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>build_module(Chunks) -> {ok, Binary} when Chunks :: [{<a href="#t:chunkid/0">chunkid</a>(), <a href="#t:dataB/0">dataB</a>()}], Binary :: binary().</pre>
+
+      </div>
+
+<p>Builds a BEAM module (as a binary) from a list of chunks.</p>
+  </section>
+</section>
+<section class="detail" id="chunks/2">
+
+  <div class="detail-header">
+    <a href="#chunks/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunks/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunks(Beam, ChunkRefs) -> {ok, {module(), [<a href="#t:chunkdata/0">chunkdata</a>()]}} | {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+          when Beam :: <a href="#t:beam/0">beam</a>(), ChunkRefs :: [<a href="#t:chunkref/0">chunkref</a>()].</pre>
+
+      </div>
+
+<p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p>
+  </section>
+</section>
+<section class="detail" id="chunks/3">
+
+  <div class="detail-header">
+    <a href="#chunks/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">chunks/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>chunks(Beam, ChunkRefs, Options) ->
+          {ok, {module(), [ChunkResult]}} | {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+          when
+              Beam :: <a href="#t:beam/0">beam</a>(),
+              ChunkRefs :: [<a href="#t:chunkref/0">chunkref</a>()],
+              Options :: [allow_missing_chunks],
+              ChunkResult :: <a href="#t:chunkdata/0">chunkdata</a>() | {ChunkRef :: <a href="#t:chunkref/0">chunkref</a>(), missing_chunk}.</pre>
+
+      </div>
+
+<p>Reads chunk data for selected chunks references. The order of the returned list of chunk data is determined by the order of the list of chunks references.</p><p>By default, if any requested chunk is missing in <code>Beam</code>, an <code>error</code> tuple is returned. However, if option <code>allow_missing_chunks</code> is specified, a result is returned even if chunks are missing. In the result list, any missing chunks are represented as <code>{ChunkRef,missing_chunk}</code>. Notice however that if chunk <code>&quot;Atom&quot;</code> is missing, that is considered a fatal error and the return value is an <code>error</code> tuple.</p>
+  </section>
+</section>
+<section class="detail" id="clear_crypto_key_fun/0">
+
+  <div class="detail-header">
+    <a href="#clear_crypto_key_fun/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">clear_crypto_key_fun/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>clear_crypto_key_fun() -> undefined | {ok, Result} when Result :: undefined | term().</pre>
+
+      </div>
+
+<p>Unregisters the crypto key fun and terminates the process holding it, started by <a href="beam_lib.html#crypto_key_fun/1"><code>crypto_key_fun/1</code></a>.</p><p>Returns either <code>{ok, undefined}</code> if no crypto key fun is registered, or <code>{ok, Term}</code>, where <code>Term</code> is the return value from <code>CryptoKeyFun(clear)</code>, see <code>crypto_key_fun/1</code>.</p>
+  </section>
+</section>
+<section class="detail" id="cmp/2">
+
+  <div class="detail-header">
+    <a href="#cmp/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmp/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>cmp(Beam1, Beam2) -> ok | {error, beam_lib, <a href="#t:cmp_rsn/0">cmp_rsn</a>()} when Beam1 :: <a href="#t:beam/0">beam</a>(), Beam2 :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="cmp_rsn"></li></ul><p>Compares the contents of two BEAM files. If the module names are the same, and all chunks except for chunk <code>&quot;CInf&quot;</code> (the chunk containing the compilation information that is returned by <code>Module:module_info(compile)</code>) have the same contents in both files, <code>ok</code> is returned. Otherwise an error message is returned.</p>
+  </section>
+</section>
+<section class="detail" id="cmp_dirs/2">
+
+  <div class="detail-header">
+    <a href="#cmp_dirs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">cmp_dirs/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>cmp_dirs(Dir1, Dir2) -> {Only1, Only2, Different} | {error, beam_lib, Reason}
+            when
+                Dir1 :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                Dir2 :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                Only1 :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()],
+                Only2 :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()],
+                Different :: [{Filename1 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), Filename2 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()}],
+                Reason :: {not_a_directory, term()} | <a href="#t:info_rsn/0">info_rsn</a>().</pre>
+
+      </div>
+
+<p>Compares the BEAM files in two directories. Only files with extension <code>&quot;.beam&quot;</code> are compared. BEAM files that exist only in directory <code>Dir1</code> (<code>Dir2</code>) are returned in <code>Only1</code> (<code>Only2</code>). BEAM files that exist in both directories but are considered different by <code>cmp/2</code> are returned as pairs {<code>Filename1</code>, <code>Filename2</code>}, where <code>Filename1</code> (<code>Filename2</code>) exists in directory <code>Dir1</code> (<code>Dir2</code>).</p>
+  </section>
+</section>
+<section class="detail" id="crypto_key_fun/1">
+
+  <div class="detail-header">
+    <a href="#crypto_key_fun/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">crypto_key_fun/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>crypto_key_fun(CryptoKeyFun) -> ok | {error, Reason}
+                  when CryptoKeyFun :: <a href="#t:crypto_fun/0">crypto_fun</a>(), Reason :: badfun | exists | term().</pre>
+
+      </div>
+
+<ul class="types"><li name="crypto_fun"></li><li name="crypto_fun_arg"></li><li name="mode"></li></ul><p>Registers an unary fun that is called if <code>beam_lib</code> must read an <code>debug_info</code> chunk that has been encrypted. The fun is held in a process that is started by the function.</p><p>If a fun is already registered when attempting to register a fun, <code>{error, exists}</code> is returned.</p><p>The fun must handle the following arguments:</p><pre><code type="none">CryptoKeyFun(init) -&gt; ok | {ok, NewCryptoKeyFun} | {error, Term}</code></pre><p>Called when the fun is registered, in the process that holds the fun. Here the crypto key fun can do any necessary initializations. If <code>{ok, NewCryptoKeyFun}</code> is returned, <code>NewCryptoKeyFun</code> is registered instead of <code>CryptoKeyFun</code>. If <code>{error, Term}</code> is returned, the registration is aborted and <code>crypto_key_fun/1</code> also returns <code>{error, Term}</code>.</p><pre><code type="none">CryptoKeyFun({debug_info, Mode, Module, Filename}) -&gt; Key</code></pre><p>Called when the key is needed for module <code>Module</code> in the file named <code>Filename</code>. <code>Mode</code> is the type of crypto algorithm; currently, the only possible value is <code>des3_cbc</code>. The call is to fail (raise an exception) if no key is available.</p><pre><code type="none">CryptoKeyFun(clear) -&gt; term()</code></pre><p>Called before the fun is unregistered. Here any cleaning up can be done. The return value is not important, but is passed back to the caller of <code>clear_crypto_key_fun/0</code> as part of its return value.</p>
+  </section>
+</section>
+<section class="detail" id="diff_dirs/2">
+
+  <div class="detail-header">
+    <a href="#diff_dirs/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">diff_dirs/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>diff_dirs(Dir1, Dir2) -> ok | {error, beam_lib, Reason}
+             when
+                 Dir1 :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                 Dir2 :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                 Reason :: {not_a_directory, term()} | <a href="#t:info_rsn/0">info_rsn</a>().</pre>
+
+      </div>
+
+<p>Compares the BEAM files in two directories as <a href="beam_lib.html#cmp_dirs/2"><code>cmp_dirs/2</code></a>, but the names of files that exist in only one directory or are different are presented on standard output.</p>
+  </section>
+</section>
+<section class="detail" id="format_error/1">
+
+  <div class="detail-header">
+    <a href="#format_error/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_error/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_error(Reason) -> <a href="io_lib.html#t:chars/0">io_lib:chars</a>() when Reason :: term().</pre>
+
+      </div>
+
+<p>For a specified error returned by any function in this module, this function returns a descriptive string of the error in English. For file errors, function <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#format_error/1"><code>file:format_error(Posix)</code></a> is to be called.</p>
+  </section>
+</section>
+<section class="detail" id="info/1">
+
+  <div class="detail-header">
+    <a href="#info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info(Beam) -> [InfoPair] | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+        when
+            Beam :: <a href="#t:beam/0">beam</a>(),
+            InfoPair ::
+                {file, Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+                {binary, Binary :: binary()} |
+                {module, Module :: module()} |
+                {chunks,
+                 [{ChunkId :: <a href="#t:chunkid/0">chunkid</a>(), Pos :: non_neg_integer(), Size :: non_neg_integer()}]}.</pre>
+
+      </div>
+
+<p>Returns a list containing some information about a BEAM file as tuples <code>{Item, Info}</code>:</p><dl><dt><code>{file, Filename} | {binary, Binary}</code></dt><dd><p>The name (string) of the BEAM file, or the binary from which the information was extracted.</p></dd><dt><code>{module, Module}</code></dt><dd><p>The name (atom) of the module.</p></dd><dt><code>{chunks, [{ChunkId, Pos, Size}]}</code></dt><dd><p>For each chunk, the identifier (string) and the position and size of the chunk data, in bytes.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="md5/1">
+
+  <div class="detail-header">
+    <a href="#md5/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">md5/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>md5(Beam) -> {ok, {module(), MD5}} | {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+       when Beam :: <a href="#t:beam/0">beam</a>(), MD5 :: binary().</pre>
+
+      </div>
+
+<p>Calculates an MD5 redundancy check for the code of the module (compilation date and other attributes are not included).</p>
+  </section>
+</section>
+<section class="detail" id="strip/1">
+
+  <div class="detail-header">
+    <a href="#strip/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip(Beam1) -> {ok, {module(), Beam2}} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+         when Beam1 :: <a href="#t:beam/0">beam</a>(), Beam2 :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks from a BEAM file except those needed by the loader. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed.</p>
+  </section>
+</section>
+<section class="detail" id="strip/2">
+
+  <div class="detail-header">
+    <a href="#strip/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip/2</h1>
+
+
+      <span class="note">(since OTP 22.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip(Beam1, AdditionalChunks) -> {ok, {module(), Beam2}} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+         when Beam1 :: <a href="#t:beam/0">beam</a>(), AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()], Beam2 :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks from a BEAM file except those needed by the loader or passed in. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed.</p>
+  </section>
+</section>
+<section class="detail" id="strip_files/1">
+
+  <div class="detail-header">
+    <a href="#strip_files/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_files/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip_files(Files) -> {ok, [{module(), Beam}]} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+               when Files :: [<a href="#t:beam/0">beam</a>()], Beam :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks except those needed by the loader from BEAM files. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code>Files</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_files/2">
+
+  <div class="detail-header">
+    <a href="#strip_files/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_files/2</h1>
+
+
+      <span class="note">(since OTP 22.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip_files(Files, AdditionalChunks) -> {ok, [{module(), Beam}]} | {error, beam_lib, <a href="#t:info_rsn/0">info_rsn</a>()}
+               when Files :: [<a href="#t:beam/0">beam</a>()], AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()], Beam :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks except those needed by the loader or passed in from BEAM files. In particular, the debug information (chunk <code>debug_info</code> and <code>abstract_code</code>) is removed. The returned list contains one element for each specified filename, in the same order as in <code>Files</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_release/1">
+
+  <div class="detail-header">
+    <a href="#strip_release/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_release/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip_release(Dir) -> {ok, [{module(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()}]} | {error, beam_lib, Reason}
+                 when
+                     Dir :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                     Reason :: {not_a_directory, term()} | <a href="#t:info_rsn/0">info_rsn</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks except those needed by the loader from the BEAM files of a release. <code>Dir</code> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code>beam_lib:strip_release(code:root_dir())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="strip_release/2">
+
+  <div class="detail-header">
+    <a href="#strip_release/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">strip_release/2</h1>
+
+
+      <span class="note">(since OTP 22.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>strip_release(Dir, AdditionalChunks) ->
+                 {ok, [{module(), <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()}]} | {error, beam_lib, Reason}
+                 when
+                     Dir :: atom() | <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                     AdditionalChunks :: [<a href="#t:chunkid/0">chunkid</a>()],
+                     Reason :: {not_a_directory, term()} | <a href="#t:info_rsn/0">info_rsn</a>().</pre>
+
+      </div>
+
+<p>Removes all chunks except those needed by the loader or passed in from the BEAM files of a release. <code>Dir</code> is to be the installation root directory. For example, the current OTP release can be stripped with the call <code>beam_lib:strip_release(code:root_dir())</code>.</p>
+  </section>
+</section>
+<section class="detail" id="version/1">
+
+  <div class="detail-header">
+    <a href="#version/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">version/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>version(Beam) -> {ok, {module(), [Version :: term()]}} | {error, beam_lib, <a href="#t:chnk_rsn/0">chnk_rsn</a>()}
+           when Beam :: <a href="#t:beam/0">beam</a>().</pre>
+
+      </div>
+
+<p>Returns the module version or versions. A version is defined by module attribute <code>-vsn(Vsn)</code>. If this attribute is not specified, the version defaults to the checksum of the module. Notice that if version <code>Vsn</code> is not a list, it is made into one, that is <code>{ok,{Module,[Vsn]}}</code> is returned. If there are many <code>-vsn</code> module attributes, the result is the concatenated list of versions.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">beam_lib</span><span class="p">:</span><span class="nf">version</span><span class="p" data-group-id="0706963347-1">(</span><span class="ss">a</span><span class="p" data-group-id="0706963347-1">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% -vsn(1).</span><span class="w">
+</span><span class="p" data-group-id="0706963347-2">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="0706963347-3">{</span><span class="ss">a</span><span class="p">,</span><span class="p" data-group-id="0706963347-4">[</span><span class="mi">1</span><span class="p" data-group-id="0706963347-4">]</span><span class="p" data-group-id="0706963347-3">}</span><span class="p" data-group-id="0706963347-2">}</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">beam_lib</span><span class="p">:</span><span class="nf">version</span><span class="p" data-group-id="0706963347-5">(</span><span class="ss">b</span><span class="p" data-group-id="0706963347-5">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% -vsn([1]).</span><span class="w">
+</span><span class="p" data-group-id="0706963347-6">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="0706963347-7">{</span><span class="ss">b</span><span class="p">,</span><span class="p" data-group-id="0706963347-8">[</span><span class="mi">1</span><span class="p" data-group-id="0706963347-8">]</span><span class="p" data-group-id="0706963347-7">}</span><span class="p" data-group-id="0706963347-6">}</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">beam_lib</span><span class="p">:</span><span class="nf">version</span><span class="p" data-group-id="0706963347-9">(</span><span class="ss">c</span><span class="p" data-group-id="0706963347-9">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% -vsn([1]). -vsn(2).</span><span class="w">
+</span><span class="p" data-group-id="0706963347-10">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="0706963347-11">{</span><span class="ss">c</span><span class="p">,</span><span class="p" data-group-id="0706963347-12">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p" data-group-id="0706963347-12">]</span><span class="p" data-group-id="0706963347-11">}</span><span class="p" data-group-id="0706963347-10">}</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">beam_lib</span><span class="p">:</span><span class="nf">version</span><span class="p" data-group-id="0706963347-13">(</span><span class="ss">d</span><span class="p" data-group-id="0706963347-13">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% no -vsn attribute</span><span class="w">
+</span><span class="p" data-group-id="0706963347-14">{</span><span class="ss">ok</span><span class="p">,</span><span class="p" data-group-id="0706963347-15">{</span><span class="ss">d</span><span class="p">,</span><span class="p" data-group-id="0706963347-16">[</span><span class="mi">275613208176997377698094100858909383631</span><span class="p" data-group-id="0706963347-16">]</span><span class="p" data-group-id="0706963347-15">}</span><span class="p" data-group-id="0706963347-14">}</span></code></pre>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

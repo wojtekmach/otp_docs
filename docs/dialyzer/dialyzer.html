@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="dialyzer v4.4.1">
+
+    <title>dialyzer — dialyzer v4.4.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-474fa48041.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+dialyzer
+      </a>
+      <strong class="sidebar-projectVersion">
+        v4.4.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+dialyzer <small class="app-vsn">(dialyzer v4.4.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>Dialyzer is a static analysis tool that identifies software discrepancies, such as definite type errors, code that has become dead or unreachable because of programming error, and unnecessary tests, in single Erlang modules or entire (sets of) applications.</p><p>Dialyzer starts its analysis from either debug-compiled BEAM bytecode or from Erlang source code. The file and line number of a discrepancy is reported along with an indication of what the discrepancy is about. Dialyzer bases its analysis on the concept of success typings, which allows for sound warnings (no false positives).</p><a id="command_line"></a><h2 id="module-using-dialyzer-from-the-command-line" class="section-heading">
+  <a href="#module-using-dialyzer-from-the-command-line" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Using Dialyzer from the Command Line
+</h2>
+<p>Dialyzer has a command-line version for automated use. This section provides a brief description of the options. The same information can be obtained by writing the following in a shell:</p><pre><code type="none">dialyzer --help</code></pre><p>For more details about the operation of Dialyzer, see section Using Dialyzer from the GUI in the User's Guide.</p><p><em>Exit status of the command-line version:</em></p><dl><dt><code>0</code></dt><dd><p>No problems were found during the analysis and no warnings were emitted.</p></dd><dt><code>1</code></dt><dd><p>Problems were found during the analysis.</p></dd><dt><code>2</code></dt><dd><p>No problems were found during the analysis, but warnings were emitted.</p></dd></dl><p><em>Usage:</em></p><pre><code type="none">dialyzer [--add_to_plt] [--apps applications] [--build_plt]
+         [--check_plt] [-Ddefine]* [-Dname]* [--dump_callgraph file]
+         [--error_location flag] [files_or_dirs] [--fullpath]
+         [--get_warnings] [--gui] [--help] [-I include_dir]*
+         [--no_check_plt] [--no_indentation] [-o outfile]
+         [--output_plt file] [-pa dir]* [--plt plt] [--plt_info]
+         [--plts plt*] [--quiet] [-r dirs] [--raw] [--remove_from_plt]
+         [--shell] [--src] [--statistics] [--verbose] [--version]
+         [-Wwarn]*</code></pre><div class="note"><p>* denotes that multiple occurrences of the option are possible.</p></div><p><em>Options of the command-line version:</em></p><dl><dt><code>--add_to_plt</code></dt><dd><p>The PLT is extended to also include the files specified with <code>-c</code> and <code>-r</code>. Use <code>--plt</code> to specify which PLT to start from, and <code>--output_plt</code> to specify where to put the PLT. Notice that the analysis possibly can include files from the PLT if they depend on the new files. This option only works for BEAM files.</p></dd><dt><code>--apps applications</code></dt><dd><p>This option is typically used when building or modifying a PLT as in:</p><pre><code type="none">dialyzer --build_plt --apps erts kernel stdlib mnesia ...</code></pre><p>to refer conveniently to library applications corresponding to the Erlang/OTP installation. However, this option is general and can also be used during analysis to refer to Erlang/OTP applications. File or directory names can also be included, as in:</p><pre><code type="none">dialyzer --apps inets ssl ./ebin ../other_lib/ebin/my_module.beam</code></pre></dd><dt><code>--build_plt</code></dt><dd><p>The analysis starts from an empty PLT and creates a new one from the files specified with <code>-c</code> and <code>-r</code>. This option only works for BEAM files. To override the default PLT location, use <code>--plt</code> or <code>--output_plt</code>.</p></dd><dt><code>--check_plt</code></dt><dd><p>Check the PLT for consistency and rebuild it if it is not up-to-date.</p></dd><dt><code>-Dname</code> (or <code>-Dname=value</code>)</dt><dd><p>When analyzing from source, pass the define to Dialyzer. (**)</p></dd><dt><code>--dump_callgraph file</code></dt><dd><p>Dump the call graph into the specified file whose format is determined by the filename extension. Supported extensions are: <code>raw</code>, <code>dot</code>, and <code>ps</code>. If something else is used as filename extension, default format <code>.raw</code> is used.</p></dd><dt><a id="error_location"></a><code>--error_location column | line</code></dt><dd><p>Use a pair <code>{Line, Column}</code> or an integer <code>Line</code> to pinpoint the location of warnings. The default is to use a pair <code>{Line, Column}</code>. When formatted, the line and the column are separated by a colon.</p></dd><dt><code>files_or_dirs</code> (for backward compatibility also as <code>-c files_or_dirs</code>)</dt><dd><p>Use Dialyzer from the command line to detect defects in the specified files or directories containing <code>.erl</code> or <code>.beam</code> files, depending on the type of the analysis.</p></dd><dt><code>--fullpath</code></dt><dd><p>Display the full path names of files for which warnings are emitted.</p></dd><dt><code>--get_warnings</code></dt><dd><p>Make Dialyzer emit warnings even when manipulating the PLT. Warnings are only emitted for files that are analyzed.</p></dd><dt><code>--gui</code></dt><dd><p>Use the GUI.</p></dd><dt><code>--help</code> (or <code>-h</code>)</dt><dd><p>Print this message and exit.</p></dd><dt><code>-I include_dir</code></dt><dd><p>When analyzing from source, pass the <code>include_dir</code> to Dialyzer. (**)</p></dd><dt><code>--no_check_plt</code></dt><dd><p>Skip the PLT check when running Dialyzer. This is useful when working with installed PLTs that never change.</p></dd><dt><code>--no_indentation</code></dt><dd><p>Do not insert line breaks in types, contracts, and Erlang Code when formatting warnings.</p></dd><dt><code>-o outfile</code> (or <code>--output outfile</code>)</dt><dd><p>When using Dialyzer from the command line, send the analysis results to the specified outfile rather than to <code>stdout</code>.</p></dd><dt><code>--output_plt file</code></dt><dd><p>Store the PLT at the specified file after building it.</p></dd><dt><code>-pa dir</code></dt><dd><p>Include <code>dir</code> in the path for Erlang. This is useful when analyzing files that have <code>-include_lib()</code> directives.</p></dd><dt><code>--plt plt</code></dt><dd><p>Use the specified PLT as the initial PLT. If the PLT was built during setup, the files are checked for consistency.</p></dd><dt><code>--plt_info</code></dt><dd><p>Make Dialyzer print information about the PLT and then quit. The PLT can be specified with <code>--plt(s)</code>.</p></dd><dt><code>--plts plt*</code></dt><dd><p>Merge the specified PLTs to create the initial PLT. This requires that the PLTs are disjoint (that is, do not have any module appearing in more than one PLT). The PLTs are created in the usual way:</p><pre><code type="none">dialyzer --build_plt --output_plt plt_1 files_to_include
+...
+dialyzer --build_plt --output_plt plt_n files_to_include</code></pre><p>They can then be used in either of the following ways:</p><pre><code type="none">dialyzer files_to_analyze --plts plt_1 ... plt_n</code></pre><p>or</p><pre><code type="none">dialyzer --plts plt_1 ... plt_n -- files_to_analyze</code></pre><p>Notice the <code>--</code> delimiter in the second case.</p></dd><dt><code>--quiet</code> (or <code>-q</code>)</dt><dd><p>Make Dialyzer a bit more quiet.</p></dd><dt><code>-r dirs</code></dt><dd><p>Same as <code>files_or_dirs</code>, but the specified directories are searched recursively for subdirectories containing <code>.erl</code> or <code>.beam</code> files in them, depending on the type of analysis.</p></dd><dt><code>--raw</code></dt><dd><p>When using Dialyzer from the command line, output the raw analysis results (Erlang terms) instead of the formatted result. The raw format is easier to post-process (for example, to filter warnings or to output HTML pages).</p></dd><dt><code>--remove_from_plt</code></dt><dd><p>The information from the files specified with <code>-c</code> and <code>-r</code> is removed from the PLT. Notice that this can cause a reanalysis of the remaining dependent files.</p></dd><dt><code>--shell</code></dt><dd><p>Do not disable the Erlang shell while running the GUI.</p></dd><dt><code>--src</code></dt><dd><p>Override the default, which is to analyze BEAM files, and analyze starting from Erlang source code instead.</p></dd><dt><code>--statistics</code></dt><dd><p>Print information about the progress of execution (analysis phases, time spent in each, and size of the relative input).</p></dd><dt><code>--verbose</code></dt><dd><p>Make Dialyzer a bit more verbose.</p></dd><dt><code>--version</code> (or <code>-v</code>)</dt><dd><p>Print the Dialyzer version and some more information and exit.</p></dd><dt><code>-Wwarn</code></dt><dd><p>A family of options that selectively turn on/off warnings. (For help on the names of warnings, use <code>dialyzer -Whelp</code>.) Notice that the options can also be specified in the file with a <code>-dialyzer()</code> attribute. For details, see section <a href="dialyzer.html#content#suppression">Requesting or Suppressing Warnings in Source Files</a>.</p></dd></dl><div class="note"><p>** options <code>-D</code> and <code>-I</code> work both from the command line and in the Dialyzer GUI; the syntax of defines and includes is the same as that used by erlc(1).</p></div><a id="warning_options"></a><p><em>Warning options:</em></p><dl><dt><code>-Werror_handling</code> (***)</dt><dd><p>Include warnings for functions that only return by an exception.</p></dd><dt><code>-Wno_behaviours</code></dt><dd><p>Suppress warnings about behavior callbacks that drift from the published recommended interfaces.</p></dd><dt><code>-Wno_contracts</code></dt><dd><p>Suppress warnings about invalid contracts.</p></dd><dt><code>-Wno_fail_call</code></dt><dd><p>Suppress warnings for failing calls.</p></dd><dt><code>-Wno_fun_app</code></dt><dd><p>Suppress warnings for fun applications that will fail.</p></dd><dt><code>-Wno_improper_lists</code></dt><dd><p>Suppress warnings for construction of improper lists.</p></dd><dt><code>-Wno_match</code></dt><dd><p>Suppress warnings for patterns that are unused or cannot match.</p></dd><dt><code>-Wno_missing_calls</code></dt><dd><p>Suppress warnings about calls to missing functions.</p></dd><dt><code>-Wno_opaque</code></dt><dd><p>Suppress warnings for violations of opacity of data types.</p></dd><dt><code>-Wno_return</code></dt><dd><p>Suppress warnings for functions that will never return a value.</p></dd><dt><code>-Wno_undefined_callbacks</code></dt><dd><p>Suppress warnings about behaviors that have no <code>-callback</code> attributes for their callbacks.</p></dd><dt><code>-Wno_unused</code></dt><dd><p>Suppress warnings for unused functions.</p></dd><dt><code>-Wrace_conditions</code> (***)</dt><dd><p>Include warnings for possible race conditions. Notice that the analysis that finds data races performs intra-procedural data flow analysis and can sometimes explode in time. Enable it at your own risk.</p></dd><dt><code>-Wunderspecs</code> (***)</dt><dd><p>Warn about underspecified functions (the specification is strictly more allowing than the success typing).</p></dd><dt><code>-Wunknown</code> (***)</dt><dd><p>Let warnings about unknown functions and types affect the exit status of the command-line version. The default is to ignore warnings about unknown functions and types when setting the exit status. When using Dialyzer from Erlang, warnings about unknown functions and types are returned; the default is not to return these warnings.</p></dd><dt><code>-Wunmatched_returns</code> (***)</dt><dd><p>Include warnings for function calls that ignore a structured return value or do not match against one of many possible return values. However, no warnings are included if the possible return values are a union of atoms or a union of numbers.</p></dd></dl><p>The following options are also available, but their use is not recommended (they are mostly for Dialyzer developers and internal debugging):</p><dl><dt><code>-Woverspecs</code> (***)</dt><dd><p>Warn about overspecified functions (the specification is strictly less allowing than the success typing).</p></dd><dt><code>-Wspecdiffs</code> (***)</dt><dd><p>Warn when the specification is different than the success typing.</p></dd></dl><div class="note"><p>*** denotes options that turn on warnings rather than turning them off.</p></div><p>The following option is not strictly needed as it specifies the default. It is primarily intended to be used with the <code>-dialyzer</code> attribute. For an example see section <a href="dialyzer.html#content#suppression">Requesting or Suppressing Warnings in Source Files</a>.</p><dl><dt><code>-Wno_underspecs</code></dt><dd><p>Suppress warnings about underspecified functions (the specification is strictly more allowing than the success typing).</p></dd></dl><h2 id="module-using-dialyzer-from-erlang" class="section-heading">
+  <a href="#module-using-dialyzer-from-erlang" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Using Dialyzer from Erlang
+</h2>
+<p>Dialyzer can be used directly from Erlang. Both the GUI and the command-line versions are also available. The options are similar to the ones given from the command line, see section <a href="dialyzer.html#content#command_line">Using Dialyzer from the Command Line</a>.</p><h2 id="module-default-dialyzer-options" class="section-heading">
+  <a href="#module-default-dialyzer-options" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Default Dialyzer Options
+</h2>
+<p>The (host operating system) environment variable <code>ERL_COMPILER_OPTIONS</code> can be used to give default Dialyzer options. Its value must be a valid Erlang term. If the value is a list, it is used as is. If it is not a list, it is put into a list.</p><p>The list is appended to any options given to <a href="dialyzer.html#run/1">run/1</a> or on the command line.</p><p>The list can be retrieved with <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#env_compiler_options/0">compile:env_compiler_options/0</a>.</p><p>Currently the only option used is the <a href="dialyzer.html#content#error_location"><code>error_location</code></a> option.</p><a id="suppression"></a><h2 id="module-requesting-or-suppressing-warnings-in-source-files" class="section-heading">
+  <a href="#module-requesting-or-suppressing-warnings-in-source-files" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Requesting or Suppressing Warnings in Source Files
+</h2>
+<p>Attribute <code>-dialyzer()</code> can be used for turning off warnings in a module by specifying functions or warning options. For example, to turn off all warnings for the function <code>f/0</code>, include the following line:</p><pre><code type="none">-dialyzer({nowarn_function, f/0}).</code></pre><p>To turn off warnings for improper lists, add the following line to the source file:</p><pre><code type="none">-dialyzer(no_improper_lists).</code></pre><p>Attribute <code>-dialyzer()</code> is allowed after function declarations. Lists of warning options or functions are allowed:</p><pre><code type="none">-dialyzer([{nowarn_function, [f/0]}, no_improper_lists]).</code></pre><p>Warning options can be restricted to functions:</p><pre><code type="none">-dialyzer({no_improper_lists, g/0}).</code></pre><pre><code type="none">-dialyzer({[no_return, no_match], [g/0, h/0]}).</code></pre><p>The warning option for underspecified functions, <code>-Wunderspecs</code>, can result in useful warnings, but often functions with specifications that are strictly more allowing than the success typing cannot easily be modified to be less allowing. To turn off the warning for underspecified function <code>f/0</code>, include the following line:</p><pre><code type="none">-dialyzer({no_underspecs, f/0}).</code></pre><p>For help on the warning options, use <code>dialyzer -Whelp</code>. The options are also enumerated, see type <a href="dialyzer.html#t:warn_option/0"><code>warn_option()</code></a>.</p><div class="note"><p>Warning option <code>-Wrace_conditions</code> has no effect when set in source files.</p></div><p>Attribute <code>-dialyzer()</code> can also be used for turning on warnings. For example, if a module has been fixed regarding unmatched returns, adding the following line can help in assuring that no new unmatched return warnings are introduced:</p><pre><code type="none">-dialyzer(unmatched_returns).</code></pre>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dial_option/0">-type dial_option() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Option <code>from</code> defaults to <code>byte_code</code>. Options <code>init_plt</code> and <code>plts</code> change the default.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dial_warn_tag/0">-type dial_warn_tag() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:dial_warning/0">-type dial_warning() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:error_location/0">-type error_location() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If the value of this option is <code>line</code>, an integer <code>Line</code> is used as <code>Location</code> in messages. If the value is <code>column</code>, a pair <code>{Line, Column}</code> is used as <code>Location</code>. The default is <code>column</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:file_location/0">-type file_location() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:warn_option/0">-type warn_option() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>See section <a href="dialyzer.html#content#warning_options">Warning options</a> for a description of the warning options.</p></div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_warning/1">format_warning/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Get a string from warnings as returned by <a href="dialyzer.html#run/1"><code>run/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#format_warning/2">format_warning/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="filename_opt"></li><li name="format_option"></li></ul><p>Get a string from warnings as returned by <a href="dialyzer.html#run/1"><code>run/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#gui/0">gui/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Dialyzer GUI version.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#gui/1">gui/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#plt_info/1">plt_info/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns information about the specified PLT.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#run/1">run/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Dialyzer command-line version.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:dial_option/0">
+
+  <div class="detail-header">
+    <a href="#t:dial_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dial_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dial_option() ::
+    {files, [FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()]} |
+    {files_rec, [DirName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()]} |
+    {defines, [{Macro :: atom(), Value :: term()}]} |
+    {from, src_code | byte_code} |
+    {init_plt, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+    {plts, [FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()]} |
+    {include_dirs, [DirName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()]} |
+    {output_file, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+    {output_plt, FileName :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} |
+    {check_plt, boolean()} |
+    {analysis_type, succ_typings | plt_add | plt_build | plt_check | plt_remove} |
+    {warnings, [<a href="#t:warn_option/0">warn_option</a>()]} |
+    {get_warnings, boolean()} |
+    {error_location, <a href="#t:error_location/0">error_location</a>()}.</pre>
+
+      </div>
+
+<p>Option <code>from</code> defaults to <code>byte_code</code>. Options <code>init_plt</code> and <code>plts</code> change the default.</p>
+  </section>
+</section>
+<section class="detail" id="t:dial_warn_tag/0">
+
+  <div class="detail-header">
+    <a href="#t:dial_warn_tag/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dial_warn_tag() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dial_warn_tag() ::
+    warn_behaviour | warn_bin_construction | warn_callgraph | warn_contract_not_equal |
+    warn_contract_range | warn_contract_subtype | warn_contract_supertype | warn_contract_syntax |
+    warn_contract_types | warn_failing_call | warn_fun_app | warn_map_construction |
+    warn_matching | warn_non_proper_list | warn_not_called | warn_opaque | warn_race_condition |
+    warn_return_no_exit | warn_return_only_exit | warn_undefined_callbacks | warn_unknown |
+    warn_umatched_return.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:dial_warning/0">
+
+  <div class="detail-header">
+    <a href="#t:dial_warning/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type dial_warning() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dial_warning() :: {Tag :: <a href="#t:dial_warn_tag/0">dial_warn_tag</a>(), Id :: <a href="#t:file_location/0">file_location</a>(), Msg :: {atom(), [term()]}}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:error_location/0">
+
+  <div class="detail-header">
+    <a href="#t:error_location/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type error_location() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>error_location() :: column | line.</pre>
+
+      </div>
+
+<p>If the value of this option is <code>line</code>, an integer <code>Line</code> is used as <code>Location</code> in messages. If the value is <code>column</code>, a pair <code>{Line, Column}</code> is used as <code>Location</code>. The default is <code>column</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:file_location/0">
+
+  <div class="detail-header">
+    <a href="#t:file_location/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type file_location() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>file_location() :: {File :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), Location :: <a href="https://wojtekmach.pl/otp_docs/stdlib/erl_anno.html#t:location/0">erl_anno:location</a>()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:warn_option/0">
+
+  <div class="detail-header">
+    <a href="#t:warn_option/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type warn_option() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>warn_option() ::
+    error_handling | no_behaviours | no_contracts | no_fail_call | no_fun_app |
+    no_improper_lists | no_match | no_missing_calls | no_opaque | no_return |
+    no_undefined_callbacks | no_underspecs | no_unused | race_conditions | underspecs | unknown |
+    unmatched_returns | overspecs | specdiffs.</pre>
+
+      </div>
+
+<p>See section <a href="dialyzer.html#content#warning_options">Warning options</a> for a description of the warning options.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="format_warning/1">
+
+  <div class="detail-header">
+    <a href="#format_warning/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_warning/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_warning(Warnings) -> string() when Warnings :: <a href="#t:dial_warning/0">dial_warning</a>().</pre>
+
+      </div>
+
+<p>Get a string from warnings as returned by <a href="dialyzer.html#run/1"><code>run/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="format_warning/2">
+
+  <div class="detail-header">
+    <a href="#format_warning/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">format_warning/2</h1>
+
+
+      <span class="note">(since R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>format_warning(Warnings, Options) -> string()
+                  when Warnings :: <a href="#t:dial_warning/0">dial_warning</a>(), Options :: <a href="#t:filename_opt/0">filename_opt</a>() | [<a href="#t:format_option/0">format_option</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="filename_opt"></li><li name="format_option"></li></ul><p>Get a string from warnings as returned by <a href="dialyzer.html#run/1"><code>run/1</code></a>.</p><p>If <code>indent_opt</code> is set to <code>true</code> (default), line breaks are inserted in types, contracts, and Erlang code to improve readability.</p><p>If <code>error_location</code> is set to <code>column</code> (default), locations are formatted as <code>Line:Column</code> if the column number is available, otherwise locations are formatted as <code>Line</code> even if the column number is available.</p>
+  </section>
+</section>
+<section class="detail" id="gui/0">
+
+  <div class="detail-header">
+    <a href="#gui/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">gui/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>gui() -> ok.</pre>
+
+      </div>
+
+<p>Dialyzer GUI version.</p>
+  </section>
+</section>
+<section class="detail" id="gui/1">
+
+  <div class="detail-header">
+    <a href="#gui/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">gui/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>gui(Options) -> ok when Options :: [<a href="#t:dial_option/0">dial_option</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="plt_info/1">
+
+  <div class="detail-header">
+    <a href="#plt_info/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">plt_info/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>plt_info(Plt) -> {ok, Result} | {error, Reason}
+            when
+                Plt :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                Result :: [{files, [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()]}],
+                Reason :: not_valid | no_such_file | read_error.</pre>
+
+      </div>
+
+<p>Returns information about the specified PLT.</p>
+  </section>
+</section>
+<section class="detail" id="run/1">
+
+  <div class="detail-header">
+    <a href="#run/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">run/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>run(Options) -> Warnings when Options :: [<a href="#t:dial_option/0">dial_option</a>()], Warnings :: [<a href="#t:dial_warning/0">dial_warning</a>()].</pre>
+
+      </div>
+
+<p>Dialyzer command-line version.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

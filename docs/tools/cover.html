@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="tools v3.5">
+
+    <title>cover — tools v3.5</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-b955672ef1.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+tools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.5
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+cover <small class="app-vsn">(tools v3.5)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The module <code>cover</code> provides a set of functions for coverage analysis of Erlang programs, counting how many times each <em>executable line</em> of code is executed when a program is run.<br/>An executable line contains an Erlang expression such as a matching or a function call. A blank line or a line containing a comment, function head or pattern in a <code>case</code>- or <code>receive</code> statement is not executable.</p><p>Coverage analysis can be used to verify test cases, making sure all relevant code is covered, and may also be helpful when looking for bottlenecks in the code.</p><p>Before any analysis can take place, the involved modules must be <em>Cover compiled</em>. This means that some extra information is added to the module before it is compiled into a binary which then is loaded. The source file of the module is not affected and no <code>.beam</code> file is created.</p><p>Each time a function in a Cover compiled module is called, information about the call is added to an internal database of Cover. The coverage analysis is performed by examining the contents of the Cover database. The output <code>Answer</code> is determined by two parameters, <code>Level</code> and <code>Analysis</code>.</p><ul><li><p><code>Level = module</code></p><p><code>Answer = {Module,Value}</code>, where <code>Module</code> is the module name.</p></li><li><p><code>Level = function</code></p><p><code>Answer = [{Function,Value}]</code>, one tuple for each function in the module. A function is specified by its module name <code>M</code>, function name <code>F</code> and arity <code>A</code> as a tuple <code>{M,F,A}</code>.</p></li><li><p><code>Level = clause</code></p><p><code>Answer = [{Clause,Value}]</code>, one tuple for each clause in the module. A clause is specified by its module name <code>M</code>, function name <code>F</code>, arity <code>A</code> and position in the function definition <code>C</code> as a tuple <code>{M,F,A,C}</code>.</p></li><li><p><code>Level = line</code></p><p><code>Answer = [{Line,Value}]</code>, one tuple for each executable line in the module. A line is specified by its module name <code>M</code> and line number in the source file <code>N</code> as a tuple <code>{M,N}</code>.</p></li><li><p><code>Analysis = coverage</code></p><p><code>Value = {Cov,NotCov}</code> where <code>Cov</code> is the number of executable lines in the module, function, clause or line that have been executed at least once and <code>NotCov</code> is the number of executable lines that have not been executed.</p></li><li><p><code>Analysis = calls</code></p><p><code>Value = Calls</code> which is the number of times the module, function, or clause has been called. In the case of line level analysis, <code>Calls</code> is the number of times the line has been executed.</p></li></ul><p><em>Distribution</em></p><p>Cover can be used in a distributed Erlang system. One of the nodes in the system must then be selected as the <em>main node</em>, and all Cover commands must be executed from this node. The error reason <code>not_main_node</code> is returned if an interface function is called on one of the remote nodes.</p><p>Use <code>cover:start/1</code> and <code>cover:stop/1</code> to add or remove nodes. The same Cover compiled code will be loaded on each node, and analysis will collect and sum up coverage data results from all nodes.</p><p>To only collect data from remote nodes without stopping <code>cover</code> on those nodes, use <code>cover:flush/1</code></p><p>If the connection to a remote node goes down, the main node will mark it as lost. If the node comes back it will be added again. If the remote node was alive during the disconnected periode, cover data from before and during this periode will be included in the analysis.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  SEE ALSO
+</h2>
+<p>code(3), compile(3)</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/0">analyse/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="analyse_fail"></li><li name="analyse_item"></li><li name="analyse_ok"></li><li name="analyse_value"></li><li name="analysis"></li><li name="level"></li><li name="modules"></li><li name="one_result"></li></ul><p>Performs analysis of one or more Cover compiled modules, as specified by <code>Analysis</code> and <code>Level</code> (see above), by examining the contents of the internal database.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/1">analyse/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/2">analyse/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse/3">analyse/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse_to_file/0">analyse_to_file/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="analyse_answer"></li><li name="analyse_file_fail"></li><li name="analyse_file_ok"></li><li name="analyse_option"></li><li name="analyse_rsn"></li><li name="modules"></li></ul><p>Makes copies of the source file for the given modules, where it for each executable line is specified how many times it has been executed.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse_to_file/1">analyse_to_file/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#analyse_to_file/2">analyse_to_file/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#async_analyse_to_file/1">async_analyse_to_file/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="analyse_rsn"></li></ul><p>This function works exactly the same way as <a href="cover.html#analyse_to_file/1"><code>analyse_to_file</code></a> except that it is asynchronous instead of synchronous. The spawned process will link with the caller when created. If an error of type <code>analyse_rsn()</code> occurs while doing the cover analysis the process will crash with the same error reason as <a href="cover.html#analyse_to_file/1"><code>analyse_to_file</code></a> would return.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#async_analyse_to_file/2">async_analyse_to_file/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#async_analyse_to_file/3">async_analyse_to_file/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile/1">compile/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="compile_result"></li><li name="mod_file"></li><li name="mod_files"></li><li name="option"></li><li name="option" class="description">See <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>compile:file/2</code></a>.</li></ul><p>Compiles a module for Cover analysis. The module is given by its module name <code>Module</code> or by its file name <code>File</code>. The <code>.erl</code> extension may be omitted. If the module is located in another directory, the path has to be specified.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile/2">compile/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_beam/1">compile_beam/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="beam_mod_file"></li><li name="beam_mod_files"></li><li name="compile_beam_result"></li><li name="compile_beam_rsn"></li></ul><p>Does the same as <a href="cover.html#compile/1"><code>compile/1,2</code></a>, but uses an existing <code>.beam</code> file as base, that is, the module is not compiled from source. Thus <code>compile_beam/1</code> is faster than <code>compile/1,2</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_beam_directory/0">compile_beam_directory/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="compile_beam_result"></li><li name="compile_beam_rsn"></li><li name="file_error"></li></ul><p>Compiles all modules (<code>.beam</code> files) in a directory <code>Dir</code> for Cover analysis the same way as <a href="cover.html#compile_beam/1"><code>compile_beam/1</code></a> and returns a list with the return values.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_beam_directory/1">compile_beam_directory/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_directory/0">compile_directory/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="compile_result"></li><li name="file_error"></li><li name="option"></li><li name="option" class="description">See <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>compile:file/2</code></a>.</li></ul><p>Compiles all modules (<code>.erl</code> files) in a directory <code>Dir</code> for Cover analysis the same way as <a href="cover.html#compile_module/1"><code>compile_module/1,2</code></a> and returns a list with the return values.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_directory/1">compile_directory/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_directory/2">compile_directory/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_module/1">compile_module/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#compile_module/2">compile_module/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#export/1">export/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="export_reason"></li></ul><p>Exports the current coverage data for <code>Module</code> to the file <code>ExportFile</code>. It is recommended to name the <code>ExportFile</code> with the extension <code>.coverdata</code>, since other filenames cannot be read by the web based interface to cover.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#export/2">export/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flush/1">flush/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Fetch data from the Cover database on the remote nodes and stored on the main node.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#import/1">import/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Imports coverage data from the file <code>ExportFile</code> created with <a href="cover.html#export/1"><code>export/1,2</code></a>. Any analysis performed after this will include the imported data.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#imported/0">imported/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list with all imported files.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#imported_modules/0">imported_modules/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list with all modules for which there are imported data.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_compiled/1">is_compiled/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns <code>{file, File}</code> if the module <code>Module</code> is Cover compiled, or <code>false</code> otherwise. <code>File</code> is the <code>.erl</code> file used by <a href="cover.html#compile_module/1"><code>compile_module/1,2</code></a> or the <code>.beam</code> file used by <a href="cover.html#compile_beam/1"><code>compile_beam/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#local_only/0">local_only/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Only support running Cover on the local node. This function must be called before any modules have been compiled or any nodes added. When running in this mode, modules will be Cover compiled in a more efficient way, but the resulting code will only work on the same node they were compiled on.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#modules/0">modules/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list with all modules that are currently Cover compiled.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reset/0">reset/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Resets all coverage data for a Cover compiled module <code>Module</code> in the Cover database on all nodes. If the argument is omitted, the coverage data will be reset for all modules known by Cover.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reset/1">reset/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/0">start/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts the Cover server which owns the Cover internal database. This function is called automatically by the other functions in the module.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start/1">start/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Starts a Cover server on the each of given nodes, and loads all cover compiled modules. This call will fail if <code>cover:local_only/0</code> has been called.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stops the Cover server and unloads all Cover compiled code.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/1">stop/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Stops the Cover server and unloads all Cover compiled code on the given nodes. Data stored in the Cover database on the remote nodes is fetched and stored on the main node.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#which_nodes/0">which_nodes/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list with all nodes that are part of the coverage analysis. Note that the current node is not returned. This node is always part of the analysis.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="analyse/0">
+
+  <div class="detail-header">
+    <a href="#analyse/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/0</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse() -> {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}.</pre>
+
+      </div>
+
+<ul class="types"><li name="analyse_fail"></li><li name="analyse_item"></li><li name="analyse_ok"></li><li name="analyse_value"></li><li name="analysis"></li><li name="level"></li><li name="modules"></li><li name="one_result"></li></ul><p>Performs analysis of one or more Cover compiled modules, as specified by <code>Analysis</code> and <code>Level</code> (see above), by examining the contents of the internal database.</p><p><code>Analysis</code> defaults to <code>coverage</code> and <code>Level</code> defaults to <code>function</code>.</p><p>If <code>Modules</code> is an atom (one module), the return will be <code>OneResult</code>, else the return will be <code>{result, Ok, Fail}</code>.</p><p>If <code>Modules</code> is not given, all modules that have data in the cover data table, are analysed. Note that this includes both cover compiled modules and imported modules.</p><p>If a given module is not Cover compiled, this is indicated by the error reason <code>{not_cover_compiled, Module}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse/1">
+
+  <div class="detail-header">
+    <a href="#analyse/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/1</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(Analysis) -> {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Analysis :: <a href="#t:analysis/0">analysis</a>();
+       (Level) -> {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Level :: <a href="#t:level/0">level</a>();
+       (Modules) -> OneResult | {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Modules :: <a href="#t:modules/0">modules</a>(), OneResult :: <a href="#t:one_result/0">one_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="analyse/2">
+
+  <div class="detail-header">
+    <a href="#analyse/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/2</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(Analysis, Level) -> {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Analysis :: <a href="#t:analysis/0">analysis</a>(), Level :: <a href="#t:level/0">level</a>();
+       (Modules, Analysis) ->
+           OneResult | {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Analysis :: <a href="#t:analysis/0">analysis</a>(), Modules :: <a href="#t:modules/0">modules</a>(), OneResult :: <a href="#t:one_result/0">one_result</a>();
+       (Modules, Level) ->
+           OneResult | {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when Level :: <a href="#t:level/0">level</a>(), Modules :: <a href="#t:modules/0">modules</a>(), OneResult :: <a href="#t:one_result/0">one_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="analyse/3">
+
+  <div class="detail-header">
+    <a href="#analyse/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse/3</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse(Modules, Analysis, Level) ->
+           OneResult | {result, <a href="#t:analyse_ok/0">analyse_ok</a>(), <a href="#t:analyse_fail/0">analyse_fail</a>()} | {error, not_main_node}
+           when
+               Analysis :: <a href="#t:analysis/0">analysis</a>(),
+               Level :: <a href="#t:level/0">level</a>(),
+               Modules :: <a href="#t:modules/0">modules</a>(),
+               OneResult :: <a href="#t:one_result/0">one_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="analyse_to_file/0">
+
+  <div class="detail-header">
+    <a href="#analyse_to_file/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse_to_file/0</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse_to_file() -> {result, <a href="#t:analyse_file_ok/0">analyse_file_ok</a>(), <a href="#t:analyse_file_fail/0">analyse_file_fail</a>()} | {error, not_main_node}.</pre>
+
+      </div>
+
+<ul class="types"><li name="analyse_answer"></li><li name="analyse_file_fail"></li><li name="analyse_file_ok"></li><li name="analyse_option"></li><li name="analyse_rsn"></li><li name="modules"></li></ul><p>Makes copies of the source file for the given modules, where it for each executable line is specified how many times it has been executed.</p><p>The output file <code>OutFile</code> defaults to <code>Module.COVER.out</code>, or <code>Module.COVER.html</code> if the option <code>html</code> was used.</p><p>If <code>Modules</code> is an atom (one module), the return will be <code>Answer</code>, else the return will be a list, <code>{result, Ok, Fail}</code>.</p><p>If <code>Modules</code> is not given, all modules that have da ta in the cover data table, are analysed. Note that this includes both cover compiled modules and imported modules.</p><p>If a module is not Cover compiled, this is indicated by the error reason <code>{not_cover_compiled, Module}</code>.</p><p>If the source file and/or the output file cannot be opened using <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#open/2"><code>file:open/2</code></a>, the function returns <code>{error, {file, File, Reason}}</code> where <code>File</code> is the file name and <code>Reason</code> is the error reason.</p><p>If a module was cover compiled from the <code>.beam</code> file, that is, using <a href="cover.html#compile_beam/1"><code>compile_beam/1</code></a> or <a href="cover.html#compile_beam_directory/0"><code>compile_beam_directory/0,1</code> </a>,it is assumed that the source code can be found in the same directory as the <code>.beam</code> file, in <code>../src</code> relative to that directory, or using the source path in <code>Module:module_info(compile)</code>. When using the latter, two paths are examined: first the one constructed by joining <code>../src</code> and the tail of the compiled path below a trailing <code>src</code> component, then the compiled path itself. If no source code is found, this is indicated by the error reason <code>{no_source_code_found, Module}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="analyse_to_file/1">
+
+  <div class="detail-header">
+    <a href="#analyse_to_file/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse_to_file/1</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse_to_file(Modules) ->
+                   Answer |
+                   {result, <a href="#t:analyse_file_ok/0">analyse_file_ok</a>(), <a href="#t:analyse_file_fail/0">analyse_file_fail</a>()} |
+                   {error, not_main_node}
+                   when Modules :: <a href="#t:modules/0">modules</a>(), Answer :: <a href="#t:analyse_answer/0">analyse_answer</a>();
+               (Options) ->
+                   {result, <a href="#t:analyse_file_ok/0">analyse_file_ok</a>(), <a href="#t:analyse_file_fail/0">analyse_file_fail</a>()} | {error, not_main_node}
+                   when Options :: [<a href="#t:analyse_option/0">analyse_option</a>()].</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="analyse_to_file/2">
+
+  <div class="detail-header">
+    <a href="#analyse_to_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">analyse_to_file/2</h1>
+
+
+      <span class="note">(since OTP 18.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>analyse_to_file(Modules, Options) ->
+                   Answer |
+                   {result, <a href="#t:analyse_file_ok/0">analyse_file_ok</a>(), <a href="#t:analyse_file_fail/0">analyse_file_fail</a>()} |
+                   {error, not_main_node}
+                   when
+                       Modules :: <a href="#t:modules/0">modules</a>(),
+                       Options :: [<a href="#t:analyse_option/0">analyse_option</a>()],
+                       Answer :: <a href="#t:analyse_answer/0">analyse_answer</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="async_analyse_to_file/1">
+
+  <div class="detail-header">
+    <a href="#async_analyse_to_file/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">async_analyse_to_file/1</h1>
+
+
+      <span class="note">(since OTP R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>async_analyse_to_file(Module) -> pid() when Module :: module().</pre>
+
+      </div>
+
+<ul class="types"><li name="analyse_rsn"></li></ul><p>This function works exactly the same way as <a href="cover.html#analyse_to_file/1"><code>analyse_to_file</code></a> except that it is asynchronous instead of synchronous. The spawned process will link with the caller when created. If an error of type <code>analyse_rsn()</code> occurs while doing the cover analysis the process will crash with the same error reason as <a href="cover.html#analyse_to_file/1"><code>analyse_to_file</code></a> would return.</p>
+  </section>
+</section>
+<section class="detail" id="async_analyse_to_file/2">
+
+  <div class="detail-header">
+    <a href="#async_analyse_to_file/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">async_analyse_to_file/2</h1>
+
+
+      <span class="note">(since OTP R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>async_analyse_to_file(Module, OutFile) -> pid()
+                         when Module :: module(), OutFile :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>();
+                     (Module, Options) -> pid()
+                         when Module :: module(), Options :: [Option], Option :: html.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="async_analyse_to_file/3">
+
+  <div class="detail-header">
+    <a href="#async_analyse_to_file/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">async_analyse_to_file/3</h1>
+
+
+      <span class="note">(since OTP R14B02)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>async_analyse_to_file(Module, OutFile, Options) -> pid()
+                         when
+                             Module :: module(),
+                             OutFile :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                             Options :: [Option],
+                             Option :: html.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile/1">
+
+  <div class="detail-header">
+    <a href="#compile/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile(ModFiles) -> Result | [Result] when ModFiles :: <a href="#t:mod_files/0">mod_files</a>(), Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="compile_result"></li><li name="mod_file"></li><li name="mod_files"></li><li name="option"></li><li name="option" class="description">See <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>compile:file/2</code></a>.</li></ul><p>Compiles a module for Cover analysis. The module is given by its module name <code>Module</code> or by its file name <code>File</code>. The <code>.erl</code> extension may be omitted. If the module is located in another directory, the path has to be specified.</p><p><code>Options</code> is a list of compiler options which defaults to <code>[]</code>. Only options defining include file directories and macros are passed to <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>compile:file/2</code></a>, everything else is ignored.</p><p>If the module is successfully Cover compiled, the function returns <code>{ok, Module}</code>. Otherwise the function returns <code>{error, File}</code>. Errors and warnings are printed as they occur.</p><p>If a list of <code>ModFiles</code> is given as input, a list of <code>Result</code> will be returned. The order of the returned list is undefined.</p><p>Note that the internal database is (re-)initiated during the compilation, meaning any previously collected coverage data for the module will be lost.</p>
+  </section>
+</section>
+<section class="detail" id="compile/2">
+
+  <div class="detail-header">
+    <a href="#compile/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile(ModFiles, Options) -> Result | [Result]
+           when ModFiles :: <a href="#t:mod_files/0">mod_files</a>(), Options :: [<a href="#t:option/0">option</a>()], Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile_beam/1">
+
+  <div class="detail-header">
+    <a href="#compile_beam/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_beam/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_beam(ModFiles) -> Result | [Result]
+                when ModFiles :: <a href="#t:beam_mod_files/0">beam_mod_files</a>(), Result :: <a href="#t:compile_beam_result/0">compile_beam_result</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="beam_mod_file"></li><li name="beam_mod_files"></li><li name="compile_beam_result"></li><li name="compile_beam_rsn"></li></ul><p>Does the same as <a href="cover.html#compile/1"><code>compile/1,2</code></a>, but uses an existing <code>.beam</code> file as base, that is, the module is not compiled from source. Thus <code>compile_beam/1</code> is faster than <code>compile/1,2</code>.</p><p>Note that the existing <code>.beam</code> file must contain <em>abstract code</em>, that is, it must have been compiled with the <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>debug_info</code></a> option. If not, the error reason <code>{no_abstract_code, BeamFile}</code> is returned. If the abstract code is encrypted, and no key is available for decrypting it, the error reason <code>{encrypted_abstract_code, BeamFile}</code> is returned.</p><p>If only the module name (that is, not the full name of the <code>.beam</code> file) is given to this function, the <code>.beam</code> file is found by calling <code>code:which(Module)</code>. If no <code>.beam</code> file is found, the error reason <code>non_existing</code> is returned. If the module is already cover compiled with <code>compile_beam/1</code>, the <code>.beam</code> file will be picked from the same location as the first time it was compiled. If the module is already cover compiled with <a href="cover.html#compile/1"><code>compile/1,2</code></a>, there is no way to find the correct <code>.beam</code> file, so the error reason <code>{already_cover_compiled, no_beam_found, Module}</code> is returned.</p><p><code>{error, BeamFile}</code> is returned if the compiled code cannot be loaded on the node.</p><p>If a list of <code>ModFiles</code> is given as input, a list of <code>Result</code> will be returned. The order of the returned list is undefined.</p>
+  </section>
+</section>
+<section class="detail" id="compile_beam_directory/0">
+
+  <div class="detail-header">
+    <a href="#compile_beam_directory/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_beam_directory/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_beam_directory() -> [Result] | {error, Reason}
+                          when Reason :: <a href="#t:file_error/0">file_error</a>(), Result :: <a href="#t:compile_beam_result/0">compile_beam_result</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="compile_beam_result"></li><li name="compile_beam_rsn"></li><li name="file_error"></li></ul><p>Compiles all modules (<code>.beam</code> files) in a directory <code>Dir</code> for Cover analysis the same way as <a href="cover.html#compile_beam/1"><code>compile_beam/1</code></a> and returns a list with the return values.</p><p><code>Dir</code> defaults to the current working directory.</p><p>The function returns <code>{error, eacces}</code> if the directory is not readable or <code>{error, enoent}</code> if the directory does not exist.</p>
+  </section>
+</section>
+<section class="detail" id="compile_beam_directory/1">
+
+  <div class="detail-header">
+    <a href="#compile_beam_directory/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_beam_directory/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_beam_directory(Dir) -> [Result] | {error, Reason}
+                          when
+                              Dir :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                              Reason :: <a href="#t:file_error/0">file_error</a>(),
+                              Result :: <a href="#t:compile_beam_result/0">compile_beam_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile_directory/0">
+
+  <div class="detail-header">
+    <a href="#compile_directory/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_directory/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_directory() -> [Result] | {error, Reason}
+                     when Reason :: <a href="#t:file_error/0">file_error</a>(), Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="compile_result"></li><li name="file_error"></li><li name="option"></li><li name="option" class="description">See <a href="https://wojtekmach.pl/otp_docs/compiler/compile.html#file/2"><code>compile:file/2</code></a>.</li></ul><p>Compiles all modules (<code>.erl</code> files) in a directory <code>Dir</code> for Cover analysis the same way as <a href="cover.html#compile_module/1"><code>compile_module/1,2</code></a> and returns a list with the return values.</p><p><code>Dir</code> defaults to the current working directory.</p><p>The function returns <code>{error, eacces}</code> if the directory is not readable or <code>{error, enoent}</code> if the directory does not exist.</p>
+  </section>
+</section>
+<section class="detail" id="compile_directory/1">
+
+  <div class="detail-header">
+    <a href="#compile_directory/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_directory/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_directory(Dir) -> [Result] | {error, Reason}
+                     when
+                         Dir :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                         Reason :: <a href="#t:file_error/0">file_error</a>(),
+                         Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile_directory/2">
+
+  <div class="detail-header">
+    <a href="#compile_directory/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_directory/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_directory(Dir, Options) -> [Result] | {error, Reason}
+                     when
+                         Dir :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+                         Options :: [<a href="#t:option/0">option</a>()],
+                         Reason :: <a href="#t:file_error/0">file_error</a>(),
+                         Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile_module/1">
+
+  <div class="detail-header">
+    <a href="#compile_module/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_module/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_module(ModFiles) -> Result | [Result]
+                  when ModFiles :: <a href="#t:mod_files/0">mod_files</a>(), Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="compile_module/2">
+
+  <div class="detail-header">
+    <a href="#compile_module/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">compile_module/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>compile_module(ModFiles, Options) -> Result | [Result]
+                  when ModFiles :: <a href="#t:mod_files/0">mod_files</a>(), Options :: [<a href="#t:option/0">option</a>()], Result :: <a href="#t:compile_result/0">compile_result</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="export/1">
+
+  <div class="detail-header">
+    <a href="#export/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">export/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>export(File) -> ok | {error, Reason} when File :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), Reason :: <a href="#t:export_reason/0">export_reason</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="export_reason"></li></ul><p>Exports the current coverage data for <code>Module</code> to the file <code>ExportFile</code>. It is recommended to name the <code>ExportFile</code> with the extension <code>.coverdata</code>, since other filenames cannot be read by the web based interface to cover.</p><p>If <code>Module</code> is not given, data for all Cover compiled or earlier imported modules is exported.</p><p>This function is useful if coverage data from different systems is to be merged.</p><p>See also <a href="cover.html#import/1"><code>import/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="export/2">
+
+  <div class="detail-header">
+    <a href="#export/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">export/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>export(File, Module) -> ok | {error, Reason}
+          when File :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(), Module :: module(), Reason :: <a href="#t:export_reason/0">export_reason</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="flush/1">
+
+  <div class="detail-header">
+    <a href="#flush/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flush/1</h1>
+
+
+      <span class="note">(since OTP R16B)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>flush(Nodes) -> ok | {error, not_main_node} when Nodes :: node() | [node()].</pre>
+
+      </div>
+
+<p>Fetch data from the Cover database on the remote nodes and stored on the main node.</p>
+  </section>
+</section>
+<section class="detail" id="import/1">
+
+  <div class="detail-header">
+    <a href="#import/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">import/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>import(ExportFile) -> ok | {error, Reason}
+          when
+              ExportFile :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>(),
+              Reason :: {cant_open_file, ExportFile, FileReason :: term()} | not_main_node.</pre>
+
+      </div>
+
+<p>Imports coverage data from the file <code>ExportFile</code> created with <a href="cover.html#export/1"><code>export/1,2</code></a>. Any analysis performed after this will include the imported data.</p><p>Note that when compiling a module <em>all existing coverage data is removed</em>, including imported data. If a module is already compiled when data is imported, the imported data is <em>added</em> to the existing coverage data.</p><p>Coverage data from several export files can be imported into one system. The coverage data is then added up when analysing.</p><p>Coverage data for a module cannot be imported from the same file twice unless the module is first reset or compiled. The check is based on the filename, so you can easily fool the system by renaming your export file.</p><p>See also <a href="cover.html#export/1"><code>export/1,2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="imported/0">
+
+  <div class="detail-header">
+    <a href="#imported/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">imported/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>imported() -> [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()] | {error, not_main_node}.</pre>
+
+      </div>
+
+<p>Returns a list with all imported files.</p>
+  </section>
+</section>
+<section class="detail" id="imported_modules/0">
+
+  <div class="detail-header">
+    <a href="#imported_modules/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">imported_modules/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>imported_modules() -> [module()] | {error, not_main_node}.</pre>
+
+      </div>
+
+<p>Returns a list with all modules for which there are imported data.</p>
+  </section>
+</section>
+<section class="detail" id="is_compiled/1">
+
+  <div class="detail-header">
+    <a href="#is_compiled/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_compiled/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>is_compiled(Module) -> {file, File :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename/0">file:filename</a>()} | false | {error, not_main_node}
+               when Module :: module().</pre>
+
+      </div>
+
+<p>Returns <code>{file, File}</code> if the module <code>Module</code> is Cover compiled, or <code>false</code> otherwise. <code>File</code> is the <code>.erl</code> file used by <a href="cover.html#compile_module/1"><code>compile_module/1,2</code></a> or the <code>.beam</code> file used by <a href="cover.html#compile_beam/1"><code>compile_beam/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="local_only/0">
+
+  <div class="detail-header">
+    <a href="#local_only/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">local_only/0</h1>
+
+
+      <span class="note">(since OTP 22.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>local_only() -> ok | {error, too_late}.</pre>
+
+      </div>
+
+<p>Only support running Cover on the local node. This function must be called before any modules have been compiled or any nodes added. When running in this mode, modules will be Cover compiled in a more efficient way, but the resulting code will only work on the same node they were compiled on.</p>
+  </section>
+</section>
+<section class="detail" id="modules/0">
+
+  <div class="detail-header">
+    <a href="#modules/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">modules/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>modules() -> [module()] | {error, not_main_node}.</pre>
+
+      </div>
+
+<p>Returns a list with all modules that are currently Cover compiled.</p>
+  </section>
+</section>
+<section class="detail" id="reset/0">
+
+  <div class="detail-header">
+    <a href="#reset/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reset/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>reset() -> ok | {error, not_main_node}.</pre>
+
+      </div>
+
+<p>Resets all coverage data for a Cover compiled module <code>Module</code> in the Cover database on all nodes. If the argument is omitted, the coverage data will be reset for all modules known by Cover.</p><p>If <code>Module</code> is not Cover compiled, the function returns <code>{error, {not_cover_compiled, Module}}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="reset/1">
+
+  <div class="detail-header">
+    <a href="#reset/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reset/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>reset(Module) -> ok | {error, not_main_node} | {error, {not_cover_compiled, Module}}
+         when Module :: module().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="start/0">
+
+  <div class="detail-header">
+    <a href="#start/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start() -> {ok, pid()} | {error, Reason} when Reason :: {already_started, pid()} | term().</pre>
+
+      </div>
+
+<p>Starts the Cover server which owns the Cover internal database. This function is called automatically by the other functions in the module.</p>
+  </section>
+</section>
+<section class="detail" id="start/1">
+
+  <div class="detail-header">
+    <a href="#start/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">start/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>start(Nodes) -> {ok, StartedNodes} | {error, not_main_node} | {error, local_only}
+         when Nodes :: node() | [node()], StartedNodes :: [node()].</pre>
+
+      </div>
+
+<p>Starts a Cover server on the each of given nodes, and loads all cover compiled modules. This call will fail if <code>cover:local_only/0</code> has been called.</p>
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop() -> ok | {error, not_main_node}.</pre>
+
+      </div>
+
+<p>Stops the Cover server and unloads all Cover compiled code.</p>
+  </section>
+</section>
+<section class="detail" id="stop/1">
+
+  <div class="detail-header">
+    <a href="#stop/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>stop(Nodes) -> ok | {error, not_main_node} when Nodes :: node() | [node()].</pre>
+
+      </div>
+
+<p>Stops the Cover server and unloads all Cover compiled code on the given nodes. Data stored in the Cover database on the remote nodes is fetched and stored on the main node.</p>
+  </section>
+</section>
+<section class="detail" id="which_nodes/0">
+
+  <div class="detail-header">
+    <a href="#which_nodes/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">which_nodes/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>which_nodes() -> [node()].</pre>
+
+      </div>
+
+<p>Returns a list with all nodes that are part of the coverage analysis. Note that the current node is not returned. This node is always part of the analysis.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

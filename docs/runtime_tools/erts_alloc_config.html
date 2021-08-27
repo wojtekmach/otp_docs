@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="runtime_tools v1.16.2">
+
+    <title>erts_alloc_config — runtime_tools v1.16.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-d9a6d1375e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+runtime_tools
+      </a>
+      <strong class="sidebar-projectVersion">
+        v1.16.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+erts_alloc_config <small class="app-vsn">(runtime_tools v1.16.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<div class="note"><p><code>erts_alloc_config</code> is currently an experimental tool and might be subject to backward incompatible changes.</p></div><p>erts_alloc(3) is an Erlang Run-Time System internal memory allocator library. <code>erts_alloc_config</code> is intended to be used to aid creation of an erts_alloc(3) configuration that is suitable for a limited number of runtime scenarios. The configuration that <code>erts_alloc_config</code> produce is intended as a suggestion, and may need to be adjusted manually.</p><p>The configuration is created based on information about a number of runtime scenarios. It is obviously impossible to foresee every runtime scenario that can occur. The important scenarios are those that cause maximum or minimum load on specific memory allocators. Load in this context is total size of memory blocks allocated.</p><p>The current implementation of <code>erts_alloc_config</code> concentrate on configuration of multi-block carriers. Information gathered when a runtime scenario is saved is mainly current and maximum use of multi-block carriers. If a parameter that change the use of multi-block carriers is changed, a previously generated configuration is invalid and <code>erts_alloc_config</code> needs to be run again. It is mainly the single block carrier threshold that effects the use of multi-block carriers, but other single-block carrier parameters might as well. If another value of a single block carrier parameter than the default is desired, use the desired value when running <code>erts_alloc_config</code>.</p><p>A configuration is created in the following way:</p><ul><li><p>Pass the +Mea config command-line flag to the Erlang runtime system you are going to use for creation of the allocator configuration. It will disable features that prevent <code>erts_alloc_config</code> from doing its job. Note, you should <em>not</em> use this flag when using the created configuration. Also note that it is important that you use the same amount of schedulers when creating the configuration as you are going the use on the system using the configuration.</p></li><li><p>Run your applications with different scenarios (the more the better) and save information about each scenario by calling <a href="erts_alloc_config.html#save_scenario/0">save_scenario/0</a>. It may be hard to know when the applications are at an (for <code>erts_alloc_config</code>) important runtime scenario. A good approach may therefore be to call <a href="erts_alloc_config.html#save_scenario/0">save_scenario/0</a> repeatedly, e.g. once every tenth second. Note that it is important that your applications reach the runtime scenarios that are important for <code>erts_alloc_config</code> when you are saving scenarios; otherwise, the configuration may perform bad.</p></li><li><p>When you have covered all scenarios, call <a href="erts_alloc_config.html#make_config/1">make_config/1</a> in order to create a configuration. The configuration is written to a file that you have chosen. This configuration file can later be read by an Erlang runtime-system at startup. Pass the command line argument -args_file FileName to the erl(1) command.</p></li><li><p>The configuration produced by <code>erts_alloc_config</code> may need to be manually adjusted as already stated. Do not modify the file produced by <code>erts_alloc_config</code>; instead, put your modifications in another file and load this file after the file produced by <code>erts_alloc_config</code>. That is, put the -args_file FileName argument that reads your modification file later on the command-line than the -args_file FileName argument that reads the configuration file produced by <code>erts_alloc_config</code>. If a memory allocation parameter appear multiple times, the last version of will be used, i.e., you can override parameters in the configuration file produced by <code>erts_alloc_config</code>. Doing it this way simplifies things when you want to rerun <code>erts_alloc_config</code>.</p></li></ul><div class="note"><p>The configuration created by <code>erts_alloc_config</code> may perform bad, ever horrible, for runtime scenarios that are very different from the ones saved when creating the configuration. You are, therefore, advised to rerun <code>erts_alloc_config</code> if the applications run when the configuration was made are changed, or if the load on the applications have changed since the configuration was made. You are also advised to rerun <code>erts_alloc_config</code> if the Erlang runtime system used is changed.</p></div><p><code>erts_alloc_config</code> saves information about runtime scenarios and performs computations in a server that is automatically started. The server register itself under the name <code>'__erts_alloc_config__'</code>.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p>erts_alloc(3), erl(1), <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html">io(3)</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#make_config/0">make_config() -&gt; ok | {error, Error}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Error = term()</li></ul><p>This is the same as calling <a href="erts_alloc_config.html#make_config/1">make_config(group_leader())</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#make_config/1">make_config(FileNameOrIODev) -&gt; ok | {error, Error}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">FileNameOrIODev = string() | io_device()</li><li class="type">Error = term()</li></ul><p><code>make_config/1</code> uses the information previously saved by <a href="erts_alloc_config.html#save_scenario/0">save_scenario/0</a> in order to produce an <code>erts_alloc</code> configuration. At least one scenario have had to be saved. All scenarios previously saved will be used when creating the configuration.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#save_scenario/0">save_scenario() -&gt; ok | {error, Error}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Error = term()</li></ul><p><code>save_scenario/0</code> saves information about the current runtime scenario. This information will later be used when <a href="erts_alloc_config.html#make_config/0">make_config/0</a>, or <a href="erts_alloc_config.html#make_config/1">make_config/1</a> is called.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#stop/0">stop() -&gt; ok | {error, Error}</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Error = term()</li></ul><p>Stops the server that saves runtime scenarios.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="make_config/0">
+
+  <div class="detail-header">
+    <a href="#make_config/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">make_config() -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Error = term()</li></ul><p>This is the same as calling <a href="erts_alloc_config.html#make_config/1">make_config(group_leader())</a>.</p>
+  </section>
+</section>
+<section class="detail" id="make_config/1">
+
+  <div class="detail-header">
+    <a href="#make_config/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">make_config(FileNameOrIODev) -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">FileNameOrIODev = string() | io_device()</li><li class="type">Error = term()</li></ul><p><code>make_config/1</code> uses the information previously saved by <a href="erts_alloc_config.html#save_scenario/0">save_scenario/0</a> in order to produce an <code>erts_alloc</code> configuration. At least one scenario have had to be saved. All scenarios previously saved will be used when creating the configuration.</p><p>If <code>FileNameOrIODev</code> is a <code>string()</code>, <code>make_config/1</code> will use <code>FileNameOrIODev</code> as a filename. A file named <code>FileNameOrIODev</code> is created and the configuration will be written to that file. If <code>FileNameOrIODev</code> is an <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html">io_device()</a> (see the documentation of the module <a href="https://wojtekmach.pl/otp_docs/stdlib/io.html">io</a>), the configuration will be written to the io device.</p>
+  </section>
+</section>
+<section class="detail" id="save_scenario/0">
+
+  <div class="detail-header">
+    <a href="#save_scenario/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">save_scenario() -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Error = term()</li></ul><p><code>save_scenario/0</code> saves information about the current runtime scenario. This information will later be used when <a href="erts_alloc_config.html#make_config/0">make_config/0</a>, or <a href="erts_alloc_config.html#make_config/1">make_config/1</a> is called.</p><p>The first time <code>save_scenario/0</code> is called a server will be started. This server will save runtime scenarios. All saved scenarios can be removed by calling <a href="erts_alloc_config.html#make_config/0">stop/0</a>.</p>
+  </section>
+</section>
+<section class="detail" id="stop/0">
+
+  <div class="detail-header">
+    <a href="#stop/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">stop() -&gt; ok | {error, Error}</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Error = term()</li></ul><p>Stops the server that saves runtime scenarios.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

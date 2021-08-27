@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="stdlib v3.15.2">
+
+    <title>filename — stdlib v3.15.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2e60d1dd15.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+stdlib
+      </a>
+      <strong class="sidebar-projectVersion">
+        v3.15.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+filename <small class="app-vsn">(stdlib v3.15.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module provides functions for analyzing and manipulating filenames. These functions are designed so that the Erlang code can work on many different platforms with different filename formats. With filename is meant all strings that can be used to denote a file. The filename can be a short relative name like <code>foo.erl</code>, a long absolute name including a drive designator, a directory name like <code>D:\usr/local\bin\erl/lib\tools\foo.erl</code>, or any variations in between.</p><p>In Windows, all functions return filenames with forward slashes only, even if the arguments contain backslashes. To normalize a filename by removing redundant directory separators, use <a href="filename.html#join/1"><code>join/1</code></a>.</p><p>The module supports raw filenames in the way that if a binary is present, or the filename cannot be interpreted according to the return value of <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#native_name_encoding/0"><code>file:native_name_encoding/0</code></a>, a raw filename is also returned. For example, <code>join/1</code> provided with a path component that is a binary (and cannot be interpreted under the current native filename encoding) results in a raw filename that is returned (the join operation is performed of course). For more information about raw filenames, see the <a href="https://wojtekmach.pl/otp_docs/kernel/file.html"><code>file</code></a> module.</p><div class="note"><p>Functionality in this module generally assumes valid input and does not necessarily fail on input that does not use a valid encoding, but may instead very likely produce invalid output.</p><p>File operations used to accept filenames containing null characters (integer value zero). This caused the name to be truncated and in some cases arguments to primitive operations to be mixed up. Filenames containing null characters inside the filename are now <em>rejected</em> and will cause primitive file operations to fail.</p></div><div class="warning"><p>Currently null characters at the end of the filename will be accepted by primitive file operations. Such filenames are however still documented as invalid. The implementation will also change in the future and reject such filenames.</p></div>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname/1">absname/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts a relative <code>Filename</code> and returns an absolute name. No attempt is made to create the shortest absolute name, as this can give incorrect results on file systems that allow links.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname/2">absname/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <a href="filename.html#absname/1"><code>absname/1</code></a>, except that the directory to which the filename is to be made relative is specified in argument <code>Dir</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#absname_join/2">absname_join/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Joins an absolute directory with a relative filename. Similar to <a href="filename.html#join/2"><code>join/2</code></a>, but on platforms with tight restrictions on raw filename length and no support for symbolic links (read: VxWorks), leading parent directory components in <code>Filename</code> are matched against trailing directory components in <code>Dir</code> so they can be removed from the result - minimizing its length.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basedir/2">basedir/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><p>Equivalent to <a href="filename.html#content#basedir_3_1">basedir(PathType, Application, #{})</a> or <a href="filename.html#content#basedir_3_2">basedir(PathsType, Application, #{})</a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basedir/3">basedir/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="basedir_opts"></li><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><a id="basedir-3"></a><p>Returns a suitable path, or paths, for a given type. If <code>os</code> is not set in <code>Opts</code> the function will default to the native option, that is <code>'linux'</code>, <code>'darwin'</code> or <code>'windows'</code>, as understood by <code>os:type/0</code>. Anything not recognized as <code>'darwin'</code> or <code>'windows'</code> is interpreted as <code>'linux'</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basename/1">basename/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the last component of <code>Filename</code>, or <code>Filename</code> itself if it does not contain any directory separators.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#basename/2">basename/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the last component of <code>Filename</code> with extension <code>Ext</code> stripped. This function is to be used to remove a (possible) specific extension. To remove an existing extension when you are unsure which one it is, use <code>rootname(basename(Filename))</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#dirname/1">dirname/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the directory part of <code>Filename</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#extension/1">extension/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the file extension of <code>Filename</code>, including the period. Returns an empty string if no extension exists.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#flatten/1">flatten/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts a possibly deep list filename consisting of characters and atoms into the corresponding flat string filename.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/1">join/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Joins a list of filename <code>Components</code> with directory separators. If one of the elements of <code>Components</code> includes an absolute path, such as <code>&quot;/xxx&quot;</code>, the preceding elements, if any, are removed from the result.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#join/2">join/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Joins two filename components with directory separators. Equivalent to <code>join([Name1, Name2])</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#nativename/1">nativename/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Converts <code>Path</code> to a form accepted by the command shell and native applications on the current platform. On Windows, forward slashes are converted to backward slashes. On all platforms, the name is normalized as done by <a href="filename.html#join/1"><code>join/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pathtype/1">pathtype/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the path type, which is one of the following</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rootname/1">rootname/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes a filename extension. <code>rootname/2</code> works as <code>rootname/1</code>, except that the extension is removed only if it is <code>Ext</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rootname/2">rootname/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#safe_relative_path/1">safe_relative_path/1</a>
+
+      <span class="deprecated" title="filename:safe_relative_path/1 is deprecated and will be removed in OTP 25; use filelib:safe_relative_path/2 instead">deprecated</span>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sanitizes the relative path by eliminating &quot;..&quot; and &quot;.&quot; components to protect against directory traversal attacks. Either returns the sanitized path name, or the atom <code>unsafe</code> if the path is unsafe. The path is considered unsafe in the following circumstances</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#split/1">split/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list whose elements are the path components of <code>Filename</code>.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="absname/1">
+
+  <div class="detail-header">
+    <a href="#absname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>absname(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Converts a relative <code>Filename</code> and returns an absolute name. No attempt is made to create the shortest absolute name, as this can give incorrect results on file systems that allow links.</p><p><em>Unix examples:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">pwd</span><span class="p" data-group-id="4037486808-1">(</span><span class="p" data-group-id="4037486808-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/local&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4037486808-2">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="4037486808-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/foo&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4037486808-3">(</span><span class="s">&quot;../x&quot;</span><span class="p" data-group-id="4037486808-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/../x&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4037486808-4">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="4037486808-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/&quot;</span></code></pre><p><em>Windows examples:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">pwd</span><span class="p" data-group-id="4725635574-1">(</span><span class="p" data-group-id="4725635574-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4725635574-2">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="4725635574-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local/foo&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4725635574-3">(</span><span class="s">&quot;../x&quot;</span><span class="p" data-group-id="4725635574-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;D:/usr/local/../x&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">absname</span><span class="p" data-group-id="4725635574-4">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="4725635574-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;D:/&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="absname/2">
+
+  <div class="detail-header">
+    <a href="#absname/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>absname(Filename, Dir) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+           when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Dir :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Same as <a href="filename.html#absname/1"><code>absname/1</code></a>, except that the directory to which the filename is to be made relative is specified in argument <code>Dir</code>.</p>
+  </section>
+</section>
+<section class="detail" id="absname_join/2">
+
+  <div class="detail-header">
+    <a href="#absname_join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">absname_join/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>absname_join(Dir, Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+                when Dir :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Joins an absolute directory with a relative filename. Similar to <a href="filename.html#join/2"><code>join/2</code></a>, but on platforms with tight restrictions on raw filename length and no support for symbolic links (read: VxWorks), leading parent directory components in <code>Filename</code> are matched against trailing directory components in <code>Dir</code> so they can be removed from the result - minimizing its length.</p>
+  </section>
+</section>
+<section class="detail" id="basedir/2">
+
+  <div class="detail-header">
+    <a href="#basedir/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basedir/2</h1>
+
+
+      <span class="note">(since OTP 19.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>basedir(PathType, Application) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+           when PathType :: <a href="#t:basedir_path_type/0">basedir_path_type</a>(), Application :: string() | binary();
+       (PathsType, Application) -> [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()]
+           when PathsType :: <a href="#t:basedir_paths_type/0">basedir_paths_type</a>(), Application :: string() | binary().</pre>
+
+      </div>
+
+<ul class="types"><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><p>Equivalent to <a href="filename.html#content#basedir_3_1">basedir(PathType, Application, #{})</a> or <a href="filename.html#content#basedir_3_2">basedir(PathsType, Application, #{})</a>.</p>
+  </section>
+</section>
+<section class="detail" id="basedir/3">
+
+  <div class="detail-header">
+    <a href="#basedir/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basedir/3</h1>
+
+
+      <span class="note">(since OTP 19.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>basedir(PathType, Application, Opts) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+           when
+               PathType :: <a href="#t:basedir_path_type/0">basedir_path_type</a>(),
+               Application :: string() | binary(),
+               Opts :: <a href="#t:basedir_opts/0">basedir_opts</a>();
+       (PathsType, Application, Opts) -> [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()]
+           when
+               PathsType :: <a href="#t:basedir_paths_type/0">basedir_paths_type</a>(),
+               Application :: string() | binary(),
+               Opts :: <a href="#t:basedir_opts/0">basedir_opts</a>().</pre>
+
+      </div>
+
+<ul class="types"><li name="basedir_opts"></li><li name="basedir_path_type"></li><li name="basedir_paths_type"></li></ul><a id="basedir-3"></a><p>Returns a suitable path, or paths, for a given type. If <code>os</code> is not set in <code>Opts</code> the function will default to the native option, that is <code>'linux'</code>, <code>'darwin'</code> or <code>'windows'</code>, as understood by <code>os:type/0</code>. Anything not recognized as <code>'darwin'</code> or <code>'windows'</code> is interpreted as <code>'linux'</code>.</p><p>The options <code>'author'</code> and <code>'version'</code> are only used with <code>'windows'</code> option mode.</p><ul><li><code>user_cache</code><p>The path location is intended for transient data files on a local machine.</p><p>On Linux: Respects the os environment variable <code>XDG_CACHE_HOME</code>.</p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3833329529-1">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3833329529-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="3833329529-2">}</span><span class="p" data-group-id="3833329529-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/.cache/my_application&quot;</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2089458250-1">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2089458250-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="2089458250-2">}</span><span class="p" data-group-id="2089458250-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/Library/Caches/my_application&quot;</span></code></pre>On Windows:<pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3753744821-1">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p" data-group-id="3753744821-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/My App/Cache&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3753744821-2">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p" data-group-id="3753744821-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/My App/Cache&quot;</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3753744821-3">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3753744821-4">#{</span><span class="ss">author</span><span class="p">=&gt;</span><span class="s">&quot;Erlang&quot;</span><span class="p" data-group-id="3753744821-4">}</span><span class="p" data-group-id="3753744821-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/Erlang/My App/Cache&quot;</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3753744821-5">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3753744821-6">#{</span><span class="ss">version</span><span class="p">=&gt;</span><span class="s">&quot;1.2&quot;</span><span class="p" data-group-id="3753744821-6">}</span><span class="p" data-group-id="3753744821-5">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/My App/1.2/Cache&quot;</span><span class="w">
+</span><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="3753744821-7">(</span><span class="ss">user_cache</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3753744821-8">#{</span><span class="ss">author</span><span class="p">=&gt;</span><span class="s">&quot;Erlang&quot;</span><span class="p">,</span><span class="ss">version</span><span class="p">=&gt;</span><span class="s">&quot;1.2&quot;</span><span class="p" data-group-id="3753744821-8">}</span><span class="p" data-group-id="3753744821-7">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/Erlang/My App/1.2/Cache&quot;</span></code></pre></li><li><code>user_config</code><p>The path location is intended for persistent configuration files.</p><p>On Linux: Respects the os environment variable <code>XDG_CONFIG_HOME</code>.</p><pre><code class="makeup erlang"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="0326129815-1">(</span><span class="ss">user_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0326129815-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="0326129815-2">}</span><span class="p" data-group-id="0326129815-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/.config/my_application&quot;</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="4704189265-1">(</span><span class="ss">user_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4704189265-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="4704189265-2">}</span><span class="p" data-group-id="4704189265-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/Library/Application Support/my_application&quot;</span></code></pre>On Windows:<pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="5305933063-1">(</span><span class="ss">user_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p" data-group-id="5305933063-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Roaming/My App&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="5305933063-2">(</span><span class="ss">user_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5305933063-3">#{</span><span class="ss">author</span><span class="p">=&gt;</span><span class="s">&quot;Erlang&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">version</span><span class="p">=&gt;</span><span class="s">&quot;1.2&quot;</span><span class="p" data-group-id="5305933063-3">}</span><span class="p" data-group-id="5305933063-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Roaming/Erlang/My App/1.2&quot;</span></code></pre></li><li><code>user_data</code><p>The path location is intended for persistent data files.</p><p>On Linux: Respects the os environment variable <code>XDG_DATA_HOME</code>.</p><pre><code class="makeup erlang"><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="4602327646-1">(</span><span class="ss">user_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4602327646-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="4602327646-2">}</span><span class="p" data-group-id="4602327646-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/.local/my_application&quot;</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="7667575986-1">(</span><span class="ss">user_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7667575986-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="7667575986-2">}</span><span class="p" data-group-id="7667575986-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/Library/Application Support/my_application&quot;</span></code></pre>On Windows:<pre><code class="makeup erlang"><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2446679612-1">(</span><span class="ss">user_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p" data-group-id="2446679612-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/My App&quot;</span><span class="w">
+</span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2446679612-2">(</span><span class="ss">user_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="p" data-group-id="2446679612-3">#{</span><span class="ss">author</span><span class="p">=&gt;</span><span class="s">&quot;Erlang&quot;</span><span class="p">,</span><span class="ss">version</span><span class="p">=&gt;</span><span class="s">&quot;1.2&quot;</span><span class="p" data-group-id="2446679612-3">}</span><span class="p" data-group-id="2446679612-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/Erlang/My App/1.2&quot;</span></code></pre></li><li><code>user_log</code><p>The path location is intended for transient log files on a local machine.</p><p>On Linux: Respects the os environment variable <code>XDG_CACHE_HOME</code>.</p><pre><code class="makeup erlang"><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="4205061865-1">(</span><span class="ss">user_log</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4205061865-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="4205061865-2">}</span><span class="p" data-group-id="4205061865-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/.cache/my_application/log&quot;</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="0721435624-1">(</span><span class="ss">user_log</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0721435624-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="0721435624-2">}</span><span class="p" data-group-id="0721435624-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/home/otptest/Library/Caches/my_application&quot;</span></code></pre>On Windows:<pre><code class="makeup erlang"><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2939643890-1">(</span><span class="ss">user_log</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p" data-group-id="2939643890-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/My App/Logs&quot;</span><span class="w">
+</span><span class="mi">13</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2939643890-2">(</span><span class="ss">user_log</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;My App&quot;</span><span class="p">,</span><span class="p" data-group-id="2939643890-3">#{</span><span class="ss">author</span><span class="p">=&gt;</span><span class="s">&quot;Erlang&quot;</span><span class="p">,</span><span class="ss">version</span><span class="p">=&gt;</span><span class="s">&quot;1.2&quot;</span><span class="p" data-group-id="2939643890-3">}</span><span class="p" data-group-id="2939643890-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;c:/Users/otptest/AppData/Local/Erlang/My App/1.2/Logs&quot;</span></code></pre></li><li><code>site_config</code><p>On Linux: Respects the os environment variable <code>XDG_CONFIG_DIRS</code>.</p><pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="8056815745-1">(</span><span class="ss">site_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8056815745-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="8056815745-2">}</span><span class="p" data-group-id="8056815745-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="8056815745-3">[</span><span class="s">&quot;/usr/local/share/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/share/my_application&quot;</span><span class="p" data-group-id="8056815745-3">]</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">os</span><span class="p">:</span><span class="nf">getenv</span><span class="p" data-group-id="8056815745-4">(</span><span class="s">&quot;XDG_CONFIG_DIRS&quot;</span><span class="p" data-group-id="8056815745-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/etc/xdg/xdg-ubuntu:/usr/share/upstart/xdg:/etc/xdg&quot;</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="8056815745-5">(</span><span class="ss">site_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8056815745-6">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="8056815745-6">}</span><span class="p" data-group-id="8056815745-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="8056815745-7">[</span><span class="s">&quot;/etc/xdg/xdg-ubuntu/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/share/upstart/xdg/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/etc/xdg/my_application&quot;</span><span class="p" data-group-id="8056815745-7">]</span><span class="w">
+</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">os</span><span class="p">:</span><span class="nf">unsetenv</span><span class="p" data-group-id="8056815745-8">(</span><span class="s">&quot;XDG_CONFIG_DIRS&quot;</span><span class="p" data-group-id="8056815745-8">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">true</span><span class="w">
+</span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="8056815745-9">(</span><span class="ss">site_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8056815745-10">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="8056815745-10">}</span><span class="p" data-group-id="8056815745-9">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="8056815745-11">[</span><span class="s">&quot;/etc/xdg/my_application&quot;</span><span class="p" data-group-id="8056815745-11">]</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="9093311058-1">(</span><span class="ss">site_config</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9093311058-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="9093311058-2">}</span><span class="p" data-group-id="9093311058-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="9093311058-3">[</span><span class="s">&quot;/Library/Application Support/my_application&quot;</span><span class="p" data-group-id="9093311058-3">]</span></code></pre></li><li><code>site_data</code><p>On Linux: Respects the os environment variable <code>XDG_DATA_DIRS</code>.</p><pre><code class="makeup erlang"><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">os</span><span class="p">:</span><span class="nf">getenv</span><span class="p" data-group-id="2795154062-1">(</span><span class="s">&quot;XDG_DATA_DIRS&quot;</span><span class="p" data-group-id="2795154062-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/&quot;</span><span class="w">
+</span><span class="mi">11</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2795154062-2">(</span><span class="ss">site_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2795154062-3">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="2795154062-3">}</span><span class="p" data-group-id="2795154062-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2795154062-4">[</span><span class="s">&quot;/usr/share/ubuntu/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/share/gnome/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/local/share/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/share/my_application&quot;</span><span class="p" data-group-id="2795154062-4">]</span><span class="w">
+</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">os</span><span class="p">:</span><span class="nf">unsetenv</span><span class="p" data-group-id="2795154062-5">(</span><span class="s">&quot;XDG_DATA_DIRS&quot;</span><span class="p" data-group-id="2795154062-5">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">true</span><span class="w">
+</span><span class="mi">13</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="2795154062-6">(</span><span class="ss">site_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2795154062-7">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">linux</span><span class="p" data-group-id="2795154062-7">}</span><span class="p" data-group-id="2795154062-6">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="2795154062-8">[</span><span class="s">&quot;/usr/local/share/my_application&quot;</span><span class="p">,</span><span class="w">
+ </span><span class="s">&quot;/usr/share/my_application&quot;</span><span class="p" data-group-id="2795154062-8">]</span></code></pre>On Darwin:<pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basedir</span><span class="p" data-group-id="8378237797-1">(</span><span class="ss">site_data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_application&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8378237797-2">#{</span><span class="ss">os</span><span class="p">=&gt;</span><span class="ss">darwin</span><span class="p" data-group-id="8378237797-2">}</span><span class="p" data-group-id="8378237797-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="8378237797-3">[</span><span class="s">&quot;/Library/Application Support/my_application&quot;</span><span class="p" data-group-id="8378237797-3">]</span></code></pre></li></ul>
+  </section>
+</section>
+<section class="detail" id="basename/1">
+
+  <div class="detail-header">
+    <a href="#basename/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basename/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>basename(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Returns the last component of <code>Filename</code>, or <code>Filename</code> itself if it does not contain any directory separators.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="5281420110-1">(</span><span class="s">&quot;foo&quot;</span><span class="p" data-group-id="5281420110-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo&quot;</span><span class="w">
+</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="5281420110-2">(</span><span class="s">&quot;/usr/foo&quot;</span><span class="p" data-group-id="5281420110-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;foo&quot;</span><span class="w">
+</span><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="5281420110-3">(</span><span class="s">&quot;/&quot;</span><span class="p" data-group-id="5281420110-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="5281420110-4">[</span><span class="p" data-group-id="5281420110-4">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="basename/2">
+
+  <div class="detail-header">
+    <a href="#basename/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">basename/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>basename(Filename, Ext) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+            when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Ext :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Returns the last component of <code>Filename</code> with extension <code>Ext</code> stripped. This function is to be used to remove a (possible) specific extension. To remove an existing extension when you are unsure which one it is, use <code>rootname(basename(Filename))</code>.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="4659605323-1">(</span><span class="s">&quot;~/src/kalle.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="4659605323-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span><span class="w">
+</span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="4659605323-2">(</span><span class="s">&quot;~/src/kalle.beam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="4659605323-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;kalle.beam&quot;</span><span class="w">
+</span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="4659605323-3">(</span><span class="s">&quot;~/src/kalle.old.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="4659605323-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;kalle.old&quot;</span><span class="w">
+</span><span class="mi">11</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="4659605323-4">(</span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="4659605323-5">(</span><span class="s">&quot;~/src/kalle.erl&quot;</span><span class="p" data-group-id="4659605323-5">)</span><span class="p" data-group-id="4659605323-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span><span class="w">
+</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="4659605323-6">(</span><span class="nc">filename</span><span class="p">:</span><span class="nf">basename</span><span class="p" data-group-id="4659605323-7">(</span><span class="s">&quot;~/src/kalle.beam&quot;</span><span class="p" data-group-id="4659605323-7">)</span><span class="p" data-group-id="4659605323-6">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;kalle&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="dirname/1">
+
+  <div class="detail-header">
+    <a href="#dirname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">dirname/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>dirname(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Returns the directory part of <code>Filename</code>.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">13</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">dirname</span><span class="p" data-group-id="7043482731-1">(</span><span class="s">&quot;/usr/src/kalle.erl&quot;</span><span class="p" data-group-id="7043482731-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/src&quot;</span><span class="w">
+</span><span class="mi">14</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">dirname</span><span class="p" data-group-id="7043482731-2">(</span><span class="s">&quot;kalle.erl&quot;</span><span class="p" data-group-id="7043482731-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;.&quot;</span></code></pre><pre><code class="makeup erlang"><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">dirname</span><span class="p" data-group-id="9334063053-1">(</span><span class="s">&quot;\\usr\\src/kalle.erl&quot;</span><span class="p" data-group-id="9334063053-1">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% Windows</span><span class="w">
+</span><span class="s">&quot;/usr/src&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="extension/1">
+
+  <div class="detail-header">
+    <a href="#extension/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">extension/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>extension(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Returns the file extension of <code>Filename</code>, including the period. Returns an empty string if no extension exists.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">15</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">extension</span><span class="p" data-group-id="8988917986-1">(</span><span class="s">&quot;foo.erl&quot;</span><span class="p" data-group-id="8988917986-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;.erl&quot;</span><span class="w">
+</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">extension</span><span class="p" data-group-id="8988917986-2">(</span><span class="s">&quot;beam.src/kalle&quot;</span><span class="p" data-group-id="8988917986-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="8988917986-3">[</span><span class="p" data-group-id="8988917986-3">]</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="flatten/1">
+
+  <div class="detail-header">
+    <a href="#flatten/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">flatten/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>flatten(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Converts a possibly deep list filename consisting of characters and atoms into the corresponding flat string filename.</p>
+  </section>
+</section>
+<section class="detail" id="join/1">
+
+  <div class="detail-header">
+    <a href="#join/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>join(Components) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Components :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>()].</pre>
+
+      </div>
+
+<p>Joins a list of filename <code>Components</code> with directory separators. If one of the elements of <code>Components</code> includes an absolute path, such as <code>&quot;/xxx&quot;</code>, the preceding elements, if any, are removed from the result.</p><p>The result is &quot;normalized&quot;:</p><ul><li>Redundant directory separators are removed.</li><li>In Windows, all directory separators are forward slashes and the drive letter is in lower case.</li></ul><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">17</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">join</span><span class="p" data-group-id="3501226255-1">(</span><span class="p" data-group-id="3501226255-2">[</span><span class="s">&quot;/usr&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;local&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bin&quot;</span><span class="p" data-group-id="3501226255-2">]</span><span class="p" data-group-id="3501226255-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/usr/local/bin&quot;</span><span class="w">
+</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">join</span><span class="p" data-group-id="3501226255-3">(</span><span class="p" data-group-id="3501226255-4">[</span><span class="s">&quot;a/b///c/&quot;</span><span class="p" data-group-id="3501226255-4">]</span><span class="p" data-group-id="3501226255-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;a/b/c&quot;</span></code></pre><pre><code class="makeup erlang"><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">join</span><span class="p" data-group-id="0479614325-1">(</span><span class="p" data-group-id="0479614325-2">[</span><span class="s">&quot;B:a\\b///c/&quot;</span><span class="p" data-group-id="0479614325-2">]</span><span class="p" data-group-id="0479614325-1">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% Windows</span><span class="w">
+</span><span class="s">&quot;b:a/b/c&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="join/2">
+
+  <div class="detail-header">
+    <a href="#join/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">join/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>join(Name1, Name2) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Name1 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Name2 :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Joins two filename components with directory separators. Equivalent to <code>join([Name1, Name2])</code>.</p>
+  </section>
+</section>
+<section class="detail" id="nativename/1">
+
+  <div class="detail-header">
+    <a href="#nativename/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">nativename/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>nativename(Path) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Path :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Converts <code>Path</code> to a form accepted by the command shell and native applications on the current platform. On Windows, forward slashes are converted to backward slashes. On all platforms, the name is normalized as done by <a href="filename.html#join/1"><code>join/1</code></a>.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">19</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">nativename</span><span class="p" data-group-id="4464220814-1">(</span><span class="s">&quot;/usr/local/bin/&quot;</span><span class="p" data-group-id="4464220814-1">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% Unix</span><span class="w">
+</span><span class="s">&quot;/usr/local/bin&quot;</span></code></pre><pre><code class="makeup erlang"><span class="mi">7</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">nativename</span><span class="p" data-group-id="7577601473-1">(</span><span class="s">&quot;/usr/local/bin/&quot;</span><span class="p" data-group-id="7577601473-1">)</span><span class="p">.</span><span class="w"> </span><span class="c1">% Windows</span><span class="w">
+</span><span class="s">&quot;\\usr\\local\\bin&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="pathtype/1">
+
+  <div class="detail-header">
+    <a href="#pathtype/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">pathtype/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>pathtype(Path) -> absolute | relative | volumerelative when Path :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Returns the path type, which is one of the following:</p><dl><dt><code>absolute</code></dt><dd><p>The path name refers to a specific file on a specific volume.</p><p>Unix example: <code>/usr/local/bin</code></p><p>Windows example: <code>D:/usr/local/bin</code></p></dd><dt><code>relative</code></dt><dd><p>The path name is relative to the current working directory on the current volume.</p><p>Example: <code>foo/bar, ../src</code></p></dd><dt><code>volumerelative</code></dt><dd><p>The path name is relative to the current working directory on a specified volume, or it is a specific file on the current working volume.</p><p>Windows example: <code>D:bar.erl, /bar/foo.erl</code></p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="rootname/1">
+
+  <div class="detail-header">
+    <a href="#rootname/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rootname/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rootname(Filename) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>() when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Removes a filename extension. <code>rootname/2</code> works as <code>rootname/1</code>, except that the extension is removed only if it is <code>Ext</code>.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">20</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="5912105016-1">(</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="p" data-group-id="5912105016-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/kalle&quot;</span><span class="w">
+</span><span class="mi">21</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="5912105016-2">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p" data-group-id="5912105016-2">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">22</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="5912105016-3">(</span><span class="s">&quot;/beam.src/foo.erl&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="5912105016-3">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo&quot;</span><span class="w">
+</span><span class="mi">23</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">rootname</span><span class="p" data-group-id="5912105016-4">(</span><span class="s">&quot;/beam.src/foo.beam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.erl&quot;</span><span class="p" data-group-id="5912105016-4">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;/beam.src/foo.beam&quot;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="rootname/2">
+
+  <div class="detail-header">
+    <a href="#rootname/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rootname/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rootname(Filename, Ext) -> <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:filename_all/0">file:filename_all</a>()
+            when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Ext :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="safe_relative_path/1">
+
+  <div class="detail-header">
+    <a href="#safe_relative_path/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">safe_relative_path/1</h1>
+
+
+      <span class="note">(since OTP 19.3)</span>
+
+  </div>
+
+    <div class="deprecated">
+      This function is deprecated. filename:safe_relative_path/1 is deprecated and will be removed in OTP 25; use filelib:safe_relative_path/2 instead.
+    </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>safe_relative_path(Filename) -> unsafe | SafeFilename
+                      when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), SafeFilename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>().</pre>
+
+      </div>
+
+<p>Sanitizes the relative path by eliminating &quot;..&quot; and &quot;.&quot; components to protect against directory traversal attacks. Either returns the sanitized path name, or the atom <code>unsafe</code> if the path is unsafe. The path is considered unsafe in the following circumstances:</p><ul><li><p>The path is not relative.</p></li><li><p>A &quot;..&quot; component would climb up above the root of the relative path.</p></li></ul><div class="warning"><p>This function is deprecated. Use <a href="filelib.html#safe_relative_path/2"><code>filelib:safe_relative_path/2</code></a> instead for sanitizing paths.</p></div><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">safe_relative_path</span><span class="p" data-group-id="6195948748-1">(</span><span class="s">&quot;dir/sub_dir/..&quot;</span><span class="p" data-group-id="6195948748-1">)</span><span class="p">.</span><span class="w">
+</span><span class="s">&quot;dir&quot;</span><span class="w">
+</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">safe_relative_path</span><span class="p" data-group-id="6195948748-2">(</span><span class="s">&quot;dir/..&quot;</span><span class="p" data-group-id="6195948748-2">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6195948748-3">[</span><span class="p" data-group-id="6195948748-3">]</span><span class="w">
+</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">safe_relative_path</span><span class="p" data-group-id="6195948748-4">(</span><span class="s">&quot;dir/../..&quot;</span><span class="p" data-group-id="6195948748-4">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">unsafe</span><span class="w">
+</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">safe_relative_path</span><span class="p" data-group-id="6195948748-5">(</span><span class="s">&quot;/abs/path&quot;</span><span class="p" data-group-id="6195948748-5">)</span><span class="p">.</span><span class="w">
+</span><span class="ss">unsafe</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="split/1">
+
+  <div class="detail-header">
+    <a href="#split/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">split/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>split(Filename) -> Components when Filename :: <a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>(), Components :: [<a href="https://wojtekmach.pl/otp_docs/kernel/file.html#t:name_all/0">file:name_all</a>()].</pre>
+
+      </div>
+
+<p>Returns a list whose elements are the path components of <code>Filename</code>.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="mi">24</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4278870271-1">(</span><span class="s">&quot;/usr/local/bin&quot;</span><span class="p" data-group-id="4278870271-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4278870271-2">[</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="s">&quot;usr&quot;</span><span class="p">,</span><span class="s">&quot;local&quot;</span><span class="p">,</span><span class="s">&quot;bin&quot;</span><span class="p" data-group-id="4278870271-2">]</span><span class="w">
+</span><span class="mi">25</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4278870271-3">(</span><span class="s">&quot;foo/bar&quot;</span><span class="p" data-group-id="4278870271-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4278870271-4">[</span><span class="s">&quot;foo&quot;</span><span class="p">,</span><span class="s">&quot;bar&quot;</span><span class="p" data-group-id="4278870271-4">]</span><span class="w">
+</span><span class="mi">26</span><span class="o">&gt;</span><span class="w"> </span><span class="nc">filename</span><span class="p">:</span><span class="nf">split</span><span class="p" data-group-id="4278870271-5">(</span><span class="s">&quot;a:\\msdev\\include&quot;</span><span class="p" data-group-id="4278870271-5">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="4278870271-6">[</span><span class="s">&quot;a:/&quot;</span><span class="p">,</span><span class="s">&quot;msdev&quot;</span><span class="p">,</span><span class="s">&quot;include&quot;</span><span class="p" data-group-id="4278870271-6">]</span></code></pre>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

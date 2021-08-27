@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="os_mon v2.7">
+
+    <title>disksup — os_mon v2.7</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-4f08799fed.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+os_mon
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.7
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+disksup <small class="app-vsn">(os_mon v2.7)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p><code>disksup</code> is a process which supervises the available disk space in the system. It is part of the OS_Mon application, see os_mon(6). Available for Unix and Windows.</p><p>Periodically checks the disks. For each disk or partition which uses more than a certain amount of the available space, the alarm <code>{{disk_almost_full, MountedOn}, []}</code> is set.</p><dl><dt>On Unix</dt><dd><p>All (locally) mounted disks are checked, including the swap disk if it is present.</p></dd><dt>On WIN32</dt><dd><p>All logical drives of type &quot;FIXED_DISK&quot; are checked.</p></dd></dl><p>Alarms are reported to the SASL alarm handler, see <a href="https://wojtekmach.pl/otp_docs/sasl/alarm_handler.html">alarm_handler(3)</a>. To set an alarm, <code>alarm_handler:set_alarm(Alarm)</code> is called where <code>Alarm</code> is the alarm specified above.</p><p>The alarms are cleared automatically when the alarm cause is no longer valid.</p><a id="config"></a><h2 id="module-configuration" class="section-heading">
+  <a href="#module-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Configuration
+</h2>
+<p>The following configuration parameters can be used to change the default values for time interval and threshold:</p><dl><dt><code>disk_space_check_interval = int()&gt;0</code></dt><dd><p>The time interval, in minutes, for the periodic disk space check. The default is 30 minutes.</p></dd><dt><code>disk_almost_full_threshold = float()</code></dt><dd><p>The threshold, as percentage of total disk space, for how much disk can be utilized before the <code>disk_almost_full</code> alarm is set. The default is 0.80 (80%).</p></dd><dt><code>disksup_posix_only = bool()</code></dt><dd><p>Specifies whether the <code>disksup</code> helper process should only use POSIX conformant commands (<code>true</code>) or not. The default is <code>false</code>. Setting this parameter to <code>true</code> can be necessary on embedded systems with stripped-down versions of Unix tools like <code>df</code>. The returned disk data and alarms can be different when using this option.</p><p>The parameter is ignored on platforms that are known to not be POSIX compatible (Windows and SunOS).</p></dd></dl><p>See config(4) for information about how to change the value of configuration parameters.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="https://wojtekmach.pl/otp_docs/sasl/alarm_handler.html">alarm_handler(3)</a>, os_mon(3)</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_almost_full_threshold/0">get_almost_full_threshold() -&gt; Percent</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Percent = int()</li></ul><p>Returns the threshold, in percent, for disk space utilization.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_check_interval/0">get_check_interval() -&gt; MS</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">MS = int()</li></ul><p>Returns the time interval, in milliseconds, for the periodic disk space check.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_disk_data/0">get_disk_data() -&gt; [DiskData]</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">DiskData = {Id, KByte, Capacity}</li><li class="type"> Id = string()</li><li class="type"> KByte = int()</li><li class="type"> Capacity = int()</li></ul><p>Returns the result of the latest disk check. <code>Id</code> is a string that identifies the disk or partition. <code>KByte</code> is the total size of the disk or partition in kbytes. <code>Capacity</code> is the percentage of disk space used.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_almost_full_threshold/1">set_almost_full_threshold(Float) -&gt; ok</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Float = float(), 0=&lt;Float=&lt;1</li></ul><p>Changes the threshold, given as a float, for disk space utilization.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#set_check_interval/1">set_check_interval(Minutes) -&gt; ok</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li class="type">Minutes = int()&gt;=1</li></ul><p>Changes the time interval, given in minutes, for the periodic disk space check.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="get_almost_full_threshold/0">
+
+  <div class="detail-header">
+    <a href="#get_almost_full_threshold/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_almost_full_threshold() -&gt; Percent</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Percent = int()</li></ul><p>Returns the threshold, in percent, for disk space utilization.</p>
+  </section>
+</section>
+<section class="detail" id="get_check_interval/0">
+
+  <div class="detail-header">
+    <a href="#get_check_interval/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_check_interval() -&gt; MS</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">MS = int()</li></ul><p>Returns the time interval, in milliseconds, for the periodic disk space check.</p>
+  </section>
+</section>
+<section class="detail" id="get_disk_data/0">
+
+  <div class="detail-header">
+    <a href="#get_disk_data/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_disk_data() -&gt; [DiskData]</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">DiskData = {Id, KByte, Capacity}</li><li class="type"> Id = string()</li><li class="type"> KByte = int()</li><li class="type"> Capacity = int()</li></ul><p>Returns the result of the latest disk check. <code>Id</code> is a string that identifies the disk or partition. <code>KByte</code> is the total size of the disk or partition in kbytes. <code>Capacity</code> is the percentage of disk space used.</p><p>The function is asynchronous in the sense that it does not invoke a disk check, but returns the latest available value.</p><p>Returns <code>[{&quot;none&quot;,0,0}]</code> if <code>disksup</code> is not available.</p>
+  </section>
+</section>
+<section class="detail" id="set_almost_full_threshold/1">
+
+  <div class="detail-header">
+    <a href="#set_almost_full_threshold/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_almost_full_threshold(Float) -&gt; ok</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Float = float(), 0=&lt;Float=&lt;1</li></ul><p>Changes the threshold, given as a float, for disk space utilization.</p><p>The change will take effect during the next disk space check and is non-persist. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="disksup.html#content#config">Configuration</a> above.</p>
+  </section>
+</section>
+<section class="detail" id="set_check_interval/1">
+
+  <div class="detail-header">
+    <a href="#set_check_interval/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">set_check_interval(Minutes) -&gt; ok</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+<ul class="types"><li class="type">Minutes = int()&gt;=1</li></ul><p>Changes the time interval, given in minutes, for the periodic disk space check.</p><p>The change will take effect after the next disk space check and is non-persist. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="disksup.html#content#config">Configuration</a> above.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

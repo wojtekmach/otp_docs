@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>logger_std_h — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+logger_std_h <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This is the standard handler for Logger. Multiple instances of this handler can be added to Logger, and each instance prints logs to <code>standard_io</code>, <code>standard_error</code>, or to file.</p><p>The handler has an overload protection mechanism that keeps the handler process and the Kernel application alive during high loads of log events. How overload protection works, and how to configure it, is described in the <code>User's Guide</code> .</p><p>To add a new instance of the standard handler, use <a href="logger.html#add_handler/3"><code>logger:add_handler/3</code> </a>. The handler configuration argument is a map which can contain general configuration parameters, as documented in the <code>User's Guide</code> , and handler specific parameters. The specific data is stored in a sub map with the key <code>config</code>, and can contain the following parameters:</p><dl><dt><a id="type"></a><code>type = standard_io | standard_error | file | {device, io:device()}</code></dt><dd><p>Specifies the log destination.</p><p>The value is set when the handler is added, and it cannot be changed in runtime.</p><p>Defaults to <code>standard_io</code>, unless parameter <a href="logger_std_h.html#content#file"><code>file</code></a> is given, in which case it defaults to <code>file</code>.</p></dd><dt><a id="file"></a><code>file = </code><a href="file.html#t:filename/0"><code>file:filename()</code></a></dt><dd><p>This specifies the name of the log file when the handler is of type <code>file</code>.</p><p>The value is set when the handler is added, and it cannot be changed in runtime.</p><p>Defaults to the same name as the handler identity, in the current directory.</p></dd><dt><a id="modes"></a><code>modes = [</code><a href="file.html#t:mode/0"><code>file:mode()</code></a><code>]</code></dt><dd><p>This specifies the file modes to use when opening the log file, see <a href="file.html#open/2"><code>file:open/2</code></a>. If <code>modes</code> are not specified, the default list used is <code>[raw,append,delayed_write]</code>. If <code>modes</code> are specified, the list replaces the default modes list with the following adjustments:</p><ul><li>If <code>raw</code> is not found in the list, it is added.</li><li>If none of <code>write</code>, <code>append</code> or <code>exclusive</code> is found in the list, <code>append</code> is added.</li><li>If none of <code>delayed_write</code> or <code>{delayed_write,Size,Delay}</code> is found in the list, <code>delayed_write</code> is added.</li></ul><p>Log files are always UTF-8 encoded. The encoding cannot be changed by setting the mode <code>{encoding,Encoding}</code>.</p><p>The value is set when the handler is added, and it cannot be changed in runtime.</p><p>Defaults to <code>[raw,append,delayed_write]</code>.</p></dd><dt><a id="max_no_bytes"></a><code>max_no_bytes = pos_integer() | infinity</code></dt><dd><p>This parameter specifies if the log file should be rotated or not. The value <code>infinity</code> means the log file will grow indefinitely, while an integer value specifies at which file size (bytes) the file is rotated.</p><p>Defaults to <code>infinity</code>.</p></dd><dt><a id="max_no_files"></a><code>max_no_files = non_neg_integer()</code></dt><dd><p>This parameter specifies the number of rotated log file archives to keep. This has meaning only if <a href="logger_std_h.html#content#max_no_bytes"><code>max_no_bytes</code></a> is set to an integer value.</p><p>The log archives are named <code>FileName.0</code>, <code>FileName.1</code>, ... <code>FileName.N</code>, where <code>FileName</code> is the name of the current log file. <code>FileName.0</code> is the newest of the archives. The maximum value for <code>N</code> is the value of <code>max_no_files</code> minus 1.</p><p>Notice that setting this value to <code>0</code> does not turn off rotation. It only specifies that no archives are kept.</p><p>Defaults to <code>0</code>.</p></dd><dt><a id="compress_on_rotate"></a><code>compress_on_rotate = boolean()</code></dt><dd><p>This parameter specifies if the rotated log file archives shall be compressed or not. If set to <code>true</code>, all archives are compressed with <code>gzip</code>, and renamed to <code>FileName.N.gz</code></p><p><code>compress_on_rotate</code> has no meaning if <a href="logger_std_h.html#content#max_no_bytes"><code>max_no_bytes</code></a> has the value <code>infinity</code>.</p><p>Defaults to <code>false</code>.</p></dd><dt><a id="file_check"></a><code>file_check = non_neg_integer()</code></dt><dd><p>When <code>logger_std_h</code> logs to a file, it reads the file information of the log file prior to each write operation. This is to make sure the file still exists and has the same inode as when it was opened. This implies some performance loss, but ensures that no log events are lost in the case when the file has been removed or renamed by an external actor.</p><p>In order to allow minimizing the performance loss, the <code>file_check</code> parameter can be set to a positive integer value, <code>N</code>. The handler will then skip reading the file information prior to writing, as long as no more than <code>N</code> milliseconds have passed since it was last read.</p><p>Notice that the risk of loosing log events grows when the <code>file_check</code> value grows.</p><p>Defaults to 0.</p></dd><dt><code>filesync_repeat_interval = pos_integer() | no_repeat</code></dt><dd><p>This value, in milliseconds, specifies how often the handler does a file sync operation to write buffered data to disk. The handler attempts the operation repeatedly, but only performs a new sync if something has actually been logged.</p><p>If <code>no_repeat</code> is set as value, the repeated file sync operation is disabled, and it is the operating system settings that determine how quickly or slowly data is written to disk. The user can also call the <a href="logger_std_h.html#filesync/1"><code>filesync/1</code></a> function to perform a file sync.</p><p>Defaults to <code>5000</code> milliseconds.</p></dd></dl><p>Other configuration parameters exist, to be used for customizing the overload protection behaviour. The same parameters are used both in the standard handler and the disk_log handler, and are documented in the <code>User's Guide</code> .</p><p>Notice that if changing the configuration of the handler in runtime, the <code>type</code>, <code>file</code>, or <code>modes</code> parameters must not be modified.</p><p>Example of adding a standard handler:</p><pre><code type="none">logger:add_handler(my_standard_h, logger_std_h,
+                   #{config =&gt; #{file =&gt; &quot;./system_info.log&quot;,
+                                 filesync_repeat_interval =&gt; 1000}}).
+    </code></pre><p>To set the default handler, that starts initially with the Kernel application, to log to file instead of <code>standard_io</code>, change the Kernel default logger configuration. Example:</p><pre><code type="none">erl -kernel logger '[{handler,default,logger_std_h,
+                      #{config =&gt; #{file =&gt; &quot;./log.log&quot;}}}]'
+    </code></pre><p>An example of how to replace the standard handler with a disk_log handler at startup is found in the <a href="logger_disk_log_h.html"><code>logger_disk_log_h</code></a> manual.</p><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="logger.html"><code>logger(3)</code></a>, <a href="logger_disk_log_h.html"><code>logger_disk_log_h(3)</code></a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#filesync/1">filesync/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Write buffered data to disk.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="filesync/1">
+
+  <div class="detail-header">
+    <a href="#filesync/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">filesync/1</h1>
+
+
+      <span class="note">(since OTP 21.0)</span>
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>filesync(Name) -> ok | {error, Reason}
+            when Name :: atom(), Reason :: handler_busy | {badarg, term()}.</pre>
+
+      </div>
+
+<p>Write buffered data to disk.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

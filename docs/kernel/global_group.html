@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="kernel v8.0.2">
+
+    <title>global_group — kernel v8.0.2</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-69e02f009e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+kernel
+      </a>
+      <strong class="sidebar-projectVersion">
+        v8.0.2
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+global_group <small class="app-vsn">(kernel v8.0.2)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This module makes it possible to partition the nodes of a system into <em>global groups</em>. Each global group has its own global namespace, see <a href="global.html"><code>global(3)</code></a>.</p><p>The main advantage of dividing systems into global groups is that the background load decreases while the number of nodes to be updated is reduced when manipulating globally registered names.</p><p>The Kernel configuration parameter <code>global_groups</code> defines the global groups (see also <code>kernel(6)</code> and <code>config(4)</code>):</p><pre><code type="none">{global_groups, [GroupTuple :: group_tuple()]}</code></pre><p>For the processes and nodes to run smoothly using the global group functionality, the following criteria must be met:</p><ul><li><p>An instance of the global group server, <code>global_group</code>, must be running on each node. The processes are automatically started and synchronized when a node is started.</p></li><li><p>All involved nodes must agree on the global group definition, otherwise the behavior of the system is undefined.</p></li><li><p><em>All</em> nodes in the system must belong to exactly one global group.</p></li></ul><p>In the following descriptions, a <em>group node</em> is a node belonging to the same global group as the local node.</p><h2 id="module-notes" class="section-heading">
+  <a href="#module-notes" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Notes
+</h2>
+<ul><li><p>In the situation where a node has lost its connections to other nodes in its global group, but has connections to nodes in other global groups, a request from another global group can produce an incorrect or misleading result. For example, the isolated node can have inaccurate information about registered names in its global group.</p></li><li><p>Function <a href="global_group.html#send/2"><code>send/2,3</code></a> is not secure.</p></li><li><p>Distribution of applications is highly dependent of the global group definitions. It is not recommended that an application is distributed over many global groups, as the registered names can be moved to another global group at failover/takeover. Nothing prevents this to be done, but the application code must then handle the situation.</p></li></ul><h2 id="module-see-also" class="section-heading">
+  <a href="#module-see-also" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  See Also
+</h2>
+<p><a href="global.html"><code>global(3)</code></a>, <code>erl(1)</code></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:group_name/0">-type group_name() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:group_tuple/0">-type group_tuple() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A <code>GroupTuple</code> without <code>PublishType</code> is the same as a <code>GroupTuple</code> with <code>PublishType</code> equal to <code>normal</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:name/0">-type name() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A registered name.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:publish_type/0">-type publish_type() :: term().</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A node started with command-line flag <code>-hidden</code> (see <code>erl(1)</code>) is said to be a <em>hidden</em> node. A hidden node establishes hidden connections to nodes not part of the same global group, but normal (visible) connections to nodes part of the same global group.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:where/0">-type where() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#global_groups/0">global_groups/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a tuple containing the name of the global group that the local node belongs to, and the list of all other known group names. Returns <code>undefined</code> if no global groups are defined.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#info/0">info/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><ul class="types"><li name="info_item"></li><li name="sync_state"></li></ul><p>Returns a list containing information about the global groups. Each list element is a tuple. The order of the tuples is undefined.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#monitor_nodes/1">monitor_nodes/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Depending on <code>Flag</code>, the calling process starts subscribing (<code>Flag</code> equal to <code>true</code>) or stops subscribing (<code>Flag</code> equal to <code>false</code>) to node status change messages.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#own_nodes/0">own_nodes/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the names of all group nodes, regardless of their current status.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#registered_names/1">registered_names/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a list of all names that are globally registered on the specified node or in the specified global group.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/2">send/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Searches for <code>Name</code>, globally registered on the specified node or in the specified global group, or (if argument <code>Where</code> is not provided) in any global group. The global groups are searched in the order that they appear in the value of configuration parameter <code>global_groups</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#send/3">send/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#sync/0">sync/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Synchronizes the group nodes, that is, the global name servers on the group nodes. Also checks the names globally registered in the current global group and unregisters them on any known node not part of the group.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#whereis_name/1">whereis_name/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Searches for <code>Name</code>, globally registered on the specified node or in the specified global group, or (if argument <code>Where</code> is not provided) in any global group. The global groups are searched in the order that they appear in the value of configuration parameter <code>global_groups</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#whereis_name/2">whereis_name/2</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:group_name/0">
+
+  <div class="detail-header">
+    <a href="#t:group_name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type group_name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>group_name() :: atom().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:group_tuple/0">
+
+  <div class="detail-header">
+    <a href="#t:group_tuple/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type group_tuple() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>group_tuple() ::
+    {GroupName :: <a href="#t:group_name/0">group_name</a>(), [node()]} |
+    {GroupName :: <a href="#t:group_name/0">group_name</a>(), PublishType :: <a href="#t:publish_type/0">publish_type</a>(), [node()]}.</pre>
+
+      </div>
+
+<p>A <code>GroupTuple</code> without <code>PublishType</code> is the same as a <code>GroupTuple</code> with <code>PublishType</code> equal to <code>normal</code>.</p>
+  </section>
+</section>
+<section class="detail" id="t:name/0">
+
+  <div class="detail-header">
+    <a href="#t:name/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type name() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>name() :: atom().</pre>
+
+      </div>
+
+<p>A registered name.</p>
+  </section>
+</section>
+<section class="detail" id="t:publish_type/0">
+
+  <div class="detail-header">
+    <a href="#t:publish_type/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type publish_type() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>publish_type() :: hidden | normal.</pre>
+
+      </div>
+
+<p>A node started with command-line flag <code>-hidden</code> (see <code>erl(1)</code>) is said to be a <em>hidden</em> node. A hidden node establishes hidden connections to nodes not part of the same global group, but normal (visible) connections to nodes part of the same global group.</p><p>A global group defined with <code>PublishType</code> equal to <code>hidden</code> is said to be a hidden global group. All nodes in a hidden global group are hidden nodes, whether they are started with command-line flag <code>-hidden</code> or not.</p>
+  </section>
+</section>
+<section class="detail" id="t:where/0">
+
+  <div class="detail-header">
+    <a href="#t:where/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type where() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>where() :: {node, node()} | {group, <a href="#t:group_name/0">group_name</a>()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="global_groups/0">
+
+  <div class="detail-header">
+    <a href="#global_groups/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">global_groups/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>global_groups() -> {GroupName, GroupNames} | undefined
+                 when GroupName :: <a href="#t:group_name/0">group_name</a>(), GroupNames :: [GroupName].</pre>
+
+      </div>
+
+<p>Returns a tuple containing the name of the global group that the local node belongs to, and the list of all other known group names. Returns <code>undefined</code> if no global groups are defined.</p>
+  </section>
+</section>
+<section class="detail" id="info/0">
+
+  <div class="detail-header">
+    <a href="#info/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">info/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>info() -> [<a href="#t:info_item/0">info_item</a>()].</pre>
+
+      </div>
+
+<ul class="types"><li name="info_item"></li><li name="sync_state"></li></ul><p>Returns a list containing information about the global groups. Each list element is a tuple. The order of the tuples is undefined.</p><dl><dt><code>{state, State}</code></dt><dd><p>If the local node is part of a global group, <code>State</code> is equal to <code>synced</code>. If no global groups are defined, <code>State</code> is equal to <code>no_conf</code>.</p></dd><dt><code>{own_group_name, GroupName}</code></dt><dd><p>The name (atom) of the group that the local node belongs to.</p></dd><dt><code>{own_group_nodes, Nodes}</code></dt><dd><p>A list of node names (atoms), the group nodes.</p></dd><dt><code>{synced_nodes, Nodes}</code></dt><dd><p>A list of node names, the group nodes currently synchronized with the local node.</p></dd><dt><code>{sync_error, Nodes}</code></dt><dd><p>A list of node names, the group nodes with which the local node has failed to synchronize.</p></dd><dt><code>{no_contact, Nodes}</code></dt><dd><p>A list of node names, the group nodes to which there are currently no connections.</p></dd><dt><code>{other_groups, Groups}</code></dt><dd><p><code>Groups</code> is a list of tuples <code>{GroupName, Nodes}</code>, specifying the name and nodes of the other global groups.</p></dd><dt><code>{monitoring, Pids}</code></dt><dd><p>A list of pids, specifying the processes that have subscribed to <code>nodeup</code> and <code>nodedown</code> messages.</p></dd></dl>
+  </section>
+</section>
+<section class="detail" id="monitor_nodes/1">
+
+  <div class="detail-header">
+    <a href="#monitor_nodes/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">monitor_nodes/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>monitor_nodes(Flag) -> ok when Flag :: boolean().</pre>
+
+      </div>
+
+<p>Depending on <code>Flag</code>, the calling process starts subscribing (<code>Flag</code> equal to <code>true</code>) or stops subscribing (<code>Flag</code> equal to <code>false</code>) to node status change messages.</p><p>A process that has subscribed receives the messages <code>{nodeup, Node}</code> and <code>{nodedown, Node}</code> when a group node connects or disconnects, respectively.</p>
+  </section>
+</section>
+<section class="detail" id="own_nodes/0">
+
+  <div class="detail-header">
+    <a href="#own_nodes/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">own_nodes/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>own_nodes() -> Nodes when Nodes :: [Node :: node()].</pre>
+
+      </div>
+
+<p>Returns the names of all group nodes, regardless of their current status.</p>
+  </section>
+</section>
+<section class="detail" id="registered_names/1">
+
+  <div class="detail-header">
+    <a href="#registered_names/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">registered_names/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>registered_names(Where) -> Names when Where :: <a href="#t:where/0">where</a>(), Names :: [Name :: <a href="#t:name/0">name</a>()].</pre>
+
+      </div>
+
+<p>Returns a list of all names that are globally registered on the specified node or in the specified global group.</p>
+  </section>
+</section>
+<section class="detail" id="send/2">
+
+  <div class="detail-header">
+    <a href="#send/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>send(Name, Msg) -> pid() | {badarg, {Name, Msg}} when Name :: <a href="#t:name/0">name</a>(), Msg :: term().</pre>
+
+      </div>
+
+<p>Searches for <code>Name</code>, globally registered on the specified node or in the specified global group, or (if argument <code>Where</code> is not provided) in any global group. The global groups are searched in the order that they appear in the value of configuration parameter <code>global_groups</code>.</p><p>If <code>Name</code> is found, message <code>Msg</code> is sent to the corresponding pid. The pid is also the return value of the function. If the name is not found, the function returns <code>{badarg, {Name, Msg}}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="send/3">
+
+  <div class="detail-header">
+    <a href="#send/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">send/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>send(Where, Name, Msg) -> pid() | {badarg, {Name, Msg}}
+        when Where :: <a href="#t:where/0">where</a>(), Name :: <a href="#t:name/0">name</a>(), Msg :: term().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sync/0">
+
+  <div class="detail-header">
+    <a href="#sync/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">sync/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>sync() -> ok.</pre>
+
+      </div>
+
+<p>Synchronizes the group nodes, that is, the global name servers on the group nodes. Also checks the names globally registered in the current global group and unregisters them on any known node not part of the group.</p><p>If synchronization is not possible, an error report is sent to the error logger (see also <a href="error_logger.html"><code>error_logger(3)</code></a>.</p><p>Returns <code>{error, {'invalid global_groups definition', Bad}}</code> if configuration parameter <code>global_groups</code> has an invalid value <code>Bad</code>.</p>
+  </section>
+</section>
+<section class="detail" id="whereis_name/1">
+
+  <div class="detail-header">
+    <a href="#whereis_name/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">whereis_name/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>whereis_name(Name) -> pid() | undefined when Name :: <a href="#t:name/0">name</a>().</pre>
+
+      </div>
+
+<p>Searches for <code>Name</code>, globally registered on the specified node or in the specified global group, or (if argument <code>Where</code> is not provided) in any global group. The global groups are searched in the order that they appear in the value of configuration parameter <code>global_groups</code>.</p><p>If <code>Name</code> is found, the corresponding pid is returned. If the name is not found, the function returns <code>undefined</code>.</p>
+  </section>
+</section>
+<section class="detail" id="whereis_name/2">
+
+  <div class="detail-header">
+    <a href="#whereis_name/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">whereis_name/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>whereis_name(Where, Name) -> pid() | undefined when Where :: <a href="#t:where/0">where</a>(), Name :: <a href="#t:name/0">name</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>
