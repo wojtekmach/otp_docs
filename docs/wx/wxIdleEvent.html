@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="wx v2.0.1">
+
+    <title>wxIdleEvent — wx v2.0.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2fbb42302e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+wx
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.0.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wxIdleEvent <small class="app-vsn">(wx v2.0.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This class is used for idle events, which are generated when the system becomes idle. Note that, unless you do something specifically, the idle events are not sent if the system remains idle once it has become it, e.g. only a single idle event will be generated until something else resulting in more normal events happens and only then is the next idle event sent again.</p><p>If you need to ensure a continuous stream of idle events, you can either use <a href="wxIdleEvent.html#requestMore/2"><code>requestMore/2</code></a> method in your handler or call ?wxWakeUpIdle() periodically (for example from a timer event handler), but note that both of these approaches (and especially the first one) increase the system load and so should be avoided if possible.</p><p>By default, idle events are sent to all windows, including even the hidden ones because they may be shown if some condition is met from their <code>wxEVT_IDLE</code> (or related <code>wxEVT_UPDATE_UI</code>) handler. The children of hidden windows do not receive idle events however as they can't change their state in any way noticeable by the user. Finally, the global <code>wxApp</code> (not implemented in wx) object also receives these events, as usual, so it can be used for any global idle time processing.</p><p>If sending idle events to all windows is causing a significant overhead in your application, you can call <a href="wxIdleEvent.html#setMode/1"><code>setMode/1</code></a> with the value wxIDLE_PROCESS_SPECIFIED, and set the wxWS_EX_PROCESS_IDLE extra window style for every window which should receive idle events, all the other ones will not receive them in this case.</p><p>Delayed Action Mechanism</p><p><a href="wxIdleEvent.html#content"><code>wxIdleEvent</code></a> can be used to perform some action &quot;at slightly later time&quot;. This can be necessary in several circumstances when, for whatever reason, something can't be done in the current event handler. For example, if a mouse event handler is called with the mouse button pressed, the mouse can be currently captured and some operations with it - notably capturing it again - might be impossible or lead to undesirable results. If you still want to capture it, you can do it from <code>wxEVT_IDLE</code> handler when it is called the next time instead of doing it immediately.</p><p>This can be achieved in two different ways: when using static event tables, you will need a flag indicating to the (always connected) idle event handler whether the desired action should be performed. The originally called handler would then set it to indicate that it should indeed be done and the idle handler itself would reset it to prevent it from doing the same action again.</p><p>Using dynamically connected event handlers things are even simpler as the original event handler can simply <code>wxEvtHandler::Connect()</code> (not implemented in wx) or <code>wxEvtHandler::Bind()</code> (not implemented in wx) the idle event handler which would only be executed then and could <code>wxEvtHandler::Disconnect()</code> (not implemented in wx) or <code>wxEvtHandler::Unbind()</code> (not implemented in wx) itself.</p><p>See: <a href="https://docs.wxwidgets.org/3.1/overview_events.html#overview_events">Overview events</a>, <a href="wxUpdateUIEvent.html"><code>wxUpdateUIEvent</code></a>, <code>wxWindow::OnInternalIdle</code> (not implemented in wx)</p><p>This class is derived (and can use functions) from: <a href="wxEvent.html"><code>wxEvent</code></a></p><p>wxWidgets docs: <a href="https://docs.wxwidgets.org/3.1/classwx_idle_event.html">wxIdleEvent</a></p><h2 id="module-events" class="section-heading">
+  <a href="#module-events" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Events
+</h2>
+<p>Use <a href="wxEvtHandler.html#connect/3"><code>wxEvtHandler:connect/3</code></a> with <a href="wxIdleEvent.html#t:wxIdleEventType/0"><code>wxIdleEventType</code></a> to subscribe to events of this type.</p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxIdle/0">-type wxIdle() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxIdleEvent/0">-type wxIdleEvent() :: term().</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxIdleEventType/0">-type wxIdleEventType() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMode/0">getMode/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Static function returning a value specifying how wxWidgets will send idle events: to all windows, or only to those which specify that they will process the events.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#moreRequested/1">moreRequested/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if the OnIdle function processing this event requested more processing time.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#requestMore/1">requestMore/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#requestMore/2">requestMore/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Tells wxWidgets that more processing is required.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setMode/1">setMode/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Static function for specifying how wxWidgets will send idle events: to all windows, or only to those which specify that they will process the events.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:wxIdle/0">
+
+  <div class="detail-header">
+    <a href="#t:wxIdle/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxIdle() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxIdle() :: #wxIdle{}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:wxIdleEvent/0">
+
+  <div class="detail-header">
+    <a href="#t:wxIdleEvent/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxIdleEvent() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxIdleEvent() :: wx:wx_object().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:wxIdleEventType/0">
+
+  <div class="detail-header">
+    <a href="#t:wxIdleEventType/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxIdleEventType() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxIdleEventType() :: idle.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="getMode/0">
+
+  <div class="detail-header">
+    <a href="#getMode/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMode/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMode() -> wx:wx_enum().</pre>
+
+      </div>
+
+<p>Static function returning a value specifying how wxWidgets will send idle events: to all windows, or only to those which specify that they will process the events.</p><p>See: <a href="wxIdleEvent.html#setMode/1"><code>setMode/1</code></a></p>
+  </section>
+</section>
+<section class="detail" id="moreRequested/1">
+
+  <div class="detail-header">
+    <a href="#moreRequested/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">moreRequested/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>moreRequested(This) -> boolean() when This :: <a href="#t:wxIdleEvent/0">wxIdleEvent</a>().</pre>
+
+      </div>
+
+<p>Returns true if the OnIdle function processing this event requested more processing time.</p><p>See: <a href="wxIdleEvent.html#requestMore/2"><code>requestMore/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="requestMore/1">
+
+  <div class="detail-header">
+    <a href="#requestMore/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">requestMore/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>requestMore(This) -> ok when This :: <a href="#t:wxIdleEvent/0">wxIdleEvent</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="requestMore/2">
+
+  <div class="detail-header">
+    <a href="#requestMore/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">requestMore/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>requestMore(This, [Option]) -> ok when This :: <a href="#t:wxIdleEvent/0">wxIdleEvent</a>(), Option :: {needMore, boolean()}.</pre>
+
+      </div>
+
+<p>Tells wxWidgets that more processing is required.</p><p>This function can be called by an OnIdle handler for a window or window event handler to indicate that wxApp::OnIdle should forward the OnIdle event once more to the application windows.</p><p>If no window calls this function during OnIdle, then the application will remain in a passive event loop (not calling OnIdle) until a new event is posted to the application by the windowing system.</p><p>See: <a href="wxIdleEvent.html#moreRequested/1"><code>moreRequested/1</code></a></p>
+  </section>
+</section>
+<section class="detail" id="setMode/1">
+
+  <div class="detail-header">
+    <a href="#setMode/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setMode/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setMode(Mode) -> ok when Mode :: wx:wx_enum().</pre>
+
+      </div>
+
+<p>Static function for specifying how wxWidgets will send idle events: to all windows, or only to those which specify that they will process the events.</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

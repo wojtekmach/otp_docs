@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="wx v2.0.1">
+
+    <title>wxMenu — wx v2.0.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2fbb42302e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+wx
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.0.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wxMenu <small class="app-vsn">(wx v2.0.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>A menu is a popup (or pull down) list of items, one of which may be selected before the menu goes away (clicking elsewhere dismisses the menu). Menus may be used to construct either menu bars or popup menus.</p><p>A menu item has an integer ID associated with it which can be used to identify the selection, or to change the menu item in some way. A menu item with a special identifier <code>wxID_SEPARATOR</code> is a separator item and doesn't have an associated command but just makes a separator line appear in the menu.</p><p>Note: Please note that <code>wxID_ABOUT</code> and <code>wxID_EXIT</code> are predefined by wxWidgets and have a special meaning since entries using these IDs will be taken out of the normal menus under macOS and will be inserted into the system menu (following the appropriate macOS interface guideline).</p><p>Menu items may be either <code>normal</code> items, <code>check</code> items or <code>radio</code> items. Normal items don't have any special properties while the check items have a boolean flag associated to them and they show a checkmark in the menu when the flag is set. wxWidgets automatically toggles the flag value when the item is clicked and its value may be retrieved using either <a href="wxMenu.html#isChecked/2"><code>isChecked/2</code></a> method of <a href="wxMenu.html#content"><code>wxMenu</code></a> or <a href="wxMenuBar.html"><code>wxMenuBar</code></a> itself or by using wxEvent::IsChecked when you get the menu notification for the item in question.</p><p>The radio items are similar to the check items except that all the other items in the same radio group are unchecked when a radio item is checked. The radio group is formed by a contiguous range of radio items, i.e. it starts at the first item of this kind and ends with the first item of a different kind (or the end of the menu). Notice that because the radio groups are defined in terms of the item positions inserting or removing the items in the menu containing the radio items risks to not work correctly.</p><p>Allocation strategy</p><p>All menus must be created on the <code>heap</code> because all menus attached to a menubar or to another menu will be deleted by their parent when it is deleted. The only exception to this rule are the popup menus (i.e. menus used with <a href="wxWindow.html#popupMenu/4"><code>wxWindow:popupMenu/4</code></a>) as wxWidgets does not destroy them to allow reusing the same menu more than once. But the exception applies only to the menus themselves and not to any submenus of popup menus which are still destroyed by wxWidgets as usual and so must be heap-allocated.</p><p>As the frame menubar is deleted by the frame itself, it means that normally all menus used are deleted automatically.</p><p>Event handling</p><p>Event handlers for the commands generated by the menu items can be connected directly to the menu object itself using <code>wxEvtHandler::Bind()</code> (not implemented in wx). If this menu is a submenu of another one, the events from its items can also be processed in the parent menu and so on, recursively.</p><p>If the menu is part of a menu bar, then events can also be handled in <a href="wxMenuBar.html"><code>wxMenuBar</code></a> object.</p><p>Finally, menu events can also be handled in the associated window, which is either the <a href="wxFrame.html"><code>wxFrame</code></a> associated with the menu bar this menu belongs to or the window for which <a href="wxWindow.html#popupMenu/4"><code>wxWindow:popupMenu/4</code></a> was called for the popup menus.</p><p>See overview_events_bind for how to bind event handlers to the various objects.</p><p>See: <a href="wxMenuBar.html"><code>wxMenuBar</code></a>, <a href="wxWindow.html#popupMenu/4"><code>wxWindow:popupMenu/4</code></a>, <a href="https://docs.wxwidgets.org/3.1/overview_events.html#overview_events">Overview events</a>, <code>wxFileHistory</code> (not implemented in wx)</p><p>This class is derived (and can use functions) from: <a href="wxEvtHandler.html"><code>wxEvtHandler</code></a></p><p>wxWidgets docs: <a href="https://docs.wxwidgets.org/3.1/classwx_menu.html">wxMenu</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxMenu/0">-type wxMenu() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#Destroy/2">'Destroy'/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes the menu item from the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/2">append/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a menu item object.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/3">append/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/4">append/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a menu item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#append/5">append/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a submenu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#appendCheckItem/3">appendCheckItem/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#appendCheckItem/4">appendCheckItem/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a checkable item to the end of the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#appendRadioItem/3">appendRadioItem/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#appendRadioItem/4">appendRadioItem/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a radio item to the end of the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#appendSeparator/1">appendSeparator/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Adds a separator to the end of the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#break/1">break/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a break in a menu, causing the next appended item to appear in a new column.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check/3">check/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Checks or unchecks the menu item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete/2">delete/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Deletes the menu item from the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#destroy/1">destroy/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Destructor, destroying the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#enable/3">enable/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enables or disables (greys out) a menu item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#findItem/2">findItem/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Finds the menu id for a menu item string.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#findItemByPosition/2">findItemByPosition/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the <a href="wxMenuItem.html"><code>wxMenuItem</code></a> given a position in the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getHelpString/2">getHelpString/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the help string associated with a menu item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getLabel/2">getLabel/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a menu item label.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMenuItemCount/1">getMenuItemCount/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the number of items in the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMenuItems/1">getMenuItems/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getTitle/1">getTitle/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the title of the menu.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/3">insert/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>item</code> before the position <code>pos</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/4">insert/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>item</code> before the position <code>pos</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/5">insert/5</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insert/6">insert/6</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>submenu</code> before the position <code>pos</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insertCheckItem/4">insertCheckItem/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insertCheckItem/5">insertCheckItem/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a checkable item at the given position.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insertRadioItem/4">insertRadioItem/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insertRadioItem/5">insertRadioItem/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a radio item at the given position.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#insertSeparator/2">insertSeparator/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a separator at the given position.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#isChecked/2">isChecked/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Determines whether a menu item is checked.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#isEnabled/2">isEnabled/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Determines whether a menu item is enabled.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/0">new/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/1">new/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/2">new/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object with a title.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prepend/2">prepend/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>item</code> at position 0, i.e. before all the other existing items.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prepend/3">prepend/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>item</code> at position 0, i.e. before all the other existing items.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prepend/4">prepend/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prepend/5">prepend/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts the given <code>submenu</code> at position 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prependCheckItem/3">prependCheckItem/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prependCheckItem/4">prependCheckItem/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a checkable item at position 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prependRadioItem/3">prependRadioItem/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prependRadioItem/4">prependRadioItem/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a radio item at position 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#prependSeparator/1">prependSeparator/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Inserts a separator at position 0.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#remove/2">remove/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Removes the menu item from the menu but doesn't delete the associated C++ object.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setHelpString/3">setHelpString/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets an item's help string.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setLabel/3">setLabel/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the label of a menu item.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setTitle/2">setTitle/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the title of the menu.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:wxMenu/0">
+
+  <div class="detail-header">
+    <a href="#t:wxMenu/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxMenu() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxMenu() :: wx:wx_object().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="Destroy/2">
+
+  <div class="detail-header">
+    <a href="#Destroy/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">'Destroy'/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>'Destroy'(This, Id) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer();
+         (This, Item) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Item :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Deletes the menu item from the menu.</p><p>If the item is a submenu, it will be deleted. Use <a href="wxMenu.html#remove/2"><code>remove/2</code></a> if you want to keep the submenu (for example, to reuse it later).</p><p>See: <a href="wxMenu.html#findItem/2"><code>findItem/2</code></a>, <a href="wxMenu.html#delete/2"><code>delete/2</code></a>, <a href="wxMenu.html#remove/2"><code>remove/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="append/2">
+
+  <div class="detail-header">
+    <a href="#append/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>append(This, MenuItem) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), MenuItem :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Adds a menu item object.</p><p>This is the most generic variant of <a href="wxMenu.html#append/5"><code>append/5</code></a> method because it may be used for both items (including separators) and submenus and because you can also specify various extra properties of a menu item this way, such as bitmaps and fonts.</p><p>Remark: See the remarks for the other <a href="wxMenu.html#append/5"><code>append/5</code></a> overloads.</p><p>See: <a href="wxMenu.html#appendSeparator/1"><code>appendSeparator/1</code></a>, <a href="wxMenu.html#appendCheckItem/4"><code>appendCheckItem/4</code></a>, <a href="wxMenu.html#appendRadioItem/4"><code>appendRadioItem/4</code></a>, <code>AppendSubMenu()</code> (not implemented in wx), <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#setLabel/3"><code>setLabel/3</code></a>, <a href="wxMenu.html#getHelpString/2"><code>getHelpString/2</code></a>, <a href="wxMenu.html#setHelpString/3"><code>setHelpString/3</code></a>, <a href="wxMenuItem.html"><code>wxMenuItem</code></a></p>
+  </section>
+</section>
+<section class="detail" id="append/3">
+
+  <div class="detail-header">
+    <a href="#append/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>append(This, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="append/4">
+
+  <div class="detail-header">
+    <a href="#append/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>append(This, Id, Item, SubMenu) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), SubMenu :: <a href="#t:wxMenu/0">wxMenu</a>();
+      (This, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when
+              This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Id :: integer(),
+              Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+              Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {kind, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>Adds a menu item.</p><p>Example:</p><p>or even better for stock menu items (see <a href="wxMenuItem.html#new/1"><code>wxMenuItem:new/1</code></a>):</p><p>Remark: This command can be used after the menu has been shown, as well as on initial creation of a menu or menubar.</p><p>See: <a href="wxMenu.html#appendSeparator/1"><code>appendSeparator/1</code></a>, <a href="wxMenu.html#appendCheckItem/4"><code>appendCheckItem/4</code></a>, <a href="wxMenu.html#appendRadioItem/4"><code>appendRadioItem/4</code></a>, <code>AppendSubMenu()</code> (not implemented in wx), <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#setLabel/3"><code>setLabel/3</code></a>, <a href="wxMenu.html#getHelpString/2"><code>getHelpString/2</code></a>, <a href="wxMenu.html#setHelpString/3"><code>setHelpString/3</code></a>, <a href="wxMenuItem.html"><code>wxMenuItem</code></a></p>
+  </section>
+</section>
+<section class="detail" id="append/5">
+
+  <div class="detail-header">
+    <a href="#append/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">append/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>append(This, Id, Item, SubMenu, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when
+              This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Id :: integer(),
+              Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+              SubMenu :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Adds a submenu.</p><p>Deprecated: This function is deprecated, use <code>AppendSubMenu()</code> (not implemented in wx) instead.</p><p>See: <a href="wxMenu.html#appendSeparator/1"><code>appendSeparator/1</code></a>, <a href="wxMenu.html#appendCheckItem/4"><code>appendCheckItem/4</code></a>, <a href="wxMenu.html#appendRadioItem/4"><code>appendRadioItem/4</code></a>, <code>AppendSubMenu()</code> (not implemented in wx), <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#setLabel/3"><code>setLabel/3</code></a>, <a href="wxMenu.html#getHelpString/2"><code>getHelpString/2</code></a>, <a href="wxMenu.html#setHelpString/3"><code>setHelpString/3</code></a>, <a href="wxMenuItem.html"><code>wxMenuItem</code></a></p>
+  </section>
+</section>
+<section class="detail" id="appendCheckItem/3">
+
+  <div class="detail-header">
+    <a href="#appendCheckItem/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">appendCheckItem/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>appendCheckItem(This, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="appendCheckItem/4">
+
+  <div class="detail-header">
+    <a href="#appendCheckItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">appendCheckItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>appendCheckItem(This, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                       Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Adds a checkable item to the end of the menu.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#insertCheckItem/5"><code>insertCheckItem/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="appendRadioItem/3">
+
+  <div class="detail-header">
+    <a href="#appendRadioItem/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">appendRadioItem/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>appendRadioItem(This, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="appendRadioItem/4">
+
+  <div class="detail-header">
+    <a href="#appendRadioItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">appendRadioItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>appendRadioItem(This, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                       Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Adds a radio item to the end of the menu.</p><p>All consequent radio items form a group and when an item in the group is checked, all the others are automatically unchecked.</p><p>Note: Radio items are not supported under wxMotif.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#insertRadioItem/5"><code>insertRadioItem/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="appendSeparator/1">
+
+  <div class="detail-header">
+    <a href="#appendSeparator/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">appendSeparator/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>appendSeparator(This) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Adds a separator to the end of the menu.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#insertSeparator/2"><code>insertSeparator/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="break/1">
+
+  <div class="detail-header">
+    <a href="#break/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">break/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>break(This) -> ok when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Inserts a break in a menu, causing the next appended item to appear in a new column.</p><p>This function only actually inserts a break in wxMSW and does nothing under the other platforms.</p>
+  </section>
+</section>
+<section class="detail" id="check/3">
+
+  <div class="detail-header">
+    <a href="#check/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>check(This, Id, Check) -> ok when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Check :: boolean().</pre>
+
+      </div>
+
+<p>Checks or unchecks the menu item.</p><p>See: <a href="wxMenu.html#isChecked/2"><code>isChecked/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="delete/2">
+
+  <div class="detail-header">
+    <a href="#delete/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>delete(This, Id) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer();
+      (This, Item) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Item :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Deletes the menu item from the menu.</p><p>If the item is a submenu, it will <code>not</code> be deleted. Use <code>'Destroy'/2</code> if you want to delete a submenu.</p><p>See: <a href="wxMenu.html#findItem/2"><code>findItem/2</code></a>, <code>'Destroy'/2</code>, <a href="wxMenu.html#remove/2"><code>remove/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="destroy/1">
+
+  <div class="detail-header">
+    <a href="#destroy/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">destroy/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>destroy(This :: <a href="#t:wxMenu/0">wxMenu</a>()) -> ok.</pre>
+
+      </div>
+
+<p>Destructor, destroying the menu.</p><p>Note: Under Motif, a popup menu must have a valid parent (the window it was last popped up on) when being destroyed. Therefore, make sure you delete or re-use the popup menu <code>before</code> destroying the parent window. Re-use in this context means popping up the menu on a different window from last time, which causes an implicit destruction and recreation of internal data structures.</p>
+  </section>
+</section>
+<section class="detail" id="enable/3">
+
+  <div class="detail-header">
+    <a href="#enable/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">enable/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>enable(This, Id, Enable) -> ok when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Enable :: boolean().</pre>
+
+      </div>
+
+<p>Enables or disables (greys out) a menu item.</p><p>See: <a href="wxMenu.html#isEnabled/2"><code>isEnabled/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="findItem/2">
+
+  <div class="detail-header">
+    <a href="#findItem/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">findItem/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>findItem(This, Id) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer();
+        (This, ItemString) -> integer() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), ItemString :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Finds the menu id for a menu item string.</p><p>Return: Menu item identifier, or wxNOT_FOUND if none is found.</p><p>Remark: Any special menu codes are stripped out of source and target strings before matching.</p>
+  </section>
+</section>
+<section class="detail" id="findItemByPosition/2">
+
+  <div class="detail-header">
+    <a href="#findItemByPosition/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">findItemByPosition/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>findItemByPosition(This, Position) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                      when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Position :: integer().</pre>
+
+      </div>
+
+<p>Returns the <a href="wxMenuItem.html"><code>wxMenuItem</code></a> given a position in the menu.</p>
+  </section>
+</section>
+<section class="detail" id="getHelpString/2">
+
+  <div class="detail-header">
+    <a href="#getHelpString/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getHelpString/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getHelpString(This, Id) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:charlist/0">unicode:charlist</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer().</pre>
+
+      </div>
+
+<p>Returns the help string associated with a menu item.</p><p>Return: The help string, or the empty string if there is no help string or the item was not found.</p><p>See: <a href="wxMenu.html#setHelpString/3"><code>setHelpString/3</code></a>, <a href="wxMenu.html#append/5"><code>append/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="getLabel/2">
+
+  <div class="detail-header">
+    <a href="#getLabel/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getLabel/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getLabel(This, Id) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:charlist/0">unicode:charlist</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer().</pre>
+
+      </div>
+
+<p>Returns a menu item label.</p><p>Return: The item label, or the empty string if the item was not found.</p><p>See: <code>GetLabelText()</code> (not implemented in wx), <a href="wxMenu.html#setLabel/3"><code>setLabel/3</code></a></p>
+  </section>
+</section>
+<section class="detail" id="getMenuItemCount/1">
+
+  <div class="detail-header">
+    <a href="#getMenuItemCount/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMenuItemCount/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMenuItemCount(This) -> integer() when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Returns the number of items in the menu.</p>
+  </section>
+</section>
+<section class="detail" id="getMenuItems/1">
+
+  <div class="detail-header">
+    <a href="#getMenuItems/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMenuItems/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMenuItems(This) -> [<a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()] when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="getTitle/1">
+
+  <div class="detail-header">
+    <a href="#getTitle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getTitle/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getTitle(This) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:charlist/0">unicode:charlist</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Returns the title of the menu.</p><p>See: <a href="wxMenu.html#setTitle/2"><code>setTitle/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insert/3">
+
+  <div class="detail-header">
+    <a href="#insert/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insert(This, Pos, Id) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Pos :: integer(), Id :: integer();
+      (This, Pos, MenuItem) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Pos :: integer(), MenuItem :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Inserts the given <code>item</code> before the position <code>pos</code>.</p><p>Inserting the item at position <a href="wxMenu.html#getMenuItemCount/1"><code>getMenuItemCount/1</code></a> is the same as appending it.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insert/4">
+
+  <div class="detail-header">
+    <a href="#insert/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insert(This, Pos, Id, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when
+              This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Pos :: integer(),
+              Id :: integer(),
+              Option ::
+                  {text, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {kind, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>Inserts the given <code>item</code> before the position <code>pos</code>.</p><p>Inserting the item at position <a href="wxMenu.html#getMenuItemCount/1"><code>getMenuItemCount/1</code></a> is the same as appending it.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insert/5">
+
+  <div class="detail-header">
+    <a href="#insert/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insert(This, Pos, Id, Text, Submenu) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when
+              This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Pos :: integer(),
+              Id :: integer(),
+              Text :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+              Submenu :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="insert/6">
+
+  <div class="detail-header">
+    <a href="#insert/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insert/6</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insert(This, Pos, Id, Text, Submenu, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when
+              This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Pos :: integer(),
+              Id :: integer(),
+              Text :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+              Submenu :: <a href="#t:wxMenu/0">wxMenu</a>(),
+              Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts the given <code>submenu</code> before the position <code>pos</code>.</p><p><code>text</code> is the text shown in the menu for it and <code>help</code> is the help string shown in the status bar when the submenu item is selected.</p><p>See: <code>AppendSubMenu()</code> (not implemented in wx), <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insertCheckItem/4">
+
+  <div class="detail-header">
+    <a href="#insertCheckItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insertCheckItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insertCheckItem(This, Pos, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Pos :: integer(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="insertCheckItem/5">
+
+  <div class="detail-header">
+    <a href="#insertCheckItem/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insertCheckItem/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insertCheckItem(This, Pos, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Pos :: integer(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                       Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts a checkable item at the given position.</p><p>See: <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#appendCheckItem/4"><code>appendCheckItem/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insertRadioItem/4">
+
+  <div class="detail-header">
+    <a href="#insertRadioItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insertRadioItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insertRadioItem(This, Pos, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Pos :: integer(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="insertRadioItem/5">
+
+  <div class="detail-header">
+    <a href="#insertRadioItem/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insertRadioItem/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insertRadioItem(This, Pos, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                   when
+                       This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                       Pos :: integer(),
+                       Id :: integer(),
+                       Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                       Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts a radio item at the given position.</p><p>See: <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#appendRadioItem/4"><code>appendRadioItem/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="insertSeparator/2">
+
+  <div class="detail-header">
+    <a href="#insertSeparator/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">insertSeparator/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>insertSeparator(This, Pos) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Pos :: integer().</pre>
+
+      </div>
+
+<p>Inserts a separator at the given position.</p><p>See: <a href="wxMenu.html#insert/6"><code>insert/6</code></a>, <a href="wxMenu.html#appendSeparator/1"><code>appendSeparator/1</code></a></p>
+  </section>
+</section>
+<section class="detail" id="isChecked/2">
+
+  <div class="detail-header">
+    <a href="#isChecked/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">isChecked/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>isChecked(This, Id) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer().</pre>
+
+      </div>
+
+<p>Determines whether a menu item is checked.</p><p>Return: true if the menu item is checked, false otherwise.</p><p>See: <a href="wxMenu.html#check/3"><code>check/3</code></a></p>
+  </section>
+</section>
+<section class="detail" id="isEnabled/2">
+
+  <div class="detail-header">
+    <a href="#isEnabled/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">isEnabled/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>isEnabled(This, Id) -> boolean() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer().</pre>
+
+      </div>
+
+<p>Determines whether a menu item is enabled.</p><p>Return: true if the menu item is enabled, false otherwise.</p><p>See: <a href="wxMenu.html#enable/3"><code>enable/3</code></a></p>
+  </section>
+</section>
+<section class="detail" id="new/0">
+
+  <div class="detail-header">
+    <a href="#new/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new() -> <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object.</p>
+  </section>
+</section>
+<section class="detail" id="new/1">
+
+  <div class="detail-header">
+    <a href="#new/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new([Option]) -> <a href="#t:wxMenu/0">wxMenu</a>() when Option :: {style, integer()}.</pre>
+
+      </div>
+
+<p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object.</p>
+  </section>
+</section>
+<section class="detail" id="new/2">
+
+  <div class="detail-header">
+    <a href="#new/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Title, [Option]) -> <a href="#t:wxMenu/0">wxMenu</a>() when Title :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Option :: {style, integer()}.</pre>
+
+      </div>
+
+<p>Constructs a <a href="wxMenu.html#content"><code>wxMenu</code></a> object with a title.</p>
+  </section>
+</section>
+<section class="detail" id="prepend/2">
+
+  <div class="detail-header">
+    <a href="#prepend/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prepend/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prepend(This, Id) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer();
+       (This, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+           when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Item :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Inserts the given <code>item</code> at position 0, i.e. before all the other existing items.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#insert/6"><code>insert/6</code></a></p>
+  </section>
+</section>
+<section class="detail" id="prepend/3">
+
+  <div class="detail-header">
+    <a href="#prepend/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prepend/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prepend(This, Id, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+           when
+               This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+               Id :: integer(),
+               Option ::
+                   {text, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {kind, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>Inserts the given <code>item</code> at position 0, i.e. before all the other existing items.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#insert/6"><code>insert/6</code></a></p>
+  </section>
+</section>
+<section class="detail" id="prepend/4">
+
+  <div class="detail-header">
+    <a href="#prepend/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prepend/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prepend(This, Id, Text, Submenu) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+           when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Text :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Submenu :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="prepend/5">
+
+  <div class="detail-header">
+    <a href="#prepend/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prepend/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prepend(This, Id, Text, Submenu, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+           when
+               This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+               Id :: integer(),
+               Text :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+               Submenu :: <a href="#t:wxMenu/0">wxMenu</a>(),
+               Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts the given <code>submenu</code> at position 0.</p><p>See: <code>AppendSubMenu()</code> (not implemented in wx), <a href="wxMenu.html#insert/6"><code>insert/6</code></a></p>
+  </section>
+</section>
+<section class="detail" id="prependCheckItem/3">
+
+  <div class="detail-header">
+    <a href="#prependCheckItem/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prependCheckItem/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prependCheckItem(This, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                    when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="prependCheckItem/4">
+
+  <div class="detail-header">
+    <a href="#prependCheckItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prependCheckItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prependCheckItem(This, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                    when
+                        This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                        Id :: integer(),
+                        Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                        Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts a checkable item at position 0.</p><p>See: <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a>, <a href="wxMenu.html#appendCheckItem/4"><code>appendCheckItem/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="prependRadioItem/3">
+
+  <div class="detail-header">
+    <a href="#prependRadioItem/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prependRadioItem/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prependRadioItem(This, Id, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                    when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="prependRadioItem/4">
+
+  <div class="detail-header">
+    <a href="#prependRadioItem/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prependRadioItem/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prependRadioItem(This, Id, Item, [Option]) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+                    when
+                        This :: <a href="#t:wxMenu/0">wxMenu</a>(),
+                        Id :: integer(),
+                        Item :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                        Option :: {help, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()}.</pre>
+
+      </div>
+
+<p>Inserts a radio item at position 0.</p><p>See: <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a>, <a href="wxMenu.html#appendRadioItem/4"><code>appendRadioItem/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="prependSeparator/1">
+
+  <div class="detail-header">
+    <a href="#prependSeparator/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">prependSeparator/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>prependSeparator(This) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>().</pre>
+
+      </div>
+
+<p>Inserts a separator at position 0.</p><p>See: <a href="wxMenu.html#prepend/5"><code>prepend/5</code></a>, <a href="wxMenu.html#appendSeparator/1"><code>appendSeparator/1</code></a></p>
+  </section>
+</section>
+<section class="detail" id="remove/2">
+
+  <div class="detail-header">
+    <a href="#remove/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">remove/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>remove(This, Id) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>() when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer();
+      (This, Item) -> <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>()
+          when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Item :: <a href="wxMenuItem.html#t:wxMenuItem/0">wxMenuItem:wxMenuItem</a>().</pre>
+
+      </div>
+
+<p>Removes the menu item from the menu but doesn't delete the associated C++ object.</p><p>This allows you to reuse the same item later by adding it back to the menu (especially useful with submenus).</p><p>Return: A pointer to the item which was detached from the menu.</p>
+  </section>
+</section>
+<section class="detail" id="setHelpString/3">
+
+  <div class="detail-header">
+    <a href="#setHelpString/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setHelpString/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setHelpString(This, Id, HelpString) -> ok
+                 when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), HelpString :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Sets an item's help string.</p><p>See: <a href="wxMenu.html#getHelpString/2"><code>getHelpString/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="setLabel/3">
+
+  <div class="detail-header">
+    <a href="#setLabel/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setLabel/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setLabel(This, Id, Label) -> ok
+            when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Id :: integer(), Label :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Sets the label of a menu item.</p><p>See: <a href="wxMenu.html#append/5"><code>append/5</code></a>, <a href="wxMenu.html#getLabel/2"><code>getLabel/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="setTitle/2">
+
+  <div class="detail-header">
+    <a href="#setTitle/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setTitle/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setTitle(This, Title) -> ok when This :: <a href="#t:wxMenu/0">wxMenu</a>(), Title :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Sets the title of the menu.</p><p>Remark: Notice that you can only call this method directly for the popup menus, to change the title of a menu that is part of a menu bar you need to use <a href="wxMenuBar.html#setLabelTop/3"><code>wxMenuBar:setLabelTop/3</code></a>.</p><p>See: <a href="wxMenu.html#getTitle/1"><code>getTitle/1</code></a></p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

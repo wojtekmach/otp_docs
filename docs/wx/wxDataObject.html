@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="wx v2.0.1">
+
+    <title>wxDataObject — wx v2.0.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2fbb42302e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+wx
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.0.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wxDataObject <small class="app-vsn">(wx v2.0.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>A <a href="wxDataObject.html#content"><code>wxDataObject</code></a> represents data that can be copied to or from the clipboard, or dragged and dropped. The important thing about <a href="wxDataObject.html#content"><code>wxDataObject</code></a> is that this is a 'smart' piece of data unlike 'dumb' data containers such as memory buffers or files. Being 'smart' here means that the data object itself should know what data formats it supports and how to render itself in each of its supported formats.</p><p>A supported format, incidentally, is exactly the format in which the data can be requested from a data object or from which the data object may be set. In the general case, an object may support different formats on 'input' and 'output', i.e. it may be able to render itself in a given format but not be created from data on this format or vice versa. <a href="wxDataObject.html#content"><code>wxDataObject</code></a> defines the <code>wxDataObject::Direction</code> (not implemented in wx) enumeration type which distinguishes between them.</p><p>See <code>wxDataFormat</code> (not implemented in wx) documentation for more about formats.</p><p>Not surprisingly, being 'smart' comes at a price of added complexity. This is reasonable for the situations when you really need to support multiple formats, but may be annoying if you only want to do something simple like cut and paste text.</p><p>To provide a solution for both cases, wxWidgets has two predefined classes which derive from <a href="wxDataObject.html#content"><code>wxDataObject</code></a>: <code>wxDataObjectSimple</code> (not implemented in wx) and <code>wxDataObjectComposite</code> (not implemented in wx). <code>wxDataObjectSimple</code> (not implemented in wx) is the simplest <a href="wxDataObject.html#content"><code>wxDataObject</code></a> possible and only holds data in a single format (such as HTML or text) and <code>wxDataObjectComposite</code> (not implemented in wx) is the simplest way to implement a <a href="wxDataObject.html#content"><code>wxDataObject</code></a> that does support multiple formats because it achieves this by simply holding several <code>wxDataObjectSimple</code> (not implemented in wx) objects.</p><p>So, you have several solutions when you need a <a href="wxDataObject.html#content"><code>wxDataObject</code></a> class (and you need one as soon as you want to transfer data via the clipboard or drag and drop):</p><p>Please note that the easiest way to use drag and drop and the clipboard with multiple formats is by using <code>wxDataObjectComposite</code> (not implemented in wx), but it is not the most efficient one as each <code>wxDataObjectSimple</code> (not implemented in wx) would contain the whole data in its respective formats. Now imagine that you want to paste 200 pages of text in your proprietary format, as well as Word, RTF, HTML, Unicode and plain text to the clipboard and even today's computers are in trouble. For this case, you will have to derive from <a href="wxDataObject.html#content"><code>wxDataObject</code></a> directly and make it enumerate its formats and provide the data in the requested format on demand.</p><p>Note that neither the GTK+ data transfer mechanisms for clipboard and drag and drop, nor OLE data transfer, <code>copies</code> any data until another application actually requests the data. This is in contrast to the 'feel' offered to the user of a program who would normally think that the data resides in the clipboard after having pressed 'Copy' - in reality it is only declared to be <code>available</code>.</p><p>You may also derive your own data object classes from <code>wxCustomDataObject</code> (not implemented in wx) for user-defined types. The format of user-defined data is given as a mime-type string literal, such as &quot;application/word&quot; or &quot;image/png&quot;. These strings are used as they are under Unix (so far only GTK+) to identify a format and are translated into their Windows equivalent under Win32 (using the OLE IDataObject for data exchange to and from the clipboard and for drag and drop). Note that the format string translation under Windows is not yet finished.</p><p>Each class derived directly from <a href="wxDataObject.html#content"><code>wxDataObject</code></a> must override and implement all of its functions which are pure virtual in the base class. The data objects which only render their data or only set it (i.e. work in only one direction), should return 0 from <code>GetFormatCount()</code> (not implemented in wx).</p><p>See: <a href="https://docs.wxwidgets.org/3.1/overview_dnd.html#overview_dnd">Overview dnd</a>, <a href="https://docs.wxwidgets.org/3.1/page_samples.html#page_samples_dnd">Examples</a>, <a href="wxFileDataObject.html"><code>wxFileDataObject</code></a>, <a href="wxTextDataObject.html"><code>wxTextDataObject</code></a>, <a href="wxBitmapDataObject.html"><code>wxBitmapDataObject</code></a>, <code>wxCustomDataObject</code> (not implemented in wx), <code>wxDropTarget</code> (not implemented in wx), <code>wxDropSource</code> (not implemented in wx), <code>wxTextDropTarget</code> (not implemented in wx), <code>wxFileDropTarget</code> (not implemented in wx)</p><p>wxWidgets docs: <a href="https://docs.wxwidgets.org/3.1/classwx_data_object.html">wxDataObject</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxDataObject/0">-type wxDataObject() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:wxDataObject/0">
+
+  <div class="detail-header">
+    <a href="#t:wxDataObject/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxDataObject() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxDataObject() :: wx:wx_object().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

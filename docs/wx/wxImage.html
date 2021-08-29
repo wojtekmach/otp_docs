@@ -1,0 +1,3415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="wx v2.0.1">
+
+    <title>wxImage — wx v2.0.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2fbb42302e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+wx
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.0.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wxImage <small class="app-vsn">(wx v2.0.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p>This class encapsulates a platform-independent image.</p><p>An image can be created from data, or using <a href="wxBitmap.html#convertToImage/1"><code>wxBitmap:convertToImage/1</code></a>. An image can be loaded from a file in a variety of formats, and is extensible to new formats via image format handlers. Functions are available to set and get image bits, so it can be used for basic image manipulation.</p><p>A <a href="wxImage.html#content"><code>wxImage</code></a> cannot (currently) be drawn directly to a <a href="wxDC.html"><code>wxDC</code></a>. Instead, a platform-specific <a href="wxBitmap.html"><code>wxBitmap</code></a> object must be created from it using the wxBitmap::wxBitmap(wxImage,int depth) constructor. This bitmap can then be drawn in a device context, using <a href="wxDC.html#drawBitmap/4"><code>wxDC:drawBitmap/4</code></a>.</p><p>More on the difference between <a href="wxImage.html#content"><code>wxImage</code></a> and <a href="wxBitmap.html"><code>wxBitmap</code></a>: <a href="wxImage.html#content"><code>wxImage</code></a> is just a buffer of RGB bytes with an optional buffer for the alpha bytes. It is all generic, platform independent and image file format independent code. It includes generic code for scaling, resizing, clipping, and other manipulations of the image data. OTOH, <a href="wxBitmap.html"><code>wxBitmap</code></a> is intended to be a wrapper of whatever is the native image format that is quickest/easiest to draw to a DC or to be the target of the drawing operations performed on a <a href="wxMemoryDC.html"><code>wxMemoryDC</code></a>. By splitting the responsibilities between wxImage/wxBitmap like this then it's easier to use generic code shared by all platforms and image types for generic operations and platform specific code where performance or compatibility is needed.</p><p>One colour value of the image may be used as a mask colour which will lead to the automatic creation of a <a href="wxMask.html"><code>wxMask</code></a> object associated to the bitmap object.</p><p>Alpha channel support</p><p>Starting from wxWidgets 2.5.0 <a href="wxImage.html#content"><code>wxImage</code></a> supports alpha channel data, that is in addition to a byte for the red, green and blue colour components for each pixel it also stores a byte representing the pixel opacity.</p><p>An alpha value of 0 corresponds to a transparent pixel (null opacity) while a value of 255 means that the pixel is 100% opaque. The constants ?wxIMAGE_ALPHA_TRANSPARENT and ?wxIMAGE_ALPHA_OPAQUE can be used to indicate those values in a more readable form.</p><p>While all images have RGB data, not all images have an alpha channel. Before using <a href="wxImage.html#getAlpha/3"><code>getAlpha/3</code></a> you should check if this image contains an alpha channel with <a href="wxImage.html#hasAlpha/1"><code>hasAlpha/1</code></a>. Currently the BMP, PNG, TGA, and TIFF format handlers have full alpha channel support for loading so if you want to use alpha you have to use one of these formats. If you initialize the image alpha channel yourself using <a href="wxImage.html#setAlpha/4"><code>setAlpha/4</code></a>, you should save it in either PNG, TGA, or TIFF format to avoid losing it as these are the only handlers that currently support saving with alpha.</p><p>Available image handlers</p><p>The following image handlers are available. wxBMPHandler is always installed by default. To use other image formats, install the appropriate handler with <code>wxImage::AddHandler</code> (not implemented in wx) or call ?wxInitAllImageHandlers().</p><p>When saving in PCX format, <code>wxPCXHandler</code> (not implemented in wx) will count the number of different colours in the image; if there are 256 or less colours, it will save as 8 bit, else it will save as 24 bit.</p><p>Loading PNMs only works for ASCII or raw RGB images. When saving in PNM format, <code>wxPNMHandler</code> (not implemented in wx) will always save as raw RGB.</p><p>Saving GIFs requires images of maximum 8 bpp (see <code>wxQuantize</code> (not implemented in wx)), and the alpha channel converted to a mask (see <a href="wxImage.html#convertAlphaToMask/5"><code>convertAlphaToMask/5</code></a>). Saving an animated GIF requires images of the same size (see <code>wxGIFHandler::SaveAnimation</code> (not implemented in wx))</p><p>Predefined objects (include wx.hrl): ?wxNullImage</p><p>See: <a href="wxBitmap.html"><code>wxBitmap</code></a>, ?wxInitAllImageHandlers(), <code>wxPixelData</code> (not implemented in wx)</p><p>wxWidgets docs: <a href="https://docs.wxwidgets.org/3.1/classwx_image.html">wxImage</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxImage/0">-type wxImage() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#Destroy/1">'Destroy'/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Destroys the image data.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#blur/2">blur/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Blurs the image in both horizontal and vertical directions by the specified pixel <code>blurRadius</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#blurHorizontal/2">blurHorizontal/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Blurs the image in the horizontal direction only.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#blurVertical/2">blurVertical/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Blurs the image in the vertical direction only.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertAlphaToMask/1">convertAlphaToMask/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertAlphaToMask/2">convertAlphaToMask/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If the image has alpha channel, this method converts it to mask.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertAlphaToMask/4">convertAlphaToMask/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertAlphaToMask/5">convertAlphaToMask/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If the image has alpha channel, this method converts it to mask using the specified colour as the mask colour.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertToGreyscale/1">convertToGreyscale/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a greyscale version of the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertToGreyscale/4">convertToGreyscale/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a greyscale version of the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#convertToMono/4">convertToMono/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns monochromatic version of the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#copy/1">copy/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns an identical copy of this image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/2">create/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/3">create/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/4">create/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/5">create/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create/6">create/6</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates a fresh image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#destroy/1">destroy/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Destructor.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#findFirstUnusedColour/1">findFirstUnusedColour/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#findFirstUnusedColour/2">findFirstUnusedColour/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Finds the first colour that is never used in the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getAlpha/1">getAlpha/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns pointer to the array storing the alpha values for this image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getAlpha/3">getAlpha/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Return alpha value at given pixel location.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getBlue/3">getBlue/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the blue intensity at the given coordinate.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getData/1">getData/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the image data as an array.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getGreen/3">getGreen/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the green intensity at the given coordinate.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getHeight/1">getHeight/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the height of the image in pixels.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getImageCount/1">getImageCount/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getImageCount/2">getImageCount/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>If the image file contains more than one image and the image handler is capable of retrieving these individually, this function will return the number of available images.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getImageExtWildcard/0">getImageExtWildcard/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Iterates all registered <code>wxImageHandler</code> (not implemented in wx) objects, and returns a string containing file extension masks suitable for passing to file open/save dialog boxes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMaskBlue/1">getMaskBlue/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the blue value of the mask colour.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMaskGreen/1">getMaskGreen/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the green value of the mask colour.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getMaskRed/1">getMaskRed/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the red value of the mask colour.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getOption/2">getOption/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets a user-defined string-valued option.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getOptionInt/2">getOptionInt/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets a user-defined integer-valued option.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getOrFindMaskColour/1">getOrFindMaskColour/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Get the current mask colour or find a suitable unused colour that could be used as a mask colour.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getPalette/1">getPalette/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the palette associated with the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getRed/3">getRed/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns the red intensity at the given coordinate.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getSubImage/2">getSubImage/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a sub image of the current one as long as the rect belongs entirely to the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getWidth/1">getWidth/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Gets the width of the image in pixels.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hasAlpha/1">hasAlpha/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if this image has alpha channel, false otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hasMask/1">hasMask/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if there is a mask active, false otherwise.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#hasOption/2">hasOption/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if the given option is present.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#initAlpha/1">initAlpha/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Initializes the image alpha channel data.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#initStandardHandlers/0">initStandardHandlers/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Internal use only.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#isOk/1">isOk/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if image data is present.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#isTransparent/3">isTransparent/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#isTransparent/4">isTransparent/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns true if the given pixel is transparent, i.e. either has the mask colour if this image has a mask or if this image has alpha channel and alpha value of this pixel is strictly less than <code>threshold</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#loadFile/2">loadFile/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#loadFile/3">loadFile/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Loads an image from a file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#loadFile/4">loadFile/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Loads an image from a file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#mirror/1">mirror/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#mirror/2">mirror/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a mirrored copy of the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/0">new/0</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates an empty <a href="wxImage.html#content"><code>wxImage</code></a> object without an alpha channel.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/1">new/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/2">new/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/3">new/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/4">new/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#new/5">new/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Creates an image from data in memory.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#ok/1">ok/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>See: <a href="wxImage.html#isOk/1"><code>isOk/1</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#removeHandler/1">removeHandler/1</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Finds the handler with the given name, and removes it.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/7">replace/7</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Replaces the colour specified by <code>r1</code>,g1,b1 by the colour <code>r2</code>,g2,b2.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rescale/3">rescale/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rescale/4">rescale/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Changes the size of the image in-place by scaling it: after a call to this function,the image will have the given width and height.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resize/3">resize/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#resize/4">resize/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Changes the size of the image in-place without scaling it by adding either a border with the given colour or cropping as necessary.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rotate/3">rotate/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rotate/4">rotate/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Rotates the image about the given point, by <code>angle</code> radians.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rotate90/1">rotate90/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rotate90/2">rotate90/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a copy of the image rotated 90 degrees in the direction indicated by <code>clockwise</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#rotateHue/2">rotateHue/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Rotates the hue of each pixel in the image by <code>angle</code>, which is a double in the range of -1.0 to +1.0, where -1.0 corresponds to -360 degrees and +1.0 corresponds to +360 degrees.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#saveFile/2">saveFile/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Saves an image in the named file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#saveFile/3">saveFile/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Saves an image in the named file.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#scale/3">scale/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#scale/4">scale/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a scaled version of the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setAlpha/2">setAlpha/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setAlpha/3">setAlpha/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This function is similar to <a href="wxImage.html#setData/5"><code>setData/5</code></a> and has similar restrictions.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setAlpha/4">setAlpha/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the alpha value for the given pixel.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setData/2">setData/2</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setData/3">setData/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the image data without performing checks.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setData/4">setData/4</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setData/5">setData/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setMask/1">setMask/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setMask/2">setMask/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Specifies whether there is a mask or not.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setMaskColour/4">setMaskColour/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the mask colour for this image (and tells the image to use the mask).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setMaskFromImage/5">setMaskFromImage/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets image's mask so that the pixels that have RGB value of mr,mg,mb in mask will be masked in the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setOption/3">setOption/3</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets a user-defined option.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setPalette/2">setPalette/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Associates a palette with the image.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setRGB/5">setRGB/5</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Sets the colour of the pixels within the given rectangle.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#setRGB/6">setRGB/6</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Set the color of the pixel at the given x and y coordinate.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#size/3">size/3</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#size/4">size/4</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Returns a resized version of this image without scaling it by adding either a border with the given colour or cropping as necessary.</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:wxImage/0">
+
+  <div class="detail-header">
+    <a href="#t:wxImage/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxImage() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxImage() :: wx:wx_object().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="Destroy/1">
+
+  <div class="detail-header">
+    <a href="#Destroy/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">'Destroy'/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>'Destroy'(This) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Destroys the image data.</p>
+  </section>
+</section>
+<section class="detail" id="blur/2">
+
+  <div class="detail-header">
+    <a href="#blur/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">blur/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>blur(This, BlurRadius) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), BlurRadius :: integer().</pre>
+
+      </div>
+
+<p>Blurs the image in both horizontal and vertical directions by the specified pixel <code>blurRadius</code>.</p><p>This should not be used when using a single mask colour for transparency.</p><p>See: <a href="wxImage.html#blurHorizontal/2"><code>blurHorizontal/2</code></a>, <a href="wxImage.html#blurVertical/2"><code>blurVertical/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="blurHorizontal/2">
+
+  <div class="detail-header">
+    <a href="#blurHorizontal/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">blurHorizontal/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>blurHorizontal(This, BlurRadius) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), BlurRadius :: integer().</pre>
+
+      </div>
+
+<p>Blurs the image in the horizontal direction only.</p><p>This should not be used when using a single mask colour for transparency.</p><p>See: <a href="wxImage.html#blur/2"><code>blur/2</code></a>, <a href="wxImage.html#blurVertical/2"><code>blurVertical/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="blurVertical/2">
+
+  <div class="detail-header">
+    <a href="#blurVertical/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">blurVertical/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>blurVertical(This, BlurRadius) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), BlurRadius :: integer().</pre>
+
+      </div>
+
+<p>Blurs the image in the vertical direction only.</p><p>This should not be used when using a single mask colour for transparency.</p><p>See: <a href="wxImage.html#blur/2"><code>blur/2</code></a>, <a href="wxImage.html#blurHorizontal/2"><code>blurHorizontal/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="convertAlphaToMask/1">
+
+  <div class="detail-header">
+    <a href="#convertAlphaToMask/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertAlphaToMask/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertAlphaToMask(This) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="convertAlphaToMask/2">
+
+  <div class="detail-header">
+    <a href="#convertAlphaToMask/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertAlphaToMask/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertAlphaToMask(This, [Option]) -> boolean()
+                      when This :: <a href="#t:wxImage/0">wxImage</a>(), Option :: {threshold, integer()}.</pre>
+
+      </div>
+
+<p>If the image has alpha channel, this method converts it to mask.</p><p>If the image has an alpha channel, all pixels with alpha value less than <code>threshold</code> are replaced with the mask colour and the alpha channel is removed. Otherwise nothing is done.</p><p>The mask colour is chosen automatically using <a href="wxImage.html#findFirstUnusedColour/2"><code>findFirstUnusedColour/2</code></a>, see the overload below if this is not appropriate.</p><p>Return: Returns true on success, false on error.</p>
+  </section>
+</section>
+<section class="detail" id="convertAlphaToMask/4">
+
+  <div class="detail-header">
+    <a href="#convertAlphaToMask/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertAlphaToMask/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertAlphaToMask(This, Mr, Mg, Mb) -> boolean()
+                      when This :: <a href="#t:wxImage/0">wxImage</a>(), Mr :: integer(), Mg :: integer(), Mb :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="convertAlphaToMask/5">
+
+  <div class="detail-header">
+    <a href="#convertAlphaToMask/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertAlphaToMask/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertAlphaToMask(This, Mr, Mg, Mb, [Option]) -> boolean()
+                      when
+                          This :: <a href="#t:wxImage/0">wxImage</a>(),
+                          Mr :: integer(),
+                          Mg :: integer(),
+                          Mb :: integer(),
+                          Option :: {threshold, integer()}.</pre>
+
+      </div>
+
+<p>If the image has alpha channel, this method converts it to mask using the specified colour as the mask colour.</p><p>If the image has an alpha channel, all pixels with alpha value less than <code>threshold</code> are replaced with the mask colour and the alpha channel is removed. Otherwise nothing is done.</p><p>Since: 2.9.0</p><p>Return: Returns true on success, false on error.</p>
+  </section>
+</section>
+<section class="detail" id="convertToGreyscale/1">
+
+  <div class="detail-header">
+    <a href="#convertToGreyscale/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertToGreyscale/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertToGreyscale(This) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns a greyscale version of the image.</p><p>Since: 2.9.0</p>
+  </section>
+</section>
+<section class="detail" id="convertToGreyscale/4">
+
+  <div class="detail-header">
+    <a href="#convertToGreyscale/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertToGreyscale/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertToGreyscale(This, Weight_r, Weight_g, Weight_b) -> <a href="#t:wxImage/0">wxImage</a>()
+                      when
+                          This :: <a href="#t:wxImage/0">wxImage</a>(),
+                          Weight_r :: number(),
+                          Weight_g :: number(),
+                          Weight_b :: number().</pre>
+
+      </div>
+
+<p>Returns a greyscale version of the image.</p><p>The returned image uses the luminance component of the original to calculate the greyscale. Defaults to using the standard ITU-T BT.601 when converting to YUV, where every pixel equals (R * <code>weight_r</code>) + (G * <code>weight_g</code>) + (B * <code>weight_b</code>).</p>
+  </section>
+</section>
+<section class="detail" id="convertToMono/4">
+
+  <div class="detail-header">
+    <a href="#convertToMono/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">convertToMono/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>convertToMono(This, R, G, B) -> <a href="#t:wxImage/0">wxImage</a>()
+                 when This :: <a href="#t:wxImage/0">wxImage</a>(), R :: integer(), G :: integer(), B :: integer().</pre>
+
+      </div>
+
+<p>Returns monochromatic version of the image.</p><p>The returned image has white colour where the original has (r,g,b) colour and black colour everywhere else.</p>
+  </section>
+</section>
+<section class="detail" id="copy/1">
+
+  <div class="detail-header">
+    <a href="#copy/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">copy/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>copy(This) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns an identical copy of this image.</p>
+  </section>
+</section>
+<section class="detail" id="create/2">
+
+  <div class="detail-header">
+    <a href="#create/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(This, Sz) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>(), Sz :: {W :: integer(), H :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="create/3">
+
+  <div class="detail-header">
+    <a href="#create/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(This, Width, Height) -> boolean()
+          when This :: <a href="#t:wxImage/0">wxImage</a>(), Width :: integer(), Height :: integer();
+      (This, Sz, Data) -> boolean()
+          when This :: <a href="#t:wxImage/0">wxImage</a>(), Sz :: {W :: integer(), H :: integer()}, Data :: binary();
+      (This, Sz, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Sz :: {W :: integer(), H :: integer()},
+              Option :: {clear, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="create/4">
+
+  <div class="detail-header">
+    <a href="#create/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(This, Width, Height, Data) -> boolean()
+          when This :: <a href="#t:wxImage/0">wxImage</a>(), Width :: integer(), Height :: integer(), Data :: binary();
+      (This, Sz, Data, Alpha) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Sz :: {W :: integer(), H :: integer()},
+              Data :: binary(),
+              Alpha :: binary();
+      (This, Width, Height, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Width :: integer(),
+              Height :: integer(),
+              Option :: {clear, boolean()};
+      (This, Sz, Data, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Sz :: {W :: integer(), H :: integer()},
+              Data :: binary(),
+              Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="create/5">
+
+  <div class="detail-header">
+    <a href="#create/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(This, Width, Height, Data, Alpha) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Width :: integer(),
+              Height :: integer(),
+              Data :: binary(),
+              Alpha :: binary();
+      (This, Width, Height, Data, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Width :: integer(),
+              Height :: integer(),
+              Data :: binary(),
+              Option :: {static_data, boolean()};
+      (This, Sz, Data, Alpha, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Sz :: {W :: integer(), H :: integer()},
+              Data :: binary(),
+              Alpha :: binary(),
+              Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="create/6">
+
+  <div class="detail-header">
+    <a href="#create/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create/6</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>create(This, Width, Height, Data, Alpha, [Option]) -> boolean()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Width :: integer(),
+              Height :: integer(),
+              Data :: binary(),
+              Alpha :: binary(),
+              Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>Creates a fresh image.</p><p>See <a href="wxImage.html#new/5"><code>new/5</code></a> for more info.</p><p>Return: true if the call succeeded, false otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="destroy/1">
+
+  <div class="detail-header">
+    <a href="#destroy/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">destroy/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>destroy(This :: <a href="#t:wxImage/0">wxImage</a>()) -> ok.</pre>
+
+      </div>
+
+<p>Destructor.</p><p>See reference-counted object destruction for more info.</p>
+  </section>
+</section>
+<section class="detail" id="findFirstUnusedColour/1">
+
+  <div class="detail-header">
+    <a href="#findFirstUnusedColour/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">findFirstUnusedColour/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>findFirstUnusedColour(This) -> Result
+                         when
+                             Result ::
+                                 {Res :: boolean(),
+                                  R :: integer(),
+                                  G :: integer(),
+                                  B :: integer()},
+                             This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="findFirstUnusedColour/2">
+
+  <div class="detail-header">
+    <a href="#findFirstUnusedColour/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">findFirstUnusedColour/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>findFirstUnusedColour(This, [Option]) -> Result
+                         when
+                             Result ::
+                                 {Res :: boolean(),
+                                  R :: integer(),
+                                  G :: integer(),
+                                  B :: integer()},
+                             This :: <a href="#t:wxImage/0">wxImage</a>(),
+                             Option ::
+                                 {startR, integer()} | {startG, integer()} | {startB, integer()}.</pre>
+
+      </div>
+
+<p>Finds the first colour that is never used in the image.</p><p>The search begins at given initial colour and continues by increasing R, G and B components (in this order) by 1 until an unused colour is found or the colour space exhausted.</p><p>The parameters <code>r</code>, <code>g</code>, <code>b</code> are pointers to variables to save the colour.</p><p>The parameters <code>startR</code>, <code>startG</code>, <code>startB</code> define the initial values of the colour. The returned colour will have RGB values equal to or greater than these.</p><p>Return: Returns false if there is no unused colour left, true on success.</p><p>Note: This method involves computing the histogram, which is a computationally intensive operation.</p>
+  </section>
+</section>
+<section class="detail" id="getAlpha/1">
+
+  <div class="detail-header">
+    <a href="#getAlpha/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getAlpha/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getAlpha(This) -> binary() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns pointer to the array storing the alpha values for this image.</p><p>This pointer is NULL for the images without the alpha channel. If the image does have it, this pointer may be used to directly manipulate the alpha values which are stored as the RGB ones.</p>
+  </section>
+</section>
+<section class="detail" id="getAlpha/3">
+
+  <div class="detail-header">
+    <a href="#getAlpha/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getAlpha/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getAlpha(This, X, Y) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer().</pre>
+
+      </div>
+
+<p>Return alpha value at given pixel location.</p>
+  </section>
+</section>
+<section class="detail" id="getBlue/3">
+
+  <div class="detail-header">
+    <a href="#getBlue/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getBlue/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getBlue(This, X, Y) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer().</pre>
+
+      </div>
+
+<p>Returns the blue intensity at the given coordinate.</p>
+  </section>
+</section>
+<section class="detail" id="getData/1">
+
+  <div class="detail-header">
+    <a href="#getData/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getData/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getData(This) -> binary() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns the image data as an array.</p><p>This is most often used when doing direct image manipulation. The return value points to an array of characters in RGBRGBRGB... format in the top-to-bottom, left-to-right order, that is the first RGB triplet corresponds to the first pixel of the first row, the second one - to the second pixel of the first row and so on until the end of the first row, with second row following after it and so on.</p><p>You should not delete the returned pointer nor pass it to <a href="wxImage.html#setData/5"><code>setData/5</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="getGreen/3">
+
+  <div class="detail-header">
+    <a href="#getGreen/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getGreen/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getGreen(This, X, Y) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer().</pre>
+
+      </div>
+
+<p>Returns the green intensity at the given coordinate.</p>
+  </section>
+</section>
+<section class="detail" id="getHeight/1">
+
+  <div class="detail-header">
+    <a href="#getHeight/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getHeight/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getHeight(This) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Gets the height of the image in pixels.</p><p>See: <a href="wxImage.html#getWidth/1"><code>getWidth/1</code></a>, <code>GetSize()</code> (not implemented in wx)</p>
+  </section>
+</section>
+<section class="detail" id="getImageCount/1">
+
+  <div class="detail-header">
+    <a href="#getImageCount/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getImageCount/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getImageCount(Filename) -> integer() when Filename :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="getImageCount/2">
+
+  <div class="detail-header">
+    <a href="#getImageCount/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getImageCount/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getImageCount(Filename, [Option]) -> integer()
+                 when Filename :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Option :: {type, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>If the image file contains more than one image and the image handler is capable of retrieving these individually, this function will return the number of available images.</p><p>For the overload taking the parameter <code>filename</code>, that's the name of the file to query. For the overload taking the parameter <code>stream</code>, that's the opened input stream with image data.</p><p>See <code>wxImageHandler::GetImageCount()</code> (not implemented in wx) for more info.</p><p>The parameter <code>type</code> may be one of the following values:</p><p>Return: Number of available images. For most image handlers, this is 1 (exceptions are TIFF and ICO formats as well as animated GIFs for which this function returns the number of frames in the animation).</p>
+  </section>
+</section>
+<section class="detail" id="getImageExtWildcard/0">
+
+  <div class="detail-header">
+    <a href="#getImageExtWildcard/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getImageExtWildcard/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getImageExtWildcard() -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:charlist/0">unicode:charlist</a>().</pre>
+
+      </div>
+
+<p>Iterates all registered <code>wxImageHandler</code> (not implemented in wx) objects, and returns a string containing file extension masks suitable for passing to file open/save dialog boxes.</p><p>Return: The format of the returned string is <code>&quot;(*.ext1;*.ext2)|*.ext1;*.ext2&quot;</code>. It is usually a good idea to prepend a description before passing the result to the dialog. Example:</p><p>See: <code>wxImageHandler</code> (not implemented in wx)</p>
+  </section>
+</section>
+<section class="detail" id="getMaskBlue/1">
+
+  <div class="detail-header">
+    <a href="#getMaskBlue/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMaskBlue/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMaskBlue(This) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Gets the blue value of the mask colour.</p>
+  </section>
+</section>
+<section class="detail" id="getMaskGreen/1">
+
+  <div class="detail-header">
+    <a href="#getMaskGreen/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMaskGreen/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMaskGreen(This) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Gets the green value of the mask colour.</p>
+  </section>
+</section>
+<section class="detail" id="getMaskRed/1">
+
+  <div class="detail-header">
+    <a href="#getMaskRed/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getMaskRed/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getMaskRed(This) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Gets the red value of the mask colour.</p>
+  </section>
+</section>
+<section class="detail" id="getOption/2">
+
+  <div class="detail-header">
+    <a href="#getOption/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getOption/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getOption(This, Name) -> <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:charlist/0">unicode:charlist</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Gets a user-defined string-valued option.</p><p>Generic options:</p><p>Options specific to <code>wxGIFHandler</code> (not implemented in wx):</p><p>Return: The value of the option or an empty string if not found. Use <a href="wxImage.html#hasOption/2"><code>hasOption/2</code></a> if an empty string can be a valid option value.</p><p>See: <a href="wxImage.html#setOption/3"><code>setOption/3</code></a>, <a href="wxImage.html#getOptionInt/2"><code>getOptionInt/2</code></a>, <a href="wxImage.html#hasOption/2"><code>hasOption/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="getOptionInt/2">
+
+  <div class="detail-header">
+    <a href="#getOptionInt/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getOptionInt/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getOptionInt(This, Name) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Gets a user-defined integer-valued option.</p><p>The function is case-insensitive to <code>name</code>. If the given option is not present, the function returns 0. Use <a href="wxImage.html#hasOption/2"><code>hasOption/2</code></a> if 0 is a possibly valid value for the option.</p><p>Generic options:</p><p>Since: 2.9.3</p><p>Options specific to <code>wxPNGHandler</code> (not implemented in wx):</p><p>Options specific to <code>wxTIFFHandler</code> (not implemented in wx):</p><p>Options specific to <code>wxGIFHandler</code> (not implemented in wx):</p><p>Note: Be careful when combining the options <code>wxIMAGE_OPTION_TIFF_SAMPLESPERPIXEL</code>, <code>wxIMAGE_OPTION_TIFF_BITSPERSAMPLE</code>, and <code>wxIMAGE_OPTION_TIFF_PHOTOMETRIC</code>. While some measures are taken to prevent illegal combinations and/or values, it is still easy to abuse them and come up with invalid results in the form of either corrupted images or crashes.</p><p>Return: The value of the option or 0 if not found. Use <a href="wxImage.html#hasOption/2"><code>hasOption/2</code></a> if 0 can be a valid option value.</p><p>See: <a href="wxImage.html#setOption/3"><code>setOption/3</code></a>, <a href="wxImage.html#getOption/2"><code>getOption/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="getOrFindMaskColour/1">
+
+  <div class="detail-header">
+    <a href="#getOrFindMaskColour/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getOrFindMaskColour/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getOrFindMaskColour(This) -> Result
+                       when
+                           Result ::
+                               {Res :: boolean(), R :: integer(), G :: integer(), B :: integer()},
+                           This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Get the current mask colour or find a suitable unused colour that could be used as a mask colour.</p><p>Returns true if the image currently has a mask.</p>
+  </section>
+</section>
+<section class="detail" id="getPalette/1">
+
+  <div class="detail-header">
+    <a href="#getPalette/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getPalette/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getPalette(This) -> <a href="wxPalette.html#t:wxPalette/0">wxPalette:wxPalette</a>() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns the palette associated with the image.</p><p>Currently the palette is only used when converting to <a href="wxBitmap.html"><code>wxBitmap</code></a> under Windows.</p><p>Some of the <a href="wxImage.html#content"><code>wxImage</code></a> handlers have been modified to set the palette if one exists in the image file (usually 256 or less colour images in GIF or PNG format).</p>
+  </section>
+</section>
+<section class="detail" id="getRed/3">
+
+  <div class="detail-header">
+    <a href="#getRed/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getRed/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getRed(This, X, Y) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer().</pre>
+
+      </div>
+
+<p>Returns the red intensity at the given coordinate.</p>
+  </section>
+</section>
+<section class="detail" id="getSubImage/2">
+
+  <div class="detail-header">
+    <a href="#getSubImage/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getSubImage/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getSubImage(This, Rect) -> <a href="#t:wxImage/0">wxImage</a>()
+               when
+                   This :: <a href="#t:wxImage/0">wxImage</a>(),
+                   Rect :: {X :: integer(), Y :: integer(), W :: integer(), H :: integer()}.</pre>
+
+      </div>
+
+<p>Returns a sub image of the current one as long as the rect belongs entirely to the image.</p>
+  </section>
+</section>
+<section class="detail" id="getWidth/1">
+
+  <div class="detail-header">
+    <a href="#getWidth/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getWidth/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getWidth(This) -> integer() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Gets the width of the image in pixels.</p><p>See: <a href="wxImage.html#getHeight/1"><code>getHeight/1</code></a>, <code>GetSize()</code> (not implemented in wx)</p>
+  </section>
+</section>
+<section class="detail" id="hasAlpha/1">
+
+  <div class="detail-header">
+    <a href="#hasAlpha/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hasAlpha/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>hasAlpha(This) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns true if this image has alpha channel, false otherwise.</p><p>See: <a href="wxImage.html#getAlpha/3"><code>getAlpha/3</code></a>, <a href="wxImage.html#setAlpha/4"><code>setAlpha/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="hasMask/1">
+
+  <div class="detail-header">
+    <a href="#hasMask/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hasMask/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>hasMask(This) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns true if there is a mask active, false otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="hasOption/2">
+
+  <div class="detail-header">
+    <a href="#hasOption/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">hasOption/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>hasOption(This, Name) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Returns true if the given option is present.</p><p>The function is case-insensitive to <code>name</code>.</p><p>The lists of the currently supported options are in <a href="wxImage.html#getOption/2"><code>getOption/2</code></a> and <a href="wxImage.html#getOptionInt/2"><code>getOptionInt/2</code></a> function docs.</p><p>See: <a href="wxImage.html#setOption/3"><code>setOption/3</code></a>, <a href="wxImage.html#getOption/2"><code>getOption/2</code></a>, <a href="wxImage.html#getOptionInt/2"><code>getOptionInt/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="initAlpha/1">
+
+  <div class="detail-header">
+    <a href="#initAlpha/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">initAlpha/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>initAlpha(This) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Initializes the image alpha channel data.</p><p>It is an error to call it if the image already has alpha data. If it doesn't, alpha data will be by default initialized to all pixels being fully opaque. But if the image has a mask colour, all mask pixels will be completely transparent.</p>
+  </section>
+</section>
+<section class="detail" id="initStandardHandlers/0">
+
+  <div class="detail-header">
+    <a href="#initStandardHandlers/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">initStandardHandlers/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>initStandardHandlers() -> ok.</pre>
+
+      </div>
+
+<p>Internal use only.</p><p>Adds standard image format handlers. It only install wxBMPHandler for the time being, which is used by <a href="wxBitmap.html"><code>wxBitmap</code></a>.</p><p>This function is called by wxWidgets on startup, and shouldn't be called by the user.</p><p>See: <code>wxImageHandler</code> (not implemented in wx), ?wxInitAllImageHandlers(), <code>wxQuantize</code> (not implemented in wx)</p>
+  </section>
+</section>
+<section class="detail" id="isOk/1">
+
+  <div class="detail-header">
+    <a href="#isOk/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">isOk/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>isOk(This) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Returns true if image data is present.</p>
+  </section>
+</section>
+<section class="detail" id="isTransparent/3">
+
+  <div class="detail-header">
+    <a href="#isTransparent/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">isTransparent/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>isTransparent(This, X, Y) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="isTransparent/4">
+
+  <div class="detail-header">
+    <a href="#isTransparent/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">isTransparent/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>isTransparent(This, X, Y, [Option]) -> boolean()
+                 when
+                     This :: <a href="#t:wxImage/0">wxImage</a>(),
+                     X :: integer(),
+                     Y :: integer(),
+                     Option :: {threshold, integer()}.</pre>
+
+      </div>
+
+<p>Returns true if the given pixel is transparent, i.e. either has the mask colour if this image has a mask or if this image has alpha channel and alpha value of this pixel is strictly less than <code>threshold</code>.</p>
+  </section>
+</section>
+<section class="detail" id="loadFile/2">
+
+  <div class="detail-header">
+    <a href="#loadFile/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">loadFile/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>loadFile(This, Name) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="loadFile/3">
+
+  <div class="detail-header">
+    <a href="#loadFile/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">loadFile/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>loadFile(This, Name, [Option]) -> boolean()
+            when
+                This :: <a href="#t:wxImage/0">wxImage</a>(),
+                Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                Option :: {type, wx:wx_enum()} | {index, integer()}.</pre>
+
+      </div>
+
+<p>Loads an image from a file.</p><p>If no handler type is provided, the library will try to autodetect the format.</p>
+  </section>
+</section>
+<section class="detail" id="loadFile/4">
+
+  <div class="detail-header">
+    <a href="#loadFile/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">loadFile/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>loadFile(This, Name, Mimetype, [Option]) -> boolean()
+            when
+                This :: <a href="#t:wxImage/0">wxImage</a>(),
+                Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                Mimetype :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                Option :: {index, integer()}.</pre>
+
+      </div>
+
+<p>Loads an image from a file.</p><p>If no handler type is provided, the library will try to autodetect the format.</p>
+  </section>
+</section>
+<section class="detail" id="mirror/1">
+
+  <div class="detail-header">
+    <a href="#mirror/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">mirror/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>mirror(This) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="mirror/2">
+
+  <div class="detail-header">
+    <a href="#mirror/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">mirror/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>mirror(This, [Option]) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), Option :: {horizontally, boolean()}.</pre>
+
+      </div>
+
+<p>Returns a mirrored copy of the image.</p><p>The parameter <code>horizontally</code> indicates the orientation.</p>
+  </section>
+</section>
+<section class="detail" id="new/0">
+
+  <div class="detail-header">
+    <a href="#new/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/0</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new() -> <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>Creates an empty <a href="wxImage.html#content"><code>wxImage</code></a> object without an alpha channel.</p>
+  </section>
+</section>
+<section class="detail" id="new/1">
+
+  <div class="detail-header">
+    <a href="#new/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Name) -> <a href="#t:wxImage/0">wxImage</a>() when Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>();
+   (Sz) -> <a href="#t:wxImage/0">wxImage</a>() when Sz :: {W :: integer(), H :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="new/2">
+
+  <div class="detail-header">
+    <a href="#new/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Width, Height) -> <a href="#t:wxImage/0">wxImage</a>() when Width :: integer(), Height :: integer();
+   (Sz, Data) -> <a href="#t:wxImage/0">wxImage</a>() when Sz :: {W :: integer(), H :: integer()}, Data :: binary();
+   (Name, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Option :: {type, wx:wx_enum()} | {index, integer()};
+   (Sz, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Sz :: {W :: integer(), H :: integer()}, Option :: {clear, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="new/3">
+
+  <div class="detail-header">
+    <a href="#new/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Width, Height, Data) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Width :: integer(), Height :: integer(), Data :: binary();
+   (Sz, Data, Alpha) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Sz :: {W :: integer(), H :: integer()}, Data :: binary(), Alpha :: binary();
+   (Width, Height, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Width :: integer(), Height :: integer(), Option :: {clear, boolean()};
+   (Name, Mimetype, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when
+           Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+           Mimetype :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+           Option :: {index, integer()};
+   (Sz, Data, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when
+           Sz :: {W :: integer(), H :: integer()},
+           Data :: binary(),
+           Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="new/4">
+
+  <div class="detail-header">
+    <a href="#new/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Width, Height, Data, Alpha) -> <a href="#t:wxImage/0">wxImage</a>()
+       when Width :: integer(), Height :: integer(), Data :: binary(), Alpha :: binary();
+   (Width, Height, Data, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when
+           Width :: integer(),
+           Height :: integer(),
+           Data :: binary(),
+           Option :: {static_data, boolean()};
+   (Sz, Data, Alpha, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when
+           Sz :: {W :: integer(), H :: integer()},
+           Data :: binary(),
+           Alpha :: binary(),
+           Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="new/5">
+
+  <div class="detail-header">
+    <a href="#new/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">new/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>new(Width, Height, Data, Alpha, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+       when
+           Width :: integer(),
+           Height :: integer(),
+           Data :: binary(),
+           Alpha :: binary(),
+           Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>Creates an image from data in memory.</p><p>If <code>static_data</code> is false then the <a href="wxImage.html#content"><code>wxImage</code></a> will take ownership of the data and free it afterwards. For this, it has to be allocated with <code>malloc</code>.</p>
+  </section>
+</section>
+<section class="detail" id="ok/1">
+
+  <div class="detail-header">
+    <a href="#ok/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">ok/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>ok(This) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+<p>See: <a href="wxImage.html#isOk/1"><code>isOk/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="removeHandler/1">
+
+  <div class="detail-header">
+    <a href="#removeHandler/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">removeHandler/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>removeHandler(Name) -> boolean() when Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Finds the handler with the given name, and removes it.</p><p>The handler is also deleted.</p><p>Return: true if the handler was found and removed, false otherwise.</p><p>See: <code>wxImageHandler</code> (not implemented in wx)</p>
+  </section>
+</section>
+<section class="detail" id="replace/7">
+
+  <div class="detail-header">
+    <a href="#replace/7" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">replace/7</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>replace(This, R1, G1, B1, R2, G2, B2) -> ok
+           when
+               This :: <a href="#t:wxImage/0">wxImage</a>(),
+               R1 :: integer(),
+               G1 :: integer(),
+               B1 :: integer(),
+               R2 :: integer(),
+               G2 :: integer(),
+               B2 :: integer().</pre>
+
+      </div>
+
+<p>Replaces the colour specified by <code>r1</code>,g1,b1 by the colour <code>r2</code>,g2,b2.</p>
+  </section>
+</section>
+<section class="detail" id="rescale/3">
+
+  <div class="detail-header">
+    <a href="#rescale/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rescale/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rescale(This, Width, Height) -> <a href="#t:wxImage/0">wxImage</a>()
+           when This :: <a href="#t:wxImage/0">wxImage</a>(), Width :: integer(), Height :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="rescale/4">
+
+  <div class="detail-header">
+    <a href="#rescale/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rescale/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rescale(This, Width, Height, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+           when
+               This :: <a href="#t:wxImage/0">wxImage</a>(),
+               Width :: integer(),
+               Height :: integer(),
+               Option :: {quality, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>Changes the size of the image in-place by scaling it: after a call to this function,the image will have the given width and height.</p><p>For a description of the <code>quality</code> parameter, see the <a href="wxImage.html#scale/4"><code>scale/4</code></a> function. Returns the (modified) image itself.</p><p>See: <a href="wxImage.html#scale/4"><code>scale/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="resize/3">
+
+  <div class="detail-header">
+    <a href="#resize/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resize/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resize(This, Size, Pos) -> <a href="#t:wxImage/0">wxImage</a>()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Size :: {W :: integer(), H :: integer()},
+              Pos :: {X :: integer(), Y :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="resize/4">
+
+  <div class="detail-header">
+    <a href="#resize/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">resize/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>resize(This, Size, Pos, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Size :: {W :: integer(), H :: integer()},
+              Pos :: {X :: integer(), Y :: integer()},
+              Option :: {r, integer()} | {g, integer()} | {b, integer()}.</pre>
+
+      </div>
+
+<p>Changes the size of the image in-place without scaling it by adding either a border with the given colour or cropping as necessary.</p><p>The image is pasted into a new image with the given <code>size</code> and background colour at the position <code>pos</code> relative to the upper left of the new image.</p><p>If <code>red</code> = green = blue = -1 then use either the current mask colour if set or find, use, and set a suitable mask colour for any newly exposed areas.</p><p>Return: The (modified) image itself.</p><p>See: <a href="wxImage.html#size/4"><code>size/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="rotate/3">
+
+  <div class="detail-header">
+    <a href="#rotate/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rotate/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rotate(This, Angle, RotationCentre) -> <a href="#t:wxImage/0">wxImage</a>()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Angle :: number(),
+              RotationCentre :: {X :: integer(), Y :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="rotate/4">
+
+  <div class="detail-header">
+    <a href="#rotate/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rotate/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rotate(This, Angle, RotationCentre, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Angle :: number(),
+              RotationCentre :: {X :: integer(), Y :: integer()},
+              Option ::
+                  {interpolating, boolean()} |
+                  {offset_after_rotation, {X :: integer(), Y :: integer()}}.</pre>
+
+      </div>
+
+<p>Rotates the image about the given point, by <code>angle</code> radians.</p><p>Passing true to <code>interpolating</code> results in better image quality, but is slower.</p><p>If the image has a mask, then the mask colour is used for the uncovered pixels in the rotated image background. Else, black (rgb 0, 0, 0) will be used.</p><p>Returns the rotated image, leaving this image intact.</p>
+  </section>
+</section>
+<section class="detail" id="rotate90/1">
+
+  <div class="detail-header">
+    <a href="#rotate90/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rotate90/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rotate90(This) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="rotate90/2">
+
+  <div class="detail-header">
+    <a href="#rotate90/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rotate90/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rotate90(This, [Option]) -> <a href="#t:wxImage/0">wxImage</a>() when This :: <a href="#t:wxImage/0">wxImage</a>(), Option :: {clockwise, boolean()}.</pre>
+
+      </div>
+
+<p>Returns a copy of the image rotated 90 degrees in the direction indicated by <code>clockwise</code>.</p>
+  </section>
+</section>
+<section class="detail" id="rotateHue/2">
+
+  <div class="detail-header">
+    <a href="#rotateHue/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">rotateHue/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>rotateHue(This, Angle) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>(), Angle :: number().</pre>
+
+      </div>
+
+<p>Rotates the hue of each pixel in the image by <code>angle</code>, which is a double in the range of -1.0 to +1.0, where -1.0 corresponds to -360 degrees and +1.0 corresponds to +360 degrees.</p>
+  </section>
+</section>
+<section class="detail" id="saveFile/2">
+
+  <div class="detail-header">
+    <a href="#saveFile/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">saveFile/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>saveFile(This, Name) -> boolean() when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Saves an image in the named file.</p><p>File type is determined from the extension of the file name. Note that this function may fail if the extension is not recognized! You can use one of the forms above to save images to files with non-standard extensions.</p>
+  </section>
+</section>
+<section class="detail" id="saveFile/3">
+
+  <div class="detail-header">
+    <a href="#saveFile/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">saveFile/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>saveFile(This, Name, Type) -> boolean()
+            when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Type :: wx:wx_enum();
+        (This, Name, Mimetype) -> boolean()
+            when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Mimetype :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Saves an image in the named file.</p>
+  </section>
+</section>
+<section class="detail" id="scale/3">
+
+  <div class="detail-header">
+    <a href="#scale/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">scale/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>scale(This, Width, Height) -> <a href="#t:wxImage/0">wxImage</a>()
+         when This :: <a href="#t:wxImage/0">wxImage</a>(), Width :: integer(), Height :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="scale/4">
+
+  <div class="detail-header">
+    <a href="#scale/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">scale/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>scale(This, Width, Height, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+         when
+             This :: <a href="#t:wxImage/0">wxImage</a>(),
+             Width :: integer(),
+             Height :: integer(),
+             Option :: {quality, wx:wx_enum()}.</pre>
+
+      </div>
+
+<p>Returns a scaled version of the image.</p><p>This is also useful for scaling bitmaps in general as the only other way to scale bitmaps is to blit a <a href="wxMemoryDC.html"><code>wxMemoryDC</code></a> into another <a href="wxMemoryDC.html"><code>wxMemoryDC</code></a>.</p><p>The parameter <code>quality</code> determines what method to use for resampling the image, see wxImageResizeQuality documentation.</p><p>It should be noted that although using <code>wxIMAGE_QUALITY_HIGH</code> produces much nicer looking results it is a slower method. Downsampling will use the box averaging method which seems to operate very fast. If you are upsampling larger images using this method you will most likely notice that it is a bit slower and in extreme cases it will be quite substantially slower as the bicubic algorithm has to process a lot of data.</p><p>It should also be noted that the high quality scaling may not work as expected when using a single mask colour for transparency, as the scaling will blur the image and will therefore remove the mask partially. Using the alpha channel will work.</p><p>Example:</p><p>See: <a href="wxImage.html#rescale/4"><code>rescale/4</code></a></p>
+  </section>
+</section>
+<section class="detail" id="setAlpha/2">
+
+  <div class="detail-header">
+    <a href="#setAlpha/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setAlpha/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setAlpha(This, Alpha) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>(), Alpha :: binary().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="setAlpha/3">
+
+  <div class="detail-header">
+    <a href="#setAlpha/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setAlpha/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setAlpha(This, Alpha, [Option]) -> ok
+            when This :: <a href="#t:wxImage/0">wxImage</a>(), Alpha :: binary(), Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This function is similar to <a href="wxImage.html#setData/5"><code>setData/5</code></a> and has similar restrictions.</p><p>The pointer passed to it may however be NULL in which case the function will allocate the alpha array internally - this is useful to add alpha channel data to an image which doesn't have any.</p><p>If the pointer is not NULL, it must have one byte for each image pixel and be allocated with malloc(). <a href="wxImage.html#content"><code>wxImage</code></a> takes ownership of the pointer and will free it unless <code>static_data</code> parameter is set to true - in this case the caller should do it.</p>
+  </section>
+</section>
+<section class="detail" id="setAlpha/4">
+
+  <div class="detail-header">
+    <a href="#setAlpha/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setAlpha/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setAlpha(This, X, Y, Alpha) -> ok
+            when This :: <a href="#t:wxImage/0">wxImage</a>(), X :: integer(), Y :: integer(), Alpha :: integer().</pre>
+
+      </div>
+
+<p>Sets the alpha value for the given pixel.</p><p>This function should only be called if the image has alpha channel data, use <a href="wxImage.html#hasAlpha/1"><code>hasAlpha/1</code></a> to check for this.</p>
+  </section>
+</section>
+<section class="detail" id="setData/2">
+
+  <div class="detail-header">
+    <a href="#setData/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setData/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setData(This, Data) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>(), Data :: binary().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="setData/3">
+
+  <div class="detail-header">
+    <a href="#setData/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setData/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setData(This, Data, [Option]) -> ok
+           when This :: <a href="#t:wxImage/0">wxImage</a>(), Data :: binary(), Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>Sets the image data without performing checks.</p><p>The data given must have the size (width*height*3) or results will be unexpected. Don't use this method if you aren't sure you know what you are doing.</p><p>The data must have been allocated with <code>malloc()</code>, <code>NOT</code> with <code>operator</code> new.</p><p>If <code>static_data</code> is false, after this call the pointer to the data is owned by the <a href="wxImage.html#content"><code>wxImage</code></a> object, that will be responsible for deleting it. Do not pass to this function a pointer obtained through <a href="wxImage.html#getData/1"><code>getData/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="setData/4">
+
+  <div class="detail-header">
+    <a href="#setData/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setData/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setData(This, Data, New_width, New_height) -> ok
+           when
+               This :: <a href="#t:wxImage/0">wxImage</a>(),
+               Data :: binary(),
+               New_width :: integer(),
+               New_height :: integer().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="setData/5">
+
+  <div class="detail-header">
+    <a href="#setData/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setData/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setData(This, Data, New_width, New_height, [Option]) -> ok
+           when
+               This :: <a href="#t:wxImage/0">wxImage</a>(),
+               Data :: binary(),
+               New_width :: integer(),
+               New_height :: integer(),
+               Option :: {static_data, boolean()}.</pre>
+
+      </div>
+
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</p>
+  </section>
+</section>
+<section class="detail" id="setMask/1">
+
+  <div class="detail-header">
+    <a href="#setMask/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setMask/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setMask(This) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="setMask/2">
+
+  <div class="detail-header">
+    <a href="#setMask/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setMask/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setMask(This, [Option]) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>(), Option :: {mask, boolean()}.</pre>
+
+      </div>
+
+<p>Specifies whether there is a mask or not.</p><p>The area of the mask is determined by the current mask colour.</p>
+  </section>
+</section>
+<section class="detail" id="setMaskColour/4">
+
+  <div class="detail-header">
+    <a href="#setMaskColour/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setMaskColour/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setMaskColour(This, Red, Green, Blue) -> ok
+                 when This :: <a href="#t:wxImage/0">wxImage</a>(), Red :: integer(), Green :: integer(), Blue :: integer().</pre>
+
+      </div>
+
+<p>Sets the mask colour for this image (and tells the image to use the mask).</p>
+  </section>
+</section>
+<section class="detail" id="setMaskFromImage/5">
+
+  <div class="detail-header">
+    <a href="#setMaskFromImage/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setMaskFromImage/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setMaskFromImage(This, Mask, Mr, Mg, Mb) -> boolean()
+                    when
+                        This :: <a href="#t:wxImage/0">wxImage</a>(),
+                        Mask :: <a href="#t:wxImage/0">wxImage</a>(),
+                        Mr :: integer(),
+                        Mg :: integer(),
+                        Mb :: integer().</pre>
+
+      </div>
+
+<p>Sets image's mask so that the pixels that have RGB value of mr,mg,mb in mask will be masked in the image.</p><p>This is done by first finding an unused colour in the image, setting this colour as the mask colour and then using this colour to draw all pixels in the image who corresponding pixel in mask has given RGB value.</p><p>The parameter <code>mask</code> is the mask image to extract mask shape from. It must have the same dimensions as the image.</p><p>The parameters <code>mr</code>, <code>mg</code>, <code>mb</code> are the RGB values of the pixels in mask that will be used to create the mask.</p><p>Return: Returns false if mask does not have same dimensions as the image or if there is no unused colour left. Returns true if the mask was successfully applied.</p><p>Note: Note that this method involves computing the histogram, which is a computationally intensive operation.</p>
+  </section>
+</section>
+<section class="detail" id="setOption/3">
+
+  <div class="detail-header">
+    <a href="#setOption/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setOption/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setOption(This, Name, Value) -> ok
+             when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Value :: integer();
+         (This, Name, Value) -> ok
+             when This :: <a href="#t:wxImage/0">wxImage</a>(), Name :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(), Value :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+<p>Sets a user-defined option.</p><p>The function is case-insensitive to <code>name</code>.</p><p>For example, when saving as a JPEG file, the option <code>quality</code> is used, which is a number between 0 and 100 (0 is terrible, 100 is very good).</p><p>The lists of the currently supported options are in <a href="wxImage.html#getOption/2"><code>getOption/2</code></a> and <a href="wxImage.html#getOptionInt/2"><code>getOptionInt/2</code></a> function docs.</p><p>See: <a href="wxImage.html#getOption/2"><code>getOption/2</code></a>, <a href="wxImage.html#getOptionInt/2"><code>getOptionInt/2</code></a>, <a href="wxImage.html#hasOption/2"><code>hasOption/2</code></a></p>
+  </section>
+</section>
+<section class="detail" id="setPalette/2">
+
+  <div class="detail-header">
+    <a href="#setPalette/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setPalette/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setPalette(This, Palette) -> ok when This :: <a href="#t:wxImage/0">wxImage</a>(), Palette :: <a href="wxPalette.html#t:wxPalette/0">wxPalette:wxPalette</a>().</pre>
+
+      </div>
+
+<p>Associates a palette with the image.</p><p>The palette may be used when converting <a href="wxImage.html#content"><code>wxImage</code></a> to <a href="wxBitmap.html"><code>wxBitmap</code></a> (MSW only at present) or in file save operations (none as yet).</p>
+  </section>
+</section>
+<section class="detail" id="setRGB/5">
+
+  <div class="detail-header">
+    <a href="#setRGB/5" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setRGB/5</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setRGB(This, Rect, Red, Green, Blue) -> ok
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              Rect :: {X :: integer(), Y :: integer(), W :: integer(), H :: integer()},
+              Red :: integer(),
+              Green :: integer(),
+              Blue :: integer().</pre>
+
+      </div>
+
+<p>Sets the colour of the pixels within the given rectangle.</p><p>This routine performs bounds-checks for the coordinate so it can be considered a safe way to manipulate the data.</p>
+  </section>
+</section>
+<section class="detail" id="setRGB/6">
+
+  <div class="detail-header">
+    <a href="#setRGB/6" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">setRGB/6</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>setRGB(This, X, Y, R, G, B) -> ok
+          when
+              This :: <a href="#t:wxImage/0">wxImage</a>(),
+              X :: integer(),
+              Y :: integer(),
+              R :: integer(),
+              G :: integer(),
+              B :: integer().</pre>
+
+      </div>
+
+<p>Set the color of the pixel at the given x and y coordinate.</p>
+  </section>
+</section>
+<section class="detail" id="size/3">
+
+  <div class="detail-header">
+    <a href="#size/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">size/3</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>size(This, Size, Pos) -> <a href="#t:wxImage/0">wxImage</a>()
+        when
+            This :: <a href="#t:wxImage/0">wxImage</a>(),
+            Size :: {W :: integer(), H :: integer()},
+            Pos :: {X :: integer(), Y :: integer()}.</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="size/4">
+
+  <div class="detail-header">
+    <a href="#size/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">size/4</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>size(This, Size, Pos, [Option]) -> <a href="#t:wxImage/0">wxImage</a>()
+        when
+            This :: <a href="#t:wxImage/0">wxImage</a>(),
+            Size :: {W :: integer(), H :: integer()},
+            Pos :: {X :: integer(), Y :: integer()},
+            Option :: {r, integer()} | {g, integer()} | {b, integer()}.</pre>
+
+      </div>
+
+<p>Returns a resized version of this image without scaling it by adding either a border with the given colour or cropping as necessary.</p><p>The image is pasted into a new image with the given <code>size</code> and background colour at the position <code>pos</code> relative to the upper left of the new image.</p><p>If <code>red</code> = green = blue = -1 then the areas of the larger image not covered by this image are made transparent by filling them with the image mask colour (which will be allocated automatically if it isn't currently set).</p><p>Otherwise, the areas will be filled with the colour with the specified RGB components.</p><p>See: <a href="wxImage.html#resize/4"><code>resize/4</code></a></p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.25.1">
+    <meta name="project" content="wx v2.0.1">
+
+    <title>wxArtProvider — wx v2.0.1</title>
+    <link rel="stylesheet" href="dist/erlang-951161c89561e05735a5.css" />
+
+    <script src="dist/sidebar_items-2fbb42302e.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-f97730d45ef67f3e6188.js"></script>
+
+
+  </head>
+  <body data-type="modules">
+    <script>
+
+      try {
+        if (localStorage.getItem('night-mode') === 'true') {
+          document.body.classList.add('night-mode');
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" title="Collapse/expand sidebar"></span>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <span class="icon-search" aria-hidden="true" title="Submit search"></span>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <span class="icon-cross" aria-hidden="true" title="Cancel search"></span>
+    </button>
+    <label class="search-label">
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName">
+wx
+      </a>
+      <strong class="sidebar-projectVersion">
+        v2.0.1
+      </strong>
+    </div>
+
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+      <h1>
+wxArtProvider <small class="app-vsn">(wx v2.0.1)</small>
+
+      </h1>
+
+
+        <section id="moduledoc">
+<p><a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> class is used to customize the look of wxWidgets application.</p><p>When wxWidgets needs to display an icon or a bitmap (e.g. in the standard file dialog), it does not use a hard-coded resource but asks <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> for it instead. This way users can plug in their own <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> class and easily replace standard art with their own version.</p><p>All that is needed is to derive a class from <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a>, override either its <code>wxArtProvider::CreateBitmap()</code> (not implemented in wx) and/or its <code>wxArtProvider::CreateIconBundle()</code> (not implemented in wx) methods and register the provider with <code>wxArtProvider::Push()</code> (not implemented in wx):</p><p>If you need bitmap images (of the same artwork) that should be displayed at different sizes you should probably consider overriding <code>wxArtProvider::CreateIconBundle</code> (not implemented in wx) and supplying icon bundles that contain different bitmap sizes.</p><p>There's another way of taking advantage of this class: you can use it in your code and use platform native icons as provided by <a href="wxArtProvider.html#getBitmap/2"><code>getBitmap/2</code></a> or <a href="wxArtProvider.html#getIcon/2"><code>getIcon/2</code></a>.</p><p>Identifying art resources</p><p>Every bitmap and icon bundle are known to <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> under an unique ID that is used when requesting a resource from it. The ID is represented by the ?wxArtID type and can have one of these predefined values (you can see bitmaps represented by these constants in the page_samples_artprov):</p><p>Additionally, any string recognized by custom art providers registered using <code>wxArtProvider::Push</code> (not implemented in wx) may be used.</p><p>Note: When running under GTK+ 2, GTK+ stock item IDs (e.g. <code>&quot;gtk-cdrom&quot;</code>) may be used as well: For a list of the GTK+ stock items please refer to the <a href="http://library.gnome.org/devel/gtk/stable/gtk-Stock-Items.html">GTK+ documentation page</a>. It is also possible to load icons from the current icon theme by specifying their name (without extension and directory components). Icon themes recognized by GTK+ follow the freedesktop.org <a href="http://freedesktop.org/Standards/icon-theme-spec">Icon Themes specification</a>. Note that themes are not guaranteed to contain all icons, so <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> may return ?wxNullBitmap or ?wxNullIcon. The default theme is typically installed in <code>/usr/share/icons/hicolor</code>.</p><p>Clients</p><p>The <code>client</code> is the entity that calls <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a>'s <a href="wxArtProvider.html#getBitmap/2"><code>getBitmap/2</code></a> or <a href="wxArtProvider.html#getIcon/2"><code>getIcon/2</code></a> function. It is represented by wxClientID type and can have one of these values:</p><p>Client ID serve as a hint to <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> that is supposed to help it to choose the best looking bitmap. For example it is often desirable to use slightly different icons in menus and toolbars even though they represent the same action (e.g. wxART_FILE_OPEN). Remember that this is really only a hint for <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a> - it is common that <a href="wxArtProvider.html#getBitmap/2"><code>getBitmap/2</code></a> returns identical bitmap for different client values!</p><p>See: <a href="https://docs.wxwidgets.org/3.1/page_samples.html#page_samples_artprov for an example of">Examples</a>, <a href="wxArtProvider.html#content"><code>wxArtProvider</code></a>, usage; stock ID list</p><p>wxWidgets docs: <a href="https://docs.wxwidgets.org/3.1/classwx_art_provider.html">wxArtProvider</a></p>
+        </section>
+
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:wxArtProvider/0">-type wxArtProvider() :: term().</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getBitmap/1">getBitmap/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getBitmap/2">getBitmap/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Query registered providers for bitmap with given ID.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getIcon/1">getIcon/1</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#getIcon/2">getIcon/2</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Same as <a href="wxArtProvider.html#getBitmap/2"><code>getBitmap/2</code></a>, but return a <a href="wxIcon.html"><code>wxIcon</code></a> object (or ?wxNullIcon on failure).</p></div>
+
+</div>
+
+  </div>
+
+        </section>
+
+
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Types
+          </h1>
+          <div class="types-list">
+<section class="detail" id="t:wxArtProvider/0">
+
+  <div class="detail-header">
+    <a href="#t:wxArtProvider/0" class="detail-link" title="Link to this type">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature">-type wxArtProvider() :: term().</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>wxArtProvider() :: wx:wx_object().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+          </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions
+          </h1>
+          <div class="functions-list">
+<section class="detail" id="getBitmap/1">
+
+  <div class="detail-header">
+    <a href="#getBitmap/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getBitmap/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getBitmap(Id) -> <a href="wxBitmap.html#t:wxBitmap/0">wxBitmap:wxBitmap</a>() when Id :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="getBitmap/2">
+
+  <div class="detail-header">
+    <a href="#getBitmap/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getBitmap/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getBitmap(Id, [Option]) -> <a href="wxBitmap.html#t:wxBitmap/0">wxBitmap:wxBitmap</a>()
+             when
+                 Id :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+                 Option :: {client, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {size, {W :: integer(), H :: integer()}}.</pre>
+
+      </div>
+
+<p>Query registered providers for bitmap with given ID.</p><p>Return: The bitmap if one of registered providers recognizes the ID or wxNullBitmap otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="getIcon/1">
+
+  <div class="detail-header">
+    <a href="#getIcon/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getIcon/1</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getIcon(Id) -> <a href="wxIcon.html#t:wxIcon/0">wxIcon:wxIcon</a>() when Id :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>().</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="getIcon/2">
+
+  <div class="detail-header">
+    <a href="#getIcon/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">getIcon/2</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <h2>Specs</h2>
+      <div class="specs">
+
+          <pre>getIcon(Id, [Option]) -> <a href="wxIcon.html#t:wxIcon/0">wxIcon:wxIcon</a>()
+           when
+               Id :: <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>(),
+               Option :: {client, <a href="https://wojtekmach.pl/otp_docs/stdlib/unicode.html#t:chardata/0">unicode:chardata</a>()} | {size, {W :: integer(), H :: integer()}}.</pre>
+
+      </div>
+
+<p>Same as <a href="wxArtProvider.html#getBitmap/2"><code>getBitmap/2</code></a>, but return a <a href="wxIcon.html"><code>wxIcon</code></a> object (or ?wxNullIcon on failure).</p>
+  </section>
+</section>
+
+          </div>
+        </section>
+
+      <footer class="footer">
+
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.25.1) for the
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank">Elixir programming language</a>.
+          </span>
+          <span class="line">
+            Designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+        </p>
+        <p>
+
+            <a href="api-reference.html" title="API reference" class="line footer-button">API Reference</a>
+
+          <button class="line footer-button display-shortcuts-help">
+            Display keyboard shortcuts
+          </button>
+          <button class="line footer-button night-mode-toggle">
+            Toggle night mode
+          </button>
+          <button class="line footer-button display-quick-switch">
+            Go to a HexDocs package
+          </button>
+          <button class="line footer-button tooltips-toggle">
+            <span class="tooltips-option-disable">Disable tooltips</span>
+            <span class="tooltips-option-enable">Enable tooltips</span>
+          </button>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>
