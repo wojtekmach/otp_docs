@@ -86,7 +86,7 @@ memsup <small class="app-vsn">(os_mon v2.7)</small>
 
 
         <section id="moduledoc">
-<p><code>memsup</code> is a process which supervises the memory usage for the system and for individual processes. It is part of the OS_Mon application, see os_mon(6). Available for Unix and Windows.</p><p>Periodically performs a memory check:</p><ul><li><p>If more than a certain amount of available system memory is allocated, as reported by the underlying operating system, the alarm <code>{system_memory_high_watermark, []}</code> is set.</p></li><li><p>If any Erlang process <code>Pid</code> in the system has allocated more than a certain amount of total system memory, the alarm <code>{process_memory_high_watermark, Pid}</code> is set.</p></li></ul><p>Alarms are reported to the SASL alarm handler, see <a href="https://wojtekmach.pl/otp_docs/sasl/alarm_handler.html">alarm_handler(3)</a>. To set an alarm, <code>alarm_handler:set_alarm(Alarm)</code> is called where <code>Alarm</code> is either of the alarms specified above.</p><p>The alarms are cleared automatically when the alarm cause is no longer valid.</p><p>The function <a href="memsup.html#get_memory_data/0">get_memory_data()</a> can be used to retrieve the result of the latest periodic memory check.</p><p>There is also a interface to system dependent memory data, <a href="memsup.html#get_system_memory_data/0">get_system_memory_data()</a>. The result is highly dependent on the underlying operating system and the interface is targeted primarily for systems without virtual memory. However, the output on other systems is still valid, although sparse.</p><p>A call to <code>get_system_memory_data/0</code> is more costly than a call to <code>get_memory_data/0</code> as data is collected synchronously when this function is called.</p><p>The total system memory reported under UNIX is the number of physical pages of memory times the page size, and the available memory is the number of available physical pages times the page size. This is a reasonable measure as swapping should be avoided anyway, but the task of defining total memory and available memory is difficult because of virtual memory and swapping.</p><a id="config"></a><h2 id="module-configuration" class="section-heading">
+<p><code>memsup</code> is a process which supervises the memory usage for the system and for individual processes. It is part of the OS_Mon application, see os_mon(6). Available for Unix and Windows.</p><p>Periodically performs a memory check:</p><ul><li><p>If more than a certain amount of available system memory is allocated, as reported by the underlying operating system, the alarm <code>{system_memory_high_watermark, []}</code> is set.</p></li><li><p>If any Erlang process <code>Pid</code> in the system has allocated more than a certain amount of total system memory, the alarm <code>{process_memory_high_watermark, Pid}</code> is set.</p></li></ul><p>Alarms are reported to the SASL alarm handler, see <a href="https://wojtekmach.pl/otp_docs/sasl/alarm_handler.html">alarm_handler(3)</a>. To set an alarm, <code>alarm_handler:set_alarm(Alarm)</code> is called where <code>Alarm</code> is either of the alarms specified above.</p><p>The alarms are cleared automatically when the alarm cause is no longer valid.</p><p>The function <a href="#get_memory_data/0">get_memory_data()</a> can be used to retrieve the result of the latest periodic memory check.</p><p>There is also a interface to system dependent memory data, <a href="#get_system_memory_data/0">get_system_memory_data()</a>. The result is highly dependent on the underlying operating system and the interface is targeted primarily for systems without virtual memory. However, the output on other systems is still valid, although sparse.</p><p>A call to <code>get_system_memory_data/0</code> is more costly than a call to <code>get_memory_data/0</code> as data is collected synchronously when this function is called.</p><p>The total system memory reported under UNIX is the number of physical pages of memory times the page size, and the available memory is the number of available physical pages times the page size. This is a reasonable measure as swapping should be avoided anyway, but the task of defining total memory and available memory is difficult because of virtual memory and swapping.</p><a id="config"></a><h2 id="module-configuration" class="section-heading">
   <a href="#module-configuration" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
   Configuration
 </h2>
@@ -358,7 +358,7 @@ Functions
 
   <section class="docstring">
 
-<ul class="types"><li class="type">Minutes = int()&gt;0</li></ul><p>Changes the time interval, given in minutes, for the periodic memory check.</p><p>The change will take effect after the next memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="memsup.html#content#config">Configuration</a> above.</p>
+<ul class="types"><li class="type">Minutes = int()&gt;0</li></ul><p>Changes the time interval, given in minutes, for the periodic memory check.</p><p>The change will take effect after the next memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="#config">Configuration</a> above.</p>
   </section>
 </section>
 <section class="detail" id="set_helper_timeout/1">
@@ -375,7 +375,7 @@ Functions
 
   <section class="docstring">
 
-<ul class="types"><li class="type">Seconds = int() (&gt;= 1)</li></ul><p>Changes the timeout value, given in seconds, for memory checks.</p><p>The change will take effect for the next memory check and is non-persistent. That is, in the case of a process restart, this value is forgotten and the default value will be used. See <a href="memsup.html#content#config">Configuration</a> above.</p>
+<ul class="types"><li class="type">Seconds = int() (&gt;= 1)</li></ul><p>Changes the timeout value, given in seconds, for memory checks.</p><p>The change will take effect for the next memory check and is non-persistent. That is, in the case of a process restart, this value is forgotten and the default value will be used. See <a href="#config">Configuration</a> above.</p>
   </section>
 </section>
 <section class="detail" id="set_procmem_high_watermark/1">
@@ -392,7 +392,7 @@ Functions
 
   <section class="docstring">
 
-<p>Changes the threshold, given as a float, for process memory allocation.</p><p>The change will take effect during the next periodic memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="memsup.html#content#config">Configuration</a> above.</p>
+<p>Changes the threshold, given as a float, for process memory allocation.</p><p>The change will take effect during the next periodic memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="#config">Configuration</a> above.</p>
   </section>
 </section>
 <section class="detail" id="set_sysmem_high_watermark/1">
@@ -409,7 +409,7 @@ Functions
 
   <section class="docstring">
 
-<p>Changes the threshold, given as a float, for system memory allocation.</p><p>The change will take effect during the next periodic memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="memsup.html#content#config">Configuration</a> above.</p>
+<p>Changes the threshold, given as a float, for system memory allocation.</p><p>The change will take effect during the next periodic memory check and is non-persistent. That is, in case of a process restart, this value is forgotten and the default value will be used. See <a href="#config">Configuration</a> above.</p>
   </section>
 </section>
 

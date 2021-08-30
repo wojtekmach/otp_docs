@@ -86,11 +86,11 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
 
         <section id="moduledoc">
-<p>Functional, extendible arrays. Arrays can have fixed size, or can grow automatically as needed. A default value is used for entries that have not been explicitly set.</p><p>Arrays uses <em>zero</em>-based indexing. This is a deliberate design choice and differs from other Erlang data structures, for example, tuples.</p><p>Unless specified by the user when the array is created, the default value is the atom <code>undefined</code>. There is no difference between an unset entry and an entry that has been explicitly set to the same value as the default one (compare <a href="array.html#reset/2"><code>reset/2</code></a>). If you need to differentiate between unset and set entries, ensure that the default value cannot be confused with the values of set entries.</p><p>The array never shrinks automatically. If an index <code>I</code> has been used to set an entry successfully, all indices in the range [0,<code>I</code>] stay accessible unless the array size is explicitly changed by calling <a href="array.html#resize/2"><code>resize/2</code></a>.</p><p><em>Examples:</em></p><p>Create a fixed-size array with entries 0-9 set to <code>undefined</code>:</p><pre><code class="makeup erlang"><span class="n">A0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="6338652716-1">(</span><span class="mi">10</span><span class="p" data-group-id="6338652716-1">)</span><span class="p">.</span><span class="w">
-</span><span class="mi">10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">size</span><span class="p" data-group-id="6338652716-2">(</span><span class="n">A0</span><span class="p" data-group-id="6338652716-2">)</span><span class="p">.</span></code></pre><p>Create an extendible array and set entry 17 to <code>true</code>, causing the array to grow automatically:</p><pre><code class="makeup erlang"><span class="n">A1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="4045550781-1">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="4045550781-2">(</span><span class="p" data-group-id="4045550781-2">)</span><span class="p" data-group-id="4045550781-1">)</span><span class="p">.</span><span class="w">
-</span><span class="mi">18</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">size</span><span class="p" data-group-id="4045550781-3">(</span><span class="n">A1</span><span class="p" data-group-id="4045550781-3">)</span><span class="p">.</span></code></pre><p>Read back a stored value:</p><pre><code class="makeup erlang"><span class="ss">true</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="6777819361-1">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="6777819361-1">)</span><span class="p">.</span></code></pre><p>Accessing an unset entry returns default value:</p><pre><code class="makeup erlang"><span class="ss">undefined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="2094192592-1">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="2094192592-1">)</span></code></pre><p>Accessing an entry beyond the last set entry also returns the default value, if the array does not have fixed size:</p><pre><code class="makeup erlang"><span class="ss">undefined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="0370416927-1">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="0370416927-1">)</span><span class="p">.</span></code></pre><p>&quot;Sparse&quot; functions ignore default-valued entries:</p><pre><code class="makeup erlang"><span class="n">A2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="3435961967-1">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="3435961967-1">)</span><span class="p">.</span><span class="w">
-</span><span class="p" data-group-id="3435961967-2">[</span><span class="p" data-group-id="3435961967-3">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p" data-group-id="3435961967-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3435961967-4">{</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p" data-group-id="3435961967-4">}</span><span class="p" data-group-id="3435961967-2">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">sparse_to_orddict</span><span class="p" data-group-id="3435961967-5">(</span><span class="n">A2</span><span class="p" data-group-id="3435961967-5">)</span><span class="p">.</span></code></pre><p>An extendible array can be made fixed-size later:</p><pre><code class="makeup erlang"><span class="n">A3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">fix</span><span class="p" data-group-id="9930780320-1">(</span><span class="n">A2</span><span class="p" data-group-id="9930780320-1">)</span><span class="p">.</span></code></pre><p>A fixed-size array does not grow automatically and does not allow accesses beyond the last set entry:</p><pre><code class="makeup erlang"><span class="p" data-group-id="1885776095-1">{</span><span class="ss">&#39;EXIT&#39;</span><span class="p">,</span><span class="p" data-group-id="1885776095-2">{</span><span class="ss">badarg</span><span class="p">,</span><span class="p">_</span><span class="p" data-group-id="1885776095-2">}</span><span class="p" data-group-id="1885776095-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1885776095-3">(</span><span class="k">catch</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="1885776095-4">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="n">A3</span><span class="p" data-group-id="1885776095-4">)</span><span class="p" data-group-id="1885776095-3">)</span><span class="p">.</span><span class="w">
-</span><span class="p" data-group-id="1885776095-5">{</span><span class="ss">&#39;EXIT&#39;</span><span class="p">,</span><span class="p" data-group-id="1885776095-6">{</span><span class="ss">badarg</span><span class="p">,</span><span class="p">_</span><span class="p" data-group-id="1885776095-6">}</span><span class="p" data-group-id="1885776095-5">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1885776095-7">(</span><span class="k">catch</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="1885776095-8">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="n">A3</span><span class="p" data-group-id="1885776095-8">)</span><span class="p" data-group-id="1885776095-7">)</span><span class="p">.</span></code></pre>
+<p>Functional, extendible arrays. Arrays can have fixed size, or can grow automatically as needed. A default value is used for entries that have not been explicitly set.</p><p>Arrays uses <em>zero</em>-based indexing. This is a deliberate design choice and differs from other Erlang data structures, for example, tuples.</p><p>Unless specified by the user when the array is created, the default value is the atom <code>undefined</code>. There is no difference between an unset entry and an entry that has been explicitly set to the same value as the default one (compare <a href="#reset/2"><code>reset/2</code></a>). If you need to differentiate between unset and set entries, ensure that the default value cannot be confused with the values of set entries.</p><p>The array never shrinks automatically. If an index <code>I</code> has been used to set an entry successfully, all indices in the range [0,<code>I</code>] stay accessible unless the array size is explicitly changed by calling <a href="#resize/2"><code>resize/2</code></a>.</p><p><em>Examples:</em></p><p>Create a fixed-size array with entries 0-9 set to <code>undefined</code>:</p><pre><code class="makeup erlang"><span class="n">A0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="6257305010-1">(</span><span class="mi">10</span><span class="p" data-group-id="6257305010-1">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">size</span><span class="p" data-group-id="6257305010-2">(</span><span class="n">A0</span><span class="p" data-group-id="6257305010-2">)</span><span class="p">.</span></code></pre><p>Create an extendible array and set entry 17 to <code>true</code>, causing the array to grow automatically:</p><pre><code class="makeup erlang"><span class="n">A1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="0374567171-1">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="0374567171-2">(</span><span class="p" data-group-id="0374567171-2">)</span><span class="p" data-group-id="0374567171-1">)</span><span class="p">.</span><span class="w">
+</span><span class="mi">18</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">size</span><span class="p" data-group-id="0374567171-3">(</span><span class="n">A1</span><span class="p" data-group-id="0374567171-3">)</span><span class="p">.</span></code></pre><p>Read back a stored value:</p><pre><code class="makeup erlang"><span class="ss">true</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="3820834809-1">(</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="3820834809-1">)</span><span class="p">.</span></code></pre><p>Accessing an unset entry returns default value:</p><pre><code class="makeup erlang"><span class="ss">undefined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="2514646204-1">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="2514646204-1">)</span></code></pre><p>Accessing an entry beyond the last set entry also returns the default value, if the array does not have fixed size:</p><pre><code class="makeup erlang"><span class="ss">undefined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="5579437210-1">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="5579437210-1">)</span><span class="p">.</span></code></pre><p>&quot;Sparse&quot; functions ignore default-valued entries:</p><pre><code class="makeup erlang"><span class="n">A2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="3171375221-1">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p">,</span><span class="w"> </span><span class="n">A1</span><span class="p" data-group-id="3171375221-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="3171375221-2">[</span><span class="p" data-group-id="3171375221-3">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="ss">false</span><span class="p" data-group-id="3171375221-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3171375221-4">{</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p" data-group-id="3171375221-4">}</span><span class="p" data-group-id="3171375221-2">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">sparse_to_orddict</span><span class="p" data-group-id="3171375221-5">(</span><span class="n">A2</span><span class="p" data-group-id="3171375221-5">)</span><span class="p">.</span></code></pre><p>An extendible array can be made fixed-size later:</p><pre><code class="makeup erlang"><span class="n">A3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">fix</span><span class="p" data-group-id="6451559179-1">(</span><span class="n">A2</span><span class="p" data-group-id="6451559179-1">)</span><span class="p">.</span></code></pre><p>A fixed-size array does not grow automatically and does not allow accesses beyond the last set entry:</p><pre><code class="makeup erlang"><span class="p" data-group-id="6031362196-1">{</span><span class="ss">&#39;EXIT&#39;</span><span class="p">,</span><span class="p" data-group-id="6031362196-2">{</span><span class="ss">badarg</span><span class="p">,</span><span class="p">_</span><span class="p" data-group-id="6031362196-2">}</span><span class="p" data-group-id="6031362196-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="6031362196-3">(</span><span class="k">catch</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">set</span><span class="p" data-group-id="6031362196-4">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="ss">true</span><span class="p">,</span><span class="w"> </span><span class="n">A3</span><span class="p" data-group-id="6031362196-4">)</span><span class="p" data-group-id="6031362196-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p" data-group-id="6031362196-5">{</span><span class="ss">&#39;EXIT&#39;</span><span class="p">,</span><span class="p" data-group-id="6031362196-6">{</span><span class="ss">badarg</span><span class="p">,</span><span class="p">_</span><span class="p" data-group-id="6031362196-6">}</span><span class="p" data-group-id="6031362196-5">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="6031362196-7">(</span><span class="k">catch</span><span class="w"> </span><span class="nc">array</span><span class="p">:</span><span class="nf">get</span><span class="p" data-group-id="6031362196-8">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="n">A3</span><span class="p" data-group-id="6031362196-8">)</span><span class="p" data-group-id="6031362196-7">)</span><span class="p">.</span></code></pre>
         </section>
 
 
@@ -207,7 +207,7 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
   </div>
 
-    <div class="summary-synopsis"><p>Equivalent to <a href="array.html#from_list/2"><code>from_list(List, undefined)</code></a>.</p></div>
+    <div class="summary-synopsis"><p>Equivalent to <a href="#from_list/2"><code>from_list(List, undefined)</code></a>.</p></div>
 
 </div>
 <div class="summary-row">
@@ -225,7 +225,7 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
   </div>
 
-    <div class="summary-synopsis"><p>Equivalent to <a href="array.html#from_orddict/2"><code>from_orddict(Orddict, undefined)</code></a>.</p></div>
+    <div class="summary-synopsis"><p>Equivalent to <a href="#from_orddict/2"><code>from_orddict(Orddict, undefined)</code></a>.</p></div>
 
 </div>
 <div class="summary-row">
@@ -306,7 +306,7 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
   </div>
 
-    <div class="summary-synopsis"><p>Makes the array resizable. (Reverses the effects of <a href="array.html#fix/1"><code>fix/1</code></a>.)</p></div>
+    <div class="summary-synopsis"><p>Makes the array resizable. (Reverses the effects of <a href="#fix/1"><code>fix/1</code></a>.)</p></div>
 
 </div>
 <div class="summary-row">
@@ -315,7 +315,7 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
   </div>
 
-    <div class="summary-synopsis"><p>Resets entry <code>I</code> to the default value for the array. If the value of entry <code>I</code> is the default value, the array is returned unchanged. Reset never changes the array size. Shrinking can be done explicitly by calling <a href="array.html#resize/2"><code>resize/2</code></a>.</p></div>
+    <div class="summary-synopsis"><p>Resets entry <code>I</code> to the default value for the array. If the value of entry <code>I</code> is the default value, the array is returned unchanged. Reset never changes the array size. Shrinking can be done explicitly by calling <a href="#resize/2"><code>resize/2</code></a>.</p></div>
 
 </div>
 <div class="summary-row">
@@ -324,7 +324,7 @@ array <small class="app-vsn">(stdlib v3.15.2)</small>
 
   </div>
 
-    <div class="summary-synopsis"><p>Changes the array size to that reported by <a href="array.html#sparse_size/1"><code>sparse_size/1</code></a>. If the specified array has fixed size, also the resulting array has fixed size.</p></div>
+    <div class="summary-synopsis"><p>Changes the array size to that reported by <a href="#sparse_size/1"><code>sparse_size/1</code></a>. If the specified array has fixed size, also the resulting array has fixed size.</p></div>
 
 </div>
 <div class="summary-row">
@@ -650,7 +650,7 @@ Functions
 
       </div>
 
-<p>Gets the value used for uninitialized entries.</p><p>See also <a href="array.html#new/2"><code>new/2</code></a>.</p>
+<p>Gets the value used for uninitialized entries.</p><p>See also <a href="#new/2"><code>new/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="fix/1">
@@ -674,7 +674,7 @@ Functions
 
       </div>
 
-<p>Fixes the array size. This prevents it from growing automatically upon insertion.</p><p>See also <a href="array.html#set/3"><code>set/3</code></a> and <a href="array.html#relax/1"><code>relax/1</code></a>.</p>
+<p>Fixes the array size. This prevents it from growing automatically upon insertion.</p><p>See also <a href="#set/3"><code>set/3</code></a> and <a href="#relax/1"><code>relax/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="foldl/3">
@@ -699,7 +699,7 @@ Functions
 
       </div>
 
-<p>Folds the array elements using the specified function and initial accumulator value. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#foldr/3"><code>foldr/3</code></a>, <a href="array.html#map/2"><code>map/2</code></a>, <a href="array.html#sparse_foldl/3"><code>sparse_foldl/3</code></a>.</p>
+<p>Folds the array elements using the specified function and initial accumulator value. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#foldr/3"><code>foldr/3</code></a>, <a href="#map/2"><code>map/2</code></a>, <a href="#sparse_foldl/3"><code>sparse_foldl/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="foldr/3">
@@ -724,7 +724,7 @@ Functions
 
       </div>
 
-<p>Folds the array elements right-to-left using the specified function and initial accumulator value. The elements are visited in order from the highest index to the lowest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#foldl/3"><code>foldl/3</code></a>, <a href="array.html#map/2"><code>map/2</code></a>.</p>
+<p>Folds the array elements right-to-left using the specified function and initial accumulator value. The elements are visited in order from the highest index to the lowest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#foldl/3"><code>foldl/3</code></a>, <a href="#map/2"><code>map/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="from_list/1">
@@ -748,7 +748,7 @@ Functions
 
       </div>
 
-<p>Equivalent to <a href="array.html#from_list/2"><code>from_list(List, undefined)</code></a>.</p>
+<p>Equivalent to <a href="#from_list/2"><code>from_list(List, undefined)</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="from_list/2">
@@ -772,7 +772,7 @@ Functions
 
       </div>
 
-<p>Converts a list to an extendible array. <code>Default</code> is used as the value for uninitialized entries of the array. If <code>List</code> is not a proper list, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#new/2"><code>new/2</code></a>, <a href="array.html#to_list/1"><code>to_list/1</code></a>.</p>
+<p>Converts a list to an extendible array. <code>Default</code> is used as the value for uninitialized entries of the array. If <code>List</code> is not a proper list, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#new/2"><code>new/2</code></a>, <a href="#to_list/1"><code>to_list/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="from_orddict/1">
@@ -796,7 +796,7 @@ Functions
 
       </div>
 
-<p>Equivalent to <a href="array.html#from_orddict/2"><code>from_orddict(Orddict, undefined)</code></a>.</p>
+<p>Equivalent to <a href="#from_orddict/2"><code>from_orddict(Orddict, undefined)</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="from_orddict/2">
@@ -820,7 +820,7 @@ Functions
 
       </div>
 
-<p>Converts an ordered list of pairs <code>{Index, Value}</code> to a corresponding extendible array. <code>Default</code> is used as the value for uninitialized entries of the array. If <code>Orddict</code> is not a proper, ordered list of pairs whose first elements are non-negative integers, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#new/2"><code>new/2</code></a>, <a href="array.html#to_orddict/1"><code>to_orddict/1</code></a>.</p>
+<p>Converts an ordered list of pairs <code>{Index, Value}</code> to a corresponding extendible array. <code>Default</code> is used as the value for uninitialized entries of the array. If <code>Orddict</code> is not a proper, ordered list of pairs whose first elements are non-negative integers, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#new/2"><code>new/2</code></a>, <a href="#to_orddict/1"><code>to_orddict/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="get/2">
@@ -844,7 +844,7 @@ Functions
 
       </div>
 
-<p>Gets the value of entry <code>I</code>. If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>.</p><p>If the array does not have fixed size, the default value for any index <code>I</code> greater than <code>size(Array)-1</code> is returned.</p><p>See also <a href="array.html#set/3"><code>set/3</code></a>.</p>
+<p>Gets the value of entry <code>I</code>. If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>.</p><p>If the array does not have fixed size, the default value for any index <code>I</code> greater than <code>size(Array)-1</code> is returned.</p><p>See also <a href="#set/3"><code>set/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="is_array/1">
@@ -892,7 +892,7 @@ Functions
 
       </div>
 
-<p>Checks if the array has fixed size. Returns <code>true</code> if the array is fixed, otherwise <code>false</code>.</p><p>See also <a href="array.html#fix/1"><code>fix/1</code></a>.</p>
+<p>Checks if the array has fixed size. Returns <code>true</code> if the array is fixed, otherwise <code>false</code>.</p><p>See also <a href="#fix/1"><code>fix/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="map/2">
@@ -917,7 +917,7 @@ Functions
 
       </div>
 
-<p>Maps the specified function onto each array element. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#foldl/3"><code>foldl/3</code></a>, <a href="array.html#foldr/3"><code>foldr/3</code></a>, <a href="array.html#sparse_map/2"><code>sparse_map/2</code></a>.</p>
+<p>Maps the specified function onto each array element. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#foldl/3"><code>foldl/3</code></a>, <a href="#foldr/3"><code>foldr/3</code></a>, <a href="#sparse_map/2"><code>sparse_map/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="new/0">
@@ -941,7 +941,7 @@ Functions
 
       </div>
 
-<p>Creates a new, extendible array with initial size zero.</p><p>See also <a href="array.html#new/1"><code>new/1</code></a>, <a href="array.html#new/2"><code>new/2</code></a>.</p>
+<p>Creates a new, extendible array with initial size zero.</p><p>See also <a href="#new/1"><code>new/1</code></a>, <a href="#new/2"><code>new/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="new/1">
@@ -965,7 +965,7 @@ Functions
 
       </div>
 
-<p>Creates a new array according to the specified options. By default, the array is extendible and has initial size zero. Array indices start at <code>0</code>.</p><p><code>Options</code> is a single term or a list of terms, selected from the following:</p><dl><dt><code>N::integer() &gt;= 0</code> or <code>{size, N::integer() &gt;= 0}</code></dt><dd><p>Specifies the initial array size; this also implies <code>{fixed, true}</code>. If <code>N</code> is not a non-negative integer, the call fails with reason <code>badarg</code>.</p></dd><dt><code>fixed</code> or <code>{fixed, true}</code></dt><dd><p>Creates a fixed-size array. See also <a href="array.html#fix/1"><code>fix/1</code></a>.</p></dd><dt><code>{fixed, false}</code></dt><dd><p>Creates an extendible (non-fixed-size) array.</p></dd><dt><code>{default, Value}</code></dt><dd><p>Sets the default value for the array to <code>Value</code>.</p></dd></dl><p>Options are processed in the order they occur in the list, that is, later options have higher precedence.</p><p>The default value is used as the value of uninitialized entries, and cannot be changed once the array has been created.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="5615848681-1">(</span><span class="mi">100</span><span class="p" data-group-id="5615848681-1">)</span></code></pre><p>creates a fixed-size array of size 100.</p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="3460948104-1">(</span><span class="p" data-group-id="3460948104-2">{</span><span class="ss">default</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="3460948104-2">}</span><span class="p" data-group-id="3460948104-1">)</span></code></pre><p>creates an empty, extendible array whose default value is <code>0</code>.</p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="7824113418-1">(</span><span class="p" data-group-id="7824113418-2">[</span><span class="p" data-group-id="7824113418-3">{</span><span class="nb">size</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="7824113418-3">}</span><span class="p">,</span><span class="p" data-group-id="7824113418-4">{</span><span class="ss">fixed</span><span class="p">,</span><span class="ss">false</span><span class="p" data-group-id="7824113418-4">}</span><span class="p">,</span><span class="p" data-group-id="7824113418-5">{</span><span class="ss">default</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p" data-group-id="7824113418-5">}</span><span class="p" data-group-id="7824113418-2">]</span><span class="p" data-group-id="7824113418-1">)</span></code></pre><p>creates an extendible array with initial size 10 whose default value is <code>-1</code>.</p><p>See also <a href="array.html#fix/1"><code>fix/1</code></a>, <a href="array.html#from_list/2"><code>from_list/2</code></a>, <a href="array.html#get/2"><code>get/2</code></a>, <a href="array.html#new/0"><code>new/0</code></a>, <a href="array.html#new/2"><code>new/2</code></a>, <a href="array.html#set/3"><code>set/3</code></a>.</p>
+<p>Creates a new array according to the specified options. By default, the array is extendible and has initial size zero. Array indices start at <code>0</code>.</p><p><code>Options</code> is a single term or a list of terms, selected from the following:</p><dl><dt><code>N::integer() &gt;= 0</code> or <code>{size, N::integer() &gt;= 0}</code></dt><dd><p>Specifies the initial array size; this also implies <code>{fixed, true}</code>. If <code>N</code> is not a non-negative integer, the call fails with reason <code>badarg</code>.</p></dd><dt><code>fixed</code> or <code>{fixed, true}</code></dt><dd><p>Creates a fixed-size array. See also <a href="#fix/1"><code>fix/1</code></a>.</p></dd><dt><code>{fixed, false}</code></dt><dd><p>Creates an extendible (non-fixed-size) array.</p></dd><dt><code>{default, Value}</code></dt><dd><p>Sets the default value for the array to <code>Value</code>.</p></dd></dl><p>Options are processed in the order they occur in the list, that is, later options have higher precedence.</p><p>The default value is used as the value of uninitialized entries, and cannot be changed once the array has been created.</p><p><em>Examples:</em></p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="5916439032-1">(</span><span class="mi">100</span><span class="p" data-group-id="5916439032-1">)</span></code></pre><p>creates a fixed-size array of size 100.</p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="9918745215-1">(</span><span class="p" data-group-id="9918745215-2">{</span><span class="ss">default</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="9918745215-2">}</span><span class="p" data-group-id="9918745215-1">)</span></code></pre><p>creates an empty, extendible array whose default value is <code>0</code>.</p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="4175295250-1">(</span><span class="p" data-group-id="4175295250-2">[</span><span class="p" data-group-id="4175295250-3">{</span><span class="nb">size</span><span class="p">,</span><span class="mi">10</span><span class="p" data-group-id="4175295250-3">}</span><span class="p">,</span><span class="p" data-group-id="4175295250-4">{</span><span class="ss">fixed</span><span class="p">,</span><span class="ss">false</span><span class="p" data-group-id="4175295250-4">}</span><span class="p">,</span><span class="p" data-group-id="4175295250-5">{</span><span class="ss">default</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p" data-group-id="4175295250-5">}</span><span class="p" data-group-id="4175295250-2">]</span><span class="p" data-group-id="4175295250-1">)</span></code></pre><p>creates an extendible array with initial size 10 whose default value is <code>-1</code>.</p><p>See also <a href="#fix/1"><code>fix/1</code></a>, <a href="#from_list/2"><code>from_list/2</code></a>, <a href="#get/2"><code>get/2</code></a>, <a href="#new/0"><code>new/0</code></a>, <a href="#new/2"><code>new/2</code></a>, <a href="#set/3"><code>set/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="new/2">
@@ -989,7 +989,7 @@ Functions
 
       </div>
 
-<p>Creates a new array according to the specified size and options. If <code>Size</code> is not a non-negative integer, the call fails with reason <code>badarg</code>. By default, the array has fixed size. Notice that any size specifications in <code>Options</code> override parameter <code>Size</code>.</p><p>If <code>Options</code> is a list, this is equivalent to <code>new([{size, Size} | Options])</code>, otherwise it is equivalent to <code>new([{size, Size} | [Options]])</code>. However, using this function directly is more efficient.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="7171345709-1">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7171345709-2">{</span><span class="ss">default</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="7171345709-2">}</span><span class="p" data-group-id="7171345709-1">)</span></code></pre><p>creates a fixed-size array of size 100, whose default value is <code>0</code>.</p><p>See also <a href="array.html#new/1"><code>new/1</code></a>.</p>
+<p>Creates a new array according to the specified size and options. If <code>Size</code> is not a non-negative integer, the call fails with reason <code>badarg</code>. By default, the array has fixed size. Notice that any size specifications in <code>Options</code> override parameter <code>Size</code>.</p><p>If <code>Options</code> is a list, this is equivalent to <code>new([{size, Size} | Options])</code>, otherwise it is equivalent to <code>new([{size, Size} | [Options]])</code>. However, using this function directly is more efficient.</p><p><em>Example:</em></p><pre><code class="makeup erlang"><span class="nc">array</span><span class="p">:</span><span class="nf">new</span><span class="p" data-group-id="3967919759-1">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3967919759-2">{</span><span class="ss">default</span><span class="p">,</span><span class="mi">0</span><span class="p" data-group-id="3967919759-2">}</span><span class="p" data-group-id="3967919759-1">)</span></code></pre><p>creates a fixed-size array of size 100, whose default value is <code>0</code>.</p><p>See also <a href="#new/1"><code>new/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="relax/1">
@@ -1013,7 +1013,7 @@ Functions
 
       </div>
 
-<p>Makes the array resizable. (Reverses the effects of <a href="array.html#fix/1"><code>fix/1</code></a>.)</p><p>See also <a href="array.html#fix/1"><code>fix/1</code></a>.</p>
+<p>Makes the array resizable. (Reverses the effects of <a href="#fix/1"><code>fix/1</code></a>.)</p><p>See also <a href="#fix/1"><code>fix/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="reset/2">
@@ -1037,7 +1037,7 @@ Functions
 
       </div>
 
-<p>Resets entry <code>I</code> to the default value for the array. If the value of entry <code>I</code> is the default value, the array is returned unchanged. Reset never changes the array size. Shrinking can be done explicitly by calling <a href="array.html#resize/2"><code>resize/2</code></a>.</p><p>If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>; compare <a href="array.html#set/3"><code>set/3</code></a></p><p>See also <a href="array.html#new/2"><code>new/2</code></a>, <a href="array.html#set/3"><code>set/3</code></a>.</p>
+<p>Resets entry <code>I</code> to the default value for the array. If the value of entry <code>I</code> is the default value, the array is returned unchanged. Reset never changes the array size. Shrinking can be done explicitly by calling <a href="#resize/2"><code>resize/2</code></a>.</p><p>If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>; compare <a href="#set/3"><code>set/3</code></a></p><p>See also <a href="#new/2"><code>new/2</code></a>, <a href="#set/3"><code>set/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="resize/1">
@@ -1061,7 +1061,7 @@ Functions
 
       </div>
 
-<p>Changes the array size to that reported by <a href="array.html#sparse_size/1"><code>sparse_size/1</code></a>. If the specified array has fixed size, also the resulting array has fixed size.</p><p>See also <a href="array.html#resize/2"><code>resize/2</code></a>, <a href="array.html#sparse_size/1"><code>sparse_size/1</code></a>.</p>
+<p>Changes the array size to that reported by <a href="#sparse_size/1"><code>sparse_size/1</code></a>. If the specified array has fixed size, also the resulting array has fixed size.</p><p>See also <a href="#resize/2"><code>resize/2</code></a>, <a href="#sparse_size/1"><code>sparse_size/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="resize/2">
@@ -1109,7 +1109,7 @@ Functions
 
       </div>
 
-<p>Sets entry <code>I</code> of the array to <code>Value</code>. If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>.</p><p>If the array does not have fixed size, and <code>I</code> is greater than <code>size(Array)-1</code>, the array grows to size <code>I+1</code>.</p><p>See also <a href="array.html#get/2"><code>get/2</code></a>, <a href="array.html#reset/2"><code>reset/2</code></a>.</p>
+<p>Sets entry <code>I</code> of the array to <code>Value</code>. If <code>I</code> is not a non-negative integer, or if the array has fixed size and <code>I</code> is larger than the maximum index, the call fails with reason <code>badarg</code>.</p><p>If the array does not have fixed size, and <code>I</code> is greater than <code>size(Array)-1</code>, the array grows to size <code>I+1</code>.</p><p>See also <a href="#get/2"><code>get/2</code></a>, <a href="#reset/2"><code>reset/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="size/1">
@@ -1133,7 +1133,7 @@ Functions
 
       </div>
 
-<p>Gets the number of entries in the array. Entries are numbered from <code>0</code> to <code>size(Array)-1</code>. Hence, this is also the index of the first entry that is guaranteed to not have been previously set.</p><p>See also <a href="array.html#set/3"><code>set/3</code></a>, <a href="array.html#sparse_size/1"><code>sparse_size/1</code></a>.</p>
+<p>Gets the number of entries in the array. Entries are numbered from <code>0</code> to <code>size(Array)-1</code>. Hence, this is also the index of the first entry that is guaranteed to not have been previously set.</p><p>See also <a href="#set/3"><code>set/3</code></a>, <a href="#sparse_size/1"><code>sparse_size/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_foldl/3">
@@ -1158,7 +1158,7 @@ Functions
 
       </div>
 
-<p>Folds the array elements using the specified function and initial accumulator value, skipping default-valued entries. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#foldl/3"><code>foldl/3</code></a>, <a href="array.html#sparse_foldr/3"><code>sparse_foldr/3</code></a>.</p>
+<p>Folds the array elements using the specified function and initial accumulator value, skipping default-valued entries. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#foldl/3"><code>foldl/3</code></a>, <a href="#sparse_foldr/3"><code>sparse_foldr/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_foldr/3">
@@ -1183,7 +1183,7 @@ Functions
 
       </div>
 
-<p>Folds the array elements right-to-left using the specified function and initial accumulator value, skipping default-valued entries. The elements are visited in order from the highest index to the lowest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#foldr/3"><code>foldr/3</code></a>, <a href="array.html#sparse_foldl/3"><code>sparse_foldl/3</code></a>.</p>
+<p>Folds the array elements right-to-left using the specified function and initial accumulator value, skipping default-valued entries. The elements are visited in order from the highest index to the lowest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#foldr/3"><code>foldr/3</code></a>, <a href="#sparse_foldl/3"><code>sparse_foldl/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_map/2">
@@ -1208,7 +1208,7 @@ Functions
 
       </div>
 
-<p>Maps the specified function onto each array element, skipping default-valued entries. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="array.html#map/2"><code>map/2</code></a>.</p>
+<p>Maps the specified function onto each array element, skipping default-valued entries. The elements are visited in order from the lowest index to the highest. If <code>Function</code> is not a function, the call fails with reason <code>badarg</code>.</p><p>See also <a href="#map/2"><code>map/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_size/1">
@@ -1232,7 +1232,7 @@ Functions
 
       </div>
 
-<p>Gets the number of entries in the array up until the last non-default-valued entry. That is, returns <code>I+1</code> if <code>I</code> is the last non-default-valued entry in the array, or zero if no such entry exists.</p><p>See also <a href="array.html#resize/1"><code>resize/1</code></a>, <a href="array.html#size/1"><code>size/1</code></a>.</p>
+<p>Gets the number of entries in the array up until the last non-default-valued entry. That is, returns <code>I+1</code> if <code>I</code> is the last non-default-valued entry in the array, or zero if no such entry exists.</p><p>See also <a href="#resize/1"><code>resize/1</code></a>, <a href="#size/1"><code>size/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_to_list/1">
@@ -1256,7 +1256,7 @@ Functions
 
       </div>
 
-<p>Converts the array to a list, skipping default-valued entries.</p><p>See also <a href="array.html#to_list/1"><code>to_list/1</code></a>.</p>
+<p>Converts the array to a list, skipping default-valued entries.</p><p>See also <a href="#to_list/1"><code>to_list/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="sparse_to_orddict/1">
@@ -1280,7 +1280,7 @@ Functions
 
       </div>
 
-<p>Converts the array to an ordered list of pairs <code>{Index, Value}</code>, skipping default-valued entries.</p><p>See also <a href="array.html#to_orddict/1"><code>to_orddict/1</code></a>.</p>
+<p>Converts the array to an ordered list of pairs <code>{Index, Value}</code>, skipping default-valued entries.</p><p>See also <a href="#to_orddict/1"><code>to_orddict/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="to_list/1">
@@ -1304,7 +1304,7 @@ Functions
 
       </div>
 
-<p>Converts the array to a list.</p><p>See also <a href="array.html#from_list/2"><code>from_list/2</code></a>, <a href="array.html#sparse_to_list/1"><code>sparse_to_list/1</code></a>.</p>
+<p>Converts the array to a list.</p><p>See also <a href="#from_list/2"><code>from_list/2</code></a>, <a href="#sparse_to_list/1"><code>sparse_to_list/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="to_orddict/1">
@@ -1328,7 +1328,7 @@ Functions
 
       </div>
 
-<p>Converts the array to an ordered list of pairs <code>{Index, Value}</code>.</p><p>See also <a href="array.html#from_orddict/2"><code>from_orddict/2</code></a>, <a href="array.html#sparse_to_orddict/1"><code>sparse_to_orddict/1</code></a>.</p>
+<p>Converts the array to an ordered list of pairs <code>{Index, Value}</code>.</p><p>See also <a href="#from_orddict/2"><code>from_orddict/2</code></a>, <a href="#sparse_to_orddict/1"><code>sparse_to_orddict/1</code></a>.</p>
   </section>
 </section>
 
